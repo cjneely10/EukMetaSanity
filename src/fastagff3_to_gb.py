@@ -4,8 +4,8 @@ from Bio import Seq
 from BCBio import GFF
 from Bio import SeqIO
 from Bio.Alphabet import generic_dna
-from Bio.SeqFeature import SeqFeature, FeatureLocation
 from utils.arg_parse import ArgParse
+from Bio.SeqFeature import SeqFeature, FeatureLocation
 """
 https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
 
@@ -64,7 +64,7 @@ def _flatten_features(rec):
             cur = nextf
     rec.features = [
         SeqFeature(
-            FeatureLocation(0, len(rec.seq) + 1), type="source",
+            FeatureLocation(0, len(rec.seq) + 2), type="source",
         ),
         *out
     ]
