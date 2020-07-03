@@ -49,17 +49,18 @@ def diamond(diamond_fp, data, ap):
             )
 
 
-def parse_diamond(i, ap, feature_data, record, rec):
-    # Determine source and add gene ident
+def _parse_diamond(i, ap, feature_data, record, rec):
+    # Determine source and add score
     qualifiers = {"source": ap.args.source, "score": ".", "ID": "gene%i" % i}
     # Store gene/exon data
-    spans = reduce_span([(feature.sstart, feature.send) for feature in feature_data.get(record.id, [])])
+    spans = _reduce_span([(feature.sstart, feature.send) for feature in feature_data.get(record.id, [])])
     for span, feature in zip(spans, feature_data.get(record.id, [])):
         rec.features.append(
             SeqFeature(
                 FeatureLocation(span[0], span[1]), type="gene", strand=feature.strand, qualifiers=qualifiers
             )
         )
+        # Default retain codon and CDS information
         rec.features[-1].sub_features = [
             SeqFeature(
                 FeatureLocation(span[0], span[0] + 3), type="start_codon", strand=feature.strand,
@@ -81,15 +82,19 @@ def parse_diamond(i, ap, feature_data, record, rec):
 def metaeuk(metaeuk_file_path, data, ap):
     records_fp = SeqIO.parse(metaeuk_file_path, "fasta")
     for record in records_fp:
+        # Metaeuk header contains pipes as delimiters - be sure to remove all in input seqs!
         line = record.id.split("|")
+        # Retain gene info in nested lists
         recs = []
         if Decimal(line[4]) < ap.args.evalue:
+            # Determine strand
             if line[2] == "+":
                 strand = 1
             elif line[2] == "-":
                 strand = -1
             else:
                 strand = 0
+            # Add base record as first record in nested list
             recs.append(
                 Result(
                     loc_type="gene",
@@ -99,24 +104,28 @@ def metaeuk(metaeuk_file_path, data, ap):
                     score=line[3],
                 )
             )
+            # Store exon/CDS info from rest of header at nested list loc
             for coords in line[8:]:
                 start, end, length = coords.split(":")
                 if strand < 0:
                     start, end = end, start
-                recs.append(
-                    Result(
-                        loc_type="exon",
-                        sstart=int(start.split("[")[0]),
-                        send=int(end.split("[")[0]),
-                        strand=strand,
-                        score=".",
+                for _type in ("exon", "CDS"):
+                    recs.append(
+                        Result(
+                            loc_type=_type,
+                            sstart=int(start.split("[")[0]),
+                            send=int(end.split("[")[0]),
+                            strand=strand,
+                            score=".",
+                        )
                     )
-                )
+        # Add nested list
         data[line[1]].append(recs)
 
 
-def parse_metaeuk(i, ap, feature_data, record, rec):
+def _parse_metaeuk(i, ap, feature_data, record, rec):
     for features in feature_data.get(record.id, [[]]):
+        # First value is gene
         rec.features.append(
             SeqFeature(
                 FeatureLocation(features[0].sstart, features[0].send), type=features[0].loc_type,
@@ -124,6 +133,7 @@ def parse_metaeuk(i, ap, feature_data, record, rec):
                 qualifiers={"score": features[0].score, "source": ap.args.source, "ID": "gene%i" % i}
             )
         )
+        # Remaining in list are features that describe the gene
         rec.features[-1].sub_features = []
         for feature in features[1:]:
             rec.features[-1].sub_features.append(
@@ -138,7 +148,7 @@ def parse_metaeuk(i, ap, feature_data, record, rec):
 
 
 # # Helper functions
-def reduce_span(coords_list):
+def _reduce_span(coords_list):
     # Sort coordinates by start value
     ranges_in_coords = sorted(coords_list, key=itemgetter(0))
     # Will group together matching sections into spans
@@ -159,7 +169,7 @@ def reduce_span(coords_list):
 
 
 # # Write functions
-def iter_gff(fasta_file, feature_data, ap):
+def _iter_gff(fasta_file, feature_data, ap):
     assert isinstance(feature_data, defaultdict)
     fasta_fp = SeqIO.parse(fasta_file, "fasta")
     i = 1
@@ -168,12 +178,12 @@ def iter_gff(fasta_file, feature_data, ap):
         rec = SeqRecord(id=record.id, seq=record.seq)
         feature_list = feature_data.get(record.id, [])
         if len(feature_list) > 0:
-            i = globals()["parse_" + ap.args.source](i, ap, feature_data, record, rec)
+            i = globals()["_parse_" + ap.args.source](i, ap, feature_data, record, rec)
         yield rec
 
 
 # # Driver logic
-def parse_args(ap):
+def _parse_args(ap):
     # Confirm path existence
     assert os.path.exists(ap.args.data_file)
     assert os.path.exists(ap.args.fasta_file)
@@ -192,13 +202,13 @@ def parse_args(ap):
         exit(1)
 
 
-def main(ap):
+def _main(ap):
     # Store results data
     data = defaultdict(list)
     # Call parsing function - ensured to exist
     globals()[ap.args.source](open(ap.args.data_file), data, ap)
     # Write results
-    GFF.write(iter_gff(ap.args.fasta_file, data, ap), open(ap.args.output, "w"))
+    GFF.write(_iter_gff(ap.args.fasta_file, data, ap), open(ap.args.output, "w"))
 
 
 if __name__ == "__main__":
@@ -223,5 +233,5 @@ if __name__ == "__main__":
         ),
         description="Parse FASTA and BLAST results to GFF3 format"
     )
-    parse_args(_ap)
-    main(_ap)
+    _parse_args(_ap)
+    _main(_ap)
