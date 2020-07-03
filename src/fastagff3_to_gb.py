@@ -1,35 +1,36 @@
 #!/usr/bin/env python3
-import sys
 import os
-from Bio import SeqIO
-from Bio.Alphabet import generic_dna
 from Bio import Seq
 from BCBio import GFF
-"""Convert a GFF and associated FASTA file into GenBank format.
-Usage:
-    gff_to_genbank.py <GFF annotation file> <FASTA sequence file>
-
-"""
+from Bio import SeqIO
+from Bio.Alphabet import generic_dna
+from Bio.SeqFeature import SeqFeature, FeatureLocation
+from utils.arg_parse import ArgParse
 """
 https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
 
 """
 
 
-def main(gff_file, fasta_file):
-    out_file = "%s.gb" % os.path.splitext(gff_file)[0]
-    fasta_input = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta", generic_dna))
-    gff_iter = GFF.parse(gff_file, fasta_input)
-    SeqIO.write(_check_gff(_fix_ncbi_id(gff_iter)), out_file, "genbank")
+def _parse_args(ap):
+    assert os.path.exists(ap.args.fasta_file)
+    assert os.path.exists(ap.args.gff3_file)
 
 
 def _fix_ncbi_id(fasta_iter):
     """GenBank identifiers can only be 16 characters; try to shorten NCBI.
     """
+    i = 1
     for rec in fasta_iter:
         if len(rec.name) > 16 and rec.name.find("|") > 0:
             new_id = [x for x in rec.name.split("|") if x][-1]
-            print("Warning: shortening NCBI name %s to %s" % (rec.id, new_id))
+            print("%s\t%s" % (rec.id, new_id))
+            rec.id = new_id
+            rec.name = new_id
+        elif len(rec.name) > 16:
+            new_id = rec.id[:15 - len(str(i))] + "_" + str(i)
+            print("%s\t%s" % (rec.id, new_id))
+            i += 1
             rec.id = new_id
             rec.name = new_id
         yield rec
@@ -61,9 +62,38 @@ def _flatten_features(rec):
                 if len(curf.sub_features) > 0:
                     nextf.extend(curf.sub_features)
             cur = nextf
-    rec.features = out
+    rec.features = [
+        SeqFeature(
+            FeatureLocation(0, len(rec.seq) + 1), type="source",
+        ),
+        *out
+    ]
     return rec
 
 
+def main(ap):
+    SeqIO.write(
+        _check_gff(
+            _fix_ncbi_id(
+                GFF.parse(ap.args.gff3_file, SeqIO.to_dict(SeqIO.parse(ap.args.fasta_file, "fasta", generic_dna))),
+            ),
+        ),
+        ap.args.output,
+        "genbank",
+    )
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    _ap = ArgParse(
+        (
+            (("fasta_file",),
+             {"help": "FASTA file"}),
+            (("gff3_file",),
+             {"help": "GFF3 mapping file"}),
+            (("-o", "--output"),
+             {"help": "Output path, default stdout", "default": "/dev/stdout"}),
+        ),
+        description="Convert FASTA and GFF3 file to Genbank format"
+    )
+    _parse_args(_ap)
+    main(_ap)
