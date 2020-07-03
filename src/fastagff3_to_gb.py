@@ -64,7 +64,7 @@ def _flatten_features(rec):
             cur = nextf
     rec.features = [
         SeqFeature(
-            FeatureLocation(0, len(rec.seq) + 2), type="source",
+            FeatureLocation(0, len(rec.seq)), type="source",
         ),
         *out
     ]
