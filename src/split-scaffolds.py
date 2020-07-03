@@ -3,8 +3,8 @@ import os
 import re
 from Bio import SeqIO
 from Bio.Seq import Seq
-from arg_parse import ArgParse
 from Bio.SeqRecord import SeqRecord
+from utils.arg_parse import ArgParse
 
 DEFAULT_OUT = "_____"
 

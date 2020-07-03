@@ -4,11 +4,11 @@ from BCBio import GFF
 from Bio import SeqIO
 from decimal import Decimal
 from _io import TextIOWrapper
-from arg_parse import ArgParse
 from operator import itemgetter
 from collections import namedtuple
 from collections import defaultdict
 from Bio.SeqRecord import SeqRecord
+from utils.arg_parse import ArgParse
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 # Result as read in from DNA/contig side as subject

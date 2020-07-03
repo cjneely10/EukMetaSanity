@@ -4,8 +4,8 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from pathlib import Path
 from random import random
-from arg_parse import ArgParse
 from Bio.SeqRecord import SeqRecord
+from utils.arg_parse import ArgParse
 
 
 # Calculate N50 for file
