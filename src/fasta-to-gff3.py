@@ -4,11 +4,11 @@ from BCBio import GFF
 from Bio import SeqIO
 from decimal import Decimal
 from _io import TextIOWrapper
+from arg_parse import ArgParse
 from operator import itemgetter
 from collections import namedtuple
 from collections import defaultdict
 from Bio.SeqRecord import SeqRecord
-from utils.arg_parse import ArgParse
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 # Result as read in from DNA/contig side as subject
@@ -55,7 +55,6 @@ def parse_diamond(i, ap, feature_data, record, rec):
     # Store gene/exon data
     spans = reduce_span([(feature.sstart, feature.send) for feature in feature_data.get(record.id, [])])
     for span, feature in zip(spans, feature_data.get(record.id, [])):
-        i += 1
         rec.features.append(
             SeqFeature(
                 FeatureLocation(span[0], span[1]), type="gene", strand=feature.strand, qualifiers=qualifiers
@@ -75,6 +74,7 @@ def parse_diamond(i, ap, feature_data, record, rec):
                 qualifiers={"source": ap.args.source}
             ),
         ]
+    i += 1
     return i
 
 
@@ -117,7 +117,6 @@ def metaeuk(metaeuk_file_path, data, ap):
 
 def parse_metaeuk(i, ap, feature_data, record, rec):
     for features in feature_data.get(record.id, [[]]):
-        i += 1
         rec.features.append(
             SeqFeature(
                 FeatureLocation(features[0].sstart, features[0].send), type=features[0].loc_type,
@@ -134,6 +133,7 @@ def parse_metaeuk(i, ap, feature_data, record, rec):
                     qualifiers={"score": feature.score, "source": ap.args.source}
                 )
             )
+        i += 1
     return i
 
 
