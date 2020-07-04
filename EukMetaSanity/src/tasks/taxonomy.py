@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+import os
 from plumbum import local
 from typing import Dict, List
-from dask.distributed import Client, wait
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
+from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.src.tasks.task_class import Task, TaskList
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
@@ -13,17 +14,14 @@ mmseqs = local["mmseqs"]
 class TaxonomyIter(TaskList):
     class Taxonomy(Task):
         def __init__(self, input_path_dict: Dict[str, str], cfg: ConfigManager, pm: PathManager, record_id: str):
-            super().__init__(input_path_dict, cfg, pm, record_id, "taxonomy", [Data.IN, Data.ACCESS])
+            super().__init__(input_path_dict, cfg, pm, record_id, Data().taxonomy()[0], [Data.IN, Data.ACCESS])
 
         def run(self):
             # Set required data
             self.required_data = [Data.OUT]
-            # Logic for mmseqs
-
-            # Parse for output
-            self.output_paths_dict = {Data.OUT: "MAGS"}
             # Call superclass run method
             super().run()
+            # Parse for output
 
         def results(self) -> Dict[str, str]:
             # Call superclass results method
@@ -33,24 +31,51 @@ class TaxonomyIter(TaskList):
             pass
 
         def run_mmseqs(self):
+            name, ident = Data().taxonomy()
             # Create sequence database
-            # Run taxonomy search
-            # Output results
-            pass
+            try:
+                mmseqs[
+                    "createdb",
+                    self.input[Data.IN],
+                    os.path.join(self.wdir, self.record_id + "_db")
+                ]()
+                # Run taxonomy search
+                mmseqs[
+                   "taxonomy",
+
+                ]()
+                # Output results
+                mmseqs[
+                    "taxonomyreport"
+                ]()
+            except ProcessExecutionError as e:
+                print(e)
+            # DB path
+            os.path.join(self.cfg.config[ConfigManager.DATA][ident])
+            self.output_paths_dict = {Data.OUT: "MAGS"}
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str]):
+        name, ident = Data().taxonomy()
+        workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         super().__init__(
+            # List of tasks
             [
                 TaxonomyIter.Taxonomy(
-                    {Data.IN: input_path, Data.ACCESS: cfg.config[ConfigManager.DATA][Data().taxonomy()]},
+                    {Data.IN: input_path, Data.ACCESS: cfg.config[ConfigManager.DATA][ident]},
                     cfg,
                     pm,
                     record_id
                 )
                 for input_path, record_id in zip(input_paths, record_ids)
             ],
-            "Running mmseqs to identify taxonomy"
+            # Logging statement
+            "Running mmseqs to identify taxonomy using %i workers and %i threads per worker" % (
+                workers,
+                int(cfg.config.get(name, ConfigManager.THREADS)),
+            ),
+            # Dask workers
+            workers,
         )
 
     def run(self):
@@ -58,3 +83,7 @@ class TaxonomyIter(TaskList):
 
     def results(self):
         return super().results()
+
+
+if __name__ == "__main__":
+    pass

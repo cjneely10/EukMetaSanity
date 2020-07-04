@@ -24,6 +24,10 @@ class ConfigManager:
     PATH = "PATH"
     # Config file
     DATA = "DATA"
+    # Workers for task
+    WORKERS = "WORKERS"
+    # Threads per worker
+    THREADS = "THREADS"
 
     def __init__(self, config_path):
         self._config = Config()
@@ -38,7 +42,7 @@ class ConfigManager:
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate_data(self):
-        odb = Data().taxonomy()
+        odb = Data().taxonomy()[1]
         if odb not in self.config[ConfigManager.DATA].keys():
             raise MissingDataError("Missing orthodbv10 info!")
         if not os.path.exists(Path(self.config[ConfigManager.DATA][odb]).resolve()):
@@ -75,3 +79,5 @@ class ConfigManager:
             return []
 
 
+if __name__ == "__main__":
+    pass

@@ -2,6 +2,7 @@ import os
 import logging
 from typing import Dict, List
 from abc import ABC, abstractmethod
+from dask.distributed import Client, wait
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
@@ -25,10 +26,8 @@ class Task(ABC):
         self.output_paths_dict: Dict[str, str] = {}
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, "THREADS"))
-        self._workers = int(cfg.config.get(db_name, "WORKERS"))
         # Store path manager
         self._pm = pm
-        self._is_complete = False
         # Store config manager
         self._cfg = cfg
         # Add name of db
@@ -37,6 +36,10 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         self._record_id = record_id
         super().__init__()
+
+    @property
+    def input(self):
+        return self._input_path_dict
 
     @property
     def record_id(self) -> str:
@@ -55,24 +58,22 @@ class Task(ABC):
         return self._threads_pw
 
     @property
-    def workers(self) -> int:
-        return self._workers
-
-    @property
     def pm(self) -> PathManager:
         return self._pm
 
     @abstractmethod
     def run(self) -> None:
         # Set complete once run is done
-        self._is_complete = True
+        for func in dir(self):
+            if func.startswith("run_"):
+                getattr(self, func)()
 
     @abstractmethod
     def results(self) -> Dict[str, str]:
-        # Run if not done so already
-        assert self._is_complete
         for data in self.required_data:
-            assert os.path.exists(self.output_paths_dict[data]), self.output_paths_dict[data]
+            assert data in self.output_paths_dict.keys(), data
+            if not os.path.exists(self.output_paths_dict[data]):
+                return None
         return self.output_paths_dict
 
     @abstractmethod
@@ -81,9 +82,10 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, task_list: List[Task], statement: str):
+    def __init__(self, task_list: List[Task], statement: str, workers: int):
         self._tasks: List[Task] = task_list
         logging.info(statement)
+        self._workers = workers
         super().__init__()
 
     @property
@@ -92,8 +94,16 @@ class TaskList(ABC):
 
     @abstractmethod
     def run(self):
+        # Single
         for task in self._tasks:
             task.run()
+
+        # # Threaded
+        # futures = []
+        # client = Client(n_workers=self._workers, threads_per_worker=1)
+        # for task in self._tasks:
+        #     futures.append(client.submit(task.run))
+        # wait(futures)
 
     @abstractmethod
     def results(self):

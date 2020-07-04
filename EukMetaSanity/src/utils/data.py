@@ -22,4 +22,8 @@ class Data:
 
     # Required for mmseqs taxonomy assignment pipeline
     def taxonomy(self):
-        return self.data["taxonomy"]
+        return "taxonomy", self.data["taxonomy"]
+
+
+if __name__ == "__main__":
+    pass

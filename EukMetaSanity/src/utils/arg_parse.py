@@ -69,3 +69,7 @@ class ArgParse:
                          "\t(Flags: {})".format(" --" + " --".join(flag_dict[program])) + "\n"
         to_return += "\n"
         return to_return
+
+
+if __name__ == "__main__":
+    pass
