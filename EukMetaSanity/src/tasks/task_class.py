@@ -3,6 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from dask.distributed import Client, wait
+from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
@@ -86,8 +87,8 @@ class Task(ABC):
             # Alert for missing required data output
             assert data in self.output_paths_dict.keys(), "Missing required %s" % data
             # Alert if data output is provided, but does not exist
-            # if not os.path.exists(self.output_paths_dict[data]):
-            #     raise OutputResultsFileError(self.output_paths_dict[data])
+            if not os.path.exists(self.output_paths_dict[data]):
+                raise OutputResultsFileError(self.output_paths_dict[data])
         return self.output_paths_dict
 
     @abstractmethod
@@ -136,7 +137,13 @@ class TaskList(ABC):
 
     @abstractmethod
     def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str]]:
-        pass
+        # Run task list
+        return (
+            [result[Data.OUT] for result in self.results()],
+            self.cfg,
+            self.pm,
+            [task.record_id for task in self.tasks]
+        )
 
 
 if __name__ == "__main__":

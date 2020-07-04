@@ -108,13 +108,7 @@ class TaxonomyIter(TaskList):
         return super().results()
 
     def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str]]:
-        # Run task list
-        return (
-            [result[Data.OUT] for result in self.results()],
-            self.cfg,
-            self.pm,
-            [task.record_id for task in self.tasks]
-        )
+        return super().output()
 
 
 if __name__ == "__main__":
