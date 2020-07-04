@@ -67,7 +67,7 @@ def _main(ap: ArgParse, cfg: ConfigManager):
     # Populate and call each task sublist based on user-input
     for T_Task in _run_iter():
         task = T_Task(
-            [{"-in": _file, "-db": "db"} for _file in input_files],  # From config file
+            input_files,  # From config file
             cfg,
             pm,
             input_prefixes
@@ -98,3 +98,4 @@ if __name__ == "__main__":
         description="Run EukMetaSanity pipeline"
     )
     _main(_ap, _parse_args(_ap))
+    logging.info("EukMetaSanity pipeline complete!")

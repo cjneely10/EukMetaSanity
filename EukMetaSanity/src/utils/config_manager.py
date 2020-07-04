@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from plumbum import local
 from configparser import RawConfigParser
+from EukMetaSanity.src.utils.data import Data
 from plumbum.commands.processes import CommandNotFound
 
 
@@ -31,9 +32,10 @@ class ConfigManager:
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate_data(self):
-        if "ORTHO_DB" not in self.config["DATA"].keys():
+        odb = Data().taxonomy()
+        if odb not in self.config[Data.DATA].keys():
             raise MissingDataError("Missing orthodbv10 info!")
-        if not os.path.exists(Path(self.config["DATA"]["ORTHO_DB"]).resolve()):
+        if not os.path.exists(Path(self.config[Data.DATA][odb]).resolve()):
             raise InvalidPathError("Invalid path for orthodbv10")
 
     # Parse config file for PATH variables and confirm validity
@@ -42,7 +44,7 @@ class ConfigManager:
         # Iterate over all values in config file
         for k, value_dict in self.config.items():
             # Ensure all data is valid
-            if k == "DATA":
+            if k == Data.DATA:
                 data_in_keys = True
                 self._validate_data()
                 continue

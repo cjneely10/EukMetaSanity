@@ -1,3 +1,4 @@
+import os
 import logging
 from typing import Dict, List
 from abc import ABC, abstractmethod
@@ -71,7 +72,7 @@ class Task(ABC):
         # Run if not done so already
         assert self._is_complete
         for data in self.required_data:
-            assert data in self.output_paths_dict.keys(), data
+            assert os.path.exists(self.output_paths_dict[data]), self.output_paths_dict[data]
         return self.output_paths_dict
 
     @abstractmethod
