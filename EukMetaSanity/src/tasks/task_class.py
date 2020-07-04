@@ -81,8 +81,11 @@ class Task(ABC):
 
     @abstractmethod
     def results(self) -> Dict[str, str]:
+        # Check that all required datasets are fulfilled
         for data in self.required_data:
+            # Alert for missing required data output
             assert data in self.output_paths_dict.keys(), "Missing required %s" % data
+            # Alert if data output is provided, but does not exist
             if not os.path.exists(self.output_paths_dict[data]):
                 raise OutputResultsFileError(self.output_paths_dict[data])
         return self.output_paths_dict

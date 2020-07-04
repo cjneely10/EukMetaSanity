@@ -34,30 +34,33 @@ class TaxonomyIter(TaskList):
             # Create sequence database
             seq_db = os.path.join(self.wdir, self.record_id + "_db")
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
+            results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
             try:
                 print(mmseqs[
                     "createdb",
-                    self.input[Data.IN],
-                    seq_db,
+                    self.input[Data.IN],  # Input FASTA file
+                    seq_db,  # Output FASTA sequence db
                 ])
                 # Run taxonomy search
                 print(mmseqs[
                     "taxonomy",
-                    seq_db,
-                    self.input[Data.ACCESS],
-                    tax_db,
+                    seq_db,  # Input FASTA sequence db
+                    self.input[Data.ACCESS],  # Input OrthoDB
+                    tax_db,  # Output tax db
                     "tmp",
                     (*self.cfg.get_added_flags(name))
                 ])
                 # Output results
                 print(mmseqs[
-                    "taxonomyreport"
+                    "taxonomyreport",
+                    self.input[Data.ACCESS],  # Input OrthoDB
+                    tax_db,  # Input tax db
+                    results_file  # Output results file
                 ])
             except ProcessExecutionError as e:
                 print(e)
             # DB path
-            os.path.join(self.cfg.config[ConfigManager.DATA][ident])
-            self.output_paths_dict = {Data.OUT: "MAGS"}
+            self.output_paths_dict = {Data.OUT: results_file}
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str]):

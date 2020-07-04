@@ -74,7 +74,7 @@ def _main(ap: ArgParse, cfg: ConfigManager):
         )
         # Gather results for each task list
         task.run()
-        print(len(task.results()))
+        print(task.results())
 
 
 if __name__ == "__main__":
