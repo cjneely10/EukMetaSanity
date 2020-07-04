@@ -74,10 +74,8 @@ def _main(ap: ArgParse, cfg: ConfigManager):
         try:
             # Run task
             task.run()
-            # Get next task, if needed
-            Task = next(run_iter)
             # Run next task
-            task = Task(*task.output())
+            task = next(run_iter)(*task.output())
         except StopIteration:
             break
 

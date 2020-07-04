@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import os
+import logging
 from plumbum import local
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
+from EukMetaSanity.src.utils.helpers import log_and_run
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.src.tasks.task_class import Task, TaskList
@@ -36,27 +38,33 @@ class TaxonomyIter(TaskList):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
             try:
-                print(mmseqs[
-                    "createdb",
-                    self.input[Data.IN],  # Input FASTA file
-                    seq_db,  # Output FASTA sequence db
-                ])
+                log_and_run(
+                    mmseqs[
+                        "createdb",
+                        self.input[Data.IN],  # Input FASTA file
+                        seq_db,  # Output FASTA sequence db
+                    ]
+                )
                 # Run taxonomy search
-                print(mmseqs[
-                    "taxonomy",
-                    seq_db,  # Input FASTA sequence db
-                    self.input[Data.ACCESS],  # Input OrthoDB
-                    tax_db,  # Output tax db
-                    "tmp",
-                    (*self.cfg.get_added_flags(name))
-                ])
+                log_and_run(
+                    mmseqs[
+                        "taxonomy",
+                        seq_db,  # Input FASTA sequence db
+                        self.input[Data.ACCESS],  # Input OrthoDB
+                        tax_db,  # Output tax db
+                        os.path.join(self.wdir, "tmp"),
+                        (*self.cfg.get_added_flags(name))
+                    ]
+                )
                 # Output results
-                print(mmseqs[
-                    "taxonomyreport",
-                    self.input[Data.ACCESS],  # Input OrthoDB
-                    tax_db,  # Input tax db
-                    results_file  # Output results file
-                ])
+                log_and_run(
+                    mmseqs[
+                        "taxonomyreport",
+                        self.input[Data.ACCESS],  # Input OrthoDB
+                        tax_db,  # Input tax db
+                        results_file  # Output results file
+                    ]
+                )
             except ProcessExecutionError as e:
                 print(e)
             # DB path
