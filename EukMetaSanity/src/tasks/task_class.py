@@ -13,6 +13,10 @@ TaskList: Collection of Task objects that calls run function on each
 """
 
 
+class OutputResultsFileError(FileNotFoundError):
+    pass
+
+
 class Task(ABC):
     def __init__(self, input_path_dict: Dict[str, str], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, required_data: List[str]):
@@ -22,7 +26,7 @@ class Task(ABC):
             assert data in input_path_dict.keys(), data
         self._input_path_dict = input_path_dict
         # Instantiate output dict variable
-        self.required_data: List[str] = []
+        self.required_data = None
         self.output_paths_dict: Dict[str, str] = {}
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, "THREADS"))
@@ -63,17 +67,24 @@ class Task(ABC):
 
     @abstractmethod
     def run(self) -> None:
-        # Set complete once run is done
-        for func in dir(self):
+        # Ensure that required_data is set
+        assert self.required_data is not None
+        # Gather all functions of the form run_1, run_2, etc.
+        runnables = sorted(
+            [func for func in dir(self) if func.startswith("run_")],
+            key=lambda _f: int(_f.split("_")[1]),
+        )
+        # Run each function in series
+        for func in runnables:
             if func.startswith("run_"):
                 getattr(self, func)()
 
     @abstractmethod
     def results(self) -> Dict[str, str]:
         for data in self.required_data:
-            assert data in self.output_paths_dict.keys(), data
+            assert data in self.output_paths_dict.keys(), "Missing required %s" % data
             if not os.path.exists(self.output_paths_dict[data]):
-                return None
+                raise OutputResultsFileError(self.output_paths_dict[data])
         return self.output_paths_dict
 
     @abstractmethod

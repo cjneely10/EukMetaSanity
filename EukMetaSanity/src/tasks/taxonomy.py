@@ -15,13 +15,12 @@ class TaxonomyIter(TaskList):
     class Taxonomy(Task):
         def __init__(self, input_path_dict: Dict[str, str], cfg: ConfigManager, pm: PathManager, record_id: str):
             super().__init__(input_path_dict, cfg, pm, record_id, Data().taxonomy()[0], [Data.IN, Data.ACCESS])
-
-        def run(self):
             # Set required data
             self.required_data = [Data.OUT]
+
+        def run(self):
             # Call superclass run method
             super().run()
-            # Parse for output
 
         def results(self) -> Dict[str, str]:
             # Call superclass results method
@@ -30,24 +29,30 @@ class TaxonomyIter(TaskList):
         def parse_output(self, output_files: List[str]) -> List[Dict[str, str]]:
             pass
 
-        def run_mmseqs(self):
+        def run_1(self):
             name, ident = Data().taxonomy()
             # Create sequence database
+            seq_db = os.path.join(self.wdir, self.record_id + "_db")
+            tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             try:
-                mmseqs[
+                print(mmseqs[
                     "createdb",
                     self.input[Data.IN],
-                    os.path.join(self.wdir, self.record_id + "_db")
-                ]()
+                    seq_db,
+                ])
                 # Run taxonomy search
-                mmseqs[
-                   "taxonomy",
-
-                ]()
+                print(mmseqs[
+                    "taxonomy",
+                    seq_db,
+                    self.input[Data.ACCESS],
+                    tax_db,
+                    "tmp",
+                    (*self.cfg.get_added_flags(name))
+                ])
                 # Output results
-                mmseqs[
+                print(mmseqs[
                     "taxonomyreport"
-                ]()
+                ])
             except ProcessExecutionError as e:
                 print(e)
             # DB path

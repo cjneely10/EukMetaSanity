@@ -71,12 +71,23 @@ class ConfigManager:
 
     # Gather user-passed flags for analysis
     def get_added_flags(self, _dict_name):
-        if "FLAGS" in dict(self.config[_dict_name]).keys():
-            return [def_key.lstrip(" ").rstrip(" ")
-                    for def_key in self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
-                    if def_key != ""]
-        else:
-            return []
+        out = []
+        for key in dict(self.config[_dict_name]).keys():
+            if key == "FLAGS":
+                all(out.append(val) for val in [def_key.lstrip(" ").rstrip(" ")
+                                                for def_key in
+                                                self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
+                                                if def_key != ""])
+            elif key not in (
+                "FLAGS",
+                ConfigManager.THREADS,
+                ConfigManager.WORKERS,
+                ConfigManager.DATA,
+                ConfigManager.PATH
+            ):
+                out.append(key)
+                out.append(self.config[_dict_name][key])
+        return out
 
 
 if __name__ == "__main__":
