@@ -8,21 +8,22 @@ mkdir = local["mkdir"]
 
 
 @jitclass((
-        ("_base", types.string),
-        ("_wdir", types.string),
+    ("_base", types.string),
+    ("_wdir", types.string),
+    ("_dbs", types.DictType(types.string))
 ))
 class PathManager:
-
     @jit(types.string(types.string), nopython=True)
     def __init__(self, base_path):
         self._wdir = "wdir"
         self._base = str(Path(base_path).resolve())
+        self._dbs = {}
         self._generate_directory_tree()
 
     # Get working dir
     @property
     def wdir(self):
-        return os.path.join(self._base, self._wdir)
+        return os.path.join(self.base, self._wdir)
 
     # Get base dir
     @property

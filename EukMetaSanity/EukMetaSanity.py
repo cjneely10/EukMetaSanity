@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import os
+from signal import signal, SIGPIPE, SIG_DFL
+from EukMetaSanity.src.tasks.taxonomy import Taxonomy
 from EukMetaSanity.src.utils.arg_parse import ArgParse
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
@@ -24,14 +26,14 @@ def _parse_args(ap):
 
 
 def _main(ap, cfg):
-    task_list = []
-    # Generate config m
-
+    # Generate primary fasta manager
 
     pass
 
 
 if __name__ == "__main__":
+    # Redirect dask nanny errors
+    signal(SIGPIPE, SIG_DFL)
     DEFAULT_EXTS = ".fna/.fasta/.fa"
     _ap = ArgParse(
         (
