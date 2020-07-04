@@ -37,6 +37,7 @@ def _files_iter(ap: ArgParse):
         for ext in ap.args.extensions:
             if file.endswith(ext):
                 yield os.path.join(ap.args.fasta_directory, file)
+    return None
 
 
 # Parse user arguments
@@ -64,19 +65,21 @@ def _main(ap: ArgParse, cfg: ConfigManager):
     # Create base dir for each file to analyze
     logging.info("Creating working directory")
     all([pm.add_dirs(_file) for _file in input_prefixes])
-    # Populate and call each task sublist based on user-input
-    T_Task = next(_run_iter())
-    task = T_Task(
-        input_files,  # From config file
-        cfg,
-        pm,
-        input_prefixes
-    )
-    while task:
-        # Gather results for each task list
-        task = next(_run_iter())(
-            *task.output()
-        )
+    # Generate first task from list
+    run_iter = _run_iter()
+    task = next(run_iter)(input_files, cfg, pm, input_prefixes)
+
+    # Primary program loop
+    while True:
+        try:
+            # Run task
+            task.run()
+            # Get next task, if needed
+            Task = next(run_iter)
+            # Run next task
+            task = Task(*task.output())
+        except StopIteration:
+            break
 
 
 if __name__ == "__main__":

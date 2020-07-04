@@ -86,8 +86,8 @@ class Task(ABC):
             # Alert for missing required data output
             assert data in self.output_paths_dict.keys(), "Missing required %s" % data
             # Alert if data output is provided, but does not exist
-            if not os.path.exists(self.output_paths_dict[data]):
-                raise OutputResultsFileError(self.output_paths_dict[data])
+            # if not os.path.exists(self.output_paths_dict[data]):
+            #     raise OutputResultsFileError(self.output_paths_dict[data])
         return self.output_paths_dict
 
     @abstractmethod
@@ -96,11 +96,21 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, task_list: List[Task], statement: str, workers: int):
+    def __init__(self, task_list: List[Task], statement: str, workers: int, cfg: ConfigManager, pm: PathManager):
         self._tasks: List[Task] = task_list
         logging.info(statement)
         self._workers = workers
+        self._cfg = cfg
+        self._pm = pm
         super().__init__()
+
+    @property
+    def cfg(self):
+        return self._cfg
+
+    @property
+    def pm(self):
+        return self._pm
 
     @property
     def tasks(self):

@@ -84,6 +84,8 @@ class TaxonomyIter(TaskList):
             ),
             # Dask workers
             workers,
+            cfg,
+            pm,
         )
 
     def run(self):
@@ -94,9 +96,12 @@ class TaxonomyIter(TaskList):
 
     def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str]]:
         # Run task list
-        self.run()
-        # Populate results
-        results = self.results()
+        return (
+            [result[Data.OUT] for result in self.results()],
+            self.cfg,
+            self.pm,
+            [task.record_id for task in self.tasks]
+        )
 
 
 if __name__ == "__main__":
