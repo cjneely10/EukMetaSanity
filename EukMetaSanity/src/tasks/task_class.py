@@ -118,16 +118,16 @@ class TaskList(ABC):
 
     @abstractmethod
     def run(self):
-        # Single
-        for task in self._tasks:
-            task.run()
-
-        # # Threaded
-        # futures = []
-        # client = Client(n_workers=self._workers, threads_per_worker=1)
+        # # Single
         # for task in self._tasks:
-        #     futures.append(client.submit(task.run))
-        # wait(futures)
+        #     task.run()
+
+        # Threaded
+        futures = []
+        client = Client(n_workers=self._workers, threads_per_worker=1)
+        for task in self._tasks:
+            futures.append(client.submit(task.run))
+        wait(futures)
 
     @abstractmethod
     def results(self):

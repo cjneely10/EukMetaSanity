@@ -52,7 +52,8 @@ class TaxonomyIter(TaskList):
                         self.input[Data.ACCESS],  # Input OrthoDB
                         tax_db,  # Output tax db
                         os.path.join(self.wdir, "tmp"),
-                        (*self.cfg.get_added_flags(name))
+                        (*self.cfg.get_added_flags(name)),
+                        "--threads", self.threads,
                     ]
                 )
                 # Output results
