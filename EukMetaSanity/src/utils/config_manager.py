@@ -7,10 +7,6 @@ from configparser import NoSectionError, NoOptionError
 
 
 class Config(RawConfigParser):
-    """ Placeholder class for calling configparser
-
-
-    """
     pass
 
 
