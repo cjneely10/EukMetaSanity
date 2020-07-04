@@ -5,8 +5,8 @@ from Bio import Seq
 from BCBio import GFF
 from Bio import SeqIO
 from Bio.Alphabet import generic_dna
-from utils.arg_parse import ArgParse
 from Bio.SeqFeature import SeqFeature, FeatureLocation
+from EukMetaSanity.src.utils.arg_parse import ArgParse
 """
 https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
 
