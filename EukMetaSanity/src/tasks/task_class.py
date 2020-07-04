@@ -1,7 +1,7 @@
 import os
 import logging
-from typing import Dict, List
 from abc import ABC, abstractmethod
+from typing import Dict, List, Tuple
 from dask.distributed import Client, wait
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
@@ -123,6 +123,10 @@ class TaskList(ABC):
     def results(self):
         # Gather results to list and return
         return [task.results() for task in self._tasks]
+
+    @abstractmethod
+    def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str]]:
+        pass
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from plumbum import local
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
@@ -91,6 +91,12 @@ class TaxonomyIter(TaskList):
 
     def results(self):
         return super().results()
+
+    def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str]]:
+        # Run task list
+        self.run()
+        # Populate results
+        results = self.results()
 
 
 if __name__ == "__main__":

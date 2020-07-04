@@ -65,16 +65,18 @@ def _main(ap: ArgParse, cfg: ConfigManager):
     logging.info("Creating working directory")
     all([pm.add_dirs(_file) for _file in input_prefixes])
     # Populate and call each task sublist based on user-input
-    for T_Task in _run_iter():
-        task = T_Task(
-            input_files,  # From config file
-            cfg,
-            pm,
-            input_prefixes
-        )
+    T_Task = next(_run_iter())
+    task = T_Task(
+        input_files,  # From config file
+        cfg,
+        pm,
+        input_prefixes
+    )
+    while task:
         # Gather results for each task list
-        task.run()
-        print(task.results())
+        task = next(_run_iter())(
+            *task.output()
+        )
 
 
 if __name__ == "__main__":
