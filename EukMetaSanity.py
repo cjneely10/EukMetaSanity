@@ -25,10 +25,10 @@ def _prefix(_path: str):
 # Logging initialize
 def _initialize_logging(ap: ArgParse):
     # Initialize logging
-    LOG_FILE = os.path.join(ap.args.output, "eukmetasanity.log")
-    if os.path.exists(LOG_FILE):
-        os.remove(LOG_FILE)
-    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=LOG_FILE, filemode='w')
+    log_file = os.path.join(ap.args.output, "eukmetasanity.log")
+    if os.path.exists(log_file):
+        os.remove(log_file)
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
 
 
 # Gather all files to parse that match user-passed extensions
