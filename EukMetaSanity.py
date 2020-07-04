@@ -45,6 +45,7 @@ def _main(ap, cfg):
     pm = PathManager(ap.args.output)
     for _file in files_iter(ap):
         prefix = os.path.basename(os.path.splitext(_file)[0])
+        pm.add_dir(prefix)
         task_list = []
         for task in run():
             task_list.append(

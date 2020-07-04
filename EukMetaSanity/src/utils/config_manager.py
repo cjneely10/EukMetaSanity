@@ -1,8 +1,8 @@
 import os
-from numba import types
 from pathlib import Path
-from numba.experimental import jitclass
+from plumbum import local
 from configparser import RawConfigParser
+from plumbum.commands.processes import CommandNotFound
 
 
 class Config(RawConfigParser):
@@ -17,7 +17,6 @@ class MissingDataError(FileExistsError):
     pass
 
 
-@jitclass((("_config", types.DictType(types.unicode_type, types.DictType(types.unicode_type, types.unicode_type))),))
 class ConfigManager:
     def __init__(self, config_path):
         self._config = Config()
@@ -25,7 +24,6 @@ class ConfigManager:
         self._config.read(config_path)
         # Confirm all paths in file are valid
         self._validate_config_paths()
-        self._config = dict(self._config)
 
     @property
     def config(self):
@@ -33,7 +31,7 @@ class ConfigManager:
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate_data(self):
-        if "ORTHO_DB" not in self.config.get("DATA", {}).keys():
+        if "ORTHO_DB" not in self.config["DATA"].keys():
             raise MissingDataError("Missing orthodbv10 info!")
         if not os.path.exists(Path(self.config["DATA"]["ORTHO_DB"]).resolve()):
             raise InvalidPathError("Invalid path for orthodbv10")
@@ -42,7 +40,7 @@ class ConfigManager:
     def _validate_config_paths(self):
         data_in_keys = False
         # Iterate over all values in config file
-        for k, value_dict in self.config.values():
+        for k, value_dict in self.config.items():
             # Ensure all data is valid
             if k == "DATA":
                 data_in_keys = True
@@ -50,8 +48,11 @@ class ConfigManager:
                 continue
             # Ensure PATH sections are valid
             for key in ("PATH",):
-                if key in value_dict.keys() and not os.path.exists(Path(value_dict[key]).resolve()):
-                    raise InvalidPathError(value_dict[key])
+                if key in value_dict.keys():
+                    try:
+                        local[value_dict[key]]()
+                    except CommandNotFound:
+                        raise InvalidPathError(value_dict[key])
         # Raise error if missing Data section
         if not data_in_keys:
             raise MissingDataError("Missing DATA section!")

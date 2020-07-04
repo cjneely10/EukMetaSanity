@@ -1,17 +1,10 @@
 import os
-from numba import types
 from pathlib import Path
 from plumbum import local
-from numba.experimental import jitclass
 
 mkdir = local["mkdir"]
 
 
-@jitclass((
-    ("_base", types.string),
-    ("_wdir", types.string),
-    ("_dbs", types.DictType(types.unicode_type, types.unicode_type)),
-))
 class PathManager:
     def __init__(self, base_path):
         self._wdir = "wdir"
@@ -29,12 +22,17 @@ class PathManager:
     def base(self):
         return str(self._base)
 
+    @property
+    def dbs(self):
+        return self._dbs
+
     # Add record directory to wdir
     def add_dir(self, record_id, _subdirs=None):
         # Record base dir
         mkdir["-p", os.path.join(self.wdir, str(record_id))]()
         # Additional dirs, if needed
         if _subdirs is not None:
+            assert isinstance(_subdirs, list)
             for _subd in _subdirs:
                 added_path = os.path.join(self.wdir, str(record_id), _subd)
                 mkdir["-p", added_path]()

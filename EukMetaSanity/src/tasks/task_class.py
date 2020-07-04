@@ -8,16 +8,16 @@ class Task(ABC):
         # Instantiate output dict variable
         self.output_paths = {}
         # Store threads and workers
-        self._threads_pw = int(cfg.config.get(db_name, {}).get("THREADS", 1)),
-        self._workers = int(cfg.config.get(db_name, {}).get("WORKERS", 1)),
+        self._threads_pw = int(cfg.config.get(db_name, "THREADS")),
+        self._workers = int(cfg.config.get(db_name, "WORKERS")),
         # Store path manager
         self._pm = pm
         # Store config manager
         self._cfg = cfg
         # Add name of db
-        pm.add_dir(db_name)
+        pm.add_dir(record_id, [db_name])
         # Store working directory
-        self._wdir = pm.get_dir(record_id, [db_name])
+        self._wdir = pm.get_dir(record_id, db_name)
         super().__init__()
 
     @property
