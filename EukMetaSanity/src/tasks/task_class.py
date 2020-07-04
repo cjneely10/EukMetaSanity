@@ -15,7 +15,7 @@ class Task(ABC):
         # Store config manager
         self._cfg = cfg
         # Add name of db
-        pm.add_dir(record_id, [db_name])
+        pm.add_dirs(record_id, [db_name])
         # Store working directory
         self._wdir = pm.get_dir(record_id, db_name)
         super().__init__()

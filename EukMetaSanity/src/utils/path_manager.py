@@ -27,7 +27,7 @@ class PathManager:
         return self._dbs
 
     # Add record directory to wdir
-    def add_dir(self, record_id, _subdirs=None):
+    def add_dirs(self, record_id, _subdirs=None):
         # Record base dir
         mkdir["-p", os.path.join(self.wdir, str(record_id))]()
         # Additional dirs, if needed
