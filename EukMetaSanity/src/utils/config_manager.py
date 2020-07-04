@@ -5,6 +5,11 @@ from configparser import RawConfigParser
 from EukMetaSanity.src.utils.data import Data
 from plumbum.commands.processes import CommandNotFound
 
+"""
+Manages the config file, as well as arguments that are set for each part of the pipeline
+
+"""
+
 
 class Config(RawConfigParser):
     pass

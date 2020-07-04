@@ -7,6 +7,11 @@ from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
+"""
+EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
+
+"""
+
 
 # # Available programs
 # Return task-list for run command

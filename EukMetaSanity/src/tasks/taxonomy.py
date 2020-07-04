@@ -9,6 +9,11 @@ from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.src.tasks.task_class import Task, TaskList
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
+"""
+Determine the taxonomy of the Eukaryotic MAG
+
+"""
+
 mmseqs = local["mmseqs"]
 
 
