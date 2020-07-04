@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import logging
 from plumbum import local
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
