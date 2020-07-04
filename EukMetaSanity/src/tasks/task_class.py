@@ -1,24 +1,32 @@
 from abc import ABC, abstractmethod
-from numba import types, jitclass, jit
-from EukMetaSanity.src.utils.path_manager import PathManager
 
 
-@jitclass((
-    ("_input_paths", types.Tuple(types.string)),
-    ("output_paths", types.Tuple(types.string)),
-    ("_threads_pw", types.int8),
-    ("_workers", types.int8),
-    ("_pm", PathManager),
-
-))
 class Task(ABC):
-    def __init__(self, input_fasta_list, cfg, pm, dict_name):
-        self._input_paths = input_fasta_list
-        self.output_paths = None
-        self._threads_pw = int(cfg.config.get(dict_name, {}).get("THREADS", 1)),
-        self._workers = int(cfg.config.get(dict_name, {}).get("WORKERS", 1)),
+    def __init__(self, input_paths_dict, cfg, pm, record_id, db_name):
+        # Store passed input flag:input_path dict
+        self._input_paths = input_paths_dict
+        # Instantiate output dict variable
+        self.output_paths = {}
+        # Store threads and workers
+        self._threads_pw = int(cfg.config.get(db_name, {}).get("THREADS", 1)),
+        self._workers = int(cfg.config.get(db_name, {}).get("WORKERS", 1)),
+        # Store path manager
         self._pm = pm
+        # Store config manager
+        self._cfg = cfg
+        # Add name of db
+        pm.add_dir(db_name)
+        # Store working directory
+        self._wdir = pm.get_dir(record_id, [db_name])
         super().__init__()
+
+    @property
+    def cfg(self):
+        return self._cfg
+
+    @property
+    def wdir(self):
+        return self._wdir
 
     @property
     def threads(self):
@@ -37,7 +45,6 @@ class Task(ABC):
         assert self.output_paths is not None
 
     @abstractmethod
-    @jit(types.ListType(types.string)())
     def results(self):
         if self.output_paths is None:
             self.run()

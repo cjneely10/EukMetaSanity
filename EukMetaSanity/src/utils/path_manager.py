@@ -1,7 +1,7 @@
 import os
+from numba import types
 from pathlib import Path
 from plumbum import local
-from numba import types, jit
 from numba.experimental import jitclass
 
 mkdir = local["mkdir"]
@@ -10,10 +10,9 @@ mkdir = local["mkdir"]
 @jitclass((
     ("_base", types.string),
     ("_wdir", types.string),
-    ("_dbs", types.DictType(types.string))
+    ("_dbs", types.DictType(types.unicode_type, types.unicode_type)),
 ))
 class PathManager:
-    @jit(types.string(types.string), nopython=True)
     def __init__(self, base_path):
         self._wdir = "wdir"
         self._base = str(Path(base_path).resolve())
@@ -31,26 +30,31 @@ class PathManager:
         return str(self._base)
 
     # Add record directory to wdir
-    @jit(types.void(types.string, types.List), nopython=True, cache=True)
     def add_dir(self, record_id, _subdirs=None):
         # Record base dir
         mkdir["-p", os.path.join(self.wdir, str(record_id))]()
         # Additional dirs, if needed
         if _subdirs is not None:
-            all(mkdir["-p", os.path.join(self.wdir, str(record_id), _subd)]() for _subd in _subdirs)
+            for _subd in _subdirs:
+                added_path = os.path.join(self.wdir, str(record_id), _subd)
+                mkdir["-p", added_path]()
+                self._dbs[_subd] = added_path
 
     # Get record directory in wdir
-    @jit(types.string(types.string), nopython=True, cache=True)
-    def get_record_dir(self, record_id=None):
+    def get_dir(self, record_id=None, subdir=None):
         loc = self.wdir
         if record_id is not None:
-            loc = os.path.join(self.wdir, str(record_id))
+            loc = os.path.join(loc, str(record_id))
+        if subdir is not None:
+            loc = self._dbs.get(subdir, "")
         if os.path.exists(loc):
             return loc
-        raise ValueError("%s dir does not exist in %s\n" % (record_id, self.wdir))
+        raise ValueError(
+            "%s%s dir does not exist in %s\n" % (record_id, ("".join(("/", subdir)) if subdir is not None else ""),
+                                                 self.wdir)
+        )
 
     # Generate initial directory tree
-    @jit(types.void(), nopython=True, cache=True)
     def _generate_directory_tree(self):
         # Base output directory
         mkdir["-p", self._base]()

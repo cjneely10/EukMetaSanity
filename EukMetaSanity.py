@@ -1,19 +1,33 @@
 #!/usr/bin/env python3
 import os
+from dask.distributed import Client, wait
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.tasks.taxonomy import Taxonomy
 from EukMetaSanity.src.utils.arg_parse import ArgParse
+from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 
-def build_task_list(_type, cfg, ap):
-    globals()["confirm_" + _type](cfg)
+# # Available programs
+
+# Return task-list for run command
+def run():
+    task_list = (Taxonomy,)
+    for task in task_list:
+        yield task
 
 
-def confirm_run(cfg):
-    pass
+# # Helper functions
+
+# Gather all files to parse that match user-passed extensions
+def files_iter(ap):
+    for file in os.listdir(ap.args.fasta_directory):
+        for ext in ap.args.extensions:
+            if file.endswith(ext):
+                yield os.path.join(ap.args.fasta_directory, file)
 
 
+# Parse user arguments
 def _parse_args(ap):
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
@@ -25,10 +39,22 @@ def _parse_args(ap):
     return ConfigManager(ap.args.config_file)
 
 
+# # Driver logic
 def _main(ap, cfg):
-    # Generate primary fasta manager
-
-    pass
+    # Generate primary path manager
+    pm = PathManager(ap.args.output)
+    for _file in files_iter(ap):
+        prefix = os.path.basename(os.path.splitext(_file)[0])
+        task_list = []
+        for task in run():
+            task_list.append(
+                task(
+                    {"in": _file},
+                    cfg,
+                    pm,
+                    prefix,
+                )
+            )
 
 
 if __name__ == "__main__":
@@ -39,10 +65,10 @@ if __name__ == "__main__":
         (
             (("command",),
              {"help": "Select from run/refine"}),
-            (("fasta_directory",),
-             {"help": "Directory of FASTA files to annotate"}),
+            (("-f", "--fasta_directory",),
+             {"help": "Directory of FASTA files to annotate", "required": True}),
             (("-c", "--config_file"),
-             {"help": "Config file"}),
+             {"help": "Config file", "required": True}),
             (("-x", "--extensions"),
              {"help": "Gather files matching '/'-separated list of extensions, default %s" % DEFAULT_EXTS,
               "default": DEFAULT_EXTS}),

@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 from plumbum import local
-from numba import types, jit
 from EukMetaSanity.src.tasks.task_class import Task
-from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 mmseqs = local["mmseqs"]
 
-_TAXONOMY_NAME = "TAXONOMY"
+_TAXONOMY_NAME = "taxonomy"
 
 
 class Taxonomy(Task):
-    @jit(types.void(types.Tuple(types.string), ConfigManager), nopython=True, cache=True)
-    def __init__(self, input_fasta_list, pm, cfg):
-        super().__init__(input_fasta_list, cfg, pm, _TAXONOMY_NAME)
+    def __init__(self, input_paths_dict, cfg, pm, record_id):
+        super().__init__(input_paths_dict, cfg, pm, record_id, _TAXONOMY_NAME)
+        print(self.wdir)
 
     def run(self):
         # Generate genome directory
