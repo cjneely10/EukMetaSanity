@@ -23,8 +23,8 @@ class Task(ABC):
         self.required_data: List[str] = []
         self.output_paths_dict: Dict[str, str] = {}
         # Store threads and workers
-        self._threads_pw = int(cfg.config.get(db_name, "THREADS")),
-        self._workers = int(cfg.config.get(db_name, "WORKERS")),
+        self._threads_pw = int(cfg.config.get(db_name, "THREADS"))
+        self._workers = int(cfg.config.get(db_name, "WORKERS"))
         # Store path manager
         self._pm = pm
         self._is_complete = False
@@ -38,41 +38,45 @@ class Task(ABC):
         super().__init__()
 
     @property
-    def record_id(self):
+    def record_id(self) -> str:
         return self._record_id
 
     @property
-    def cfg(self):
+    def cfg(self) -> ConfigManager:
         return self._cfg
 
     @property
-    def wdir(self):
+    def wdir(self) -> str:
         return self._wdir
 
     @property
-    def threads(self):
+    def threads(self) -> int:
         return self._threads_pw
 
     @property
-    def workers(self):
+    def workers(self) -> int:
         return self._workers
 
     @property
-    def pm(self):
+    def pm(self) -> PathManager:
         return self._pm
 
     @abstractmethod
-    def run(self):
+    def run(self) -> None:
         # Set complete once run is done
         self._is_complete = True
 
     @abstractmethod
-    def results(self):
+    def results(self) -> Dict[str, str]:
         # Run if not done so already
         assert self._is_complete
         for data in self.required_data:
             assert data in self.output_paths_dict.keys(), data
         return self.output_paths_dict
+
+    @abstractmethod
+    def parse_output(self, output_files: List[str]) -> List[Dict[str, str]]:
+        pass
 
 
 class TaskList(ABC):

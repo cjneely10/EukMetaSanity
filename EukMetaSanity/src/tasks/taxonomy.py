@@ -19,15 +19,21 @@ class TaxonomyIter(TaskList):
             super().__init__(input_paths_dict, cfg, pm, record_id, _TAXONOMY_NAME, ["-in", "-db"])
 
         def run(self):
-            # Generate genome directory
-            # Call superclass run method
+            # Set required data
             self.required_data = ["-out"]
+            # Logic for mmseqs
+
+            # Parse for output
             self.output_paths_dict = {"-out": self.record_id}
+            # Call superclass run method
             super().run()
 
         def results(self):
             # Call superclass results method
             return super().results()
+
+        def parse_output(self, output_files: List[str]) -> List[Dict[str, str]]:
+            pass
 
     def __init__(self, input_paths_dict: List[Dict[str, str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str]):
