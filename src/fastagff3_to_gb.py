@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 from Bio import Seq
 from BCBio import GFF
 from Bio import SeqIO
@@ -24,12 +25,12 @@ def _fix_ncbi_id(fasta_iter):
     for rec in fasta_iter:
         if len(rec.name) > 16 and rec.name.find("|") > 0:
             new_id = [x for x in rec.name.split("|") if x][-1]
-            print("%s\t%s" % (rec.id, new_id))
+            sys.stderr.write("%s\t%s\n" % (rec.id, new_id))
             rec.id = new_id
             rec.name = new_id
         elif len(rec.name) > 16:
             new_id = rec.id[:15 - len(str(i))] + "_" + str(i)
-            print("%s\t%s" % (rec.id, new_id))
+            sys.stderr.write("%s\t%s\n" % (rec.id, new_id))
             i += 1
             rec.id = new_id
             rec.name = new_id
