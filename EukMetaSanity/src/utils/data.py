@@ -10,12 +10,8 @@ class Data:
     # Default accessors
     # API
     ACCESS = "-db"
-    # Config file
-    DATA = "DATA"
     # Input fasta
     IN = "-in"
-    # Paths to programs
-    PATH = "PATH"
     # Output data
     OUT = "-out"
 

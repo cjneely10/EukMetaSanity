@@ -43,7 +43,7 @@ class TaxonomyIter(TaskList):
         super().__init__(
             [
                 TaxonomyIter.Taxonomy(
-                    {Data.IN: input_path, Data.ACCESS: cfg.config[Data.DATA][Data().taxonomy()]},
+                    {Data.IN: input_path, Data.ACCESS: cfg.config[ConfigManager.DATA][Data().taxonomy()]},
                     cfg,
                     pm,
                     record_id

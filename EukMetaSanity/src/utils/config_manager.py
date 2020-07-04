@@ -19,6 +19,12 @@ class MissingDataError(FileExistsError):
 
 
 class ConfigManager:
+    # Default accessors
+    # Paths to programs
+    PATH = "PATH"
+    # Config file
+    DATA = "DATA"
+
     def __init__(self, config_path):
         self._config = Config()
         self._config.optionxform = str
@@ -33,9 +39,9 @@ class ConfigManager:
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate_data(self):
         odb = Data().taxonomy()
-        if odb not in self.config[Data.DATA].keys():
+        if odb not in self.config[ConfigManager.DATA].keys():
             raise MissingDataError("Missing orthodbv10 info!")
-        if not os.path.exists(Path(self.config[Data.DATA][odb]).resolve()):
+        if not os.path.exists(Path(self.config[ConfigManager.DATA][odb]).resolve()):
             raise InvalidPathError("Invalid path for orthodbv10")
 
     # Parse config file for PATH variables and confirm validity
@@ -44,12 +50,12 @@ class ConfigManager:
         # Iterate over all values in config file
         for k, value_dict in self.config.items():
             # Ensure all data is valid
-            if k == Data.DATA:
+            if k == ConfigManager.DATA:
                 data_in_keys = True
                 self._validate_data()
                 continue
             # Ensure PATH sections are valid
-            for key in ("PATH",):
+            for key in (ConfigManager.PATH,):
                 if key in value_dict.keys():
                     try:
                         local[value_dict[key]]()
