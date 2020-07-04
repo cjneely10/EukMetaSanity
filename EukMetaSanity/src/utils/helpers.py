@@ -7,6 +7,7 @@ General functions
 
 
 # Function logs and runs dask command
-def log_and_run(cmd):
+def log_and_run(cmd, test=False):
     logging.info(str(cmd))
-    cmd()
+    if test:
+        cmd()
