@@ -19,4 +19,5 @@ class Taxonomy(Task):
 
     def results(self):
         # Call superclass results method
+        self.output_paths = ["output_path_1"]
         return super().results()
