@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import logging
-from numba import jit, types
 from dask.distributed import Client, wait
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
@@ -20,7 +19,6 @@ def _run_iter():
 
 # # Helper functions
 # Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
-@jit(types.unicode_type(types.unicode_type), nopython=True, cache=True)
 def _prefix(_path: str):
     return ".".join(_path.split("/")[-1].split(".")[:-1])
 
@@ -49,21 +47,23 @@ def _parse_args(ap: ArgParse):
 def _main(ap: ArgParse, cfg: ConfigManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
-    # Simplify FASTA files
-    # Create base dir for each
+    # Gather list of files to analyze
     input_files = list(_files_iter(ap))
     input_prefixes = [_prefix(_file) for _file in input_files]
+    # Simplify FASTA files
+    # Create base dir for each file to analyze
     all([pm.add_dirs(_file) for _file in input_prefixes])
-    # Populate and call each task sublist
+    # Populate and call each task sublist based on user-input
     for T_Task in _run_iter():
         task = T_Task(
-            [{"-in": _file} for _file in input_files],
+            [{"-in": _file, "-db": "db"} for _file in input_files],  # From config file
             cfg,
             pm,
             input_prefixes
         )
-        # Call task list tasks
+        # Gather results for each task list
         task.run()
+        print(task.results())
 
 
 if __name__ == "__main__":
