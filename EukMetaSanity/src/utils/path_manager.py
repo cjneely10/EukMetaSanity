@@ -1,4 +1,5 @@
 import os
+from typing import List
 from pathlib import Path
 from plumbum import local
 
@@ -6,7 +7,8 @@ mkdir = local["mkdir"]
 
 
 class PathManager:
-    def __init__(self, base_path):
+    def __init__(self, base_path: str):
+        assert base_path is not None
         self._wdir = "wdir"
         self._base = str(Path(base_path).resolve())
         self._dbs = {}
@@ -27,7 +29,8 @@ class PathManager:
         return self._dbs
 
     # Add record directory to wdir
-    def add_dirs(self, record_id, _subdirs=None):
+    def add_dirs(self, record_id: str, _subdirs: List[str] = None):
+        assert record_id is not None
         # Record base dir
         mkdir["-p", os.path.join(self.wdir, str(record_id))]()
         # Additional dirs, if needed
@@ -39,7 +42,7 @@ class PathManager:
                 self._dbs[_subd] = added_path
 
     # Get record directory in wdir
-    def get_dir(self, record_id=None, subdir=None):
+    def get_dir(self, record_id: str = None, subdir: str = None):
         loc = self.wdir
         if record_id is not None:
             loc = os.path.join(loc, str(record_id))

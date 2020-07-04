@@ -1,26 +1,32 @@
 #!/usr/bin/env python3
 import os
+import logging
+from numba import jit, types
 from dask.distributed import Client, wait
 from signal import signal, SIGPIPE, SIG_DFL
-from EukMetaSanity.src.tasks.taxonomy import Taxonomy
 from EukMetaSanity.src.utils.arg_parse import ArgParse
+from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 
 # # Available programs
-
 # Return task-list for run command
-def run():
-    task_list = (Taxonomy,)
+def _run_iter():
+    task_list = (TaxonomyIter,)
     for task in task_list:
         yield task
 
 
 # # Helper functions
+# Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
+@jit(types.unicode_type(types.unicode_type), nopython=True, cache=True)
+def _prefix(_path: str):
+    return ".".join(_path.split("/")[-1].split(".")[:-1])
+
 
 # Gather all files to parse that match user-passed extensions
-def files_iter(ap):
+def _files_iter(ap: ArgParse):
     for file in os.listdir(ap.args.fasta_directory):
         for ext in ap.args.extensions:
             if file.endswith(ext):
@@ -28,7 +34,7 @@ def files_iter(ap):
 
 
 # Parse user arguments
-def _parse_args(ap):
+def _parse_args(ap: ArgParse):
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
     assert os.path.exists(ap.args.fasta_directory)
@@ -40,22 +46,24 @@ def _parse_args(ap):
 
 
 # # Driver logic
-def _main(ap, cfg):
+def _main(ap: ArgParse, cfg: ConfigManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
-    for _file in files_iter(ap):
-        prefix = os.path.basename(os.path.splitext(_file)[0])
-        pm.add_dirs(prefix)
-        task_list = []
-        for task in run():
-            task_list.append(
-                task(
-                    {"in": _file},
-                    cfg,
-                    pm,
-                    prefix,
-                )
-            )
+    # Simplify FASTA files
+    # Create base dir for each
+    input_files = list(_files_iter(ap))
+    input_prefixes = [_prefix(_file) for _file in input_files]
+    all([pm.add_dirs(_file) for _file in input_prefixes])
+    # Populate and call each task sublist
+    for T_Task in _run_iter():
+        task = T_Task(
+            [{"-in": _file} for _file in input_files],
+            cfg,
+            pm,
+            input_prefixes
+        )
+        # Call task list tasks
+        task.run()
 
 
 if __name__ == "__main__":
