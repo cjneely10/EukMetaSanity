@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import logging
-from dask.distributed import Client, wait
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
@@ -21,6 +20,15 @@ def _run_iter():
 # Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
 def _prefix(_path: str):
     return ".".join(_path.split("/")[-1].split(".")[:-1])
+
+
+# Logging initialize
+def _initialize_logging(ap: ArgParse):
+    # Initialize logging
+    LOG_FILE = os.path.join(ap.args.output, "eukmetasanity.log")
+    if os.path.exists(LOG_FILE):
+        os.remove(LOG_FILE)
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=LOG_FILE, filemode='w')
 
 
 # Gather all files to parse that match user-passed extensions
@@ -47,11 +55,14 @@ def _parse_args(ap: ArgParse):
 def _main(ap: ArgParse, cfg: ConfigManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
+    # Begin logging
+    _initialize_logging(ap)
     # Gather list of files to analyze
     input_files = list(_files_iter(ap))
     input_prefixes = [_prefix(_file) for _file in input_files]
     # Simplify FASTA files
     # Create base dir for each file to analyze
+    logging.info("Creating working directory")
     all([pm.add_dirs(_file) for _file in input_prefixes])
     # Populate and call each task sublist based on user-input
     for T_Task in _run_iter():

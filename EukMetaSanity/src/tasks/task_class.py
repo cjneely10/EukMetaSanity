@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List
 from abc import ABC, abstractmethod
 from EukMetaSanity.src.utils.path_manager import PathManager
@@ -75,8 +76,9 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, task_list: List[Task]):
+    def __init__(self, task_list: List[Task], statement: str):
         self._tasks: List[Task] = task_list
+        logging.info(statement)
         super().__init__()
 
     @property
