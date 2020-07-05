@@ -68,7 +68,7 @@ def record_generator(record: type, _i: str):
         record.id = record.id.replace(val, "")
     # Shorten id to 16 characters
     if len(str(record.id)) > 16:
-        record.id = record.id[:len(_i)] + _i
+        record.id = record.id[:16 - len(_i)] + _i
     yield record
 
 
