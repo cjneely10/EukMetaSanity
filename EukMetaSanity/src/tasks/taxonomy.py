@@ -68,9 +68,9 @@ class TaxonomyIter(TaskList):
                 logging.info(e)
             # DB path
             self.output_paths_dict = {Data.OUT: [
-                results_file,
-                self.input[Data.IN][0],
-                os.path.join(self.wdir, self.record_id + "_db"),
+                results_file,  # Taxonomic results for ab initio prediction
+                self.input[Data.IN][0],  # Input FASTA file for repeat masking
+                seq_db,  # MMseqs database for
             ]}
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
