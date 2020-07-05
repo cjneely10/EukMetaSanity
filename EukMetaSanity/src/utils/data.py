@@ -14,10 +14,13 @@ class Data:
     IN = "-in"
     # Output data
     OUT = "-out"
+    # Additional/optional data
+    ADDED = "-added"
 
     def __init__(self):
         self.data: Dict[str, str] = {
             "taxonomy": "ORTHODB",
+            "repeats": "MODELER",
         }
 
     # Required for mmseqs taxonomy assignment pipeline
@@ -25,7 +28,7 @@ class Data:
         return "taxonomy", self.data["taxonomy"]
 
     def repeat_modeling(self):
-        return "repeats", None
+        return "repeats", self.data["repeats"]
 
 
 if __name__ == "__main__":

@@ -34,6 +34,8 @@ class ConfigManager:
     WORKERS = "WORKERS"
     # Threads per worker
     THREADS = "THREADS"
+    # Protocols for running a choice of a program
+    PROTOCOL = "PROTOCOL"
 
     def __init__(self, config_path):
         self._config = Config()
@@ -48,11 +50,21 @@ class ConfigManager:
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate_data(self):
-        odb = Data().taxonomy()[1]
+        # Taxonomy step
+        dt = Data()
+        odb = dt.taxonomy()[1]
         if odb not in self.config[ConfigManager.DATA].keys():
             raise MissingDataError("Missing orthodbv10 info!")
         if not os.path.exists(Path(self.config[ConfigManager.DATA][odb]).resolve()):
             raise InvalidPathError("Invalid path for orthodbv10")
+        # Repeats modelling step
+        modeler_name, modeler_ident = dt.repeat_modeling()
+        if self.config[modeler_name][ConfigManager.PROTOCOL] == "full":
+            if modeler_ident not in self.config[ConfigManager.DATA].keys():
+                raise MissingDataError("Missing additional repeats data for full search info!")
+            path = self.config[ConfigManager.DATA][modeler_ident]
+            if path != "None" and not all(os.path.exists(Path(_p).resolve()) for _p in path.split(",") if _p != ""):
+                raise InvalidPathError("Invalid paths for additional repeats data")
 
     # Parse config file for PATH variables and confirm validity
     def _validate_config_paths(self):
@@ -79,13 +91,14 @@ class ConfigManager:
     def get_added_flags(self, _dict_name):
         out = []
         for key in dict(self.config[_dict_name]).keys():
+            # Parse FLAGS argument from comma-separated
             if key == "FLAGS":
                 all(out.append(val) for val in [def_key.lstrip(" ").rstrip(" ")
                                                 for def_key in
                                                 self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
                                                 if def_key != ""])
+            # Parse remaining args as dictionary items
             elif key not in (
-                "FLAGS",
                 ConfigManager.THREADS,
                 ConfigManager.WORKERS,
                 ConfigManager.DATA,

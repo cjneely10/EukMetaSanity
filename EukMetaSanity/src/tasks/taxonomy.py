@@ -28,7 +28,6 @@ class TaxonomyIter(TaskList):
             return super().results()
 
         def run_1(self):
-            name, ident = Data().taxonomy()
             seq_db = os.path.join(self.wdir, self.record_id + "_db")
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
@@ -50,7 +49,7 @@ class TaxonomyIter(TaskList):
                         self.input[Data.ACCESS],  # Input OrthoDB
                         tax_db,  # Output tax db
                         os.path.join(self.wdir, "tmp"),
-                        (*self.cfg.get_added_flags(name)),
+                        (*self.cfg.get_added_flags(Data().taxonomy()[0])),
                         "--threads", self.threads,
                     ],
                     self.mode
