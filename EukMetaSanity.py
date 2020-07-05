@@ -42,18 +42,18 @@ def _initialize_logging(ap: ArgParse) -> str:
 
 
 # Gather all files to parse that match user-passed extensions
-def _files_iter(ap: ArgParse) -> Generator[str, ArgParse, None]:
+def _files_iter(ap: ArgParse, storage_dir: str) -> Generator[str, ArgParse, None]:
     for file in os.listdir(ap.args.fasta_directory):
         for ext in ap.args.extensions:
             if file.endswith(ext):
-                yield _simplify_fasta(ap, file)
+                yield _simplify_fasta(ap, file, storage_dir)
     return None
 
 
-def _simplify_fasta(ap: ArgParse, file) -> str:
+def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     # Simplify FASTA of complex-named sequences
     fasta_file = str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
-    out_file = os.path.splitext(fasta_file)[0] + "._sfna_eu"
+    out_file = os.path.join(storage_dir, os.path.basename(os.path.splitext(fasta_file)[0]) + ".fna")
     record_p = SeqIO.parse(fasta_file, "fasta")
     i: int = 0
     for record in record_p:
@@ -95,15 +95,19 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # Begin logging
     logging_path = _initialize_logging(ap)
     print(
-        "*" * 80,
-        "All log statements are redirected to %s" % logging_path,
+        "*" * 80, "",
+        "All log statements are redirected to %s" % logging_path, "",
+        "*" * 80, "",
         "Displaying step summaries here:\n\n",
+        "Simplifying FASTA sequences",
         sep="\n"
     )
     logging.info("Creating working directory")
-    # Gather list of files to analyze and simplify FASTA files
     logging.info("Simplifying FASTA sequences")
-    input_files = list(_file for _file in _files_iter(ap))
+    # Gather list of files to analyze and simplify FASTA files
+    # Move all input files to output directory
+    pm.add_dirs("MAGS")
+    input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
     input_prefixes = [_prefix(_file) for _file in input_files]
     # Create base dir for each file to analyze
     all([pm.add_dirs(_file) for _file in input_prefixes])
@@ -112,15 +116,18 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # Generate first task from list
     run_iter = _run_iter(tm, ap.args.command)
     task = next(run_iter)(input_files, cfg, pm, input_prefixes, ap.args.debug)
+    # Run task
+    task.run()
     # Primary program loop
     while True:
         try:
-            # Run task
-            task.run()
             # Run next task
             task = next(run_iter)(*task.output())
+            task.run()
         except StopIteration:
             break
+    # Must call output on last task to generate final summary statistics
+    task.output()
 
 
 if __name__ == "__main__":
