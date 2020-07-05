@@ -29,21 +29,45 @@ class RepeatsIter(TaskList):
         def run_1(self):
             name = Data().repeat_modeling()[0]
             # Call method
-            getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
+            mmseqs_mask_db, masked_fasta = getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
+            self.output = {Data.OUT: [
+                self.input[Data.IN][0],  # Taxonomic results for ab initio prediction
+                masked_fasta,  # Input FASTA file for ab initio
+                mmseqs_mask_db,  # MMseqs database for use in metaeuk
+            ]}
 
+        # Simple repeat masking using mmseqs
         def simple(self):
+            masked_db_path = self.input[Data.IN][2][:-3] + "-mask_db"
+            masked_fa_path = masked_db_path[:-3] + ".fna"
             try:
+                # Generate the masked sequence
                 log_and_run(
                     self.program[
                         "masksequence",
                         self.input[Data.IN][2],
-                        self.input[Data.IN][2][:-3] + "-mask_db",
+                        masked_db_path,
                         "--threads", self.threads,
                     ],
                     self.mode
                 )
+                # Output as FASTA file
+                log_and_run(
+                    self.program[
+                        "convert2fasta",
+                        masked_db_path,
+                        masked_fa_path,
+                    ],
+                    self.mode
+                )
+                # Return masked-db and FASTA file paths
+                return masked_db_path, masked_fa_path
             except ProcessExecutionError as e:
                 logging.info(e)
+
+        # Complete masking using RepeatModeler/Masker
+        def full(self):
+            pass
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
@@ -54,9 +78,10 @@ class RepeatsIter(TaskList):
         protocol = cfg.config.get(name, ConfigManager.PROTOCOL)
         assert protocol in dir(self)
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
-        # Call protocol function to geenrate list for superclass initialization
         super().__init__(
+            # Call protocol function to generate list for superclass initialization
             getattr(RepeatsIter, protocol)(input_paths, record_ids, cfg, pm, mode),
+            # Remaining args as usual
             "Running %s repeat identification using %i workers and %i threads per worker" % (
                 protocol,
                 workers,
@@ -82,12 +107,20 @@ class RepeatsIter(TaskList):
             for input_path, record_id in zip(inputs, r_ids)
         ]
 
-    def _simple(self):
-        pass
-
     # Full repeat annotation using RepeatModeler/RepeatMasker
-    def full(self, inputs: List[str], r_ids: List[str], cfg: ConfigManager, pm: PathManager, mode: int) -> List[Task]:
-        pass
+    @staticmethod
+    def full(inputs: List[List[str]], r_ids: List[str], cfg: ConfigManager, pm: PathManager, mode: int) -> List[Task]:
+        name = Data().repeat_modeling()[0]
+        return [
+            RepeatsIter.Repeats(
+                {Data.IN: [*input_path, cfg.config[name][ConfigManager.PATH2]]},
+                cfg,
+                pm,
+                record_id,
+                mode
+            )
+            for input_path, record_id in zip(inputs, r_ids)
+        ]
 
     def run(self):
         super().run()

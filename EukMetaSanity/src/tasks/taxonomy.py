@@ -67,10 +67,10 @@ class TaxonomyIter(TaskList):
             except ProcessExecutionError as e:
                 logging.info(e)
             # DB path
-            self.output_paths_dict = {Data.OUT: [
+            self.output = {Data.OUT: [
                 results_file,  # Taxonomic results for ab initio prediction
                 self.input[Data.IN][0],  # Input FASTA file for repeat masking
-                seq_db,  # MMseqs database for
+                seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]}
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,

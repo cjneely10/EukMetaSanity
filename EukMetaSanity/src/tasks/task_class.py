@@ -30,7 +30,7 @@ class Task(ABC):
         self._input_path_dict = input_path_dict
         # Instantiate output dict variable
         self.required_data = [Data.OUT]
-        self.output_paths_dict: Dict[str, List[str]] = {}
+        self._output_paths_dict: Dict[str, List[str]] = {}
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
@@ -39,6 +39,9 @@ class Task(ABC):
         self._cfg = cfg
         # Store primary calling program
         self._prog = cfg.config.get(db_name, ConfigManager.PATH)
+        self._prog2 = None
+        if ConfigManager.PATH2 in cfg.config[db_name].keys():
+            self._prog2 = cfg.config.get(db_name, ConfigManager.PATH2)
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -49,8 +52,20 @@ class Task(ABC):
         super().__init__()
 
     @property
+    def output(self):
+        return self._output_paths_dict
+
+    @output.setter
+    def output(self, v: Dict[str, List[str]]):
+        self._output_paths_dict = v
+
+    @property
     def program(self):
         return local[self._prog]
+
+    @property
+    def program2(self):
+        return local[self._prog2]
 
     @property
     def input(self) -> Dict[str, List[str]]:
@@ -99,16 +114,16 @@ class Task(ABC):
         # Check that all required datasets are fulfilled
         for data in self.required_data:
             # Alert for missing required data output
-            assert data in self.output_paths_dict.keys(), "Missing required %s" % data
+            assert data in self._output_paths_dict.keys(), "Missing required %s" % data
             # Alert if data output is provided, but does not exist
-            for _path in self.output_paths_dict[data]:
+            for _path in self._output_paths_dict[data]:
                 if not os.path.exists(_path):
                     # Write dummy file if in developer mode
                     if self._mode == 0:
                         touch(_path)
                     else:
                         raise OutputResultsFileError(_path)
-        return self.output_paths_dict
+        return self._output_paths_dict
 
 
 class TaskList(ABC):
@@ -137,7 +152,7 @@ class TaskList(ABC):
 
     @abstractmethod
     def run(self):
-        # # Single
+        # Single
         if self._mode == 0:
             for task in self._tasks:
                 task.run()
