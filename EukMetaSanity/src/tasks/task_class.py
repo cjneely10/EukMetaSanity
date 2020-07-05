@@ -1,5 +1,6 @@
 import os
 import logging
+from plumbum import local
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
@@ -31,11 +32,13 @@ class Task(ABC):
         self.required_data = [Data.OUT]
         self.output_paths_dict: Dict[str, List[str]] = {}
         # Store threads and workers
-        self._threads_pw = int(cfg.config.get(db_name, "THREADS"))
+        self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
         self._pm = pm
         # Store config manager
         self._cfg = cfg
+        # Store primary calling program
+        self._prog = cfg.config.get(db_name, ConfigManager.PATH)
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -44,6 +47,10 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         self._record_id = record_id
         super().__init__()
+
+    @property
+    def program(self):
+        return local[self._prog]
 
     @property
     def input(self) -> Dict[str, List[str]]:

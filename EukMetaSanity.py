@@ -6,6 +6,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.path_manager import PathManager
+from EukMetaSanity.src.tasks.task_manager import TaskManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 """
@@ -16,8 +17,8 @@ EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
 
 # # Available programs
 # Return task-list for run command
-def _run_iter():
-    task_list = (TaxonomyIter,)
+def _run_iter(tm: TaskManager, program: str):
+    task_list = tm.tasks[program]
     for task in task_list:
         yield task
 
@@ -47,12 +48,12 @@ def _files_iter(ap: ArgParse):
 
 
 # Parse user arguments
-def _parse_args(ap: ArgParse):
+def _parse_args(ap: ArgParse, tm: TaskManager):
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
     assert os.path.exists(ap.args.fasta_directory)
     # Ensure command is valid
-    assert ap.args.command in ("run", "refine")
+    assert ap.args.command in tm.tasks
     if ap.args.debug is True:
         ap.args.debug = 0
     else:
@@ -63,7 +64,7 @@ def _parse_args(ap: ArgParse):
 
 
 # # Driver logic
-def _main(ap: ArgParse, cfg: ConfigManager):
+def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
     # Begin logging
@@ -77,7 +78,7 @@ def _main(ap: ArgParse, cfg: ConfigManager):
     logging.info("Creating working directory")
     all([pm.add_dirs(_file) for _file in input_prefixes])
     # Generate first task from list
-    run_iter = _run_iter()
+    run_iter = _run_iter(tm, ap.args.command)
     task = next(run_iter)(input_files, cfg, pm, input_prefixes, ap.args.debug)
 
     # Primary program loop
@@ -114,5 +115,7 @@ if __name__ == "__main__":
         ),
         description="Run EukMetaSanity pipeline"
     )
-    _main(_ap, _parse_args(_ap))
+
+    _tm = TaskManager()
+    _main(_ap, _parse_args(_ap, _tm), _tm)
     logging.info("EukMetaSanity pipeline complete!")

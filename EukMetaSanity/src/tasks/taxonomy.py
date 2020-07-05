@@ -1,6 +1,5 @@
 import os
 import logging
-from plumbum import local
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.helpers import log_and_run
@@ -14,21 +13,18 @@ Determine the taxonomy of the Eukaryotic MAG
 
 """
 
-mmseqs = local["mmseqs"]
-
 
 class TaxonomyIter(TaskList):
     class Taxonomy(Task):
         def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager, record_id: str,
                      mode: int):
+            # Needs an input file and input database
             super().__init__(input_path_dict, cfg, pm, record_id, Data().taxonomy()[0], [Data.IN, Data.ACCESS], mode)
 
         def run(self):
-            # Call superclass run method
             super().run()
 
         def results(self) -> Dict[str, List[str]]:
-            # Call superclass results method
             return super().results()
 
         def run_1(self):
@@ -39,7 +35,7 @@ class TaxonomyIter(TaskList):
             try:
                 # Create sequence database
                 log_and_run(
-                    mmseqs[
+                    self.program[
                         "createdb",
                         self.input[Data.IN],  # Input FASTA file
                         seq_db,  # Output FASTA sequence db
@@ -48,7 +44,7 @@ class TaxonomyIter(TaskList):
                 )
                 # Run taxonomy search
                 log_and_run(
-                    mmseqs[
+                    self.program[
                         "taxonomy",
                         seq_db,  # Input FASTA sequence db
                         self.input[Data.ACCESS],  # Input OrthoDB
@@ -61,7 +57,7 @@ class TaxonomyIter(TaskList):
                 )
                 # Output results
                 log_and_run(
-                    mmseqs[
+                    self.program[
                         "taxonomyreport",
                         self.input[Data.ACCESS],  # Input OrthoDB
                         tax_db,  # Input tax db
@@ -72,7 +68,11 @@ class TaxonomyIter(TaskList):
             except ProcessExecutionError as e:
                 logging.info(e)
             # DB path
-            self.output_paths_dict = {Data.OUT: [results_file, self.input[Data.IN][0]]}
+            self.output_paths_dict = {Data.OUT: [
+                results_file,
+                self.input[Data.IN][0],
+                os.path.join(self.wdir, self.record_id + "_db"),
+            ]}
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
@@ -95,7 +95,6 @@ class TaxonomyIter(TaskList):
                 workers,
                 int(cfg.config.get(name, ConfigManager.THREADS)),
             ),
-            # Dask workers
             workers,
             cfg,
             pm,
