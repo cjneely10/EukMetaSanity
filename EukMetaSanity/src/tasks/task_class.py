@@ -37,23 +37,25 @@ class Task(ABC):
         self._pm = pm
         # Store config manager
         self._cfg = cfg
-        # Store primary calling program
+        # Store primary calling program(s)
         self._prog = cfg.config.get(db_name, ConfigManager.PATH)
         self._prog2 = None
         self._prog3 = None
         self._prog4 = None
-        if ConfigManager.PATH2 in cfg.config[db_name].keys():
-            self._prog2 = cfg.config.get(db_name, ConfigManager.PATH2)
-        if ConfigManager.PATH3 in cfg.config[db_name].keys():
-            self._prog3 = cfg.config.get(db_name, ConfigManager.PATH3)
-        if ConfigManager.PATH4 in cfg.config[db_name].keys():
-            self._prog4 = cfg.config.get(db_name, ConfigManager.PATH4)
+        for _path, _attr in (
+            (ConfigManager.PATH2, "_prog2"),
+            (ConfigManager.PATH3, "_prog3"),
+            (ConfigManager.PATH4, "_prog4"),
+        ):
+            if _path in cfg.config[db_name].keys():
+                setattr(self, _attr, cfg.config.get(db_name, _path))
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
         pm.add_dirs(record_id, [db_name])
         # Store working directory
         self._wdir = pm.get_dir(record_id, db_name)
+        # Store id of record in Task
         self._record_id = record_id
         super().__init__()
 
