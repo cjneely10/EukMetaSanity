@@ -147,6 +147,7 @@ class TaskList(ABC):
                  mode: int):
         self._tasks: List[Task] = task_list
         logging.info(statement)
+        print(statement)
         self._workers = workers
         self._cfg = cfg
         self._pm = pm

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import os
 import logging
+from Bio import SeqIO
 from pathlib import Path
+from typing import Generator
+from string import punctuation
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
-from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.tasks.task_manager import TaskManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
@@ -17,7 +19,7 @@ EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
 
 # # Available programs
 # Return task-list for run command
-def _run_iter(tm: TaskManager, program: str):
+def _run_iter(tm: TaskManager, program: str) -> Generator[type, TaskManager, None]:
     task_list = tm.tasks[program]
     for task in task_list:
         yield task
@@ -25,30 +27,53 @@ def _run_iter(tm: TaskManager, program: str):
 
 # # Helper functions
 # Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
-def _prefix(_path: str):
+def _prefix(_path: str) -> str:
     return ".".join(_path.split("/")[-1].split(".")[:-1])
 
 
 # Logging initialize
-def _initialize_logging(ap: ArgParse):
+def _initialize_logging(ap: ArgParse) -> str:
     # Initialize logging
     log_file = os.path.join(ap.args.output, "eukmetasanity.log")
     if os.path.exists(log_file):
         os.remove(log_file)
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
+    return log_file
 
 
 # Gather all files to parse that match user-passed extensions
-def _files_iter(ap: ArgParse):
+def _files_iter(ap: ArgParse) -> Generator[str, ArgParse, None]:
     for file in os.listdir(ap.args.fasta_directory):
         for ext in ap.args.extensions:
             if file.endswith(ext):
-                yield str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
+                yield _simplify_fasta(ap, file)
     return None
 
 
+def _simplify_fasta(ap: ArgParse, file) -> str:
+    # Simplify FASTA of complex-named sequences
+    fasta_file = str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
+    out_file = os.path.splitext(fasta_file)[0] + "._sfna_eu"
+    record_p = SeqIO.parse(fasta_file, "fasta")
+    i: int = 0
+    for record in record_p:
+        SeqIO.write(record_generator(record, str(i)), out_file, "fasta")
+        i += 1
+    return out_file
+
+
+def record_generator(record: type, _i: str):
+    # Remove problem characters
+    for val in punctuation:
+        record.id = record.id.replace(val, "")
+    # Shorten id to 16 characters
+    if len(str(record.id)) > 16:
+        record.id = record.id[:len(_i)] + _i
+    yield record
+
+
 # Parse user arguments
-def _parse_args(ap: ArgParse, tm: TaskManager):
+def _parse_args(ap: ArgParse, tm: TaskManager) -> ConfigManager:
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
     assert os.path.exists(ap.args.fasta_directory)
@@ -68,19 +93,25 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
     # Begin logging
-    _initialize_logging(ap)
-    # Gather list of files to analyze
-    input_files = list(_files_iter(ap))
-    input_prefixes = [_prefix(_file) for _file in input_files]
-    # TODO(1) Simplify FASTA files
-    # Simplify FASTA files
-    # Create base dir for each file to analyze
+    logging_path = _initialize_logging(ap)
+    print(
+        "*" * 80,
+        "All log statements are redirected to %s" % logging_path,
+        "Displaying step summaries here:\n\n",
+        sep="\n"
+    )
     logging.info("Creating working directory")
+    # Gather list of files to analyze and simplify FASTA files
+    logging.info("Simplifying FASTA sequences")
+    input_files = list(_file for _file in _files_iter(ap))
+    input_prefixes = [_prefix(_file) for _file in input_files]
+    # Create base dir for each file to analyze
     all([pm.add_dirs(_file) for _file in input_prefixes])
+
+    # # Begin task list
     # Generate first task from list
     run_iter = _run_iter(tm, ap.args.command)
     task = next(run_iter)(input_files, cfg, pm, input_prefixes, ap.args.debug)
-
     # Primary program loop
     while True:
         try:
