@@ -4,6 +4,7 @@ from plumbum import local
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
+from plumbum.machines.local import LocalCommand
 from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed
 from EukMetaSanity.src.utils.path_manager import PathManager
@@ -27,6 +28,7 @@ class Task(ABC):
         # Require input file name passed
         for data in required_data:
             assert data in input_path_dict.keys(), data
+        self._name = db_name
         self._input_path_dict = input_path_dict
         # Instantiate output dict variable
         self.required_data = [Data.OUT]
@@ -58,6 +60,10 @@ class Task(ABC):
         # Store id of record in Task
         self._record_id = record_id
         super().__init__()
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def output(self):
@@ -115,15 +121,31 @@ class Task(ABC):
     def run(self) -> None:
         # Ensure that required_data is set
         assert self.required_data is not None
-        # Gather all functions of the form run_1, run_2, etc.
-        runnables = sorted(
-            [func for func in dir(self) if func.startswith("run_")],
-            key=lambda _f: int(_f.split("_")[1]),
-        )
-        # Run each function in series
-        for func in runnables:
-            if func.startswith("run_"):
-                getattr(self, func)()
+        for data in self.required_data:
+            # Alert for missing required data output
+            assert data in self._output_paths_dict.keys(), "Missing required %s" % data
+        # Check if task has completed based on provided output data
+        completed = True
+        for _path in self._output_paths_dict[Data.OUT]:
+            if not os.path.exists(_path):
+                # Only call function if missing path
+                # Then move on
+                completed = False
+                break
+        # Run if not completed (e.g. missing data)
+        if completed:
+            logging.info("Encountered completed task %s" % self.name)
+        else:
+            logging.info("Running task %s" % self.name)
+            # Gather all functions of the form run_1, run_2, etc.
+            runnables = sorted(
+                [func for func in dir(self) if func.startswith("run_")],
+                key=lambda _f: int(_f.split("_")[1]),
+            )
+            # Run each function in series
+            for func in runnables:
+                if func.startswith("run_"):
+                    getattr(self, func)()
 
     @abstractmethod
     def results(self) -> Dict[str, List[str]]:
@@ -143,7 +165,7 @@ class Task(ABC):
 
     @staticmethod
     # Function logs and runs dask command
-    def log_and_run(cmd, test: int):
+    def log_and_run(cmd: LocalCommand, test: int):
         logging.info(str(cmd))
         if test == 1:
             cmd()
@@ -152,9 +174,8 @@ class Task(ABC):
 class TaskList(ABC):
     def __init__(self, task_list: List[Task], statement: str, workers: int, cfg: ConfigManager, pm: PathManager,
                  mode: int):
+        self._statement = statement
         self._tasks: List[Task] = task_list
-        logging.info(statement)
-        print(statement)
         self._workers = workers
         self._cfg = cfg
         self._pm = pm
@@ -177,6 +198,8 @@ class TaskList(ABC):
     @abstractmethod
     def run(self):
         # Single
+        logging.info(self._statement)
+        print(self._statement)
         if self._mode == 0:
             for task in self._tasks:
                 task.run()

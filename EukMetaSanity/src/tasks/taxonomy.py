@@ -18,16 +18,23 @@ class TaxonomyIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-        def run(self):
+        def run(self) -> None:
+            seq_db = os.path.join(self.wdir, self.record_id + "_db")
+            results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
+            # Expected output
+            self.output = {Data.OUT: [
+                results_file,  # Taxonomic results for ab initio prediction
+                self.input[Data.IN][0],  # Input FASTA file for repeat masking
+                seq_db,  # MMseqs database for use in metaeuk or repeat masking
+            ]}
             super().run()
 
         def results(self) -> Dict[str, List[str]]:
             return super().results()
 
         def run_1(self):
-            seq_db = os.path.join(self.wdir, self.record_id + "_db")
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
+            seq_db = self.output[Data.OUT][2]
             try:
                 # Create sequence database
                 super().log_and_run(
@@ -57,18 +64,12 @@ class TaxonomyIter(TaskList):
                         "taxonomyreport",
                         self.input[Data.ACCESS],  # Input OrthoDB
                         tax_db,  # Input tax db
-                        results_file  # Output results file
+                        self.output[Data.OUT][0]  # Output results file
                     ],
                     self.mode
                 )
             except ProcessExecutionError as e:
                 logging.info(e)
-            # DB path
-            self.output = {Data.OUT: [
-                results_file,  # Taxonomic results for ab initio prediction
-                self.input[Data.IN][0],  # Input FASTA file for repeat masking
-                seq_db,  # MMseqs database for use in metaeuk or repeat masking
-            ]}
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):

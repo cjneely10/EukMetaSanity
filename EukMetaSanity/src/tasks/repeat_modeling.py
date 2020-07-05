@@ -19,6 +19,13 @@ class RepeatsIter(TaskList):
             super().__init__(*args, **kwargs)
 
         def run(self) -> None:
+            masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
+            masked_fa_path = masked_db_path[:-3] + ".fna"
+            self.output = {Data.OUT: [
+                self.input[Data.IN][0],  # Taxonomic results for ab initio prediction
+                masked_fa_path,  # Input FASTA file for ab initio
+                masked_db_path,  # MMseqs database for use in metaeuk
+            ]}
             super().run()
 
         def results(self) -> Dict[str, List[str]]:
@@ -26,18 +33,12 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             name = Data().repeat_modeling()[0]
-            # Call method
-            mmseqs_mask_db, masked_fasta = getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
-            self.output = {Data.OUT: [
-                self.input[Data.IN][0],  # Taxonomic results for ab initio prediction
-                masked_fasta,  # Input FASTA file for ab initio
-                mmseqs_mask_db,  # MMseqs database for use in metaeuk
-            ]}
+            # Call protocol method
+            getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
 
         # Simple repeat masking using mmseqs
         def simple(self):
-            masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
-            masked_fa_path = masked_db_path[:-3] + ".fna"
+            masked_db_path = self.output[Data.OUT][2]
             try:
                 # Generate the masked sequence
                 super().log_and_run(
@@ -54,18 +55,19 @@ class RepeatsIter(TaskList):
                     self.program[
                         "convert2fasta",
                         masked_db_path,
-                        masked_fa_path,
+                        self.output[Data.OUT][1],
                     ],
                     self.mode
                 )
-                # Return masked-db and FASTA file paths
-                return masked_db_path, masked_fa_path
             except ProcessExecutionError as e:
                 logging.info(e)
 
         # Complete masking using RepeatModeler/Masker
         def full(self):
-            pass
+            try:
+                pass
+            except ProcessExecutionError as e:
+                logging.info(e)
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
@@ -90,7 +92,7 @@ class RepeatsIter(TaskList):
                 for input_path, record_id in zip(input_paths, record_ids)
             ],
             # Remaining args as usual
-            statement % (protocol, workers, int(cfg.config.get(name, ConfigManager.THREADS))),
+            statement % (protocol + " search", workers, int(cfg.config.get(name, ConfigManager.THREADS))),
             workers,
             cfg,
             pm,
