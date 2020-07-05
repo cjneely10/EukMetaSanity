@@ -104,10 +104,6 @@ class Task(ABC):
                     raise OutputResultsFileError(self.output_paths_dict[data])
         return self.output_paths_dict
 
-    @abstractmethod
-    def parse_output(self, output_files: List[str]) -> List[Dict[str, str]]:
-        pass
-
 
 class TaskList(ABC):
     def __init__(self, task_list: List[Task], statement: str, workers: int, cfg: ConfigManager, pm: PathManager,
@@ -144,8 +140,11 @@ class TaskList(ABC):
             futures = []
             client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
-            client.map(lambda _task: _task.run(), self._tasks)
-            all(_ for _ in as_completed(futures))
+            for _task in self._tasks:
+                futures.append(client.submit(_task.run))
+            for _task in as_completed(futures):
+                _task.result()
+            wait(futures)
             client.close()
 
     @abstractmethod

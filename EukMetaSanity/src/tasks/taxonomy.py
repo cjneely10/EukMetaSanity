@@ -32,9 +32,6 @@ class TaxonomyIter(TaskList):
             # Call superclass results method
             return super().results()
 
-        def parse_output(self, output_files: List[str]) -> List[Dict[str, str]]:
-            pass
-
         def run_1(self):
             name, ident = Data().taxonomy()
             # Create sequence database
