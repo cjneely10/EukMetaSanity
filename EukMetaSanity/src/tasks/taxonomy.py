@@ -2,7 +2,6 @@ import os
 import logging
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
-from EukMetaSanity.src.utils.helpers import log_and_run
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.src.tasks.task_class import Task, TaskList
@@ -33,7 +32,7 @@ class TaxonomyIter(TaskList):
             results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
             try:
                 # Create sequence database
-                log_and_run(
+                super().log_and_run(
                     self.program[
                         "createdb",
                         self.input[Data.IN],  # Input FASTA file
@@ -42,7 +41,7 @@ class TaxonomyIter(TaskList):
                     self.mode
                 )
                 # Run taxonomy search
-                log_and_run(
+                super().log_and_run(
                     self.program[
                         "taxonomy",
                         seq_db,  # Input FASTA sequence db
@@ -55,7 +54,7 @@ class TaxonomyIter(TaskList):
                     self.mode
                 )
                 # Output results
-                log_and_run(
+                super().log_and_run(
                     self.program[
                         "taxonomyreport",
                         self.input[Data.ACCESS],  # Input OrthoDB
@@ -73,9 +72,9 @@ class TaxonomyIter(TaskList):
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]}
 
-    def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
-        name, ident = Data().taxonomy()
+        name, ident, statement = Data().taxonomy()
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         super().__init__(
             # List of tasks
@@ -90,9 +89,8 @@ class TaxonomyIter(TaskList):
                 for input_path, record_id in zip(input_paths, record_ids)
             ],
             # Logging statement
-            "Running mmseqs to identify taxonomy using %i workers and %i threads per worker" % (
-                workers,
-                int(cfg.config.get(name, ConfigManager.THREADS)),
+            statement % (
+                cfg.config.get(name, ConfigManager.PATH), workers, int(cfg.config.get(name, ConfigManager.THREADS))
             ),
             workers,
             cfg,

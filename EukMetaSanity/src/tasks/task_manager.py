@@ -1,5 +1,5 @@
-from EukMetaSanity.src.tasks.repeat_modeling import RepeatsIter
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.src.tasks.repeat_modeling import RepeatsIter
 
 
 class TaskManager:

@@ -141,6 +141,13 @@ class Task(ABC):
                         raise OutputResultsFileError(_path)
         return self._output_paths_dict
 
+    @staticmethod
+    # Function logs and runs dask command
+    def log_and_run(cmd, test: int):
+        logging.info(str(cmd))
+        if test == 1:
+            cmd()
+
 
 class TaskList(ABC):
     def __init__(self, task_list: List[Task], statement: str, workers: int, cfg: ConfigManager, pm: PathManager,

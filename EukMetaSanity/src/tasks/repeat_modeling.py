@@ -1,7 +1,7 @@
+import os
 import logging
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
-from EukMetaSanity.src.utils.helpers import log_and_run
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.src.tasks.task_class import Task, TaskList
@@ -38,11 +38,11 @@ class RepeatsIter(TaskList):
 
         # Simple repeat masking using mmseqs
         def simple(self):
-            masked_db_path = self.input[Data.IN][2][:-3] + "-mask_db"
+            masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
             masked_fa_path = masked_db_path[:-3] + ".fna"
             try:
                 # Generate the masked sequence
-                log_and_run(
+                super().log_and_run(
                     self.program[
                         "masksequence",
                         self.input[Data.IN][2],
@@ -52,7 +52,7 @@ class RepeatsIter(TaskList):
                     self.mode
                 )
                 # Output as FASTA file
-                log_and_run(
+                super().log_and_run(
                     self.program[
                         "convert2fasta",
                         masked_db_path,
@@ -69,58 +69,33 @@ class RepeatsIter(TaskList):
         def full(self):
             pass
 
-    def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
         # Get name of config section and required data
-        name = Data().repeat_modeling()[0]
+        name, ident, statement = Data().repeat_modeling()
         # Ensure protocol is passed and valid
         assert ConfigManager.PROTOCOL in cfg.config[name].keys()
         protocol = cfg.config.get(name, ConfigManager.PROTOCOL)
-        assert protocol in dir(self)
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         super().__init__(
             # Call protocol function to generate list for superclass initialization
-            getattr(RepeatsIter, protocol)(input_paths, record_ids, cfg, pm, mode),
+            [
+                RepeatsIter.Repeats(
+                    {Data.IN: input_path},
+                    cfg,
+                    pm,
+                    record_id,
+                    mode
+                )
+                for input_path, record_id in zip(input_paths, record_ids)
+            ],
             # Remaining args as usual
-            "Running %s repeat identification using %i workers and %i threads per worker" % (
-                protocol,
-                workers,
-                int(cfg.config.get(name, ConfigManager.THREADS)),
-            ),
+            statement % (protocol, workers, int(cfg.config.get(name, ConfigManager.THREADS))),
             workers,
             cfg,
             pm,
             mode
         )
-
-    # Simple repeat annotation initialization using mmseqs
-    @staticmethod
-    def simple(inputs: List[List[str]], r_ids: List[str], cfg: ConfigManager, pm: PathManager, mode: int) -> List[Task]:
-        return [
-            RepeatsIter.Repeats(
-                {Data.IN: input_path},
-                cfg,
-                pm,
-                record_id,
-                mode
-            )
-            for input_path, record_id in zip(inputs, r_ids)
-        ]
-
-    # Full repeat annotation using RepeatModeler/RepeatMasker
-    @staticmethod
-    def full(inputs: List[List[str]], r_ids: List[str], cfg: ConfigManager, pm: PathManager, mode: int) -> List[Task]:
-        name = Data().repeat_modeling()[0]
-        return [
-            RepeatsIter.Repeats(
-                {Data.IN: [*input_path, cfg.config[name][ConfigManager.PATH2]]},
-                cfg,
-                pm,
-                record_id,
-                mode
-            )
-            for input_path, record_id in zip(inputs, r_ids)
-        ]
 
     def run(self):
         super().run()

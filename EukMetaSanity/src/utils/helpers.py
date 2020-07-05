@@ -1,17 +1,14 @@
-import logging
-
 """
 General functions
 
 """
 
 
-# Function logs and runs dask command
-def log_and_run(cmd, test: int):
-    logging.info(str(cmd))
-    if test == 1:
-        cmd()
-
-
+# Mimic touch command from linux
 def touch(_path: str):
     open(_path, "w").close()
+
+
+# Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
+def prefix(_path: str) -> str:
+    return ".".join(_path.split("/")[-1].split(".")[:-1])

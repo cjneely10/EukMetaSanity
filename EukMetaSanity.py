@@ -9,6 +9,7 @@ from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.tasks.task_manager import TaskManager
+from EukMetaSanity.src.utils.helpers import prefix as _prefix
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 """
@@ -26,11 +27,6 @@ def _run_iter(tm: TaskManager, program: str) -> Generator[type, TaskManager, Non
 
 
 # # Helper functions
-# Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
-def _prefix(_path: str) -> str:
-    return ".".join(_path.split("/")[-1].split(".")[:-1])
-
-
 # Logging initialize
 def _initialize_logging(ap: ArgParse) -> str:
     # Initialize logging
