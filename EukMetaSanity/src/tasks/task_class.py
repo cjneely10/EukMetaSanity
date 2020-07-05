@@ -40,8 +40,14 @@ class Task(ABC):
         # Store primary calling program
         self._prog = cfg.config.get(db_name, ConfigManager.PATH)
         self._prog2 = None
+        self._prog3 = None
+        self._prog4 = None
         if ConfigManager.PATH2 in cfg.config[db_name].keys():
             self._prog2 = cfg.config.get(db_name, ConfigManager.PATH2)
+        if ConfigManager.PATH3 in cfg.config[db_name].keys():
+            self._prog3 = cfg.config.get(db_name, ConfigManager.PATH3)
+        if ConfigManager.PATH4 in cfg.config[db_name].keys():
+            self._prog4 = cfg.config.get(db_name, ConfigManager.PATH4)
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -66,6 +72,14 @@ class Task(ABC):
     @property
     def program2(self):
         return local[self._prog2]
+
+    @property
+    def program3(self):
+        return local[self._prog3]
+
+    @property
+    def program4(self):
+        return local[self._prog4]
 
     @property
     def input(self) -> Dict[str, List[str]]:

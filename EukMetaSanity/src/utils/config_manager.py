@@ -28,6 +28,8 @@ class ConfigManager:
     # Paths to programs
     PATH = "PATH"
     PATH2 = "PATH2"
+    PATH3 = "PATH3"
+    PATH4 = "PATH4"
     # Config file
     DATA = "DATA"
     # Workers for task
