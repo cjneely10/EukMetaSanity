@@ -106,9 +106,6 @@ class TaxonomyIter(TaskList):
     def run(self):
         super().run()
 
-    def results(self):
-        return super().results()
-
     def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str], int]:
         return super().output()
 

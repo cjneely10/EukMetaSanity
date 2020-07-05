@@ -1,9 +1,9 @@
 import os
 import logging
-from plumbum import local
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
+from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed
 from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
@@ -13,8 +13,6 @@ Task: Class that manages and handles working directory to complete an operation
 TaskList: Collection of Task objects that calls run function on each
 
 """
-
-touch = local["touch"]
 
 
 class OutputResultsFileError(FileNotFoundError):
@@ -96,10 +94,10 @@ class Task(ABC):
             # Alert for missing required data output
             assert data in self.output_paths_dict.keys(), "Missing required %s" % data
             # Alert if data output is provided, but does not exist
-            # Write dummy file if in developer mode
             if not os.path.exists(self.output_paths_dict[data]):
+                # Write dummy file if in developer mode
                 if self._mode == 0:
-                    touch[self.output_paths_dict[data]]()
+                    touch(self.output_paths_dict[data])
                 else:
                     raise OutputResultsFileError(self.output_paths_dict[data])
         return self.output_paths_dict
@@ -148,15 +146,11 @@ class TaskList(ABC):
             client.close()
 
     @abstractmethod
-    def results(self):
-        # Gather results to list and return
-        return [task.results() for task in self._tasks]
-
-    @abstractmethod
     def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str], int]:
         # Run task list
+        results = (task.results() for task in self._tasks)
         return (
-            [result[Data.OUT] for result in self.results()],  # Output files using required Data object
+            [result[Data.OUT] for result in results],  # Output files using required Data object
             self.cfg,
             self.pm,
             [task.record_id for task in self.tasks],
