@@ -15,10 +15,8 @@ Determine the taxonomy of the Eukaryotic MAG
 
 class TaxonomyIter(TaskList):
     class Taxonomy(Task):
-        def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager, record_id: str,
-                     mode: int):
-            # Needs an input file and input database
-            super().__init__(input_path_dict, cfg, pm, record_id, Data().taxonomy()[0], [Data.IN, Data.ACCESS], mode)
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
         def run(self):
             super().run()
@@ -84,7 +82,9 @@ class TaxonomyIter(TaskList):
                     cfg,
                     pm,
                     record_id,
-                    mode
+                    name,
+                    mode,
+                    required_data=[Data.IN, Data.ACCESS],
                 )
                 for input_path, record_id in zip(input_paths, record_ids)
             ],

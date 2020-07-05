@@ -22,7 +22,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 class Task(ABC):
     def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager,
-                 record_id: str, db_name: str, required_data: List[str], mode: int):
+                 record_id: str, db_name: str, mode: int, required_data: List[str]):
         # Store passed input flag:input_path dict
         # Require input file name passed
         for data in required_data:

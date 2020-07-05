@@ -15,10 +15,8 @@ Model the repeated regions of a FASTA sequence
 
 class RepeatsIter(TaskList):
     class Repeats(Task):
-        def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager, record_id: str,
-                     mode: int):
-            # Needs an input file only
-            super().__init__(input_path_dict, cfg, pm, record_id, Data().repeat_modeling()[0], [Data.IN], mode)
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
         def run(self) -> None:
             super().run()
@@ -85,7 +83,9 @@ class RepeatsIter(TaskList):
                     cfg,
                     pm,
                     record_id,
-                    mode
+                    name,
+                    mode,
+                    required_data=[Data.IN],
                 )
                 for input_path, record_id in zip(input_paths, record_ids)
             ],
