@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import logging
+from pathlib import Path
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
@@ -41,7 +42,7 @@ def _files_iter(ap: ArgParse):
     for file in os.listdir(ap.args.fasta_directory):
         for ext in ap.args.extensions:
             if file.endswith(ext):
-                yield os.path.join(ap.args.fasta_directory, file)
+                yield str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
     return None
 
 
@@ -85,6 +86,7 @@ def _main(ap: ArgParse, cfg: ConfigManager):
             # Run task
             task.run()
             # Run next task
+            print(task.output())
             task = next(run_iter)(*task.output())
         except StopIteration:
             break

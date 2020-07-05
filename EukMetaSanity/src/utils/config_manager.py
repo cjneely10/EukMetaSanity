@@ -27,6 +27,7 @@ class ConfigManager:
     # Default accessors
     # Paths to programs
     PATH = "PATH"
+    PATH2 = "PATH2"
     # Config file
     DATA = "DATA"
     # Workers for task
@@ -64,12 +65,12 @@ class ConfigManager:
                 self._validate_data()
                 continue
             # Ensure PATH sections are valid
-            for key in (ConfigManager.PATH,):
-                if key in value_dict.keys():
+            for i, possible_path in enumerate((ConfigManager.PATH, ConfigManager.PATH2)):
+                if possible_path in value_dict.keys():
                     try:
-                        local[value_dict[key]]()
+                        local[value_dict[possible_path]]()
                     except CommandNotFound:
-                        raise InvalidPathError(value_dict[key])
+                        raise InvalidPathError(value_dict[possible_path])
         # Raise error if missing Data section
         if not data_in_keys:
             raise MissingDataError("Missing DATA section!")
@@ -88,7 +89,8 @@ class ConfigManager:
                 ConfigManager.THREADS,
                 ConfigManager.WORKERS,
                 ConfigManager.DATA,
-                ConfigManager.PATH
+                ConfigManager.PATH,
+                ConfigManager.PATH2,
             ):
                 out.append(key)
                 out.append(self.config[_dict_name][key])

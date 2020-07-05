@@ -24,6 +24,9 @@ class Data:
     def taxonomy(self):
         return "taxonomy", self.data["taxonomy"]
 
+    def repeat_modeling(self):
+        return "repeats", self.data["repeats"]
+
 
 if __name__ == "__main__":
     pass

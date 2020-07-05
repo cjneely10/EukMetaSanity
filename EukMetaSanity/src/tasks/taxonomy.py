@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import logging
 from plumbum import local
@@ -20,7 +19,7 @@ mmseqs = local["mmseqs"]
 
 class TaxonomyIter(TaskList):
     class Taxonomy(Task):
-        def __init__(self, input_path_dict: Dict[str, str], cfg: ConfigManager, pm: PathManager, record_id: str,
+        def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager, record_id: str,
                      mode: int):
             super().__init__(input_path_dict, cfg, pm, record_id, Data().taxonomy()[0], [Data.IN, Data.ACCESS], mode)
 
@@ -28,17 +27,17 @@ class TaxonomyIter(TaskList):
             # Call superclass run method
             super().run()
 
-        def results(self) -> Dict[str, str]:
+        def results(self) -> Dict[str, List[str]]:
             # Call superclass results method
             return super().results()
 
         def run_1(self):
             name, ident = Data().taxonomy()
-            # Create sequence database
             seq_db = os.path.join(self.wdir, self.record_id + "_db")
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
             try:
+                # Create sequence database
                 log_and_run(
                     mmseqs[
                         "createdb",
@@ -73,7 +72,7 @@ class TaxonomyIter(TaskList):
             except ProcessExecutionError as e:
                 logging.info(e)
             # DB path
-            self.output_paths_dict = {Data.OUT: results_file}
+            self.output_paths_dict = {Data.OUT: [results_file, self.input[Data.IN][0]]}
 
     def __init__(self, input_paths: List[str], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
@@ -83,7 +82,7 @@ class TaxonomyIter(TaskList):
             # List of tasks
             [
                 TaxonomyIter.Taxonomy(
-                    {Data.IN: input_path, Data.ACCESS: cfg.config[ConfigManager.DATA][ident]},
+                    {Data.IN: [input_path], Data.ACCESS: [cfg.config[ConfigManager.DATA][ident]]},
                     cfg,
                     pm,
                     record_id,
@@ -106,7 +105,7 @@ class TaxonomyIter(TaskList):
     def run(self):
         super().run()
 
-    def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str], int]:
+    def output(self) -> Tuple[List[List[str]], ConfigManager, PathManager, List[str], int]:
         return super().output()
 
 

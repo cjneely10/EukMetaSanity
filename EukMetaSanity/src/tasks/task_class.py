@@ -20,7 +20,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 
 class Task(ABC):
-    def __init__(self, input_path_dict: Dict[str, str], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, required_data: List[str], mode: int):
         # Store passed input flag:input_path dict
         # Require input file name passed
@@ -29,7 +29,7 @@ class Task(ABC):
         self._input_path_dict = input_path_dict
         # Instantiate output dict variable
         self.required_data = [Data.OUT]
-        self.output_paths_dict: Dict[str, str] = {}
+        self.output_paths_dict: Dict[str, List[str]] = {}
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, "THREADS"))
         # Store path manager
@@ -46,11 +46,11 @@ class Task(ABC):
         super().__init__()
 
     @property
-    def input(self):
+    def input(self) -> Dict[str, List[str]]:
         return self._input_path_dict
 
     @property
-    def mode(self):
+    def mode(self) -> int:
         return self._mode
 
     @property
@@ -88,18 +88,19 @@ class Task(ABC):
                 getattr(self, func)()
 
     @abstractmethod
-    def results(self) -> Dict[str, str]:
+    def results(self) -> Dict[str, List[str]]:
         # Check that all required datasets are fulfilled
         for data in self.required_data:
             # Alert for missing required data output
             assert data in self.output_paths_dict.keys(), "Missing required %s" % data
             # Alert if data output is provided, but does not exist
-            if not os.path.exists(self.output_paths_dict[data]):
-                # Write dummy file if in developer mode
-                if self._mode == 0:
-                    touch(self.output_paths_dict[data])
-                else:
-                    raise OutputResultsFileError(self.output_paths_dict[data])
+            for _path in self.output_paths_dict[data]:
+                if not os.path.exists(_path):
+                    # Write dummy file if in developer mode
+                    if self._mode == 0:
+                        touch(_path)
+                    else:
+                        raise OutputResultsFileError(_path)
         return self.output_paths_dict
 
 
@@ -146,7 +147,7 @@ class TaskList(ABC):
             client.close()
 
     @abstractmethod
-    def output(self) -> Tuple[List[str], ConfigManager, PathManager, List[str], int]:
+    def output(self) -> Tuple[List[List[str]], ConfigManager, PathManager, List[str], int]:
         # Run task list
         results = (task.results() for task in self._tasks)
         return (
