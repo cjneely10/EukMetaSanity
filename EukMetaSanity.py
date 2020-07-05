@@ -52,6 +52,10 @@ def _parse_args(ap: ArgParse):
     assert os.path.exists(ap.args.fasta_directory)
     # Ensure command is valid
     assert ap.args.command in ("run", "refine")
+    if ap.args.debug is True:
+        ap.args.debug = 0
+    else:
+        ap.args.debug = 1
     # Determine file extensions to keep
     ap.args.extensions = ap.args.extensions.split("/")
     return ConfigManager(ap.args.config_file)
@@ -66,13 +70,14 @@ def _main(ap: ArgParse, cfg: ConfigManager):
     # Gather list of files to analyze
     input_files = list(_files_iter(ap))
     input_prefixes = [_prefix(_file) for _file in input_files]
+    # TODO(1) Simplify FASTA files
     # Simplify FASTA files
     # Create base dir for each file to analyze
     logging.info("Creating working directory")
     all([pm.add_dirs(_file) for _file in input_prefixes])
     # Generate first task from list
     run_iter = _run_iter()
-    task = next(run_iter)(input_files, cfg, pm, input_prefixes)
+    task = next(run_iter)(input_files, cfg, pm, input_prefixes, ap.args.debug)
 
     # Primary program loop
     while True:
@@ -102,6 +107,9 @@ if __name__ == "__main__":
               "default": DEFAULT_EXTS}),
             (("-o", "--output"),
              {"help": "Output directory, default out", "default": "out"}),
+            (("-d", "--debug"),
+             {"help": "Developer mode: display all commands on single thread, default False", "default": False,
+              "action": "store_true"}),
         ),
         description="Run EukMetaSanity pipeline"
     )
