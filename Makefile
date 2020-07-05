@@ -9,6 +9,4 @@ build:
 install:
 	$(PIP) install -r requirements.txt
 
-all:
-	build
-	install
+all: build install
