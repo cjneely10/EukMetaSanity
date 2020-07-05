@@ -134,9 +134,9 @@ class Task(ABC):
                 break
         # Run if not completed (e.g. missing data)
         if completed:
-            logging.info("Encountered completed task %s" % self.name)
+            logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
-            logging.info("Running task %s" % self.name)
+            logging.info("%s  Running %s" % (self.record_id, self.name))
             # Gather all functions of the form run_1, run_2, etc.
             runnables = sorted(
                 [func for func in dir(self) if func.startswith("run_")],
