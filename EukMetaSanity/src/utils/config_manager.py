@@ -110,6 +110,8 @@ class ConfigManager:
                 ConfigManager.DATA,
                 ConfigManager.PATH,
                 ConfigManager.PATH2,
+                ConfigManager.PATH3,
+                ConfigManager.PATH4,
             ):
                 out.append(key)
                 out.append(self.config[_dict_name][key])

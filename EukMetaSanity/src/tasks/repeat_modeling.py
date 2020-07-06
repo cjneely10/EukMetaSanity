@@ -28,9 +28,6 @@ class RepeatsIter(TaskList):
             ]}
             super().run()
 
-        def results(self) -> Dict[str, List[str]]:
-            return super().results()
-
         def run_1(self):
             name = Data().repeat_modeling()[0]
             # Call protocol method
@@ -41,23 +38,21 @@ class RepeatsIter(TaskList):
             masked_db_path = self.output[Data.OUT][2]
             try:
                 # Generate the masked sequence
-                super().log_and_run(
+                self.log_and_run(
                     self.program[
                         "masksequence",
                         self.input[Data.IN][2],
                         masked_db_path,
                         "--threads", self.threads,
-                    ],
-                    self.mode
+                    ]
                 )
                 # Output as FASTA file
-                super().log_and_run(
+                self.log_and_run(
                     self.program[
                         "convert2fasta",
                         masked_db_path,
                         self.output[Data.OUT][1],
-                    ],
-                    self.mode
+                    ]
                 )
             except ProcessExecutionError as e:
                 logging.info(e)
@@ -65,19 +60,34 @@ class RepeatsIter(TaskList):
         # Complete masking using RepeatModeler/Masker
         def full(self):
             try:
-                pass
+                # Build database
+                self.log_and_run(
+                    self.program[
+                        "-name", self.output[Data.OUT][2],
+                        (*self.added_flags),
+                        self.input[Data.IN][1],
+                    ]
+                )
+                # Run RepeatModeler
+                self.log_and_run(
+                    self.program2[
+                        "-pa", self.threads,
+                        (*self.added_flags),
+                        "-database", self.input[Data.ACCESS][0],
+                    ]
+                )
             except ProcessExecutionError as e:
                 logging.info(e)
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
-        super().__init__(RepeatsIter.Repeats, input_paths, record_ids, Data().repeat_modeling, cfg, pm, mode)
-
-    def run(self):
-        super().run()
-
-    def output(self) -> Tuple[List[List[str]], ConfigManager, PathManager, List[str], int]:
-        return super().output()
+        dt = Data()
+        protocol = cfg.config.get(dt.repeat_modeling()[0], ConfigManager.PROTOCOL)
+        if protocol == "simple":
+            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeat_modeling, cfg, pm, mode)
+        else:
+            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeat_modeling, cfg, pm, mode,
+                             {Data.ACCESS: [dt.repeat_modeling()[1]]})
 
 
 if __name__ == "__main__":

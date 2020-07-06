@@ -62,11 +62,15 @@ class Task(ABC):
         super().__init__()
 
     @property
-    def name(self):
+    def added_flags(self) -> List[str]:
+        return self.cfg.get_added_flags(self.name)
+
+    @property
+    def name(self) -> str:
         return self._name
 
     @property
-    def output(self):
+    def output(self) -> Dict[str, List[str]]:
         return self._output_paths_dict
 
     @output.setter
@@ -74,19 +78,19 @@ class Task(ABC):
         self._output_paths_dict = v
 
     @property
-    def program(self):
+    def program(self) -> LocalCommand:
         return local[self._prog]
 
     @property
-    def program2(self):
+    def program2(self) -> LocalCommand:
         return local[self._prog2]
 
     @property
-    def program3(self):
+    def program3(self) -> LocalCommand:
         return local[self._prog3]
 
     @property
-    def program4(self):
+    def program4(self) -> LocalCommand:
         return local[self._prog4]
 
     @property
@@ -147,7 +151,6 @@ class Task(ABC):
                 if func.startswith("run_"):
                     getattr(self, func)()
 
-    @abstractmethod
     def results(self) -> Dict[str, List[str]]:
         # Check that all required datasets are fulfilled
         for data in self.required_data:
@@ -163,11 +166,10 @@ class Task(ABC):
                         raise OutputResultsFileError(_path)
         return self._output_paths_dict
 
-    @staticmethod
     # Function logs and runs dask command
-    def log_and_run(cmd: LocalCommand, test: int):
+    def log_and_run(self, cmd: LocalCommand):
         logging.info(str(cmd))
-        if test == 1:
+        if self.mode == 1:
             cmd()
 
 
@@ -216,7 +218,6 @@ class TaskList(ABC):
     def tasks(self):
         return self._tasks
 
-    @abstractmethod
     def run(self):
         # Single
         logging.info(self._statement)
@@ -236,7 +237,6 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    @abstractmethod
     def output(self) -> Tuple[List[List[str]], ConfigManager, PathManager, List[str], int]:
         # Run task list
         results = (task.results() for task in self._tasks)

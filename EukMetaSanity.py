@@ -28,13 +28,20 @@ def _run_iter(tm: TaskManager, program: str) -> Generator[type, TaskManager, Non
 
 # # Helper functions
 # Logging initialize
-def _initialize_logging(ap: ArgParse) -> str:
+def _initialize_logging(ap: ArgParse) -> None:
     # Initialize logging
     log_file = os.path.join(ap.args.output, "eukmetasanity.log")
     if os.path.exists(log_file):
         os.remove(log_file)
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
-    return log_file
+    print(
+        "*" * 80, "",
+        "All log statements are redirected to %s" % log_file, "",
+        "*" * 80, "",
+        "Displaying step summaries here:\n\n",
+        "Simplifying FASTA sequences",
+        sep="\n"
+    )
 
 
 # Gather all files to parse that match user-passed extensions
@@ -92,21 +99,13 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
     # Begin logging
-    logging_path = _initialize_logging(ap)
-    print(
-        "*" * 80, "",
-        "All log statements are redirected to %s" % logging_path, "",
-        "*" * 80, "",
-        "Displaying step summaries here:\n\n",
-        "Simplifying FASTA sequences",
-        sep="\n"
-    )
+    _initialize_logging(ap)
     logging.info("Creating working directory")
     logging.info("Simplifying FASTA sequences")
-    # Gather list of files to analyze and simplify FASTA files
-    # Move all input files to output directory
+    # Gather list of files to analyze and simplify FASTA files into working directory
     pm.add_dirs("MAGS")
     input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
+    # List of prefixes for tracking each file's progress
     input_prefixes = [_prefix(_file) for _file in input_files]
     # Create base dir for each file to analyze
     all([pm.add_dirs(_file) for _file in input_prefixes])
@@ -155,4 +154,5 @@ if __name__ == "__main__":
 
     _tm = TaskManager()
     _main(_ap, _parse_args(_ap, _tm), _tm)
-    logging.info("EukMetaSanity pipeline complete!")
+    for func in (logging.info, print):
+        func("EukMetaSanity pipeline complete!")
