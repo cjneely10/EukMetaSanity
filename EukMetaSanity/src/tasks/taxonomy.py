@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Dict, List, Tuple
+from typing import List
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError

@@ -121,6 +121,27 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
+    def results(self) -> Dict[str, List[str]]:
+        # Check that all required datasets are fulfilled
+        for data in self.required_data:
+            # Alert for missing required data output
+            assert data in self._output_paths_dict.keys(), "Missing required %s" % data
+            # Alert if data output is provided, but does not exist
+            for _path in self._output_paths_dict[data]:
+                if not os.path.exists(_path):
+                    # Write dummy file if in developer mode
+                    if self._mode == 0:
+                        touch(_path)
+                    else:
+                        raise OutputResultsFileError(_path)
+        return self._output_paths_dict
+
+    # Function logs and runs dask command
+    def log_and_run(self, cmd: LocalCommand):
+        logging.info(str(cmd))
+        if self.mode == 1:
+            cmd()
+
     @abstractmethod
     def run(self) -> None:
         # Ensure that required_data is set
@@ -150,27 +171,6 @@ class Task(ABC):
             for func in runnables:
                 if func.startswith("run_"):
                     getattr(self, func)()
-
-    def results(self) -> Dict[str, List[str]]:
-        # Check that all required datasets are fulfilled
-        for data in self.required_data:
-            # Alert for missing required data output
-            assert data in self._output_paths_dict.keys(), "Missing required %s" % data
-            # Alert if data output is provided, but does not exist
-            for _path in self._output_paths_dict[data]:
-                if not os.path.exists(_path):
-                    # Write dummy file if in developer mode
-                    if self._mode == 0:
-                        touch(_path)
-                    else:
-                        raise OutputResultsFileError(_path)
-        return self._output_paths_dict
-
-    # Function logs and runs dask command
-    def log_and_run(self, cmd: LocalCommand):
-        logging.info(str(cmd))
-        if self.mode == 1:
-            cmd()
 
 
 class TaskList(ABC):

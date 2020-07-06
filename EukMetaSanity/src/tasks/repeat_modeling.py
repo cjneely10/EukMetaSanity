@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Dict, List, Tuple
+from typing import List
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
@@ -76,6 +76,12 @@ class RepeatsIter(TaskList):
                         "-database", self.input[Data.ACCESS][0],
                     ]
                 )
+                # Rename results
+                if self.mode == 1:
+                    os.rename(
+                        os.path.join(self.wdir, self.record_id + "-families.fa"),
+                        self.output[Data.OUT][1],
+                    )
             except ProcessExecutionError as e:
                 logging.info(e)
 
@@ -92,3 +98,4 @@ class RepeatsIter(TaskList):
 
 if __name__ == "__main__":
     pass
+
