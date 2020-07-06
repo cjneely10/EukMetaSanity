@@ -27,12 +27,11 @@ class AbInitioIter(TaskList):
                 self, self.cfg.config.get(name, ConfigManager.PROTOCOL)
             )(AbInitioIter.get_taxonomy(self.input[Data.Type.IN][0]))
 
-        @program_catch
         def augustus(self, tax_id: int):
             self._augustus(str(tax_id), 1)
             name = Data().abinitio()[0]
             for i in range(int(self.cfg.config.get(name, ConfigManager.ROUNDS)) - 1):
-                self._augustus(self.record_id + str(i + 2))
+                self._augustus(self.record_id + str(i + 2), i + 2)
 
         @program_catch
         def _augustus(self, species: str, pos: int):
@@ -54,10 +53,21 @@ class AbInitioIter(TaskList):
                 out_gff,
                 out_gb
             )
+            species_config_prefix = self.record_id + str(pos)
             # Write new species config file
-
+            self.log_and_run(
+                self.program2[
+                    "--species=%s" % species_config_prefix,
+                    out_gb
+                ]
+            )
             # Run training
-
+            self.log_and_run(
+                self.program3[
+                    "--species=%s" % species_config_prefix,
+                    out_gb
+                ]
+            )
 
         @program_catch
         def gmes(self, tax_id: int):

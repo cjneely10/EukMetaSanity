@@ -7,7 +7,7 @@ from Bio.SeqRecord import SeqRecord
 
 
 def parse_args():
-    USAGE = "split-to-train-test.py <input.fasta> <test-ratio=0.10>"
+    USAGE = "split_to_train_test.py <input.fasta> <test-ratio=0.10>"
     assert len(sys.argv) == 3 or len(sys.argv) == 2, USAGE
     # Determine test ratio
     try:
@@ -20,10 +20,10 @@ def parse_args():
         exit(1)
 
 
-def main(argv):
+def split_train_test(input_fasta):
     test_out = []
     train_out = []
-    record_fp = SeqIO.parse(argv[1], "fasta")
+    record_fp = SeqIO.parse(input_fasta, "fasta")
     for num, record in enumerate(record_fp):
         print("%s/6" % str(num + 1))
         len_seq = len(record.seq)
@@ -37,14 +37,18 @@ def main(argv):
                     seq=Seq(_seq),
                     description=""
                 )
-            ) 
+            )
         for _text, _seq in zip(("Train", "Test"), (len(train_seq), len(test_seq))):
             print("%s len: %s" % (_text, str(_seq)))
         print("Total: %s, Total length: %s" % (len(train_seq) + len(test_seq), len_seq))
     # Write train/test results
-    prefix = os.path.splitext(argv[1])[0]
+    prefix = os.path.splitext(input_fasta)[0]
     for _out, _path in zip((train_out, test_out), (".train.fasta", ".test.fasta")):
         SeqIO.write(_out, prefix + _path, "fasta")
+
+
+def main(argv):
+    split_train_test(argv[1])
 
 
 if __name__ == "__main__":

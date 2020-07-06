@@ -73,6 +73,7 @@ def _flatten_features(rec):
 
 
 def write_genbank(fasta_file, gff3_file, output_file):
+    assert os.path.exists(fasta_file) and os.path.exists(gff3_file)
     SeqIO.write(
         _check_gff(
             _fix_ncbi_id(
