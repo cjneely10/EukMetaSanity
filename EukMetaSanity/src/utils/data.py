@@ -1,10 +1,20 @@
 from enum import Enum, auto
-from typing import Dict, Set
+from typing import Dict, Set, Callable
 
 """
 Class to handle tracking all required datasets for each task
 
 """
+
+
+def added(f: Callable):
+    def _wrapper(self):
+        return (
+            f.__name__,
+            self.data[f.__name__],
+            "Identifying {} using %i workers and %i threads per worker".format(f.__name__)
+        )
+    return _wrapper
 
 
 class Data:
@@ -26,22 +36,20 @@ class Data:
         }
         self.protocols: Dict[str, Set[str]] = {
             "repeats": {"simple", "full"},
+            "abinitio": {"augustus", "gmes"},
         }
 
-    # Required for mmseqs taxonomy assignment pipeline
+    @added
     def taxonomy(self):
-        return (
-            "taxonomy",
-            self.data["taxonomy"],
-            "Identifying taxonomy using %i workers and %i threads per worker"
-        )
+        pass
 
-    def repeat_modeling(self):
-        return (
-            "repeats",
-            self.data["repeats"],
-            "Identifying repeats using %i workers and %i threads per worker"
-        )
+    @added
+    def repeats(self):
+        pass
+
+    @added
+    def ab_initio(self):
+        pass
 
 
 if __name__ == "__main__":

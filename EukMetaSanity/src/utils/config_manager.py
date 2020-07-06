@@ -60,7 +60,7 @@ class ConfigManager:
         if not os.path.exists(Path(self.config[ConfigManager.DATA][odb]).resolve()):
             raise InvalidPathError("Invalid path for orthodbv10")
         # Repeats modelling step
-        modeler_name, modeler_ident = dt.repeat_modeling()[0:2]
+        modeler_name, modeler_ident = dt.repeats()[0:2]
         if self.config[modeler_name][ConfigManager.PROTOCOL] == "full":
             if modeler_ident not in self.config[ConfigManager.DATA].keys():
                 raise MissingDataError("Missing additional repeats data for full search info!")

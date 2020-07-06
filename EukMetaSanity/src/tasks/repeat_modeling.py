@@ -29,7 +29,7 @@ class RepeatsIter(TaskList):
             super().run()
 
         def run_1(self):
-            name = Data().repeat_modeling()[0]
+            name = Data().repeats()[0]
             # Call protocol method
             getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
 
@@ -88,14 +88,13 @@ class RepeatsIter(TaskList):
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
         dt = Data()
-        protocol = cfg.config.get(dt.repeat_modeling()[0], ConfigManager.PROTOCOL)
+        protocol = cfg.config.get(dt.repeats()[0], ConfigManager.PROTOCOL)
         if protocol == "simple":
-            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeat_modeling, cfg, pm, mode)
+            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeats, cfg, pm, mode)
         else:
-            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeat_modeling, cfg, pm, mode,
-                             {Data.Type.ACCESS: [dt.repeat_modeling()[1]]})
+            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeats, cfg, pm, mode,
+                             {Data.Type.ACCESS: [dt.repeats()[1]]})
 
 
 if __name__ == "__main__":
     pass
-
