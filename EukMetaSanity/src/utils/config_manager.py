@@ -56,7 +56,7 @@ class ConfigManager:
     def _validate_data(key, inner_dict):
         for possible_key in (ConfigManager.DATA,):
             _path = inner_dict.get(possible_key, None)
-            if _path is not None and _path != "None" and not os.path.exists(Path(_path).resolve()):
+            if _path is not None and not os.path.exists(Path(_path).resolve()):
                 raise InvalidPathError("Invalid path %s for %s %s" % (_path, key, possible_key))
 
     # Parse config file for PATH variables and confirm validity
