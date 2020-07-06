@@ -27,11 +27,15 @@ class AbInitioIter(TaskList):
                 self, self.cfg.config.get(name, ConfigManager.PROTOCOL)
             )(AbInitioIter.get_taxonomy(self.input[Data.Type.IN][0]))
 
-        def augustus(self, tax_id: int):
-            self._augustus(str(tax_id), 1)
+        def augustus(self):
+            self._augustus(self._augustus_tax_ident(), 1)
             name = Data().abinitio()[0]
             for i in range(int(self.cfg.config.get(name, ConfigManager.ROUNDS)) - 1):
                 self._augustus(self.record_id + str(i + 2), i + 2)
+
+        @program_catch
+        def _augustus_tax_ident(self) -> str:
+            return "tax_species"
 
         @program_catch
         def _augustus(self, species: str, pos: int):
