@@ -1,17 +1,14 @@
 import os
-from typing import List, Dict
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
-from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 from EukMetaSanity.src.tasks.task_class import TaskList, Task, program_catch
 
 
 class AbInitioIter(TaskList):
     class AbInitio(Task):
-        def __init__(self, input_path_dict: Dict[Data.Type, List[str]], cfg: ConfigManager, pm: PathManager,
-                     record_id: str, db_name: str, mode: int, required_data: List[str]):
-            super().__init__(input_path_dict, cfg, pm, record_id, db_name, mode, required_data)
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
         def run(self) -> None:
             # Only looking for final trained ab initio prediction
@@ -36,8 +33,8 @@ class AbInitioIter(TaskList):
             return "tax_species"
 
         @program_catch
-        def _augustus(self, species: str, round: int):
-            out_gff = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gff3" % round)
+        def _augustus(self, species: str, _round: int):
+            out_gff = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gff3" % _round)
             # Run prediction
             self.log_and_run(
                 self.program[
@@ -49,13 +46,13 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Parse to genbank
-            out_gb = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gb" % round)
+            out_gb = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gb" % _round)
             write_genbank(
                 self.input[Data.Type.IN][1],
                 out_gff,
                 out_gb
             )
-            species_config_prefix = self.record_id + str(round)
+            species_config_prefix = self.record_id + str(_round)
             # Write new species config file
             self.log_and_run(
                 self.program2[
@@ -80,10 +77,8 @@ class AbInitioIter(TaskList):
             _file_name = _file_name.split(".")
             return ".".join(_file_name[:-1]) + _ext
 
-    def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager, record_ids: List[str],
-                 mode: int):
-        dt = Data(cfg, "abinitio")
-        super().__init__(AbInitioIter.AbInitio, input_paths, cfg, pm, record_ids, mode, dt.abinitio)
+    def __init__(self, *args, **kwargs):
+        super().__init__(AbInitioIter.AbInitio, "repeats", *args, **kwargs)
 
     @staticmethod
     def get_taxonomy(tax_results_file: str) -> int:

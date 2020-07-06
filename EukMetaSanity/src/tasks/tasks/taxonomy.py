@@ -1,8 +1,5 @@
 import os
-from typing import List
 from EukMetaSanity.src.utils.data import Data
-from EukMetaSanity.src.utils.path_manager import PathManager
-from EukMetaSanity.src.utils.config_manager import ConfigManager
 from EukMetaSanity.src.tasks.task_class import Task, TaskList, program_catch
 
 """
@@ -61,11 +58,8 @@ class TaxonomyIter(TaskList):
                 ]
             )
 
-    def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
-                 record_ids: List[str], mode: int):
-        dt = Data(cfg, "taxonomy")
-        super().__init__(TaxonomyIter.Taxonomy, input_paths, cfg, pm, record_ids, mode, dt.taxonomy,
-                         {Data.Type.ACCESS: [dt.data]})
+    def __init__(self, *args, **kwargs):
+        super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)
 
 
 if __name__ == "__main__":

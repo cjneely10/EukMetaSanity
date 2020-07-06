@@ -1,7 +1,5 @@
 import os
-from typing import List
 from EukMetaSanity.src.utils.data import Data
-from EukMetaSanity.src.utils.path_manager import PathManager
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 from EukMetaSanity.src.tasks.task_class import Task, TaskList, program_catch
 
@@ -80,14 +78,8 @@ class RepeatsIter(TaskList):
                     self.output[Data.Type.OUT][1],
                 )
 
-    def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
-                 record_ids: List[str], mode: int):
-        dt = Data(cfg, "repeats")
-        protocol = cfg.config.get(dt.repeats()[0], ConfigManager.PROTOCOL)
-        args = (RepeatsIter.Repeats, input_paths, cfg, pm, record_ids, mode, dt.repeats)
-        if protocol == "full":
-            args = (*args, {Data.Type.ACCESS: [dt.data]})
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)
 
 
 if __name__ == "__main__":

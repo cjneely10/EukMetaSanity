@@ -37,13 +37,21 @@ class Data:
             "repeats": {"simple", "full"},
             "abinitio": {"augustus", "gmes"},
         }
+        self._confirm_data()
+
+    def _confirm_data(self):
         # Assert only correct protocols used in config file
         for step, possible_protocols in self.protocols.items():
-            assert self.cfg.config[step][ConfigManager.PROTOCOL] in possible_protocols
+            if ConfigManager.PROTOCOL in self._cfg.config[step].keys():
+                assert self.cfg.config.get(step, ConfigManager.PROTOCOL) in possible_protocols
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     @property
     def data(self):
-        if ConfigManager.DATA in self._cfg.config[self._name]:
+        if ConfigManager.DATA in self._cfg.config[self._name].keys():
             return self._cfg.config.get(self._name, ConfigManager.DATA)
         return None
 

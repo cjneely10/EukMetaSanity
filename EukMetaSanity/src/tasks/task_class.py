@@ -90,18 +90,22 @@ class Task(ABC):
 
     @property
     def program(self) -> LocalCommand:
+        assert self._prog is not None, "PATH is invalid for %s" % self.name
         return local[self._prog]
 
     @property
     def program2(self) -> LocalCommand:
+        assert self._prog2 is not None, "PATH2 is invalid for %s" % self.name
         return local[self._prog2]
 
     @property
     def program3(self) -> LocalCommand:
+        assert self._prog3 is not None, "PATH3 is invalid for %s" % self.name
         return local[self._prog3]
 
     @property
     def program4(self) -> LocalCommand:
+        assert self._prog4 is not None, "PATH4 is invalid for %s" % self.name
         return local[self._prog4]
 
     @property
@@ -185,13 +189,15 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, new_task: type, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
-                 record_ids: List[str], mode: int, data_function: Callable,
-                 required_data: Dict[Data.Type, List[str]] = None):
-        if required_data is None:
-            required_data = {}
+    def __init__(self, new_task: type, name: str, cfg: ConfigManager, input_paths: List[List[str]], pm: PathManager,
+                 record_ids: List[str], mode: int):
         # Call data function for pertinent info
-        name, _, statement = data_function()
+        dt = Data(cfg, name)
+        name, _, statement = getattr(dt, dt.name)()
+        # Determine if added DATA is needed
+        required_data = {}
+        if ConfigManager.DATA in dt.cfg.config[name].keys():
+            required_data = {Data.Type.ACCESS: [dt.cfg.config[name][ConfigManager.DATA]]}
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement
@@ -249,12 +255,12 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def output(self) -> Tuple[List[List[str]], ConfigManager, PathManager, List[str], int]:
+    def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int]:
         # Run task list
         results = (task.results() for task in self._tasks)
         return (
-            [result[Data.Type.OUT] for result in results],  # Output files using required Data object
             self.cfg,
+            [result[Data.Type.OUT] for result in results],  # Output files using required Data object
             self.pm,
             [task.record_id for task in self.tasks],
             self._mode,
