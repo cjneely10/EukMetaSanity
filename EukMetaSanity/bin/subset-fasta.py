@@ -23,8 +23,9 @@ def n50(records):
 def monte_carlo():
     r1 = random()
     while True:
-        if random() < r1:
-            return r1
+        r2 = random()
+        if r2 > r1:
+            return r2
 
 
 # Subset each record in FASTA file using monte_carlo method
