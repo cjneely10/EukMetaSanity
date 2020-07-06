@@ -11,7 +11,7 @@ def added(f: Callable):
     def _wrapper(self):
         return (
             f.__name__,
-            self.data[f.__name__],
+            (self.data[f.__name__] if f.__name__ in self.data.keys() else None),
             "Identifying {} using %i workers and %i threads per worker".format(f.__name__)
         )
     return _wrapper
@@ -48,7 +48,7 @@ class Data:
         pass
 
     @added
-    def ab_initio(self):
+    def abinitio(self):
         pass
 
 

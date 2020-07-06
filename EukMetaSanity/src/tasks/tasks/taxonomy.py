@@ -1,11 +1,9 @@
 import os
-import logging
 from typing import List
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
-from plumbum.commands.processes import ProcessExecutionError
-from EukMetaSanity.src.tasks.task_class import Task, TaskList
 from EukMetaSanity.src.utils.config_manager import ConfigManager
+from EukMetaSanity.src.tasks.task_class import Task, TaskList, program_catch
 
 """
 Determine the taxonomy of the Eukaryotic MAG
@@ -29,41 +27,39 @@ class TaxonomyIter(TaskList):
             ]}
             super().run()
 
+        @program_catch
         def run_1(self):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             seq_db = self.output[Data.Type.OUT][2]
-            try:
-                # Create sequence database
-                self.log_and_run(
-                    self.program[
-                        "createdb",
-                        self.input[Data.Type.IN],  # Input FASTA file
-                        seq_db,  # Output FASTA sequence db
-                    ]
-                )
-                # Run taxonomy search
-                self.log_and_run(
-                    self.program[
-                        "taxonomy",
-                        seq_db,  # Input FASTA sequence db
-                        self.input[Data.Type.ACCESS],  # Input OrthoDB
-                        tax_db,  # Output tax db
-                        os.path.join(self.wdir, "tmp"),
-                        (*self.added_flags),
-                        "--threads", self.threads,
-                    ]
-                )
-                # Output results
-                self.log_and_run(
-                    self.program[
-                        "taxonomyreport",
-                        self.input[Data.Type.ACCESS],  # Input OrthoDB
-                        tax_db,  # Input tax db
-                        self.output[Data.Type.OUT][0]  # Output results file
-                    ]
-                )
-            except ProcessExecutionError as e:
-                logging.info(e)
+            # Create sequence database
+            self.log_and_run(
+                self.program[
+                    "createdb",
+                    self.input[Data.Type.IN],  # Input FASTA file
+                    seq_db,  # Output FASTA sequence db
+                ]
+            )
+            # Run taxonomy search
+            self.log_and_run(
+                self.program[
+                    "taxonomy",
+                    seq_db,  # Input FASTA sequence db
+                    self.input[Data.Type.ACCESS],  # Input OrthoDB
+                    tax_db,  # Output tax db
+                    os.path.join(self.wdir, "tmp"),
+                    (*self.added_flags),
+                    "--threads", self.threads,
+                ]
+            )
+            # Output results
+            self.log_and_run(
+                self.program[
+                    "taxonomyreport",
+                    self.input[Data.Type.ACCESS],  # Input OrthoDB
+                    tax_db,  # Input tax db
+                    self.output[Data.Type.OUT][0]  # Output results file
+                ]
+            )
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):

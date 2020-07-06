@@ -8,6 +8,7 @@ from plumbum.machines.local import LocalCommand
 from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed
 from EukMetaSanity.src.utils.path_manager import PathManager
+from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 """
@@ -15,6 +16,16 @@ Task: Class that manages and handles working directory to complete an operation
 TaskList: Collection of Task objects that calls run function on each
 
 """
+
+
+def program_catch(f: Callable):
+    def _add_try_except(self, *args, **kwargs):
+        try:
+            f(self, *args, **kwargs)
+        except ProcessExecutionError as e:
+            logging.info(e)
+            print(e)
+    return _add_try_except
 
 
 class OutputResultsFileError(FileNotFoundError):

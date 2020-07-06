@@ -72,16 +72,20 @@ def _flatten_features(rec):
     return rec
 
 
-def main(ap):
+def write_genbank(fasta_file, gff3_file, output_file):
     SeqIO.write(
         _check_gff(
             _fix_ncbi_id(
-                GFF.parse(ap.args.gff3_file, SeqIO.to_dict(SeqIO.parse(ap.args.fasta_file, "fasta", generic_dna))),
+                GFF.parse(gff3_file, SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta", generic_dna))),
             ),
         ),
-        ap.args.output,
+        output_file,
         "genbank",
     )
+
+
+def main(ap):
+    write_genbank(ap.args.fasta_file, ap.args.gff3_file, ap.args.output)
 
 
 if __name__ == "__main__":

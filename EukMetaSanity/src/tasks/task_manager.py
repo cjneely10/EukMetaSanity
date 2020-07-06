@@ -1,5 +1,6 @@
-from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
-from EukMetaSanity.src.tasks.repeat_modeling import RepeatsIter
+from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.src.tasks.tasks.repeat_modeling import RepeatsIter
+from EukMetaSanity.src.tasks.tasks.ab_initio import AbInitioIter
 
 
 class TaskManager:
@@ -8,6 +9,7 @@ class TaskManager:
             "run": (
                 TaxonomyIter,
                 RepeatsIter,
+                AbInitioIter,
             ),
             "refine": (),
             "report": (),

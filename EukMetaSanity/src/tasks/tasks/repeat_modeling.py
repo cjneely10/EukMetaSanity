@@ -1,11 +1,9 @@
 import os
-import logging
 from typing import List
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.path_manager import PathManager
-from plumbum.commands.processes import ProcessExecutionError
-from EukMetaSanity.src.tasks.task_class import Task, TaskList
 from EukMetaSanity.src.utils.config_manager import ConfigManager
+from EukMetaSanity.src.tasks.task_class import Task, TaskList, program_catch
 
 """
 Model the repeated regions of a FASTA sequence
@@ -34,56 +32,53 @@ class RepeatsIter(TaskList):
             getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
 
         # Simple repeat masking using mmseqs
+        @program_catch
         def simple(self):
             masked_db_path = self.output[Data.Type.OUT][2]
-            try:
-                # Generate the masked sequence
-                self.log_and_run(
-                    self.program[
-                        "masksequence",
-                        self.input[Data.Type.IN][2],
-                        masked_db_path,
-                        "--threads", self.threads,
-                    ]
-                )
-                # Output as FASTA file
-                self.log_and_run(
-                    self.program[
-                        "convert2fasta",
-                        masked_db_path,
-                        self.output[Data.Type.OUT][1],
-                    ]
-                )
-            except ProcessExecutionError as e:
-                logging.info(e)
+            # Generate the masked sequence
+            self.log_and_run(
+                self.program[
+                    "masksequence",
+                    self.input[Data.Type.IN][2],
+                    masked_db_path,
+                    "--threads", self.threads,
+                ]
+            )
+            # Output as FASTA file
+            self.log_and_run(
+                self.program[
+                    "convert2fasta",
+                    masked_db_path,
+                    self.output[Data.Type.OUT][1],
+                ]
+            )
 
         # Complete masking using RepeatModeler/Masker
+        @program_catch
         def full(self):
-            try:
-                # Build database
-                self.log_and_run(
-                    self.program[
-                        "-name", self.output[Data.Type.OUT][2],
-                        (*self.added_flags),
-                        self.input[Data.Type.IN][1],
-                    ]
+            # Build database
+            self.log_and_run(
+                self.program[
+                    "-name", self.output[Data.Type.OUT][2],
+                    (*self.added_flags),
+                    self.input[Data.Type.IN][1],
+                ]
+            )
+            # Run RepeatModeler
+            self.log_and_run(
+                self.program2[
+                    "-pa", self.threads,
+                    (*self.added_flags),
+                    "-database", self.output[Data.Type.OUT][2],
+                ]
+            )
+            # TODO: Add ability to run user-provided input files
+            # Rename results
+            if self.mode == 1:
+                os.replace(
+                    os.path.join(self.wdir, self.record_id + "-families.fa"),
+                    self.output[Data.Type.OUT][1],
                 )
-                # Run RepeatModeler
-                self.log_and_run(
-                    self.program2[
-                        "-pa", self.threads,
-                        (*self.added_flags),
-                        "-database", self.input[Data.Type.ACCESS][0],
-                    ]
-                )
-                # Rename results
-                if self.mode == 1:
-                    os.replace(
-                        os.path.join(self.wdir, self.record_id + "-families.fa"),
-                        self.output[Data.Type.OUT][1],
-                    )
-            except ProcessExecutionError as e:
-                logging.info(e)
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):

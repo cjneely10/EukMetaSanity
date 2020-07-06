@@ -38,6 +38,8 @@ class ConfigManager:
     THREADS = "THREADS"
     # Protocols for running a choice of a program
     PROTOCOL = "PROTOCOL"
+    # Used for repeating step multiple times
+    ROUNDS = "ROUNDS"
 
     def __init__(self, config_path):
         self._config = Config()
