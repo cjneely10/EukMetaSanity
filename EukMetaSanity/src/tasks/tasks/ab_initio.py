@@ -83,7 +83,7 @@ class AbInitioIter(TaskList):
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager, record_ids: List[str],
                  mode: int):
         dt = Data()
-        super().__init__(AbInitioIter.AbInitio, input_paths, record_ids, dt.abinitio, cfg, pm, mode)
+        super().__init__(AbInitioIter.AbInitio, input_paths, cfg, pm, record_ids, mode, dt.abinitio)
 
     @staticmethod
     def get_taxonomy(tax_results_file: str) -> int:

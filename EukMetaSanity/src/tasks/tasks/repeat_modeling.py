@@ -84,11 +84,10 @@ class RepeatsIter(TaskList):
                  record_ids: List[str], mode: int):
         dt = Data()
         protocol = cfg.config.get(dt.repeats()[0], ConfigManager.PROTOCOL)
-        if protocol == "simple":
-            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeats, cfg, pm, mode)
-        else:
-            super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeats, cfg, pm, mode,
-                             {Data.Type.ACCESS: [dt.repeats()[1]]})
+        args = (RepeatsIter.Repeats, input_paths, cfg, pm, record_ids, mode, dt.repeats)
+        if protocol == "full":
+            args = (*args, {Data.Type.ACCESS: [dt.repeats()[1]]})
+        super().__init__(*args)
 
 
 if __name__ == "__main__":

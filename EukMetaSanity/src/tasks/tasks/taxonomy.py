@@ -35,7 +35,7 @@ class TaxonomyIter(TaskList):
             self.log_and_run(
                 self.program[
                     "createdb",
-                    self.input[Data.Type.IN],  # Input FASTA file
+                    self.input[Data.Type.IN][0],  # Input FASTA file
                     seq_db,  # Output FASTA sequence db
                 ]
             )
@@ -44,7 +44,7 @@ class TaxonomyIter(TaskList):
                 self.program[
                     "taxonomy",
                     seq_db,  # Input FASTA sequence db
-                    self.input[Data.Type.ACCESS],  # Input OrthoDB
+                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
                     tax_db,  # Output tax db
                     os.path.join(self.wdir, "tmp"),
                     (*self.added_flags),
@@ -55,7 +55,7 @@ class TaxonomyIter(TaskList):
             self.log_and_run(
                 self.program[
                     "taxonomyreport",
-                    self.input[Data.Type.ACCESS],  # Input OrthoDB
+                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
                     tax_db,  # Input tax db
                     self.output[Data.Type.OUT][0]  # Output results file
                 ]
@@ -64,7 +64,7 @@ class TaxonomyIter(TaskList):
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
         dt = Data()
-        super().__init__(TaxonomyIter.Taxonomy, input_paths, record_ids, dt.taxonomy, cfg, pm, mode,
+        super().__init__(TaxonomyIter.Taxonomy, input_paths, cfg, pm, record_ids, mode, dt.taxonomy,
                          {Data.Type.ACCESS: [dt.taxonomy()[1]]})
 
 

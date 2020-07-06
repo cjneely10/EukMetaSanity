@@ -185,8 +185,9 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, new_task: type, input_paths: List[List[str]], record_ids: List[str], data_function: Callable,
-                 cfg: ConfigManager, pm: PathManager, mode: int, required_data: Dict[Data.Type, List[str]] = None):
+    def __init__(self, new_task: type, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
+                 record_ids: List[str], mode: int, data_function: Callable,
+                 required_data: Dict[Data.Type, List[str]] = None):
         if required_data is None:
             required_data = {}
         # Call data function for pertinent info
