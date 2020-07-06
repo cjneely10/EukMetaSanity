@@ -65,7 +65,7 @@ class TaxonomyIter(TaskList):
                  record_ids: List[str], mode: int):
         dt = Data()
         super().__init__(TaxonomyIter.Taxonomy, input_paths, cfg, pm, record_ids, mode, dt.taxonomy,
-                         {Data.Type.ACCESS: [dt.taxonomy()[1]]})
+                         {Data.Type.ACCESS: [cfg.config.get(ConfigManager.DATA, dt.taxonomy()[1])]})
 
 
 if __name__ == "__main__":

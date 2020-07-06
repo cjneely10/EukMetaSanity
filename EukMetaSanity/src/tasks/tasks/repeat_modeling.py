@@ -86,7 +86,7 @@ class RepeatsIter(TaskList):
         protocol = cfg.config.get(dt.repeats()[0], ConfigManager.PROTOCOL)
         args = (RepeatsIter.Repeats, input_paths, cfg, pm, record_ids, mode, dt.repeats)
         if protocol == "full":
-            args = (*args, {Data.Type.ACCESS: [dt.repeats()[1]]})
+            args = (*args, {Data.Type.ACCESS: [cfg.config.get(ConfigManager.DATA, dt.repeats()[1])]})
         super().__init__(*args)
 
 

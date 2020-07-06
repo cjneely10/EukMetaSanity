@@ -85,7 +85,7 @@ class Task(ABC):
         return self._output_paths_dict
 
     @output.setter
-    def output(self, v: Dict[str, List[str]]):
+    def output(self, v: Dict[Data.Type, List[str]]):
         self._output_paths_dict = v
 
     @property
@@ -199,7 +199,7 @@ class TaskList(ABC):
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
-                {Data.Type.IN: input_path, **required_data},
+                {Data.Type.IN: (input_path if isinstance(input_path, list) else [input_path]), **required_data},
                 cfg,
                 pm,
                 record_id,
