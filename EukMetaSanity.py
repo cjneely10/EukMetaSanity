@@ -21,7 +21,7 @@ EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
 # # Available programs
 # Return task-list for run command
 def _run_iter(tm: TaskManager, program: str) -> Generator[type, TaskManager, None]:
-    task_list = tm.tasks[program]
+    task_list = tm.programs[program]
     for task in task_list:
         yield task
 
@@ -84,7 +84,7 @@ def _parse_args(ap: ArgParse, tm: TaskManager) -> ConfigManager:
     assert os.path.exists(ap.args.config_file)
     assert os.path.exists(ap.args.fasta_directory)
     # Ensure command is valid
-    assert ap.args.command in tm.tasks
+    assert ap.args.command in tm.programs
     if ap.args.debug is True:
         ap.args.debug = 0
     else:
