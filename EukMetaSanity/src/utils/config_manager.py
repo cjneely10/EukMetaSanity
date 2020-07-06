@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from plumbum import local
 from configparser import RawConfigParser
-from EukMetaSanity.src.utils.data import Data
 from plumbum.commands.processes import CommandNotFound
 
 """
@@ -53,37 +52,20 @@ class ConfigManager:
         return self._config
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
-    def _validate_data(self):
-        # Taxonomy step
-        dt = Data()
-        odb = dt.taxonomy()[1]
-        if odb not in self.config[ConfigManager.DATA].keys():
-            raise MissingDataError("Missing orthodbv10 info!")
-        if not os.path.exists(Path(self.config[ConfigManager.DATA][odb]).resolve()):
-            raise InvalidPathError("Invalid path for orthodbv10")
-        # Repeats modelling step
-        modeler_name, modeler_ident = dt.repeats()[0:2]
-        if self.config[modeler_name][ConfigManager.PROTOCOL] == "full":
-            if modeler_ident not in self.config[ConfigManager.DATA].keys():
-                raise MissingDataError("Missing additional repeats data for full search info!")
-            path = self.config[ConfigManager.DATA][modeler_ident]
-            if path != "None" and not all(os.path.exists(Path(_p).resolve()) for _p in path.split(",") if _p != ""):
-                raise InvalidPathError("Invalid paths for additional repeats data")
+    @staticmethod
+    def _validate_data(key, inner_dict):
+        for possible_key in (ConfigManager.DATA,):
+            _path = inner_dict.get(possible_key, None)
+            if _path is not None and _path != "None" and not os.path.exists(Path(_path).resolve()):
+                raise InvalidPathError("Invalid path %s for %s %s" % (_path, key, possible_key))
 
     # Parse config file for PATH variables and confirm validity
     def _validate_config_paths(self):
-        data_in_keys = False
         # Check if protocols are valid
-        protocols = Data().protocols
-        for step, possible_protocols in protocols.items():
-            assert self.config[step][ConfigManager.PROTOCOL] in possible_protocols
         # Iterate over all values in config file
         for k, value_dict in self.config.items():
             # Ensure all data is valid
-            if k == ConfigManager.DATA:
-                data_in_keys = True
-                self._validate_data()
-                continue
+            ConfigManager._validate_data(k, value_dict)
             # Ensure PATH sections are valid
             for possible_path in (
                 ConfigManager.PATH,
@@ -96,9 +78,6 @@ class ConfigManager:
                         local[value_dict[possible_path]]()
                     except CommandNotFound:
                         raise InvalidPathError("%s %s" % (k, value_dict[possible_path]))
-        # Raise error if missing Data section
-        if not data_in_keys:
-            raise MissingDataError("Missing DATA section!")
 
     # Gather user-passed flags for analysis
     def get_added_flags(self, _dict_name):

@@ -191,7 +191,7 @@ class TaskList(ABC):
         if required_data is None:
             required_data = {}
         # Call data function for pertinent info
-        name, ident, statement = data_function()
+        name, _, statement = data_function()
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement

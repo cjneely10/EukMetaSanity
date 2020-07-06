@@ -27,7 +27,7 @@ class RepeatsIter(TaskList):
             super().run()
 
         def run_1(self):
-            name = Data().repeats()[0]
+            name = Data(self.cfg, self.name).repeats()[0]
             # Call protocol method
             getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
 
@@ -82,11 +82,11 @@ class RepeatsIter(TaskList):
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
-        dt = Data()
+        dt = Data(cfg, "repeats")
         protocol = cfg.config.get(dt.repeats()[0], ConfigManager.PROTOCOL)
         args = (RepeatsIter.Repeats, input_paths, cfg, pm, record_ids, mode, dt.repeats)
         if protocol == "full":
-            args = (*args, {Data.Type.ACCESS: [cfg.config.get(ConfigManager.DATA, dt.repeats()[1])]})
+            args = (*args, {Data.Type.ACCESS: [dt.data]})
         super().__init__(*args)
 
 

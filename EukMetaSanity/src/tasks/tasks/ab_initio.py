@@ -21,13 +21,13 @@ class AbInitioIter(TaskList):
             super().run()
 
         def run_1(self):
-            name = Data().abinitio()[0]
+            name = Data(self.cfg, self.name).abinitio()[0]
             # Call protocol method
             getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
 
         def augustus(self):
             self._augustus(self._augustus_tax_ident(), 1)
-            name = Data().abinitio()[0]
+            name = Data(self.cfg, self.name).abinitio()[0]
             for i in range(int(self.cfg.config.get(name, ConfigManager.ROUNDS)) - 1):
                 self._augustus(self.record_id + str(i + 2), i + 2)
 
@@ -36,8 +36,8 @@ class AbInitioIter(TaskList):
             return "tax_species"
 
         @program_catch
-        def _augustus(self, species: str, pos: int):
-            out_gff = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gff3" % pos)
+        def _augustus(self, species: str, round: int):
+            out_gff = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gff3" % round)
             # Run prediction
             self.log_and_run(
                 self.program[
@@ -49,13 +49,13 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Parse to genbank
-            out_gb = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gb" % pos)
+            out_gb = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gb" % round)
             write_genbank(
                 self.input[Data.Type.IN][1],
                 out_gff,
                 out_gb
             )
-            species_config_prefix = self.record_id + str(pos)
+            species_config_prefix = self.record_id + str(round)
             # Write new species config file
             self.log_and_run(
                 self.program2[
@@ -82,7 +82,7 @@ class AbInitioIter(TaskList):
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager, record_ids: List[str],
                  mode: int):
-        dt = Data()
+        dt = Data(cfg, "abinitio")
         super().__init__(AbInitioIter.AbInitio, input_paths, cfg, pm, record_ids, mode, dt.abinitio)
 
     @staticmethod
