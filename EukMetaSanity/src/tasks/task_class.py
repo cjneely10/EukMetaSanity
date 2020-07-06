@@ -22,7 +22,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 
 class Task(ABC):
-    def __init__(self, input_path_dict: Dict[str, List[str]], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_path_dict: Dict[Data.Type, List[str]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, required_data: List[str]):
         # Store passed input flag:input_path dict
         # Require input file name passed
@@ -31,8 +31,8 @@ class Task(ABC):
         self._name = db_name
         self._input_path_dict = input_path_dict
         # Instantiate output dict variable
-        self.required_data = [Data.OUT]
-        self._output_paths_dict: Dict[str, List[str]] = {}
+        self._required_data = [Data.Type.OUT]
+        self._output_paths_dict: Dict[Data.Type, List[str]] = {}
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
@@ -70,7 +70,7 @@ class Task(ABC):
         return self._name
 
     @property
-    def output(self) -> Dict[str, List[str]]:
+    def output(self) -> Dict[Data.Type, List[str]]:
         return self._output_paths_dict
 
     @output.setter
@@ -94,7 +94,7 @@ class Task(ABC):
         return local[self._prog4]
 
     @property
-    def input(self) -> Dict[str, List[str]]:
+    def input(self) -> Dict[Data.Type, List[str]]:
         return self._input_path_dict
 
     @property
@@ -121,9 +121,9 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> Dict[str, List[str]]:
+    def results(self) -> Dict[Data.Type, List[str]]:
         # Check that all required datasets are fulfilled
-        for data in self.required_data:
+        for data in self._required_data:
             # Alert for missing required data output
             assert data in self._output_paths_dict.keys(), "Missing required %s" % data
             # Alert if data output is provided, but does not exist
@@ -145,13 +145,13 @@ class Task(ABC):
     @abstractmethod
     def run(self) -> None:
         # Ensure that required_data is set
-        assert self.required_data is not None
-        for data in self.required_data:
+        assert self._required_data is not None
+        for data in self._required_data:
             # Alert for missing required data output
             assert data in self._output_paths_dict.keys(), "Missing required %s" % data
         # Check if task has completed based on provided output data
         completed = True
-        for _path in self._output_paths_dict[Data.OUT]:
+        for _path in self._output_paths_dict[Data.Type.OUT]:
             if not os.path.exists(_path):
                 # Only call function if missing path
                 # Then move on
@@ -175,7 +175,7 @@ class Task(ABC):
 
 class TaskList(ABC):
     def __init__(self, new_task: type, input_paths: List[List[str]], record_ids: List[str], data_function: Callable,
-                 cfg: ConfigManager, pm: PathManager, mode: int, required_data: Dict[str, List[str]] = None):
+                 cfg: ConfigManager, pm: PathManager, mode: int, required_data: Dict[Data.Type, List[str]] = None):
         if required_data is None:
             required_data = {}
         # Call data function for pertinent info
@@ -187,13 +187,13 @@ class TaskList(ABC):
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
-                {Data.IN: input_path, **required_data},
+                {Data.Type.IN: input_path, **required_data},
                 cfg,
                 pm,
                 record_id,
                 name,
                 mode,
-                required_data=[Data.IN, *required_data.keys()],
+                required_data=[Data.Type.IN, *required_data.keys()],
             )
             for input_path, record_id in zip(input_paths, record_ids)
             ]
@@ -241,7 +241,7 @@ class TaskList(ABC):
         # Run task list
         results = (task.results() for task in self._tasks)
         return (
-            [result[Data.OUT] for result in results],  # Output files using required Data object
+            [result[Data.Type.OUT] for result in results],  # Output files using required Data object
             self.cfg,
             self.pm,
             [task.record_id for task in self.tasks],

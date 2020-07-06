@@ -21,8 +21,8 @@ class RepeatsIter(TaskList):
         def run(self) -> None:
             masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
             masked_fa_path = masked_db_path[:-3] + ".fna"
-            self.output = {Data.OUT: [
-                self.input[Data.IN][0],  # Taxonomic results for ab initio prediction
+            self.output = {Data.Type.OUT: [
+                self.input[Data.Type.IN][0],  # Taxonomic results for ab initio prediction
                 masked_fa_path,  # Input FASTA file for ab initio
                 masked_db_path,  # MMseqs database for use in metaeuk
             ]}
@@ -35,13 +35,13 @@ class RepeatsIter(TaskList):
 
         # Simple repeat masking using mmseqs
         def simple(self):
-            masked_db_path = self.output[Data.OUT][2]
+            masked_db_path = self.output[Data.Type.OUT][2]
             try:
                 # Generate the masked sequence
                 self.log_and_run(
                     self.program[
                         "masksequence",
-                        self.input[Data.IN][2],
+                        self.input[Data.Type.IN][2],
                         masked_db_path,
                         "--threads", self.threads,
                     ]
@@ -51,7 +51,7 @@ class RepeatsIter(TaskList):
                     self.program[
                         "convert2fasta",
                         masked_db_path,
-                        self.output[Data.OUT][1],
+                        self.output[Data.Type.OUT][1],
                     ]
                 )
             except ProcessExecutionError as e:
@@ -63,9 +63,9 @@ class RepeatsIter(TaskList):
                 # Build database
                 self.log_and_run(
                     self.program[
-                        "-name", self.output[Data.OUT][2],
+                        "-name", self.output[Data.Type.OUT][2],
                         (*self.added_flags),
-                        self.input[Data.IN][1],
+                        self.input[Data.Type.IN][1],
                     ]
                 )
                 # Run RepeatModeler
@@ -73,14 +73,14 @@ class RepeatsIter(TaskList):
                     self.program2[
                         "-pa", self.threads,
                         (*self.added_flags),
-                        "-database", self.input[Data.ACCESS][0],
+                        "-database", self.input[Data.Type.ACCESS][0],
                     ]
                 )
                 # Rename results
                 if self.mode == 1:
                     os.replace(
                         os.path.join(self.wdir, self.record_id + "-families.fa"),
-                        self.output[Data.OUT][1],
+                        self.output[Data.Type.OUT][1],
                     )
             except ProcessExecutionError as e:
                 logging.info(e)
@@ -93,7 +93,7 @@ class RepeatsIter(TaskList):
             super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeat_modeling, cfg, pm, mode)
         else:
             super().__init__(RepeatsIter.Repeats, input_paths, record_ids, dt.repeat_modeling, cfg, pm, mode,
-                             {Data.ACCESS: [dt.repeat_modeling()[1]]})
+                             {Data.Type.ACCESS: [dt.repeat_modeling()[1]]})
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from typing import Dict, Set
 
 """
@@ -9,13 +10,14 @@ Class to handle tracking all required datasets for each task
 class Data:
     # Default accessors
     # API
-    ACCESS = "-db"
-    # Input fasta
-    IN = "-in"
-    # Output data
-    OUT = "-out"
-    # Additional/optional data
-    ADDED = "-added"
+    class Type(Enum):
+        ACCESS = auto()
+        # Input fasta
+        IN = auto()
+        # Output data
+        OUT = auto()
+        # Additional/optional data
+        ADDED = auto()
 
     def __init__(self):
         self.data: Dict[str, str] = {
