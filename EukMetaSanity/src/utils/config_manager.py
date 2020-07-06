@@ -85,12 +85,17 @@ class ConfigManager:
                 self._validate_data()
                 continue
             # Ensure PATH sections are valid
-            for i, possible_path in enumerate((ConfigManager.PATH, ConfigManager.PATH2)):
+            for possible_path in (
+                ConfigManager.PATH,
+                ConfigManager.PATH2,
+                ConfigManager.PATH3,
+                ConfigManager.PATH4,
+            ):
                 if possible_path in value_dict.keys():
                     try:
                         local[value_dict[possible_path]]()
                     except CommandNotFound:
-                        raise InvalidPathError(value_dict[possible_path])
+                        raise InvalidPathError("%s %s" % (k, value_dict[possible_path]))
         # Raise error if missing Data section
         if not data_in_keys:
             raise MissingDataError("Missing DATA section!")

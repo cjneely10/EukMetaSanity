@@ -23,9 +23,7 @@ class AbInitioIter(TaskList):
         def run_1(self):
             name = Data().abinitio()[0]
             # Call protocol method
-            getattr(
-                self, self.cfg.config.get(name, ConfigManager.PROTOCOL)
-            )(AbInitioIter.get_taxonomy(self.input[Data.Type.IN][0]))
+            getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
 
         def augustus(self):
             self._augustus(self._augustus_tax_ident(), 1)
