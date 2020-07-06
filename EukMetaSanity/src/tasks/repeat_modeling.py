@@ -78,7 +78,7 @@ class RepeatsIter(TaskList):
                 )
                 # Rename results
                 if self.mode == 1:
-                    os.rename(
+                    os.replace(
                         os.path.join(self.wdir, self.record_id + "-families.fa"),
                         self.output[Data.OUT][1],
                     )
