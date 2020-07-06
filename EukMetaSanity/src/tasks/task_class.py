@@ -176,9 +176,13 @@ class TaskList(ABC):
                  cfg: ConfigManager, pm: PathManager, mode: int, required_data: Dict[str, List[str]] = None):
         if required_data is None:
             required_data = {}
+        # Call data function for pertinent info
         name, ident, statement = data_function()
+        # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
+        # Get log statement
         self._statement = statement % (workers, int(cfg.config.get(name, ConfigManager.THREADS)))
+        # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
                 {Data.IN: input_path, **required_data},
@@ -191,8 +195,11 @@ class TaskList(ABC):
             )
             for input_path, record_id in zip(input_paths, record_ids)
             ]
+        # Store workers
         self._workers = workers
+        # Store ConfigManager object
         self._cfg = cfg
+        # Store PathManager object
         self._pm = pm
         # Single(0) or Threaded(1) mode
         self._mode = mode
