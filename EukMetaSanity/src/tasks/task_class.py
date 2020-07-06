@@ -2,8 +2,8 @@ import os
 import logging
 from plumbum import local
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
 from EukMetaSanity.src.utils.data import Data
+from typing import Dict, List, Tuple, Callable
 from plumbum.machines.local import LocalCommand
 from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed
@@ -172,16 +172,30 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, task_list: List[Task], statement: str, workers: int, cfg: ConfigManager, pm: PathManager,
-                 mode: int):
-        self._statement = statement
-        self._tasks: List[Task] = task_list
+    def __init__(self, new_task: type, input_paths: List[List[str]], record_ids: List[str], data_function: Callable,
+                 cfg: ConfigManager, pm: PathManager, mode: int, required_data: Dict[str, List[str]] = None):
+        if required_data is None:
+            required_data = {}
+        name, ident, statement = data_function()
+        workers = int(cfg.config.get(name, ConfigManager.WORKERS))
+        self._statement = statement % (workers, int(cfg.config.get(name, ConfigManager.THREADS)))
+        self._tasks: List[Task] = [
+            new_task(
+                {Data.IN: input_path, **required_data},
+                cfg,
+                pm,
+                record_id,
+                name,
+                mode,
+                required_data=[Data.IN, *required_data.keys()],
+            )
+            for input_path, record_id in zip(input_paths, record_ids)
+            ]
         self._workers = workers
         self._cfg = cfg
         self._pm = pm
         # Single(0) or Threaded(1) mode
         self._mode = mode
-        super().__init__()
 
     @property
     def cfg(self):

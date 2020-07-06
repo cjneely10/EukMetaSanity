@@ -71,33 +71,7 @@ class RepeatsIter(TaskList):
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
-        # Get name of config section and required data
-        name, ident, statement = Data().repeat_modeling()
-        # Ensure protocol is passed and valid
-        assert ConfigManager.PROTOCOL in cfg.config[name].keys()
-        protocol = cfg.config.get(name, ConfigManager.PROTOCOL)
-        workers = int(cfg.config.get(name, ConfigManager.WORKERS))
-        super().__init__(
-            # Call protocol function to generate list for superclass initialization
-            [
-                RepeatsIter.Repeats(
-                    {Data.IN: input_path},
-                    cfg,
-                    pm,
-                    record_id,
-                    name,
-                    mode,
-                    required_data=[Data.IN],
-                )
-                for input_path, record_id in zip(input_paths, record_ids)
-            ],
-            # Remaining args as usual
-            statement % (protocol + " search", workers, int(cfg.config.get(name, ConfigManager.THREADS))),
-            workers,
-            cfg,
-            pm,
-            mode
-        )
+        super().__init__(RepeatsIter.Repeats, input_paths, record_ids, Data().repeat_modeling, cfg, pm, mode)
 
     def run(self):
         super().run()

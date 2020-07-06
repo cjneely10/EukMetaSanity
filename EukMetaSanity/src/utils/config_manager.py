@@ -71,6 +71,10 @@ class ConfigManager:
     # Parse config file for PATH variables and confirm validity
     def _validate_config_paths(self):
         data_in_keys = False
+        # Check if protocols are valid
+        protocols = Data().protocols
+        for step, possible_protocols in protocols.items():
+            assert self.config[step][ConfigManager.PROTOCOL] in possible_protocols
         # Iterate over all values in config file
         for k, value_dict in self.config.items():
             # Ensure all data is valid

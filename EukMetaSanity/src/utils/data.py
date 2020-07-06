@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Set
 
 """
 Class to handle tracking all required datasets for each task
@@ -22,20 +22,23 @@ class Data:
             "taxonomy": "ORTHODB",
             "repeats": "MODELER",
         }
+        self.protocols: Dict[str, Set[str]] = {
+            "repeats": {"simple", "full"},
+        }
 
     # Required for mmseqs taxonomy assignment pipeline
     def taxonomy(self):
         return (
             "taxonomy",
             self.data["taxonomy"],
-            "Running %s to identify taxonomy using %i workers and %i threads per worker"
+            "Identifying taxonomy using %i workers and %i threads per worker"
         )
 
     def repeat_modeling(self):
         return (
             "repeats",
             self.data["repeats"],
-            "Running %s to identify repeats using %i workers and %i threads per worker"
+            "Identifying repeats using %i workers and %i threads per worker"
         )
 
 

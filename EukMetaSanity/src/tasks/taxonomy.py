@@ -73,31 +73,9 @@ class TaxonomyIter(TaskList):
 
     def __init__(self, input_paths: List[List[str]], cfg: ConfigManager, pm: PathManager,
                  record_ids: List[str], mode: int):
-        name, ident, statement = Data().taxonomy()
-        workers = int(cfg.config.get(name, ConfigManager.WORKERS))
-        super().__init__(
-            # List of tasks
-            [
-                TaxonomyIter.Taxonomy(
-                    {Data.IN: [input_path], Data.ACCESS: [cfg.config[ConfigManager.DATA][ident]]},
-                    cfg,
-                    pm,
-                    record_id,
-                    name,
-                    mode,
-                    required_data=[Data.IN, Data.ACCESS],
-                )
-                for input_path, record_id in zip(input_paths, record_ids)
-            ],
-            # Logging statement
-            statement % (
-                cfg.config.get(name, ConfigManager.PATH), workers, int(cfg.config.get(name, ConfigManager.THREADS))
-            ),
-            workers,
-            cfg,
-            pm,
-            mode
-        )
+        dt = Data()
+        super().__init__(TaxonomyIter.Taxonomy, input_paths, record_ids, dt.taxonomy, cfg, pm, mode,
+                         {Data.ACCESS: [dt.taxonomy()[1]]})
 
     def run(self):
         super().run()
