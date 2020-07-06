@@ -33,6 +33,7 @@ class Data:
     def __init__(self, cfg: ConfigManager, name: str):
         self._cfg = cfg
         self._name = name
+        # # Update protocols as needed
         self.protocols: Dict[str, Set[str]] = {
             "repeats": {"simple", "full"},
             "abinitio": {"augustus", "gmes"},

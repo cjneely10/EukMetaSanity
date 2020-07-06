@@ -78,7 +78,7 @@ class AbInitioIter(TaskList):
             return ".".join(_file_name[:-1]) + _ext
 
     def __init__(self, *args, **kwargs):
-        super().__init__(AbInitioIter.AbInitio, "repeats", *args, **kwargs)
+        super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)
 
     @staticmethod
     def get_taxonomy(tax_results_file: str) -> int:
