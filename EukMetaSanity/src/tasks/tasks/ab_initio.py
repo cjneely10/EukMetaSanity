@@ -33,7 +33,6 @@ class AbInitioIter(TaskList):
                 os.replace(out, self.output[Data.Type.OUT][0])
 
         @program_catch
-        # TODO: Provide implementation for searching for optimal augustus species
         def _augustus_tax_ident(self) -> str:
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             seq_db = self.input[Data.Type.IN][2]
