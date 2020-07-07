@@ -19,17 +19,6 @@ def added(f: Callable) -> Callable:
 
 
 class Data:
-    # Default accessors
-    # API
-    class Type(Enum):
-        ACCESS = auto()
-        # Input fasta
-        IN = auto()
-        # Output data
-        OUT = auto()
-        # Additional/optional data
-        ADDED = auto()
-
     def __init__(self, cfg: ConfigManager, name: str):
         self._cfg = cfg
         self._name = name
@@ -61,6 +50,14 @@ class Data:
         return self._cfg
 
     # # Add task info below
+    class Type(Enum):
+        ACCESS = auto()
+        # Input fasta
+        IN = auto()
+        # Output data
+        OUT = auto()
+        # Additional/optional data
+        ADDED = auto()
 
     @added
     def taxonomy(self):

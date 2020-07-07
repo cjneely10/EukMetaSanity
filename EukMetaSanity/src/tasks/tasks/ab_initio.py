@@ -20,12 +20,12 @@ class AbInitioIter(TaskList):
         def run_1(self):
             name = Data(self.cfg, self.name).abinitio()[0]
             # Call protocol method
-            getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
+            getattr(self, self.config.get(name, ConfigManager.PROTOCOL))()
 
         def augustus(self):
             self._augustus(self._augustus_tax_ident(), 1)
             name = Data(self.cfg, self.name).abinitio()[0]
-            for i in range(int(self.cfg.config.get(name, ConfigManager.ROUNDS)) - 1):
+            for i in range(int(self.config.get(name, ConfigManager.ROUNDS)) - 1):
                 self._augustus(self.record_id + str(i + 2), i + 2)
 
         @program_catch
@@ -77,25 +77,29 @@ class AbInitioIter(TaskList):
             _file_name = _file_name.split(".")
             return ".".join(_file_name[:-1]) + _ext
 
+        @staticmethod
+        def get_taxonomy(tax_results_file: str) -> int:
+            _tax_results_file = open(tax_results_file, "r")
+            # Get first line
+            tax_id: int = 2759  # Default to Eukaryota if nothing better is found
+            try:
+                while True:
+                    line = next(_tax_results_file).rstrip("\r\n").split("\t")
+                    # Parse line for assignment
+                    _score, _tax_id, _assignment = float(line[0]), line[4], line[5].replace(" ", "")
+                    if _assignment in ("unclassified", "root"):
+                        continue
+                    if _score < 80.0:
+                        break
+                    # Keep new value if >= 80.0% of contigs map to the taxonomy
+                    else:
+                        tax_id = _tax_id
+            except StopIteration:
+                return tax_id
+
     def __init__(self, *args, **kwargs):
         super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)
 
-    @staticmethod
-    def get_taxonomy(tax_results_file: str) -> int:
-        _tax_results_file = open(tax_results_file, "r")
-        # Get first line
-        tax_id: int = 2759  # Default to Eukaryota if nothing better is found
-        try:
-            while True:
-                line = next(_tax_results_file).rstrip("\r\n").split("\t")
-                # Parse line for assignment
-                _score, _tax_id, _assignment = float(line[0]), line[4], line[5].replace(" ", "")
-                if _assignment in ("unclassified", "root"):
-                    continue
-                if _score < 80.0:
-                    break
-                # Keep new value if >= 80.0% of contigs map to the taxonomy
-                else:
-                    tax_id = _tax_id
-        except StopIteration:
-            return tax_id
+
+if __name__ == "__main__":
+    pass

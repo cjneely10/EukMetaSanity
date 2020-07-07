@@ -27,7 +27,7 @@ class RepeatsIter(TaskList):
         def run_1(self):
             name = Data(self.cfg, self.name).repeats()[0]
             # Call protocol method
-            getattr(self, self.cfg.config.get(name, ConfigManager.PROTOCOL))()
+            getattr(self, self.config.get(name, ConfigManager.PROTOCOL))()
 
         # Simple repeat masking using mmseqs
         @program_catch
