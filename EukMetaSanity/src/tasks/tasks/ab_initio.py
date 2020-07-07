@@ -36,13 +36,13 @@ class AbInitioIter(TaskList):
         # TODO: Provide implementation for searching for optimal augustus species
         def _augustus_tax_ident(self) -> str:
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            seq_db = self.output[Data.Type.OUT][2]
+            seq_db = self.input[Data.Type.IN][2]
             # Run taxonomy search
             self.log_and_run(
                 self.program[
                     "taxonomy",
                     seq_db,  # Input FASTA sequence db
-                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
+                    self.config[ConfigManager.DATA],  # Input augustus-db
                     tax_db,  # Output tax db
                     os.path.join(self.wdir, "tmp"),
                     (*self.added_flags),
@@ -53,7 +53,7 @@ class AbInitioIter(TaskList):
             self.log_and_run(
                 self.program[
                     "taxonomyreport",
-                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
+                    self.config[ConfigManager.DATA],  # Input augustus-db
                     tax_db,  # Input tax db
                     tax_db + ".taxreport"  # Output results file
                 ]
