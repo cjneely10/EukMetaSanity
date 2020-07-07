@@ -9,7 +9,7 @@ from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
-from EukMetaSanity.src.utils.config_manager import ConfigManager, Config
+from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 """
 Task: Class that manages and handles working directory to complete an operation
@@ -124,9 +124,10 @@ class Task(ABC):
     def cfg(self) -> ConfigManager:
         return self._cfg
 
+    # Returns dict of config section for this task
     @property
-    def config(self) -> Config:
-        return self._cfg.config
+    def config(self) -> Dict[str, str]:
+        return self._cfg.config[self._name]
 
     @property
     def wdir(self) -> str:

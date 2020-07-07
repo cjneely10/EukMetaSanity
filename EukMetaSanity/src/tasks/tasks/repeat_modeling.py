@@ -25,9 +25,8 @@ class RepeatsIter(TaskList):
             super().run()
 
         def run_1(self):
-            name = Data(self.cfg, self.name).repeats()[0]
             # Call protocol method
-            getattr(self, self.config.get(name, ConfigManager.PROTOCOL))()
+            getattr(self, self.config[ConfigManager.PROTOCOL])()
 
         # Simple repeat masking using mmseqs
         @program_catch
@@ -52,8 +51,12 @@ class RepeatsIter(TaskList):
             )
 
         # Complete masking using RepeatModeler/Masker
-        @program_catch
         def full(self):
+            self._model()
+            self._mask()
+
+        @program_catch
+        def _model(self):
             # Build database
             self.log_and_run(
                 self.program[
@@ -70,13 +73,10 @@ class RepeatsIter(TaskList):
                     "-database", self.output[Data.Type.OUT][2],
                 ]
             )
-            # TODO: Add ability to run user-provided input files
-            # Rename results
-            if self.mode == 1:
-                os.replace(
-                    os.path.join(self.wdir, self.record_id + "-families.fa"),
-                    self.output[Data.Type.OUT][1],
-                )
+
+        @program_catch
+        def _mask(self):
+            pass
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)

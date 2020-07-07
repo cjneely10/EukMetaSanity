@@ -18,14 +18,12 @@ class AbInitioIter(TaskList):
             super().run()
 
         def run_1(self):
-            name = Data(self.cfg, self.name).abinitio()[0]
             # Call protocol method
-            getattr(self, self.config.get(name, ConfigManager.PROTOCOL))()
+            getattr(self, self.config[ConfigManager.PROTOCOL])()
 
         def augustus(self):
             self._augustus(self._augustus_tax_ident(), 1)
-            name = Data(self.cfg, self.name).abinitio()[0]
-            for i in range(int(self.config.get(name, ConfigManager.ROUNDS)) - 1):
+            for i in range(int(self.config[ConfigManager.ROUNDS]) - 1):
                 self._augustus(self.record_id + str(i + 2), i + 2)
 
         @program_catch
