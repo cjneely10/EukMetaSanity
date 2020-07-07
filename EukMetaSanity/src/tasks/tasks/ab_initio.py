@@ -22,11 +22,14 @@ class AbInitioIter(TaskList):
             getattr(self, self.config[ConfigManager.PROTOCOL])()
 
         def augustus(self):
-            self._augustus(self._augustus_tax_ident(), 1)
+            out = self._augustus(self._augustus_tax_ident(), 1)
             for i in range(int(self.config[ConfigManager.ROUNDS]) - 1):
-                self._augustus(self.record_id + str(i + 2), i + 2)
+                out = self._augustus(self.record_id + str(i + 2), i + 2)
+            if self.mode == 1:
+                os.replace(out, self.output[Data.Type.OUT][0])
 
         @program_catch
+        # TODO: Provide implementation for searching for optimal augustus species
         def _augustus_tax_ident(self) -> str:
             return "tax_species"
 
@@ -65,35 +68,27 @@ class AbInitioIter(TaskList):
                     out_gb
                 ]
             )
+            return out_gff
 
         @program_catch
-        def gmes(self, tax_id: int):
-            pass
+        def gmes(self):
+            self.log_and_run(
+                self.program[
+                    "--sequence", self.input[Data.Type.IN][1],
+                    "--ES", "--cores", self.threads, (*self.added_flags)
+                ]
+            )
+            # Move program to match required output name
+            if self.mode == 1:
+                os.replace(
+                    os.path.join(self.pm.get_dir(self.record_id, self.name), "genemark.gtf"),
+                    self.output[Data.Type.OUT][0],
+                )
 
         @staticmethod
         def _out_path(_file_name: str, _ext: str) -> str:
             _file_name = _file_name.split(".")
             return ".".join(_file_name[:-1]) + _ext
-
-        @staticmethod
-        def get_taxonomy(tax_results_file: str) -> int:
-            _tax_results_file = open(tax_results_file, "r")
-            # Get first line
-            tax_id: int = 2759  # Default to Eukaryota if nothing better is found
-            try:
-                while True:
-                    line = next(_tax_results_file).rstrip("\r\n").split("\t")
-                    # Parse line for assignment
-                    _score, _tax_id, _assignment = float(line[0]), line[4], line[5].replace(" ", "")
-                    if _assignment in ("unclassified", "root"):
-                        continue
-                    if _score < 80.0:
-                        break
-                    # Keep new value if >= 80.0% of contigs map to the taxonomy
-                    else:
-                        tax_id = _tax_id
-            except StopIteration:
-                return tax_id
 
     def __init__(self, *args, **kwargs):
         super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)

@@ -4,11 +4,11 @@ from plumbum import local
 from abc import ABC, abstractmethod
 from EukMetaSanity.src.utils.data import Data
 from typing import Dict, List, Tuple, Callable
-from plumbum.machines.local import LocalCommand
 from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
+from plumbum.machines.local import LocalCommand, LocalMachine
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
 """
@@ -21,7 +21,7 @@ TaskList: Collection of Task objects that calls run function on each
 def program_catch(f: Callable):
     def _add_try_except(self, *args, **kwargs):
         try:
-            f(self, *args, **kwargs)
+            return f(self, *args, **kwargs)
         except ProcessExecutionError as e:
             logging.info(e)
             print(e)
@@ -50,18 +50,8 @@ class Task(ABC):
         self._pm = pm
         # Store config manager
         self._cfg = cfg
-        # Store primary calling program(s)
-        self._prog = cfg.config.get(db_name, ConfigManager.PATH)
-        self._prog2 = None
-        self._prog3 = None
-        self._prog4 = None
-        for _path, _attr in (
-            (ConfigManager.PATH2, "_prog2"),
-            (ConfigManager.PATH3, "_prog3"),
-            (ConfigManager.PATH4, "_prog4"),
-        ):
-            if _path in cfg.config[db_name].keys():
-                setattr(self, _attr, cfg.config.get(db_name, _path))
+        # Store program attributes
+        self._set_progs(cfg, db_name)
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -71,6 +61,26 @@ class Task(ABC):
         # Store id of record in Task
         self._record_id = record_id
         super().__init__()
+
+    def _set_progs(self, cfg, db_name):
+        # Store primary calling program(s)
+        self._prog = cfg.config.get(db_name, ConfigManager.PATH)
+        self._prog2 = None
+        self._prog3 = None
+        self._prog4 = None
+        self._prog5 = None
+        for _path, _attr in (
+            (ConfigManager.PATH2, "_prog2"),
+            (ConfigManager.PATH3, "_prog3"),
+            (ConfigManager.PATH4, "_prog4"),
+            (ConfigManager.PATH5, "_prog5"),
+        ):
+            if _path in cfg.config[db_name].keys():
+                setattr(self, _attr, cfg.config.get(db_name, _path))
+
+    @property
+    def local(self) -> LocalMachine:
+        return local
 
     @property
     def added_flags(self) -> List[str]:
@@ -107,6 +117,11 @@ class Task(ABC):
     def program4(self) -> LocalCommand:
         assert self._prog4 is not None, "PATH4 is invalid for %s" % self.name
         return local[self._prog4]
+
+    @property
+    def program5(self) -> LocalCommand:
+        assert self._prog5 is not None, "PATH4 is invalid for %s" % self.name
+        return local[self._prog5]
 
     @property
     def input(self) -> Dict[Data.Type, List[str]]:

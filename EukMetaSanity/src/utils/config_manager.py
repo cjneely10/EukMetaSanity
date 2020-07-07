@@ -29,6 +29,7 @@ class ConfigManager:
     PATH2 = "PATH2"
     PATH3 = "PATH3"
     PATH4 = "PATH4"
+    PATH5 = "PATH5"
     # Config file
     DATA = "DATA"
     # Workers for task
@@ -72,6 +73,7 @@ class ConfigManager:
                 ConfigManager.PATH2,
                 ConfigManager.PATH3,
                 ConfigManager.PATH4,
+                ConfigManager.PATH5,
             ):
                 if possible_path in value_dict.keys():
                     try:
@@ -98,6 +100,7 @@ class ConfigManager:
                 ConfigManager.PATH2,
                 ConfigManager.PATH3,
                 ConfigManager.PATH4,
+                ConfigManager.PATH5,
             ):
                 out.append(key)
                 out.append(self.config[_dict_name][key])
