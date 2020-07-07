@@ -4,9 +4,8 @@ from pathlib import Path
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
-from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.config_manager import ConfigManager
-from EukMetaSanity.src.tasks.task_class import Task, TaskList, program_catch
+from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 """
 Model the repeated regions of a FASTA sequence
@@ -129,7 +128,8 @@ class RepeatsIter(TaskList):
             # Run ProcessRepeats
             self.log_and_run(
                 self.program4[
-                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[Data.Type.IN][0]), final_out
+                    # Input taxonomy from OrthoDB search
+                    "-species", open(self.input[Data.Type.IN][0], "r").readline().rstrip("\r\n"), final_out
                 ]
             )
             # Create GFF3

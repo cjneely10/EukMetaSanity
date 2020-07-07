@@ -1,9 +1,9 @@
 import os
-from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
+from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.config_manager import ConfigManager
-from EukMetaSanity.src.tasks.task_class import TaskList, Task, program_catch
+from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 
 class AbInitioIter(TaskList):

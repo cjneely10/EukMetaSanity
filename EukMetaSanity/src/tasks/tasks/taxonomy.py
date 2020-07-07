@@ -1,6 +1,6 @@
 import os
 from EukMetaSanity.src.utils.data import Data
-from EukMetaSanity.src.tasks.task_class import Task, TaskList, program_catch
+from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 """
 Determine the taxonomy of the Eukaryotic MAG
@@ -54,15 +54,20 @@ class TaxonomyIter(TaskList):
                     "taxonomyreport",
                     self.input[Data.Type.ACCESS][0],  # Input OrthoDB
                     tax_db,  # Input tax db
-                    self.output[Data.Type.OUT][0]  # Output results file
+                    self.output[Data.Type.OUT][0] + ".tmp"  # Output results file
                 ]
             )
+            # Write taxonomy result species to file
+            with open(self.output[Data.Type.OUT][0], "w") as w:
+                w.write(TaxonomyIter.Taxonomy.get_taxonomy(self.output[Data.Type.OUT][0] + ".tmp") + "\n")
 
         @staticmethod
         def get_taxonomy(tax_results_file: str) -> str:
-            _tax_results_file = open(tax_results_file, "r")
+            assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
+            if not os.path.exists(tax_results_file):
+                return assignment
             # Get first line
-            tax_id: str = "2759"  # Default to Eukaryota if nothing better is found
+            _tax_results_file = open(tax_results_file, "r")
             try:
                 while True:
                     line = next(_tax_results_file).rstrip("\r\n").split("\t")
@@ -74,9 +79,9 @@ class TaxonomyIter(TaskList):
                         break
                     # Keep new value if >= 80.0% of contigs map to the taxonomy
                     else:
-                        tax_id = _tax_id
+                        assignment = _assignment
             except StopIteration:
-                return tax_id
+                return assignment
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)
