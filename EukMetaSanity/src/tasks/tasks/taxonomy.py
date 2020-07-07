@@ -59,10 +59,10 @@ class TaxonomyIter(TaskList):
             )
 
         @staticmethod
-        def get_taxonomy(tax_results_file: str) -> int:
+        def get_taxonomy(tax_results_file: str) -> str:
             _tax_results_file = open(tax_results_file, "r")
             # Get first line
-            tax_id: int = 2759  # Default to Eukaryota if nothing better is found
+            tax_id: str = "2759"  # Default to Eukaryota if nothing better is found
             try:
                 while True:
                     line = next(_tax_results_file).rstrip("\r\n").split("\t")

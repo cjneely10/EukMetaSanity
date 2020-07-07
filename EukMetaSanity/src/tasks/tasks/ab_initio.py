@@ -1,4 +1,6 @@
 import os
+
+from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
 from EukMetaSanity.src.utils.config_manager import ConfigManager
@@ -31,7 +33,31 @@ class AbInitioIter(TaskList):
         @program_catch
         # TODO: Provide implementation for searching for optimal augustus species
         def _augustus_tax_ident(self) -> str:
-            return "tax_species"
+            tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
+            seq_db = self.output[Data.Type.OUT][2]
+            # Run taxonomy search
+            self.log_and_run(
+                self.program[
+                    "taxonomy",
+                    seq_db,  # Input FASTA sequence db
+                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
+                    tax_db,  # Output tax db
+                    os.path.join(self.wdir, "tmp"),
+                    (*self.added_flags),
+                    "--threads", self.threads,
+                ]
+            )
+            # Output results
+            self.log_and_run(
+                self.program[
+                    "taxonomyreport",
+                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
+                    tax_db,  # Input tax db
+                    tax_db + ".taxreport"  # Output results file
+                ]
+            )
+            # Return optimal taxonomy
+            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport")
 
         @program_catch
         def _augustus(self, species: str, _round: int):
