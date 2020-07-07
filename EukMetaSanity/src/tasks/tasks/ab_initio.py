@@ -24,7 +24,9 @@ class AbInitioIter(TaskList):
             getattr(self, self.config[ConfigManager.PROTOCOL])()
 
         def augustus(self):
+            # Initial training based on best species from taxonomy search
             out = self._augustus(self._augustus_tax_ident(), 1)
+            # Remaining rounds of re-training on generated predictions
             for i in range(int(self.config[ConfigManager.ROUNDS]) - 1):
                 out = self._augustus(self.record_id + str(i + 2), i + 2)
             if self.mode == 1:
