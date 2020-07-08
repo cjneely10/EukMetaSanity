@@ -50,7 +50,7 @@ class Task(ABC):
         self._pm = pm
         # Store config manager
         self._cfg = cfg
-        # Store program attributes
+        # Dynamically generate program attributes for easy in API access
         self._set_progs(cfg, db_name)
         # Developer(0) or User(1) mode
         self._mode = mode
@@ -62,21 +62,28 @@ class Task(ABC):
         self._record_id = record_id
         super().__init__()
 
-    def _set_progs(self, cfg, db_name):
-        # Store primary calling program(s)
-        self._prog = cfg.config.get(db_name, ConfigManager.PATH)
-        self._prog2 = None
-        self._prog3 = None
-        self._prog4 = None
-        self._prog5 = None
-        for _path, _attr in (
-            (ConfigManager.PATH2, "_prog2"),
-            (ConfigManager.PATH3, "_prog3"),
-            (ConfigManager.PATH4, "_prog4"),
-            (ConfigManager.PATH5, "_prog5"),
-        ):
-            if _path in cfg.config[db_name].keys():
-                setattr(self, _attr, cfg.config.get(db_name, _path))
+    def _set_progs(self, cfg: ConfigManager, db_name: str):
+        # Store primary calling program(s) as object attributes
+        for _path, _value in cfg.config[db_name].items():
+            # Set attribute
+            if ConfigManager.PATH in _path and _value != "None":
+                # Set as self.program is only default Config PATH variable
+                if ConfigManager.PATH == _path:
+                    _accessor_name = _path.replace(ConfigManager.PATH, "program").lower()
+                else:
+                    # Determine if PATH_ or PATH to replace
+                    if ConfigManager.PATH + "_" in _path:
+                        replace_val = ConfigManager.PATH + "_"
+                    else:
+                        replace_val = ConfigManager.PATH
+                    # Replace
+                    _accessor_name = _path.replace(replace_val, "program_").lower()
+                # Set attribute for ease of use in API
+                setattr(
+                    self,
+                    _accessor_name,  # Name: PATH -> program; PATH2 = program_2; PATH_MMSEQS = program_mmseqs
+                    local[cfg.config.get(db_name, _path)],  # Local path for calling program
+                )
 
     @property
     def local(self) -> LocalMachine:
@@ -97,31 +104,6 @@ class Task(ABC):
     @output.setter
     def output(self, v: Dict[Data.Type, List[str]]):
         self._output_paths_dict = v
-
-    @property
-    def program(self) -> LocalCommand:
-        assert self._prog is not None, "PATH is invalid for %s" % self.name
-        return local[self._prog]
-
-    @property
-    def program2(self) -> LocalCommand:
-        assert self._prog2 is not None, "PATH2 is invalid for %s" % self.name
-        return local[self._prog2]
-
-    @property
-    def program3(self) -> LocalCommand:
-        assert self._prog3 is not None, "PATH3 is invalid for %s" % self.name
-        return local[self._prog3]
-
-    @property
-    def program4(self) -> LocalCommand:
-        assert self._prog4 is not None, "PATH4 is invalid for %s" % self.name
-        return local[self._prog4]
-
-    @property
-    def program5(self) -> LocalCommand:
-        assert self._prog5 is not None, "PATH4 is invalid for %s" % self.name
-        return local[self._prog5]
 
     @property
     def input(self) -> Dict[Data.Type, List[str]]:

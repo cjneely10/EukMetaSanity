@@ -73,7 +73,7 @@ class RepeatsIter(TaskList):
             )
             # Run RepeatModeler
             self.log_and_run(
-                self.program2[
+                self.program_modeler[
                     "-pa", self.threads,
                     (*self.added_flags),
                     "-database", self.output[Data.Type.OUT][2],
@@ -97,7 +97,7 @@ class RepeatsIter(TaskList):
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
                 # Call RepeatMasker on modeled repeats in the new directory
                 self.log_and_run(
-                    self.program3[
+                    self.program_masker[
                         "-pa", self.threads,
                         (*self.added_flags),
                         (*search),
@@ -127,7 +127,7 @@ class RepeatsIter(TaskList):
             )
             # Run ProcessRepeats
             self.log_and_run(
-                self.program4[
+                self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
                     "-species", open(self.input[Data.Type.IN][0], "r").readline().rstrip("\r\n"), final_out
                 ]
@@ -135,7 +135,7 @@ class RepeatsIter(TaskList):
             # Create GFF3
             out_gff3 = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.gff3")
             self.log_and_run(
-                self.program5[
+                self.program_rmOutToGFF3[
                     os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.out"),
                 ] > out_gff3
             )

@@ -24,12 +24,8 @@ class MissingDataError(FileExistsError):
 
 class ConfigManager:
     # Default accessors
-    # Paths to programs
+    # Starting PATH value
     PATH = "PATH"
-    PATH2 = "PATH2"
-    PATH3 = "PATH3"
-    PATH4 = "PATH4"
-    PATH5 = "PATH5"
     # Config file
     DATA = "DATA"
     # Workers for task
@@ -68,13 +64,8 @@ class ConfigManager:
             # Ensure all data is valid
             ConfigManager._validate_data(k, value_dict)
             # Ensure PATH sections are valid
-            for possible_path in (
-                ConfigManager.PATH,
-                ConfigManager.PATH2,
-                ConfigManager.PATH3,
-                ConfigManager.PATH4,
-                ConfigManager.PATH5,
-            ):
+            possible_paths = set([val for val in value_dict.keys() if ConfigManager.PATH in val])
+            for possible_path in possible_paths:
                 if possible_path in value_dict.keys():
                     try:
                         local[value_dict[possible_path]]()
@@ -84,6 +75,7 @@ class ConfigManager:
     # Gather user-passed flags for analysis
     def get_added_flags(self, _dict_name):
         out = []
+        _attrs = set(dir(self))
         for key in dict(self.config[_dict_name]).keys():
             # Parse FLAGS argument from comma-separated
             if key == "FLAGS":
@@ -92,16 +84,7 @@ class ConfigManager:
                                                 self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
                                                 if def_key != ""])
             # Parse remaining args as dictionary items
-            elif key not in (
-                ConfigManager.THREADS,
-                ConfigManager.WORKERS,
-                ConfigManager.DATA,
-                ConfigManager.PATH,
-                ConfigManager.PATH2,
-                ConfigManager.PATH3,
-                ConfigManager.PATH4,
-                ConfigManager.PATH5,
-            ):
+            elif key not in dir(self) and not any([key.startswith(_attr) for _attr in dir(self)]):
                 out.append(key)
                 out.append(self.config[_dict_name][key])
         return out

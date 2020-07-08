@@ -37,7 +37,7 @@ class AbInitioIter(TaskList):
             seq_db = self.input[Data.Type.IN][2]
             # Run taxonomy search
             self.log_and_run(
-                self.program[
+                self.program_mmseqs[
                     "taxonomy",
                     seq_db,  # Input FASTA sequence db
                     self.config[ConfigManager.DATA],  # Input augustus-db
@@ -49,7 +49,7 @@ class AbInitioIter(TaskList):
             )
             # Output results
             self.log_and_run(
-                self.program[
+                self.program_mmseqs[
                     "taxonomyreport",
                     self.config[ConfigManager.DATA],  # Input augustus-db
                     tax_db,  # Input tax db
@@ -82,14 +82,14 @@ class AbInitioIter(TaskList):
             species_config_prefix = self.record_id + str(_round)
             # Write new species config file
             self.log_and_run(
-                self.program2[
+                self.program_new_species_pl[
                     "--species=%s" % species_config_prefix,
                     out_gb
                 ]
             )
             # Run training
             self.log_and_run(
-                self.program3[
+                self.program_etraining[
                     "--species=%s" % species_config_prefix,
                     out_gb
                 ]
