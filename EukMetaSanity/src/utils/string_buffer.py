@@ -1,18 +1,24 @@
-import numpy as np
+from array import array
 
 
-class Buffer:
-    def __init__(self, output: str = "/dev/stdout", buf_size: int = int(1e6), initial: str = ""):
+class StringBuffer:
+    def __init__(self, output: str = None, buf_size: int = int(1e6), initial: str = ""):
+        assert buf_size > 0
+        assert isinstance(initial, str)
+        assert output is None or isinstance(output, str)
         # Initialize buffer and position in buffer
         self._initialize_buffer(buf_size)
         self._buf_size = buf_size
         # Open output buffer
-        self._output = open(output, "w")
+        self._output = None
+        if output is not None:
+            self._output = open(output, "w")
         # Add initial value, if present
         self._add_to_buffer(initial)
 
     def _initialize_buffer(self, buf_size: int):
-        self._data = np.array([0] * buf_size, dtype="int8")
+        assert isinstance(buf_size, int)
+        self._data = array("i", [0] * buf_size)
         self._pos = 0
 
     def _to_str(self) -> str:
@@ -23,6 +29,7 @@ class Buffer:
         return self._to_str()
 
     def _add_to_buffer(self, _value: str):
+        assert isinstance(_value, str)
         if self._pos + len(_value) >= self._buf_size:
             self._flush_buffer()
 
@@ -31,7 +38,8 @@ class Buffer:
         self._pos += len(_value)
 
     def _flush_buffer(self):
-        self._output.write(self._to_str())
+        if self._output is not None:
+            self._output.write(self._to_str())
         self._initialize_buffer(self._buf_size)
 
     def __iadd__(self, other):
