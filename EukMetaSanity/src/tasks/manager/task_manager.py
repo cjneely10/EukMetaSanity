@@ -3,6 +3,7 @@ from EukMetaSanity.src.tasks.base.task_class import Task
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.tasks.ab_initio import AbInitioIter
 from EukMetaSanity.src.tasks.repeat_modeling import RepeatsIter
+from EukMetaSanity.src.tasks.initial_evidence import EvidenceIter
 
 
 class TaskManager:
@@ -12,6 +13,7 @@ class TaskManager:
                 TaxonomyIter,
                 RepeatsIter,
                 AbInitioIter,
+                EvidenceIter,
             ],
             "refine": [],
             "report": [],

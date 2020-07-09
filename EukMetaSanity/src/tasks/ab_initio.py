@@ -11,6 +11,8 @@ class AbInitioIter(TaskList):
             # Only looking for final trained ab initio prediction
             self.output = [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
+                self.input[2],  # Forward masked mmseqs-db to initial evidence step
+                self.input[0],  # Taxonomic assignment file
             ]
 
         def run(self) -> None:

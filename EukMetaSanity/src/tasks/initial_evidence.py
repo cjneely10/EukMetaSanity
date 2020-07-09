@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Data, Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class EvidenceIter(TaskList):
@@ -15,7 +15,32 @@ class EvidenceIter(TaskList):
 
         @program_catch
         def run_1(self):
-            pass
+            # Subset taxonomic database
+            subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_db")
+            self.log_and_run(
+                self.program_mmseqs[
+                    "filtertaxseqdb",
+                    self.data,
+                    self.input[1],
+                    "--taxon-list", str(self.local["cat"][self.input[2]]()),
+                    subset_db_outpath,
+                    "--threads", self.threads,
+                ]
+            )
+            # Run metaeuk
+            self.log_and_run(
+                self.program_metaeuk[
+                    "easy-predict",
+                    self.input[1],
+                    subset_db_outpath,
+                    os.path.join(self.wdir, "tmp"),
+                    "--threads", self.threads,
+                ]
+            )
+            # Merge results
+            self.log_and_run(
+                self.local["cat"][self.input[0]] | self.program_gffread
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
