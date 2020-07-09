@@ -63,33 +63,20 @@ class Task(ABC):
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
-        cfg_attrs = [_attr for _attr in dir(cfg) if _attr.isupper()]
-        cfg_attrs_lower = [_attr.lower() for _attr in cfg_attrs]
-        for _accessor, _prefix in zip(cfg_attrs, cfg_attrs_lower):
-            # Store primary calling program(s) as object attributes
-            for _path, _value in cfg.config[db_name].items():
-                # Set attribute
-                if _accessor in _path and _value != "None":
-                    # Set as self.program is only default Config PATH variable
-                    if _accessor == _path:
-                        _accessor_name = _path.replace(_accessor, _prefix).lower()
-                    else:
-                        # Determine if PATH_ or PATH to replace
-                        if _accessor + "_" in _path:
-                            replace_val = _accessor + "_"
-                        else:
-                            replace_val = _accessor
-                        # Replace
-                        _accessor_name = _path.replace(replace_val, _prefix + "_").lower()
-                    # Set attribute for ease of use in API
-                    _set_attr = cfg.config.get(db_name, _path)
-                    if _prefix == "program":
-                        _set_attr = local[_set_attr]
-                    setattr(
-                        self,
-                        _accessor_name,  # Name: PATH -> program/data; PATH2/DATA_2 = program_2/data_2;
-                        _set_attr,  # Local path, or config path, for calling program
-                    )
+        for _path, _value in cfg.config[db_name].items():
+            # Set attribute
+            if _path.split("_")[0].isupper() and _value != "None":
+                _path = _path.lower()
+                # Set as self.program is only default Config PATH variable
+                # Set attribute for ease of use in API
+                _set_attr = _value
+                if _path.startswith("program"):
+                    _set_attr = local[_set_attr]
+                setattr(
+                    self,
+                    _path,  # Name: PATH -> program/data; PATH2/DATA_2 = program2/data_2;
+                    _set_attr,  # Local path, or config path, for calling program
+                )
 
     @property
     def local(self) -> LocalMachine:
