@@ -33,17 +33,13 @@ class OutputResultsFileError(FileNotFoundError):
 
 
 class Task(ABC):
-    def __init__(self, input_path_dict: Dict[Data.Type, List[str]], cfg: ConfigManager, pm: PathManager,
-                 record_id: str, db_name: str, mode: int, required_data: List[str]):
+    def __init__(self, input_path_list: List[str], cfg: ConfigManager, pm: PathManager,
+                 record_id: str, db_name: str, mode: int):
         # Store passed input flag:input_path dict
-        # Require input file name passed
-        for data in required_data:
-            assert data in input_path_dict.keys(), data
         self._name = db_name
-        self._input_path_dict = input_path_dict
+        self._input_path_list = input_path_list
         # Instantiate output dict variable
-        self._required_data = [Data.Type.OUT]
-        self._output_paths_dict: Dict[Data.Type, List[str]] = {}
+        self._output_paths: List[str] = []
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
@@ -91,16 +87,16 @@ class Task(ABC):
         return self._name
 
     @property
-    def output(self) -> Dict[Data.Type, List[str]]:
-        return self._output_paths_dict
+    def output(self) -> List[str]:
+        return self._output_paths
 
     @output.setter
-    def output(self, v: Dict[Data.Type, List[str]]):
-        self._output_paths_dict = v
+    def output(self, v: List[str]):
+        self._output_paths = v
 
     @property
-    def input(self) -> Dict[Data.Type, List[str]]:
-        return self._input_path_dict
+    def input(self) -> List[str]:
+        return self._input_path_list
 
     @property
     def mode(self) -> int:
@@ -127,20 +123,17 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> Dict[Data.Type, List[str]]:
+    def results(self) -> List[str]:
         # Check that all required datasets are fulfilled
-        for data in self._required_data:
-            # Alert for missing required data output
-            assert data in self._output_paths_dict.keys(), "Missing required %s" % data
-            # Alert if data output is provided, but does not exist
-            for _path in self._output_paths_dict[data]:
-                if not os.path.exists(_path):
-                    # Write dummy file if in developer mode
-                    if self._mode == 0:
-                        touch(_path)
-                    else:
-                        raise OutputResultsFileError(_path)
-        return self._output_paths_dict
+        # Alert if data output is provided, but does not exist
+        for _path in self._output_paths:
+            if not os.path.exists(_path):
+                # Write dummy file if in developer mode
+                if self._mode == 0:
+                    touch(_path)
+                else:
+                    raise OutputResultsFileError(_path)
+        return self._output_paths
 
     # Function logs and runs dask command
     def log_and_run(self, cmd: LocalCommand):
@@ -150,14 +143,9 @@ class Task(ABC):
 
     @abstractmethod
     def run(self) -> None:
-        # Ensure that required_data is set
-        assert self._required_data is not None
-        for data in self._required_data:
-            # Alert for missing required data output
-            assert data in self._output_paths_dict.keys(), "Missing required %s" % data
         # Check if task has completed based on provided output data
         completed = True
-        for _path in self._output_paths_dict[Data.Type.OUT]:
+        for _path in self._output_paths:
             if not os.path.exists(_path):
                 # Only call function if missing path
                 # Then move on
@@ -192,13 +180,12 @@ class TaskList(ABC):
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
-                {Data.Type.IN: (input_path if isinstance(input_path, list) else [input_path])},
+                (input_path if isinstance(input_path, list) else [input_path]),
                 cfg,
                 pm,
                 record_id,
                 name,
                 mode,
-                required_data=[Data.Type.IN],
             )
             for input_path, record_id in zip(input_paths, record_ids)
             ]
@@ -244,10 +231,9 @@ class TaskList(ABC):
 
     def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int]:
         # Run task list
-        results = (task.results() for task in self._tasks)
         return (
             self.cfg,
-            [result[Data.Type.OUT] for result in results],  # Output files using required Data object
+            [task.results() for task in self._tasks],  # Output files using required Data object
             self.pm,
             [task.record_id for task in self.tasks],
             self._mode,

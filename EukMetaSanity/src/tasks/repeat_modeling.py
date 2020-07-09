@@ -17,11 +17,11 @@ class RepeatsIter(TaskList):
             super().__init__(*args, **kwargs)
             masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
             masked_fa_path = masked_db_path[:-3] + ".out"
-            self.output = {Data.Type.OUT: [
-                self.input[Data.Type.IN][0],  # Taxonomic results for ab initio prediction
+            self.output = [
+                self.input[0],  # Taxonomic results for ab initio prediction
                 masked_fa_path,  # Input FASTA file for ab initio
                 masked_db_path,  # MMseqs database for use in metaeuk
-            ]}
+            ]
 
         def run(self) -> None:
             super().run()
@@ -33,12 +33,12 @@ class RepeatsIter(TaskList):
         # Simple repeat masking using mmseqs
         @program_catch
         def simple(self):
-            masked_db_path = self.output[Data.Type.OUT][2]
+            masked_db_path = self.output[2]
             # Generate the masked sequence
             self.log_and_run(
                 self.program[
                     "masksequence",
-                    self.input[Data.Type.IN][2],
+                    self.input[2],
                     masked_db_path,
                     "--threads", self.threads,
                 ]
@@ -48,7 +48,7 @@ class RepeatsIter(TaskList):
                 self.program[
                     "convert2fasta",
                     masked_db_path,
-                    self.output[Data.Type.OUT][1],
+                    self.output[1],
                 ]
             )
 
@@ -64,9 +64,9 @@ class RepeatsIter(TaskList):
             # Build database
             self.log_and_run(
                 self.program[
-                    "-name", self.output[Data.Type.OUT][2],
+                    "-name", self.output[2],
                     (*self.added_flags),
-                    self.input[Data.Type.IN][1],
+                    self.input[1],
                 ]
             )
             # Run RepeatModeler
@@ -74,7 +74,7 @@ class RepeatsIter(TaskList):
                 self.program_modeler[
                     "-pa", self.threads,
                     (*self.added_flags),
-                    "-database", self.output[Data.Type.OUT][2],
+                    "-database", self.output[2],
                 ]
             )
 
@@ -100,7 +100,7 @@ class RepeatsIter(TaskList):
                         (*self.added_flags),
                         (*search),
                         "-dir", self.pm.get_dir(self.record_id, _dir),
-                        "-database", self.output[Data.Type.OUT][2],
+                        "-database", self.output[2],
                     ]
                 )
             # Combine repeat results and process
@@ -127,7 +127,7 @@ class RepeatsIter(TaskList):
             self.log_and_run(
                 self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
-                    "-species", open(self.input[Data.Type.IN][0], "r").readline().rstrip("\r\n"), final_out
+                    "-species", open(self.input[0], "r").readline().rstrip("\r\n"), final_out
                 ]
             )
             # Create GFF3
@@ -139,9 +139,9 @@ class RepeatsIter(TaskList):
             )
             # Write as genbank
             write_genbank(
-                self.input[Data.Type.IN][1],
+                self.input[1],
                 out_gff3,
-                self.output[Data.Type.OUT][1]
+                self.output[1]
             )
 
     def __init__(self, *args, **kwargs):

@@ -1,7 +1,7 @@
 import os
+from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
 from EukMetaSanity import Data, Task, TaskList, program_catch
-from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 
 
 class AbInitioIter(TaskList):
@@ -9,9 +9,9 @@ class AbInitioIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             # Only looking for final trained ab initio prediction
-            self.output = {Data.Type.OUT: [
+            self.output = [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
-            ]}
+            ]
 
         def run(self) -> None:
             super().run()
@@ -27,12 +27,12 @@ class AbInitioIter(TaskList):
             for i in range(int(self.rounds) - 1):
                 out = self._augustus(self.record_id + str(i + 2), i + 2)
             if self.mode == 1:
-                os.replace(out, self.output[Data.Type.OUT][0])
+                os.replace(out, self.output[0])
 
         @program_catch
         def _augustus_tax_ident(self) -> str:
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            seq_db = self.input[Data.Type.IN][2]
+            seq_db = self.input[2]
             # Run taxonomy search
             self.log_and_run(
                 self.program_mmseqs[
@@ -55,25 +55,25 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Return optimal taxonomy
-            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport")
+            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", 40.0)
 
         @program_catch
         def _augustus(self, species: str, _round: int):
-            out_gff = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gff3" % _round)
+            out_gff = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round)
             # Run prediction
             self.log_and_run(
                 self.program[
                     "--codingseq=on",
                     "--stopCodonExcludedFromCDS=true",
                     "--species=%s" % species,
-                    self.input[Data.Type.IN][1],
+                    self.input[1],
                     "--outfile", out_gff
                 ]
             )
             # Parse to genbank
-            out_gb = AbInitioIter.AbInitio._out_path(self.input[Data.Type.IN][1], ".%i.gb" % _round)
+            out_gb = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round)
             write_genbank(
-                self.input[Data.Type.IN][1],
+                self.input[1],
                 out_gff,
                 out_gb
             )
@@ -98,7 +98,7 @@ class AbInitioIter(TaskList):
         def gmes(self):
             self.log_and_run(
                 self.program[
-                    "--sequence", self.input[Data.Type.IN][1],
+                    "--sequence", self.input[1],
                     "--ES", "--cores", self.threads, (*self.added_flags)
                 ]
             )
@@ -106,7 +106,7 @@ class AbInitioIter(TaskList):
             if self.mode == 1:
                 os.replace(
                     os.path.join(self.pm.get_dir(self.record_id, self.name), "genemark.gtf"),
-                    self.output[Data.Type.OUT][0],
+                    self.output[0],
                 )
 
         @staticmethod
