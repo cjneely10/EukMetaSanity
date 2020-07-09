@@ -1,7 +1,7 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
-from EukMetaSanity.src.scripts.fastagff3_to_gb import write_genbank
+from scripts.fastagff3_to_gb import write_genbank
 
 
 class AbInitioIter(TaskList):
@@ -56,7 +56,7 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Return optimal taxonomy
-            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", 40.0)[0]
+            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", self.cutoff)[0]
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):

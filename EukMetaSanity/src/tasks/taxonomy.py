@@ -56,7 +56,7 @@ class TaxonomyIter(TaskList):
                 ]
             )
             self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
-                self.output[0] + ".tmp", 40.0
+                self.output[0] + ".tmp", self.cutoff
             )
 
         @staticmethod
