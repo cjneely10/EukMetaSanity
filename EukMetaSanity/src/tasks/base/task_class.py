@@ -56,7 +56,8 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
-        self.passed_data = {**passed_data}
+        print(passed_data)
+        self.passed_data = passed_data
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -124,7 +125,7 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> Tuple[List[str], Dict[str, object]]:
+    def results(self) -> List[str]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths:
@@ -134,10 +135,11 @@ class Task(ABC):
                     touch(_path)
                 else:
                     raise OutputResultsFileError(_path)
-        return self._output_paths, self.passed_data
+        return self._output_paths
 
     # Function logs and runs dask command
     def log_and_run(self, cmd: LocalCommand):
+        print(str(cmd))
         logging.info(str(cmd))
         if self.mode == 1:
             cmd()
@@ -192,7 +194,7 @@ class TaskList(ABC):
             for input_path, record_id, _passed_data in zip(
                 input_paths,
                 record_ids,
-                (passed_data if passed_data is not None else [{} for _ in range(len(input_paths))])
+                (passed_data if passed_data is not None else [{}] * len(input_paths))
             )
             ]
         # Store workers
@@ -237,11 +239,11 @@ class TaskList(ABC):
         # Run task list
         return (
             self.cfg,
-            [task.results()[0] for task in self._tasks],  # Output files using required Data object
+            [task.results() for task in self._tasks],  # Output files using required Data object
             self.pm,
-            [task.record_id for task in self.tasks],
+            [task.record_id for task in self._tasks],
             self._mode,
-            [task.results()[1] for task in self._tasks],  # Output files using required Data object
+            [task.passed_data for task in self._tasks],  # Accumulated data
         )
 
 

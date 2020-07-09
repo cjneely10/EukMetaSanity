@@ -1,8 +1,10 @@
 import os
 import glob
+import shutil
 from typing import List
 from pathlib import Path
 from EukMetaSanity.src.utils.helpers import prefix
+from scripts.merge_fasta_files import write_merged
 from EukMetaSanity import Task, TaskList, program_catch
 
 """
@@ -53,7 +55,7 @@ class RepeatsIter(TaskList):
         # Complete masking using RepeatModeler/Masker
         def full(self):
             # BuildDatabase and RepeatModeler
-            # self._model()
+            self._model()
             # RepeatMasker and ProcessRepeats
             self._mask()
 
@@ -80,7 +82,7 @@ class RepeatsIter(TaskList):
         def _mask(self):
             # Perform on de novo results
             de_novo_library = None
-            _results_dir = glob.glob(os.path.join(self.input[0], "RM_*"))
+            _results_dir = glob.glob(os.path.join(self.wdir, "RM_*"))
             if len(_results_dir) > 0:
                 de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
             # Perform step on each file passed by user
@@ -113,6 +115,9 @@ class RepeatsIter(TaskList):
                         self.input[0],
                     ]
                 )
+                # Move output file
+                if os.path.exists(_search):
+                    shutil.move(_search, os.path.join(self.wdir))
             # Combine repeat results and process
             self._parse_output(_added_dirs)
 

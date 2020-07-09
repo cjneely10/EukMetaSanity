@@ -18,13 +18,12 @@ class TaxonomyIter(TaskList):
                 self.input[0],  # Input FASTA sequence for repeat masking
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]
-            if os.path.exists(self.output[1]):
-                self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
-                    os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
-                )
 
         def run(self) -> None:
             super().run()
+            self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
+                os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
+            )
 
         @program_catch
         def run_1(self):
@@ -61,9 +60,6 @@ class TaxonomyIter(TaskList):
                     tax_report
                 ]
             )
-            self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
-                tax_report, float(self.cutoff)
-            )
 
         @staticmethod
         def get_taxonomy(tax_results_file: str, cutoff: float) -> Tuple[str, int]:
@@ -77,7 +73,7 @@ class TaxonomyIter(TaskList):
                 while True:
                     line = next(_tax_results_file).rstrip("\r\n").split("\t")
                     # Parse line for assignment
-                    _score, _tax_id, _assignment = float(line[0]), line[4], line[5].replace(" ", "")
+                    _score, _tax_id, _assignment = float(line[0]), line[4], line[5].lstrip(" ")
                     if _assignment in ("unclassified", "root"):
                         continue
                     if _score < cutoff:
@@ -88,6 +84,7 @@ class TaxonomyIter(TaskList):
                         _id = _tax_id
             except StopIteration:
                 return assignment.lower(), _id
+            return assignment.lower(), _id
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)

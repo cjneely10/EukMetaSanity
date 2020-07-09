@@ -27,6 +27,16 @@ class StringBuffer:
     def buffer(self) -> str:
         return self._to_str()
 
+    @property
+    def buf_size(self) -> int:
+        return self._buf_size
+
+    @buf_size.setter
+    def buf_size(self, _size: int):
+        self._flush_buffer()
+        self.buf_size = _size
+        self._initialize_buffer()
+
     def _add_to_buffer(self, _value: str):
         assert isinstance(_value, str)
         if self._pos + len(_value) >= self._buf_size:

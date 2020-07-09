@@ -59,23 +59,21 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     out_file = os.path.join(storage_dir, os.path.basename(os.path.splitext(fasta_file)[0]) + ".fna")
     record_p = SeqIO.parse(fasta_file, "fasta")
     i: int = 0
+    records = []
     for record in record_p:
-        SeqIO.write(record_generator(record, str(i)), out_file, "fasta")
+        _i = str(i)
+        for val in punctuation:
+            record.id = record.id.replace(val, "")
+        # Shorten id to 16 characters
+        if len(str(record.id)) > 16:
+            # Store old id in description
+            record.description = str(record.id) + " " + record.description
+            # Update new id
+            record.id = str(record.id[:16 - len(_i)]) + _i
+        records.append(record)
         i += 1
+    SeqIO.write(records, out_file, "fasta")
     return out_file
-
-
-def record_generator(record: type, _i: str):
-    # Remove problem characters
-    for val in punctuation:
-        record.id = record.id.replace(val, "")
-    # Shorten id to 16 characters
-    if len(str(record.id)) > 16:
-        # Store old id in description
-        record.description = record.id + " " + record.description
-        # Update new id
-        record.id = record.id[:16 - len(_i)] + _i
-    yield record
 
 
 # Parse user arguments
