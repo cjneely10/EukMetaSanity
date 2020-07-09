@@ -60,9 +60,10 @@ class RepeatsIter(TaskList):
         @program_catch
         def _model(self):
             # Build database
+            db_name = os.path.join(self.wdir, "de_novo", self.record_id)
             self.log_and_run(
                 self.program[
-                    "-name", self.record_id,
+                    "-name", db_name,
                     (*self.added_flags),
                     self.input[0],
                 ]
@@ -72,16 +73,23 @@ class RepeatsIter(TaskList):
                 self.program_modeler[
                     "-pa", self.threads,
                     (*self.added_flags),
-                    "-database", self.record_id,
+                    "-database", db_name,
                 ]
             )
 
         @program_catch
         def _mask(self):
             # Perform on de novo results
-            de_novo_library = os.path.join(glob.glob(os.path.join(self.wdir, "RM_*"))[0], "consensi.fa")
+            de_novo_library = None
+            _results_dir = glob.glob(os.path.join(self.wdir, "de_novo", "RM_*"))
+            if len(_results_dir) > 0:
+                de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
             # Perform step on each file passed by user
-            data_files = [_file for _file in self.data.split(",") if _file != ""] + [de_novo_library]
+            data_files = []
+            if de_novo_library is not None:
+                data_files = [de_novo_library]
+            if "data" in dir(self):
+                data_files += [_file for _file in self.data.split(",") if _file != ""]
             _added_dirs = []
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
@@ -118,16 +126,14 @@ class RepeatsIter(TaskList):
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
             self.log_and_run(
                 (
-                    self.local[
-                        "cat", (*["/".join((rep_dir, "*.cat")) for rep_dir in repeats_dirs])
-                    ] >> final_out
+                    self.local["cat"][(["/".join((rep_dir, "*.cat")) for rep_dir in repeats_dirs])] >> final_out
                 )
             )
             # Run ProcessRepeats
             self.log_and_run(
                 self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
-                    "-species", self.passed_data["tax_assignment"], "-gff", final_out
+                    "-species", self.passed_data.get("tax_assignment", "eukaryota"), "-gff", final_out
                 ]
             )
 

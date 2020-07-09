@@ -32,10 +32,10 @@ class ConfigManager:
     WORKERS = "WORKERS"
     # Threads per worker
     THREADS = "THREADS"
-    # Protocols for running a choice of a program
+    # # Protocols for running a choice of a program
     PROTOCOL = "PROTOCOL"
-    # Used for repeating step multiple times
-    ROUNDS = "ROUNDS"
+    # # Used for repeating step multiple times
+    # ROUNDS = "ROUNDS"
 
     def __init__(self, config_path):
         self._config = Config()
@@ -65,12 +65,12 @@ class ConfigManager:
             ConfigManager._validate_data(k, value_dict)
             # Ensure PATH sections are valid
             possible_paths = set([val for val in value_dict.keys() if ConfigManager.PROGRAM in val])
-            for possible_path in possible_paths:
-                if possible_path in value_dict.keys():
-                    try:
-                        local[value_dict[possible_path]]()
-                    except CommandNotFound:
-                        raise InvalidPathError("%s %s" % (k, value_dict[possible_path]))
+            # for possible_path in possible_paths:
+            #     if possible_path in value_dict.keys():
+            #         try:
+            #             local[value_dict[possible_path]]()
+            #         except CommandNotFound:
+            #             raise InvalidPathError("%s %s" % (k, value_dict[possible_path]))
 
     # Gather user-passed flags for analysis
     def get_added_flags(self, _dict_name):
@@ -84,7 +84,8 @@ class ConfigManager:
                                                 self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
                                                 if def_key != ""])
             # Parse remaining args as dictionary items (for those not used in API)
-            elif key not in dir(self) and not any([key.startswith(_attr) for _attr in dir(self)]):
+            elif key not in dir(self) and not any([key.startswith(_attr) for _attr in dir(self) if _attr.isupper()]) \
+                    and not any([key.startswith(_attr) for _attr in self.config[_dict_name] if _attr.isupper()]):
                 out.append(key)
                 out.append(self.config[_dict_name][key])
         return out
