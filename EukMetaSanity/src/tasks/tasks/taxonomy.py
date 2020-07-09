@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity.src.utils.data import Data
+from EukMetaSanity.src.tasks.data import Data
 from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 """

@@ -1,7 +1,7 @@
 import os
 from typing import List
 from pathlib import Path
-from EukMetaSanity.src.utils.data import Data
+from EukMetaSanity.src.tasks.data import Data
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
 from EukMetaSanity.src.tasks import Task, TaskList, program_catch

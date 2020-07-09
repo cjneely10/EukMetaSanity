@@ -25,8 +25,6 @@ class Data:
         IN = auto()
         # Output data
         OUT = auto()
-        # Additional/optional data
-        ADDED = auto()
 
     def __init__(self, cfg: ConfigManager, name: str):
         self._cfg = cfg
