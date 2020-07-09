@@ -83,7 +83,6 @@ class Task(ABC):
                         _accessor_name = _path.replace(replace_val, _prefix + "_").lower()
                     # Set attribute for ease of use in API
                     _set_attr = cfg.config.get(db_name, _path)
-                    print(_accessor_name, _set_attr)
                     if _prefix == "program":
                         _set_attr = local[_set_attr]
                     setattr(
