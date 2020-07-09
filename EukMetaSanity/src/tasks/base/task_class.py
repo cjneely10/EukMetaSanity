@@ -2,7 +2,7 @@ import os
 import logging
 from plumbum import local
 from abc import ABC, abstractmethod
-from EukMetaSanity.src.tasks.data import Data
+from EukMetaSanity.src.tasks.manager.data import Data
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.src.utils.helpers import touch
 from dask.distributed import Client, wait, as_completed

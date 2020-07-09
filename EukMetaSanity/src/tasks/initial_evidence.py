@@ -16,3 +16,7 @@ class EvidenceIter(TaskList):
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
+
+
+if __name__ == "__main__":
+    pass

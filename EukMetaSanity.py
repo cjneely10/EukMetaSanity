@@ -8,7 +8,7 @@ from string import punctuation
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.src.utils.arg_parse import ArgParse
 from EukMetaSanity.src.utils.path_manager import PathManager
-from EukMetaSanity.src.tasks.task_manager import TaskManager
+from EukMetaSanity.src.tasks.manager.task_manager import TaskManager
 from EukMetaSanity.src.utils.helpers import prefix as _prefix
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
