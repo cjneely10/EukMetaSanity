@@ -4,7 +4,6 @@ import shutil
 from typing import List
 from pathlib import Path
 from EukMetaSanity.src.utils.helpers import prefix
-from scripts.merge_fasta_files import write_merged
 from EukMetaSanity import Task, TaskList, program_catch
 
 """

@@ -56,7 +56,6 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
-        print(passed_data)
         self.passed_data = passed_data
         super().__init__()
 
@@ -237,6 +236,7 @@ class TaskList(ABC):
 
     def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int, List[Dict[str, object]]]:
         # Run task list
+        print([task.passed_data for task in self._tasks])
         return (
             self.cfg,
             [task.results() for task in self._tasks],  # Output files using required Data object

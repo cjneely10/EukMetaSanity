@@ -18,12 +18,13 @@ class TaxonomyIter(TaskList):
                 self.input[0],  # Input FASTA sequence for repeat masking
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]
-
-        def run(self) -> None:
-            super().run()
             self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
                 os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
             )
+
+        def run(self) -> None:
+            super().run()
+            # self.passed_data["tax_assignment"], self.passed_data["tax_id"] = "1", "2"
 
         @program_catch
         def run_1(self):
@@ -66,7 +67,7 @@ class TaxonomyIter(TaskList):
             assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
             _id: int = 2759
             if not os.path.exists(tax_results_file):
-                return assignment, _id
+                return assignment.lower(), _id
             # Get first line
             _tax_results_file = open(tax_results_file, "r")
             try:
@@ -82,9 +83,9 @@ class TaxonomyIter(TaskList):
                     else:
                         assignment = _assignment
                         _id = _tax_id
-            except StopIteration:
                 return assignment.lower(), _id
-            return assignment.lower(), _id
+            except Exception:
+                return assignment.lower(), _id
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)
