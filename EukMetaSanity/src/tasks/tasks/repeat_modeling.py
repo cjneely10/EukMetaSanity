@@ -1,10 +1,9 @@
 import os
 from typing import List
 from pathlib import Path
-from EukMetaSanity.src.tasks.data import Data
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
-from EukMetaSanity.src.tasks import Task, TaskList, program_catch
+from EukMetaSanity import Data, Task, TaskList, program_catch
 
 """
 Model the repeated regions of a FASTA sequence
@@ -16,8 +15,6 @@ class RepeatsIter(TaskList):
     class Repeats(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-
-        def run(self) -> None:
             masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
             masked_fa_path = masked_db_path[:-3] + ".out"
             self.output = {Data.Type.OUT: [
@@ -25,6 +22,8 @@ class RepeatsIter(TaskList):
                 masked_fa_path,  # Input FASTA file for ab initio
                 masked_db_path,  # MMseqs database for use in metaeuk
             ]}
+
+        def run(self) -> None:
             super().run()
 
         def run_1(self):

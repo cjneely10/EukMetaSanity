@@ -26,6 +26,13 @@ class Data:
         # Output data
         OUT = auto()
 
+    @staticmethod
+    def _confirm_data(obj):
+        # Assert only correct protocols used in config file
+        for step, possible_protocols in obj.protocols.items():
+            if ConfigManager.PROTOCOL in obj._cfg.config[step].keys():
+                assert obj.cfg.config.get(step, ConfigManager.PROTOCOL) in possible_protocols
+
     def __init__(self, cfg: ConfigManager, name: str):
         self._cfg = cfg
         self._name = name
@@ -34,13 +41,7 @@ class Data:
             "repeats": {"simple", "full"},
             "abinitio": {"augustus", "gmes"},
         }
-        self._confirm_data()
-
-    def _confirm_data(self):
-        # Assert only correct protocols used in config file
-        for step, possible_protocols in self.protocols.items():
-            if ConfigManager.PROTOCOL in self._cfg.config[step].keys():
-                assert self.cfg.config.get(step, ConfigManager.PROTOCOL) in possible_protocols
+        Data._confirm_data(self)
 
     @property
     def name(self) -> str:
@@ -66,6 +67,10 @@ class Data:
 
     @added
     def abinitio(self):
+        pass
+
+    @added
+    def evidence(self):
         pass
 
 

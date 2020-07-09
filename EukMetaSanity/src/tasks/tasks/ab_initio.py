@@ -1,20 +1,19 @@
 import os
-from EukMetaSanity.src.tasks.data import Data
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
+from EukMetaSanity import Data, Task, TaskList, program_catch
 from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
-from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 
 class AbInitioIter(TaskList):
     class AbInitio(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-
-        def run(self) -> None:
             # Only looking for final trained ab initio prediction
             self.output = {Data.Type.OUT: [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
             ]}
+
+        def run(self) -> None:
             super().run()
 
         def run_1(self):

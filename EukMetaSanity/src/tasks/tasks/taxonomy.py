@@ -1,6 +1,5 @@
 import os
-from EukMetaSanity.src.tasks.data import Data
-from EukMetaSanity.src.tasks import Task, TaskList, program_catch
+from EukMetaSanity import Data, Task, TaskList, program_catch
 
 """
 Determine the taxonomy of the Eukaryotic MAG
@@ -12,8 +11,6 @@ class TaxonomyIter(TaskList):
     class Taxonomy(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-
-        def run(self) -> None:
             seq_db = os.path.join(self.wdir, self.record_id + "_db")
             results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
             # Expected output
@@ -22,6 +19,8 @@ class TaxonomyIter(TaskList):
                 self.input[Data.Type.IN][0],  # Input FASTA file for repeat masking
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]}
+
+        def run(self) -> None:
             super().run()
 
         @program_catch
