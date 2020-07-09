@@ -60,3 +60,9 @@ class StringBuffer:
 
     def add(self, value: str):
         self._add_to_buffer(value)
+
+    def write(self, endline: str = None):
+        self._output.write(self._to_str())
+        if endline is not None:
+            self._output.write(endline)
+        self._flush_buffer()
