@@ -18,6 +18,10 @@ class TaxonomyIter(TaskList):
                 self.input[0],  # Input FASTA sequence for repeat masking
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]
+            if os.path.exists(self.output[1]):
+                self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
+                    os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
+                )
 
         def run(self) -> None:
             super().run()
@@ -46,17 +50,19 @@ class TaxonomyIter(TaskList):
                     "--threads", self.threads,
                 ]
             )
+            # Tax report path
+            tax_report = os.path.join(self.wdir, "tax-report.txt")
             # Output results
             self.log_and_run(
                 self.program[
                     "taxonomyreport",
                     self.data,  # Input OrthoDB
                     tax_db,  # Input tax db
-                    self.output[0] + ".tmp"  # Output results file
+                    tax_report
                 ]
             )
             self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
-                self.output[0] + ".tmp", self.cutoff
+                tax_report, float(self.cutoff)
             )
 
         @staticmethod

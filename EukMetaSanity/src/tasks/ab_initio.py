@@ -56,7 +56,7 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Return optimal taxonomy
-            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", self.cutoff)[0]
+            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", float(self.cutoff))[0]
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):

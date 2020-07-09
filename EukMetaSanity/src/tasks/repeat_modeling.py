@@ -60,11 +60,9 @@ class RepeatsIter(TaskList):
         @program_catch
         def _model(self):
             # Build database
-            db_name = os.path.join(self.wdir, "de_novo", self.record_id)
             self.log_and_run(
                 self.program[
-                    "-name", db_name,
-                    (*self.added_flags),
+                    "-name", self.record_id,
                     self.input[0],
                 ]
             )
@@ -73,7 +71,7 @@ class RepeatsIter(TaskList):
                 self.program_modeler[
                     "-pa", self.threads,
                     (*self.added_flags),
-                    "-database", db_name,
+                    "-database", self.record_id,
                 ]
             )
 
@@ -81,7 +79,7 @@ class RepeatsIter(TaskList):
         def _mask(self):
             # Perform on de novo results
             de_novo_library = None
-            _results_dir = glob.glob(os.path.join(self.wdir, "de_novo", "RM_*"))
+            _results_dir = glob.glob(os.path.join(self.input[0], "RM_*"))
             if len(_results_dir) > 0:
                 de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
             # Perform step on each file passed by user
