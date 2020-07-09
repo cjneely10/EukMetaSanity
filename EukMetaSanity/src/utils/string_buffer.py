@@ -2,23 +2,22 @@ from array import array
 
 
 class StringBuffer:
-    def __init__(self, output: str = None, buf_size: int = int(1e6), initial: str = ""):
+    def __init__(self, output_path=None, buf_size=1e6, initial=""):
         assert buf_size > 0
         assert isinstance(initial, str)
-        assert output is None or isinstance(output, str)
+        assert output_path is None or isinstance(output_path, str)
         # Initialize buffer and position in buffer
-        self._initialize_buffer(buf_size)
-        self._buf_size = buf_size
+        self._buf_size = int(float(buf_size))
+        self._initialize_buffer()
         # Open output buffer
         self._output = None
-        if output is not None:
-            self._output = open(output, "w")
+        if output_path is not None:
+            self._output = open(output_path, "w")
         # Add initial value, if present
         self._add_to_buffer(initial)
 
-    def _initialize_buffer(self, buf_size: int):
-        assert isinstance(buf_size, int)
-        self._data = array("i", [0] * buf_size)
+    def _initialize_buffer(self):
+        self._data = array("i", [0] * self._buf_size)
         self._pos = 0
 
     def _to_str(self) -> str:
@@ -40,7 +39,7 @@ class StringBuffer:
     def _flush_buffer(self):
         if self._output is not None:
             self._output.write(self._to_str())
-        self._initialize_buffer(self._buf_size)
+        self._initialize_buffer()
 
     def __iadd__(self, other):
         self._add_to_buffer(other)
@@ -48,3 +47,6 @@ class StringBuffer:
 
     def __repr__(self):
         return self._to_str()
+
+    def add(self, value: str):
+        self._add_to_buffer(value)

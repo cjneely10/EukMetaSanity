@@ -53,7 +53,7 @@ class RepeatsIter(TaskList):
         # Complete masking using RepeatModeler/Masker
         def full(self):
             # BuildDatabase and RepeatModeler
-            self._model()
+            # self._model()
             # RepeatMasker and ProcessRepeats
             self._mask()
 
@@ -89,14 +89,17 @@ class RepeatsIter(TaskList):
                 data_files = [de_novo_library]
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
+            # Perform on optimal taxonomic identification
+            data_files += [self.passed_data["tax_assignment"]]
             _added_dirs = []
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
                 if os.path.exists(str(Path(_search).resolve())):
                     search = ("-lib", _search)
+                    _dir = "repeats_" + prefix(_search)
                 else:
                     search = ("-species", _search)
-                _dir = "repeats_" + prefix(_search)
+                    _dir = "repeats_" + _search.replace(" ", "_")
                 # Create contained directory
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
@@ -115,10 +118,12 @@ class RepeatsIter(TaskList):
 
         @program_catch
         def _parse_output(self, repeats_dirs: List[str]):
+            if len(repeats_dirs) == 0:
+                return
             self.pm.add_dirs(self.record_id, ["repeats_final"])
             # Unzip results
             all(
-                self.log_and_run(self.local["gunzip", "/".join((rep_dir, "*.cat.gz"))])
+                self.log_and_run(self.local["gunzip"]["/".join((rep_dir, "*.cat.gz"))])
                 for rep_dir in repeats_dirs
             )
             # Combine results into single file

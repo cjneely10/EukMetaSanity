@@ -230,8 +230,6 @@ class TaskList(ABC):
             # Run each future
             for _task in self._tasks:
                 futures.append(client.submit(_task.run))
-            for _task in as_completed(futures):
-                _task.result()
             wait(futures)
             client.close()
 
