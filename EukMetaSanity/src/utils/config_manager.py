@@ -24,7 +24,7 @@ class MissingDataError(FileExistsError):
 
 class ConfigManager:
     # Default accessors
-    # Starting PATH value
+    # Starting PATH value - * * API: THIS IS CALLABLE * *
     PROGRAM = "PROGRAM"
     # Config file
     DATA = "DATA"
