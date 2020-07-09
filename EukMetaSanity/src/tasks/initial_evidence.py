@@ -22,7 +22,7 @@ class EvidenceIter(TaskList):
                     "filtertaxseqdb",
                     self.data,
                     self.input[1],
-                    "--taxon-list", str(self.local["cat"][self.input[2]]()),
+                    "--taxon-list", self.passed_data["tax_id"],
                     subset_db_outpath,
                     "--threads", self.threads,
                 ]

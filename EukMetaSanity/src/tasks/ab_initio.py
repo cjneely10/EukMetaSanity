@@ -11,8 +11,7 @@ class AbInitioIter(TaskList):
             # Only looking for final trained ab initio prediction
             self.output = [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
-                self.input[2],  # Forward masked mmseqs-db to initial evidence step
-                self.input[0],  # Taxonomic assignment file
+                self.input[1],  # Forward masked mmseqs-db to initial evidence step
             ]
 
         def run(self) -> None:
@@ -24,17 +23,17 @@ class AbInitioIter(TaskList):
 
         def augustus(self):
             # Initial training based on best species from taxonomy search
-            out = self._augustus(self._augustus_tax_ident(), 1)
+            out, _file = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds) - 1):
-                out = self._augustus(self.record_id + str(i + 2), i + 2)
+                out, _file = self._augustus(self.record_id + str(i + 2), i + 2, _file)
             if self.mode == 1:
                 os.replace(out, self.output[0])
 
         @program_catch
         def _augustus_tax_ident(self) -> str:
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            seq_db = self.input[2]
+            seq_db = self.input[1]
             # Run taxonomy search
             self.log_and_run(
                 self.program_mmseqs[
@@ -57,10 +56,10 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Return optimal taxonomy
-            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", 40.0)
+            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", 40.0)[0]
 
         @program_catch
-        def _augustus(self, species: str, _round: int):
+        def _augustus(self, species: str, _round: int, _file: str):
             out_gff = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round)
             # Run prediction
             self.log_and_run(
@@ -68,14 +67,14 @@ class AbInitioIter(TaskList):
                     "--codingseq=on",
                     "--stopCodonExcludedFromCDS=true",
                     "--species=%s" % species,
-                    self.input[1],
+                    _file,
                     "--outfile", out_gff
                 ]
             )
             # Parse to genbank
             out_gb = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round)
             write_genbank(
-                self.input[1],
+                _file,
                 out_gff,
                 out_gb
             )
@@ -94,13 +93,13 @@ class AbInitioIter(TaskList):
                     out_gb
                 ]
             )
-            return out_gff
+            return out_gff, out_gb
 
         @program_catch
         def gmes(self):
             self.log_and_run(
                 self.program[
-                    "--sequence", self.input[1],
+                    "--sequence", self.input[0],
                     "--ES", "--cores", self.threads, (*self.added_flags)
                 ]
             )

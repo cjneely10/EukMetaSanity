@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 from EukMetaSanity import Task, TaskList, program_catch
 
 """
@@ -12,11 +13,9 @@ class TaxonomyIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             seq_db = os.path.join(self.wdir, self.record_id + "_db")
-            results_file = os.path.join(self.wdir, self.record_id + "-tax-report.txt")
             # Expected output
             self.output = [
-                results_file,  # Taxonomic results for ab initio prediction
-                self.input[0],  # Input FASTA file for repeat masking
+                self.input[0],  # Input FASTA sequence for repeat masking
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]
 
@@ -26,7 +25,7 @@ class TaxonomyIter(TaskList):
         @program_catch
         def run_1(self):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            seq_db = self.output[2]
+            seq_db = self.output[1]
             # Create sequence database
             self.log_and_run(
                 self.program[
@@ -56,15 +55,16 @@ class TaxonomyIter(TaskList):
                     self.output[0] + ".tmp"  # Output results file
                 ]
             )
-            # Write taxonomy result species to file
-            with open(self.output[0], "w") as w:
-                w.write(TaxonomyIter.Taxonomy.get_taxonomy(self.output[0] + ".tmp", 40.0) + "\n")
+            self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
+                self.output[0] + ".tmp", 40.0
+            )
 
         @staticmethod
-        def get_taxonomy(tax_results_file: str, cutoff: float) -> str:
+        def get_taxonomy(tax_results_file: str, cutoff: float) -> Tuple[str, int]:
             assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
+            _id: int = 2759
             if not os.path.exists(tax_results_file):
-                return assignment
+                return assignment, _id
             # Get first line
             _tax_results_file = open(tax_results_file, "r")
             try:
@@ -79,8 +79,9 @@ class TaxonomyIter(TaskList):
                     # Keep new value if >= cutoff% of contigs map to the taxonomy
                     else:
                         assignment = _assignment
+                        _id = _tax_id
             except StopIteration:
-                return assignment
+                return assignment, _id
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)

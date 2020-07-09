@@ -34,7 +34,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 class Task(ABC):
     def __init__(self, input_path_list: List[str], cfg: ConfigManager, pm: PathManager,
-                 record_id: str, db_name: str, mode: int):
+                 record_id: str, db_name: str, mode: int, passed_data: Dict[str, object]):
         # Store passed input flag:input_path dict
         self._name = db_name
         self._input_path_list = input_path_list
@@ -56,6 +56,7 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
+        self.passed_data = {**passed_data}
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -123,7 +124,7 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> List[str]:
+    def results(self) -> Tuple[List[str], Dict[str, object]]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths:
@@ -133,7 +134,7 @@ class Task(ABC):
                     touch(_path)
                 else:
                     raise OutputResultsFileError(_path)
-        return self._output_paths
+        return self._output_paths, self.passed_data
 
     # Function logs and runs dask command
     def log_and_run(self, cmd: LocalCommand):
@@ -169,7 +170,7 @@ class Task(ABC):
 
 class TaskList(ABC):
     def __init__(self, new_task: type, name: str, cfg: ConfigManager, input_paths: List[List[str]], pm: PathManager,
-                 record_ids: List[str], mode: int):
+                 record_ids: List[str], mode: int, passed_data: List[Dict[str, object]] = None):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         name, _, statement = getattr(dt, dt.name)()
@@ -186,8 +187,13 @@ class TaskList(ABC):
                 record_id,
                 name,
                 mode,
+                _passed_data
             )
-            for input_path, record_id in zip(input_paths, record_ids)
+            for input_path, record_id, _passed_data in zip(
+                input_paths,
+                record_ids,
+                (passed_data if passed_data is not None else [{} for _ in range(len(input_paths))])
+            )
             ]
         # Store workers
         self._workers = workers
@@ -229,14 +235,15 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int]:
+    def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int, List[Dict[str, object]]]:
         # Run task list
         return (
             self.cfg,
-            [task.results() for task in self._tasks],  # Output files using required Data object
+            [task.results()[0] for task in self._tasks],  # Output files using required Data object
             self.pm,
             [task.record_id for task in self.tasks],
             self._mode,
+            [task.results()[1] for task in self._tasks],  # Output files using required Data object
         )
 
 
