@@ -41,7 +41,7 @@ class TaxonomyIter(TaskList):
                 self.program[
                     "taxonomy",
                     seq_db,  # Input FASTA sequence db
-                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
+                    self.data,  # Input OrthoDB
                     tax_db,  # Output tax db
                     os.path.join(self.wdir, "tmp"),
                     (*self.added_flags),
@@ -52,7 +52,7 @@ class TaxonomyIter(TaskList):
             self.log_and_run(
                 self.program[
                     "taxonomyreport",
-                    self.input[Data.Type.ACCESS][0],  # Input OrthoDB
+                    self.data,  # Input OrthoDB
                     tax_db,  # Input tax db
                     self.output[Data.Type.OUT][0] + ".tmp"  # Output results file
                 ]

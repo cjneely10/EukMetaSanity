@@ -4,7 +4,6 @@ from pathlib import Path
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
-from EukMetaSanity.src.utils.config_manager import ConfigManager
 from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 """
@@ -30,7 +29,7 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            getattr(self, self.config[ConfigManager.PROTOCOL])()
+            getattr(self, self.protocol)()
 
         # Simple repeat masking using mmseqs
         @program_catch
@@ -83,7 +82,7 @@ class RepeatsIter(TaskList):
         @program_catch
         def _mask(self):
             # Perform step on each file
-            data_files = [_file for _file in self.config[ConfigManager.DATA].split(",") if _file != ""]
+            data_files = [_file for _file in self.data.split(",") if _file != ""]
             _added_dirs = []
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library

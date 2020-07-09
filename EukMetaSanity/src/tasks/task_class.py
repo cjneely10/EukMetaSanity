@@ -51,7 +51,7 @@ class Task(ABC):
         # Store config manager
         self._cfg = cfg
         # Dynamically generate program attributes for easy in API access
-        self._set_progs(cfg, db_name)
+        self._set_api_accessors(cfg, db_name)
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -62,28 +62,35 @@ class Task(ABC):
         self._record_id = record_id
         super().__init__()
 
-    def _set_progs(self, cfg: ConfigManager, db_name: str):
-        # Store primary calling program(s) as object attributes
-        for _path, _value in cfg.config[db_name].items():
-            # Set attribute
-            if ConfigManager.PATH in _path and _value != "None":
-                # Set as self.program is only default Config PATH variable
-                if ConfigManager.PATH == _path:
-                    _accessor_name = _path.replace(ConfigManager.PATH, "program").lower()
-                else:
-                    # Determine if PATH_ or PATH to replace
-                    if ConfigManager.PATH + "_" in _path:
-                        replace_val = ConfigManager.PATH + "_"
+    def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
+        cfg_attrs = [_attr for _attr in dir(cfg) if _attr.isupper()]
+        cfg_attrs_lower = [_attr.lower() for _attr in cfg_attrs]
+        for _accessor, _prefix in zip(cfg_attrs, cfg_attrs_lower):
+            # Store primary calling program(s) as object attributes
+            for _path, _value in cfg.config[db_name].items():
+                # Set attribute
+                if _accessor in _path and _value != "None":
+                    # Set as self.program is only default Config PATH variable
+                    if _accessor == _path:
+                        _accessor_name = _path.replace(_accessor, _prefix).lower()
                     else:
-                        replace_val = ConfigManager.PATH
-                    # Replace
-                    _accessor_name = _path.replace(replace_val, "program_").lower()
-                # Set attribute for ease of use in API
-                setattr(
-                    self,
-                    _accessor_name,  # Name: PATH -> program; PATH2 = program_2; PATH_MMSEQS = program_mmseqs
-                    local[cfg.config.get(db_name, _path)],  # Local path for calling program
-                )
+                        # Determine if PATH_ or PATH to replace
+                        if _accessor + "_" in _path:
+                            replace_val = _accessor + "_"
+                        else:
+                            replace_val = _accessor
+                        # Replace
+                        _accessor_name = _path.replace(replace_val, _prefix + "_").lower()
+                    # Set attribute for ease of use in API
+                    _set_attr = cfg.config.get(db_name, _path)
+                    print(_accessor_name, _set_attr)
+                    if _prefix == "program":
+                        _set_attr = local[_set_attr]
+                    setattr(
+                        self,
+                        _accessor_name,  # Name: PATH -> program/data; PATH2/DATA_2 = program_2/data_2;
+                        _set_attr,  # Local path, or config path, for calling program
+                    )
 
     @property
     def local(self) -> LocalMachine:
@@ -129,10 +136,6 @@ class Task(ABC):
     @property
     def wdir(self) -> str:
         return self._wdir
-
-    @property
-    def threads(self) -> int:
-        return self._threads_pw
 
     @property
     def pm(self) -> PathManager:
@@ -196,10 +199,6 @@ class TaskList(ABC):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         name, _, statement = getattr(dt, dt.name)()
-        # Determine if added DATA is needed
-        required_data = {}
-        if ConfigManager.DATA in dt.cfg.config[name].keys():
-            required_data = {Data.Type.ACCESS: [dt.cfg.config[name][ConfigManager.DATA]]}
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement
@@ -207,13 +206,13 @@ class TaskList(ABC):
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
-                {Data.Type.IN: (input_path if isinstance(input_path, list) else [input_path]), **required_data},
+                {Data.Type.IN: (input_path if isinstance(input_path, list) else [input_path])},
                 cfg,
                 pm,
                 record_id,
                 name,
                 mode,
-                required_data=[Data.Type.IN, *required_data.keys()],
+                required_data=[Data.Type.IN],
             )
             for input_path, record_id in zip(input_paths, record_ids)
             ]

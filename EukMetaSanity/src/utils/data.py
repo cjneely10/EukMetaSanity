@@ -21,7 +21,6 @@ def added(f: Callable) -> Callable:
 class Data:
     # # Add task info below
     class Type(Enum):
-        ACCESS = auto()
         # Input fasta
         IN = auto()
         # Output data

@@ -25,7 +25,7 @@ class MissingDataError(FileExistsError):
 class ConfigManager:
     # Default accessors
     # Starting PATH value
-    PATH = "PATH"
+    PROGRAM = "PROGRAM"
     # Config file
     DATA = "DATA"
     # Workers for task
@@ -64,7 +64,7 @@ class ConfigManager:
             # Ensure all data is valid
             ConfigManager._validate_data(k, value_dict)
             # Ensure PATH sections are valid
-            possible_paths = set([val for val in value_dict.keys() if ConfigManager.PATH in val])
+            possible_paths = set([val for val in value_dict.keys() if ConfigManager.PROGRAM in val])
             for possible_path in possible_paths:
                 if possible_path in value_dict.keys():
                     try:
@@ -83,7 +83,7 @@ class ConfigManager:
                                                 for def_key in
                                                 self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
                                                 if def_key != ""])
-            # Parse remaining args as dictionary items
+            # Parse remaining args as dictionary items (for those not used in API)
             elif key not in dir(self) and not any([key.startswith(_attr) for _attr in dir(self)]):
                 out.append(key)
                 out.append(self.config[_dict_name][key])

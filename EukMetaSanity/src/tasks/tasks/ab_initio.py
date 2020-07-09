@@ -2,7 +2,6 @@ import os
 from EukMetaSanity.src.utils.data import Data
 from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
 from EukMetaSanity.src.tasks.tasks.taxonomy import TaxonomyIter
-from EukMetaSanity.src.utils.config_manager import ConfigManager
 from EukMetaSanity.src.tasks import Task, TaskList, program_catch
 
 
@@ -20,13 +19,13 @@ class AbInitioIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            getattr(self, self.config[ConfigManager.PROTOCOL])()
+            getattr(self, self.protocol)()
 
         def augustus(self):
             # Initial training based on best species from taxonomy search
             out = self._augustus(self._augustus_tax_ident(), 1)
             # Remaining rounds of re-training on generated predictions
-            for i in range(int(self.config[ConfigManager.ROUNDS]) - 1):
+            for i in range(int(self.rounds) - 1):
                 out = self._augustus(self.record_id + str(i + 2), i + 2)
             if self.mode == 1:
                 os.replace(out, self.output[Data.Type.OUT][0])
@@ -40,7 +39,7 @@ class AbInitioIter(TaskList):
                 self.program_mmseqs[
                     "taxonomy",
                     seq_db,  # Input FASTA sequence db
-                    self.config[ConfigManager.DATA],  # Input augustus-db
+                    self.data,  # Input augustus-db
                     tax_db,  # Output tax db
                     os.path.join(self.wdir, "tmp"),
                     (*self.added_flags),
@@ -51,7 +50,7 @@ class AbInitioIter(TaskList):
             self.log_and_run(
                 self.program_mmseqs[
                     "taxonomyreport",
-                    self.config[ConfigManager.DATA],  # Input augustus-db
+                    self.data,  # Input augustus-db
                     tax_db,  # Input tax db
                     tax_db + ".taxreport"  # Output results file
                 ]
