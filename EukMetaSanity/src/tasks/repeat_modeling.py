@@ -60,9 +60,10 @@ class RepeatsIter(TaskList):
         @program_catch
         def _model(self):
             # Build database
+            _name = os.path.join(self.wdir, self.record_id)
             self.log_and_run(
                 self.program[
-                    "-name", self.record_id,
+                    "-name", _name,
                     self.input[0],
                 ]
             )
@@ -71,7 +72,7 @@ class RepeatsIter(TaskList):
                 self.program_modeler[
                     "-pa", self.threads,
                     (*self.added_flags),
-                    "-database", self.record_id,
+                    "-database", _name,
                 ]
             )
 
