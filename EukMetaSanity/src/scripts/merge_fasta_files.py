@@ -20,24 +20,28 @@ def parse_args(argv):
 		assert os.path.exists(_file)
 
 
-def main(argv):
-	out_records = []
-	w = open("/dev/stdout", "w")
-	for _file in glob.glob(argv[1]):
+def record_iter(_files, w):
+	for _file in glob.glob(_files):
 		seq = ""
 		record_id = os.path.basename(os.path.splitext(_file)[0])
 		record_p = SeqIO.parse(_file, "fasta")
 		for record in record_p:
 			seq += str(record.seq).replace("N", "").replace("n", "").upper()
-		out_records.append(
-			SeqRecord(
-				seq=Seq(seq),
-				id=record_id,
-				description="",
-			)
-		)
 		w.write("".join([record_id, "\n"]))
-	SeqIO.write(out_records, argv[2], "fasta")
+		yield SeqRecord(
+			seq=Seq(seq),
+			id=record_id,
+			description="",
+		)
+
+
+def main(argv):
+	w = open("/dev/stdout", "w")
+	SeqIO.write(
+		record_iter(argv[1], w),
+		argv[2],
+		"fasta"
+	)
 	w.close()
 
 

@@ -81,7 +81,7 @@ class TaxonomyIter(TaskList):
                         assignment = _assignment
                         _id = _tax_id
             except StopIteration:
-                return assignment, _id
+                return assignment.lower(), _id
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)

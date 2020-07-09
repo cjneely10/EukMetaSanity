@@ -1,9 +1,9 @@
 import os
+import glob
 from typing import List
 from pathlib import Path
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.bin.fastagff3_to_gb import write_genbank
 
 """
 Model the repeated regions of a FASTA sequence
@@ -78,8 +78,10 @@ class RepeatsIter(TaskList):
 
         @program_catch
         def _mask(self):
-            # Perform step on each file
-            data_files = [_file for _file in self.data.split(",") if _file != ""]
+            # Perform on de novo results
+            de_novo_library = os.path.join(glob.glob(os.path.join(self.wdir, "RM_*"))[0], "consensi.fa")
+            # Perform step on each file passed by user
+            data_files = [_file for _file in self.data.split(",") if _file != ""] + [de_novo_library]
             _added_dirs = []
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
@@ -125,21 +127,8 @@ class RepeatsIter(TaskList):
             self.log_and_run(
                 self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
-                    "-species", self.passed_data["tax_assignment"], final_out
+                    "-species", self.passed_data["tax_assignment"], "-gff", final_out
                 ]
-            )
-            # Create GFF3
-            out_gff3 = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.gff3")
-            self.log_and_run(
-                self.program_rmOutToGFF3[
-                    os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.out"),
-                ] > out_gff3
-            )
-            # Write as genbank
-            write_genbank(
-                self.input[1],
-                out_gff3,
-                self.output[1]
             )
 
     def __init__(self, *args, **kwargs):

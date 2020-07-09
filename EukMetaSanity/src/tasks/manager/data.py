@@ -1,4 +1,3 @@
-from enum import Enum, auto
 from typing import Dict, Set, Callable, Tuple
 from EukMetaSanity.src.utils.config_manager import ConfigManager
 
@@ -19,13 +18,6 @@ def added(f: Callable) -> Callable:
 
 
 class Data:
-    # # Add task info below
-    class Type(Enum):
-        # Input fasta
-        IN = auto()
-        # Output data
-        OUT = auto()
-
     @staticmethod
     def _confirm_data(obj):
         # Assert only correct protocols used in config file

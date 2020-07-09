@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/scripts/env python3
 import os
 from BCBio import GFF
 from Bio import SeqIO
