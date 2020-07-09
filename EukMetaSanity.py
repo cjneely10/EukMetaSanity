@@ -155,4 +155,4 @@ if __name__ == "__main__":
     _tm = TaskManager()
     _main(_ap, _parse_args(_ap, _tm), _tm)
     for func in (logging.info, print):
-        func("EukMetaSanity pipeline complete!")
+        func("\nEukMetaSanity pipeline complete!")

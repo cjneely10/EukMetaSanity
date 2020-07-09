@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Data, Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch
 
 """
 Determine the taxonomy of the Eukaryotic MAG
