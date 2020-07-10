@@ -39,7 +39,7 @@ class Task(ABC):
         self._name = db_name
         self._input_path_list = input_path_list
         # Instantiate output dict variable
-        self._output_paths: List[str] = []
+        self._output_paths: List[object] = []
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
@@ -87,11 +87,11 @@ class Task(ABC):
         return self._name
 
     @property
-    def output(self) -> List[str]:
+    def output(self) -> List[object]:
         return self._output_paths
 
     @output.setter
-    def output(self, v: List[str]):
+    def output(self, v: List[object]):
         self._output_paths = v
 
     @property
@@ -123,11 +123,11 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> List[str]:
+    def results(self) -> List[object]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths:
-            if not os.path.exists(_path):
+            if isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
                     touch(_path)
@@ -228,7 +228,7 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int]:
+    def output(self) -> Tuple[ConfigManager, List[List[object]], PathManager, List[str], int]:
         # Run task list
         return (
             self.cfg,
