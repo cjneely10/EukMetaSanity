@@ -1,7 +1,7 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
-from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
+from EukMetaSanity.src.scripts.fastagff3_to_gb import write_genbank
 
 
 class AbInitioIter(TaskList):
@@ -26,7 +26,7 @@ class AbInitioIter(TaskList):
             # Initial training based on best species from taxonomy search
             out, _file = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
             # Remaining rounds of re-training on generated predictions
-            for i in range(int(self.rounds) - 1):
+            for i in range(int(self.rounds)):
                 out, _file = self._augustus(self.record_id + str(i + 2), i + 2, _file)
             if self.mode == 1:
                 os.replace(out, self.output[0])
@@ -113,8 +113,7 @@ class AbInitioIter(TaskList):
 
         @staticmethod
         def _out_path(_file_name: str, _ext: str) -> str:
-            _file_name = _file_name.split(".")
-            return ".".join(_file_name[:-1]) + _ext
+            return os.path.splitext(_file_name)[0] + _ext
 
     def __init__(self, *args, **kwargs):
         super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)

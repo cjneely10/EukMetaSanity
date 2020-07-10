@@ -19,6 +19,7 @@ class TaxonomyIter(TaskList):
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]
             if os.path.exists(os.path.join(self.wdir, "tax-report.txt")):
+                print("A")
                 self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
                     os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
                 )
@@ -62,9 +63,13 @@ class TaxonomyIter(TaskList):
                     tax_report
                 ]
             )
-            self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
-                os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
-            )
+            print("B")
+            if self.mode == 0:
+                self.passed_data["tax_assignment"], self.passed_data["tax_id"] = "1", "2"
+            else:
+                self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
+                    os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
+                )
 
         @staticmethod
         def get_taxonomy(tax_results_file: str, cutoff: float) -> Tuple[str, int]:

@@ -56,6 +56,7 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
+        self.passed_data = {}
         self.passed_data = {**passed_data}
         super().__init__()
 
@@ -171,7 +172,7 @@ class Task(ABC):
 
 class TaskList(ABC):
     def __init__(self, new_task: type, name: str, cfg: ConfigManager, input_paths: List[List[str]], pm: PathManager,
-                 record_ids: List[str], mode: int, passed_data: List[Dict[str, object]] = None):
+                 record_ids: List[str], mode: int, passed_data: List[Dict[str, object]]):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         name, _, statement = getattr(dt, dt.name)()
@@ -193,7 +194,7 @@ class TaskList(ABC):
             for input_path, record_id, _passed_data in zip(
                 input_paths,
                 record_ids,
-                (passed_data if passed_data is not None else [{}] * len(input_paths))
+                passed_data,
             )
             ]
         # Store workers
@@ -236,6 +237,7 @@ class TaskList(ABC):
 
     def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int, List[Dict[str, object]]]:
         # Run task list
+        print([task.results() for task in self._tasks])
         return (
             self.cfg,
             [task.results()[0] for task in self._tasks],  # Output files using required Data object

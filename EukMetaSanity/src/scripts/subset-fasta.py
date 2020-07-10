@@ -5,7 +5,7 @@ from Bio.Seq import Seq
 from pathlib import Path
 from random import random
 from Bio.SeqRecord import SeqRecord
-from EukMetaSanity.scripts.utils.arg_parse import ArgParse
+from EukMetaSanity.src.utils.arg_parse import ArgParse
 
 
 # Calculate N50 for file
