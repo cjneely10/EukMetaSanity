@@ -3,6 +3,8 @@ import glob
 import shutil
 from typing import List
 from pathlib import Path
+
+from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 
@@ -21,7 +23,8 @@ class RepeatsIter(TaskList):
             self.output = [
                 masked_fa_path,  # Input FASTA file for ab initio
                 masked_db_path,  # MMseqs database for use in metaeuk
-                self.input[0],  # Original input file
+                self.input[0],  # Original input file,
+                self.input[2],  # Tax file
             ]
 
         def run(self) -> None:
@@ -92,7 +95,7 @@ class RepeatsIter(TaskList):
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
-            data_files += [self.passed_data["tax_assignment"]]
+            data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0]]
             _added_dirs = []
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
@@ -142,7 +145,8 @@ class RepeatsIter(TaskList):
             self.log_and_run(
                 self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
-                    "-species", self.passed_data.get("tax_assignment", "eukaryota"), "-gff", final_out
+                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0],
+                    "-gff", final_out
                 ]
             )
 

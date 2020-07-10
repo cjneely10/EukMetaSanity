@@ -111,7 +111,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # # Begin task list
     # Generate first task from list
     run_iter = _run_iter(tm, ap.args.command)
-    task = next(run_iter)(cfg, input_files, pm, input_prefixes, ap.args.debug, [{} for _ in input_files])
+    task = next(run_iter)(cfg, input_files, pm, input_prefixes, ap.args.debug)
     # Run task
     task.run()
     # Primary program loop

@@ -5,8 +5,8 @@
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity
 make all
-export PATH=/path/to/EukMetaSanity/bin:$PATH
-export PYTHONPATH=/path/to/EukMetaSanity:$PYTHONPATH
+export PATH=/path/to/EukMetaSanity/bin/:$PATH
+export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 ```
 
 ### Database downloads

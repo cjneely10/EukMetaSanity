@@ -34,7 +34,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 class Task(ABC):
     def __init__(self, input_path_list: List[str], cfg: ConfigManager, pm: PathManager,
-                 record_id: str, db_name: str, mode: int, passed_data: Dict[str, object]):
+                 record_id: str, db_name: str, mode: int):
         # Store passed input flag:input_path dict
         self._name = db_name
         self._input_path_list = input_path_list
@@ -56,8 +56,6 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
-        self.passed_data = {}
-        self.passed_data = {**passed_data}
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -125,7 +123,7 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> Tuple[List[str], Dict[str, object]]:
+    def results(self) -> List[str]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths:
@@ -135,7 +133,7 @@ class Task(ABC):
                     touch(_path)
                 else:
                     raise OutputResultsFileError(_path)
-        return self._output_paths, self.passed_data
+        return self._output_paths
 
     # Function logs and runs dask command
     def log_and_run(self, cmd: LocalCommand):
@@ -149,7 +147,7 @@ class Task(ABC):
         # Check if task has completed based on provided output data
         completed = True
         for _path in self._output_paths:
-            if not os.path.exists(_path):
+            if isinstance(_path, str) and not os.path.exists(_path):
                 # Only call function if missing path
                 # Then move on
                 completed = False
@@ -172,7 +170,7 @@ class Task(ABC):
 
 class TaskList(ABC):
     def __init__(self, new_task: type, name: str, cfg: ConfigManager, input_paths: List[List[str]], pm: PathManager,
-                 record_ids: List[str], mode: int, passed_data: List[Dict[str, object]]):
+                 record_ids: List[str], mode: int):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         name, _, statement = getattr(dt, dt.name)()
@@ -189,14 +187,9 @@ class TaskList(ABC):
                 record_id,
                 name,
                 mode,
-                _passed_data
             )
-            for input_path, record_id, _passed_data in zip(
-                input_paths,
-                record_ids,
-                passed_data,
-            )
-            ]
+            for input_path, record_id in zip(input_paths, record_ids)
+        ]
         # Store workers
         self._workers = workers
         # Store ConfigManager object
@@ -235,16 +228,14 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int, List[Dict[str, object]]]:
+    def output(self) -> Tuple[ConfigManager, List[List[str]], PathManager, List[str], int]:
         # Run task list
-        print([task.results() for task in self._tasks])
         return (
             self.cfg,
-            [task.results()[0] for task in self._tasks],  # Output files using required Data object
+            [task.results() for task in self._tasks],  # Output files using required Data object
             self.pm,
             [task.record_id for task in self._tasks],
             self._mode,
-            [task.results()[1] for task in self._tasks],  # Accumulated data
         )
 
 

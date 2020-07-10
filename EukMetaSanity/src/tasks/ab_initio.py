@@ -12,7 +12,8 @@ class AbInitioIter(TaskList):
             self.output = [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
-                self.input[2],  # Original file
+                self.input[2],  # Original file,
+                self.input[3],  # Tax file
             ]
 
         def run(self) -> None:

@@ -1,5 +1,6 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 
 
 class EvidenceIter(TaskList):
@@ -22,7 +23,7 @@ class EvidenceIter(TaskList):
                     "filtertaxseqdb",
                     self.data,
                     self.input[1],
-                    "--taxon-list", self.passed_data["tax_id"],
+                    "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[1],
                     subset_db_outpath,
                     "--threads", self.threads,
                 ]
