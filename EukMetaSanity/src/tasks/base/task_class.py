@@ -140,7 +140,7 @@ class Task(ABC):
         print(str(cmd))
         logging.info(str(cmd))
         if self.mode == 1:
-            cmd()
+            logging.info(cmd())
 
     @abstractmethod
     def run(self) -> None:
