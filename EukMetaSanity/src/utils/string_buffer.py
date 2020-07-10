@@ -2,7 +2,7 @@ from array import array
 
 
 class StringBuffer:
-    def __init__(self, output_path=None, buf_size=1e6, initial=""):
+    def __init__(self, output_path=None, buf_size=1e5, initial=""):
         assert buf_size > 0
         assert isinstance(initial, str)
         assert output_path is None or isinstance(output_path, str)
@@ -15,6 +15,9 @@ class StringBuffer:
             self._output = open(output_path, "w")
         # Add initial value, if present
         self._add_to_buffer(initial)
+
+    def __del__(self):
+        self._flush_buffer()
 
     def _initialize_buffer(self):
         self._data = array("i", [0] * self._buf_size)
