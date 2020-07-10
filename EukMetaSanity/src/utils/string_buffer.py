@@ -17,7 +17,8 @@ class StringBuffer:
         self._add_to_buffer(initial)
 
     def __del__(self):
-        self._flush_buffer()
+        if self._output is not None:
+            self._output.write(self._to_str())
 
     def _initialize_buffer(self):
         self._data = array("u", ["\0"] * self._buf_size)
