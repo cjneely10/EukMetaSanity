@@ -22,7 +22,6 @@ class TaxonomyIter(TaskList):
 
         def run(self) -> None:
             super().run()
-            # Data to pass forward
 
         @program_catch
         def run_1(self):
