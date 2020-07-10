@@ -37,9 +37,12 @@ class EvidenceIter(TaskList):
                     "--threads", self.threads,
                 ]
             )
-            # Merge results
+            # Convert to GFF3
+            self.local["fasta-to-gff3.py"](self.input[2], os.path.join(self.wdir, "predsResults.fas"),
+                                           "-o", os.path.join(self.wdir, "metaeuk.gff3"))
+            # Merge ab initio and initial prediction results
             self.log_and_run(
-                self.local["cat"][self.input[0]] | self.program_gffread
+                self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] | self.program_gffread
             )
 
     def __init__(self, *args, **kwargs):

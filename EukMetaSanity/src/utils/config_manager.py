@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
-from plumbum import local
 from configparser import RawConfigParser
-from plumbum.commands.processes import CommandNotFound
 
 """
 Manages the config file, as well as arguments that are set for each part of the pipeline

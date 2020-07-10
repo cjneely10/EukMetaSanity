@@ -21,6 +21,7 @@ class RepeatsIter(TaskList):
             self.output = [
                 masked_fa_path,  # Input FASTA file for ab initio
                 masked_db_path,  # MMseqs database for use in metaeuk
+                self.input[0],  # Original input file
             ]
 
         def run(self) -> None:

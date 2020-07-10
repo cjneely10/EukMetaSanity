@@ -18,13 +18,13 @@ class TaxonomyIter(TaskList):
                 self.input[0],  # Input FASTA sequence for repeat masking
                 seq_db,  # MMseqs database for use in metaeuk or repeat masking
             ]
+            # Data to pass forward
             self.passed_data["tax_assignment"], self.passed_data["tax_id"] = TaxonomyIter.Taxonomy.get_taxonomy(
                 os.path.join(self.wdir, "tax-report.txt"), float(self.cutoff)
             )
 
         def run(self) -> None:
             super().run()
-            # self.passed_data["tax_assignment"], self.passed_data["tax_id"] = "1", "2"
 
         @program_catch
         def run_1(self):

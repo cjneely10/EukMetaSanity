@@ -2,10 +2,10 @@ import os
 import logging
 from plumbum import local
 from abc import ABC, abstractmethod
+from dask.distributed import Client, wait
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.src.utils.helpers import touch
 from EukMetaSanity.src.tasks.manager.data import Data
-from dask.distributed import Client, wait, as_completed
 from EukMetaSanity.src.utils.path_manager import PathManager
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine

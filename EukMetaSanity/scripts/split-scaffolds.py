@@ -4,7 +4,7 @@ import re
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from EukMetaSanity.src.utils.arg_parse import ArgParse
+from EukMetaSanity.scripts.utils.arg_parse import ArgParse
 
 DEFAULT_OUT = "_____"
 

@@ -1,4 +1,4 @@
-#!/usr/scripts/env python3
+#!/usr/bin/env python3
 import os
 from BCBio import GFF
 from Bio import SeqIO
@@ -9,7 +9,7 @@ from collections import namedtuple
 from collections import defaultdict
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
-from EukMetaSanity.src.utils.arg_parse import ArgParse
+from EukMetaSanity.scripts.utils.arg_parse import ArgParse
 
 # Result as read in from DNA/contig side as subject
 Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand", "score"))

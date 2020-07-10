@@ -1,7 +1,7 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
-from scripts.fastagff3_to_gb import write_genbank
+from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 
 class AbInitioIter(TaskList):
@@ -12,6 +12,7 @@ class AbInitioIter(TaskList):
             self.output = [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
+                self.input[2],  # Original file
             ]
 
         def run(self) -> None:
