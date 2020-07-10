@@ -2,7 +2,7 @@ from array import array
 
 
 class StringBuffer:
-    def __init__(self, output_path=None, buf_size=1e5, initial=""):
+    def __init__(self, output_path=None, buf_size=4e4, initial=""):
         assert buf_size > 0
         assert isinstance(initial, str)
         assert output_path is None or isinstance(output_path, str)
@@ -20,11 +20,11 @@ class StringBuffer:
         self._flush_buffer()
 
     def _initialize_buffer(self):
-        self._data = array("i", [0] * self._buf_size)
+        self._data = array("u", ["\0"] * self._buf_size)
         self._pos = 0
 
     def _to_str(self) -> str:
-        return "".join(chr(_char) for _char in self._data[:self._pos])
+        return "".join(_char for _char in self._data[:self._pos])
 
     @property
     def buffer(self) -> str:
@@ -46,7 +46,7 @@ class StringBuffer:
             self._flush_buffer()
 
         for i, char in enumerate(_value):
-            self._data[self._pos + i] = ord(char)
+            self._data[self._pos + i] = char
         self._pos += len(_value)
 
     def _flush_buffer(self):
