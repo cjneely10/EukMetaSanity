@@ -120,7 +120,7 @@ class RepeatsIter(TaskList):
                 )
                 # Move output file
                 if os.path.exists(_search):
-                    shutil.move(_search, os.path.join(self.wdir))
+                    shutil.move(os.path.dirname(_search), os.path.join(self.wdir))
             # Combine repeat results and process
             self._parse_output(_added_dirs)
 
@@ -133,12 +133,14 @@ class RepeatsIter(TaskList):
             all(
                 self.log_and_run(self.local["gunzip"]["/".join((rep_dir, "*.cat.gz"))])
                 for rep_dir in repeats_dirs
+                if os.path.exists("/".join((rep_dir, "*.cat.gz")))
             )
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
             self.log_and_run(
                 (
-                    self.local["cat"][(["/".join((rep_dir, "*.cat")) for rep_dir in repeats_dirs])] >> final_out
+                    self.local["cat"][(["/".join((rep_dir, "*.cat")) for rep_dir in repeats_dirs
+                                        if os.path.exists("/".join((rep_dir, "*.cat")))])] >> final_out
                 )
             )
             # Run ProcessRepeats

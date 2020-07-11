@@ -8,7 +8,8 @@ class StringBuffer:
         assert output_path is None or isinstance(output_path, str)
         # Initialize buffer and position in buffer
         self._buf_size = int(float(buf_size))
-        self._initialize_buffer()
+        self._data = array("u", ["\0" for _ in range(self._buf_size)])
+        self._pos = 0
         # Open output buffer
         self._output = None
         if output_path is not None:
@@ -16,16 +17,11 @@ class StringBuffer:
         # Add initial value, if present
         self._add_to_buffer(initial)
 
-    def __del__(self):
-        if self._output is not None:
-            self._output.write(self._to_str())
-
-    def _initialize_buffer(self):
-        self._data = array("u", ["\0"] * self._buf_size)
+    def _reinitialize_buffer(self):
         self._pos = 0
 
     def _to_str(self) -> str:
-        return "".join(_char for _char in self._data[:self._pos])
+        return "".join(self._data[:self._pos])
 
     @property
     def buffer(self) -> str:
@@ -39,7 +35,7 @@ class StringBuffer:
     def buf_size(self, _size: int):
         self._flush_buffer()
         self.buf_size = _size
-        self._initialize_buffer()
+        self._pos = 0
 
     def _add_to_buffer(self, _value: str):
         assert isinstance(_value, str)
@@ -50,23 +46,35 @@ class StringBuffer:
             self._data[self._pos + i] = char
         self._pos += len(_value)
 
-    def _flush_buffer(self):
+    def _flush_buffer(self, reinit=True):
         if self._output is not None:
             self._output.write(self._to_str())
-        self._initialize_buffer()
+        if reinit:
+            self._reinitialize_buffer()
 
     def __iadd__(self, other):
         self._add_to_buffer(other)
         return self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self._to_str()
 
     def add(self, value: str):
         self._add_to_buffer(value)
 
     def write(self, endline: str = None):
-        self._output.write(self._to_str())
+        self._flush_buffer()
         if endline is not None:
             self._output.write(endline)
-        self._flush_buffer()
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    def __len__(self) -> int:
+        return self._pos
+
+
+buf = StringBuffer("/dev/null", 10000)
+for _ in range(1000000):
+    buf.add("2")
+buf.write()
