@@ -3,10 +3,10 @@ import glob
 import shutil
 from typing import List
 from pathlib import Path
-
-from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity.src.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.src.scripts.fastagff3_to_gb import write_genbank
 
 """
 Model the repeated regions of a FASTA sequence
@@ -148,6 +148,12 @@ class RepeatsIter(TaskList):
                     "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0],
                     "-gff", final_out
                 ]
+            )
+            # Rename output file to match expected
+            write_genbank(
+                self.input[0],
+                final_out,
+                os.path.join(self.wdir, self.record_id + "-mask.out")
             )
 
     def __init__(self, *args, **kwargs):
