@@ -129,19 +129,17 @@ class RepeatsIter(TaskList):
             if len(repeats_dirs) == 0:
                 return
             self.pm.add_dirs(self.record_id, ["repeats_final"])
+            _basename = os.path.basename(self.input[0])
             # Unzip results
             all(
-                self.log_and_run(self.local["gunzip"]["/".join((rep_dir, "*.cat.gz"))])
+                self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, _basename + ".cat.gz")])
                 for rep_dir in repeats_dirs
-                if os.path.exists("/".join((rep_dir, "*.cat.gz")))
             )
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
-            self.log_and_run(
-                (
-                    self.local["cat"][(["/".join((rep_dir, "*.cat")) for rep_dir in repeats_dirs
-                                        if os.path.exists("/".join((rep_dir, "*.cat")))])] >> final_out
-                )
+            all(
+                self.log_and_run(self.local["cat"][os.path.join(rep_dir, _basename + ".cat")] >> final_out)
+                for rep_dir in repeats_dirs
             )
             # Run ProcessRepeats
             self.log_and_run(
