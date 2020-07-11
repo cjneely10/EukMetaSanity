@@ -1,4 +1,4 @@
-from array import array
+import ctypes
 
 
 class StringBuffer:
@@ -7,8 +7,8 @@ class StringBuffer:
         assert isinstance(initial, str)
         assert output_path is None or isinstance(output_path, str)
         # Initialize buffer and position in buffer
-        self._buf_size = int(float(buf_size))
-        self._data = array("u", ["\0" for _ in range(self._buf_size)])
+        self._buf_size = int(float(buf_size)) - 1
+        self._data = ctypes.create_string_buffer(b"\0" * (self._buf_size + 1))
         self._pos = 0
         # Open output buffer
         self._output = None
@@ -21,30 +21,16 @@ class StringBuffer:
         self._pos = 0
 
     def _to_str(self) -> str:
-        return "".join(self._data[:self._pos])
-
-    @property
-    def buffer(self) -> str:
-        return self._to_str()
-
-    @property
-    def buf_size(self) -> int:
-        return self._buf_size
-
-    @buf_size.setter
-    def buf_size(self, _size: int):
-        self._flush_buffer()
-        self.buf_size = _size
-        self._pos = 0
+        return "".join([chr(_v) for _v in self._data[:self._pos]])
 
     def _add_to_buffer(self, _value: str):
-        assert isinstance(_value, str)
-        if self._pos + len(_value) >= self._buf_size:
+        _len_val = len(_value)
+        assert _len_val < self._buf_size - 1
+        if self._pos + len(_value) >= self._buf_size - 1:
             self._flush_buffer()
-
-        for i, char in enumerate(_value):
-            self._data[self._pos + i] = char
-        self._pos += len(_value)
+        for i in range(_len_val):
+            self._data[self._pos + i] = ord(_value[i])
+        self._pos += _len_val
 
     def _flush_buffer(self, reinit=True):
         if self._output is not None:
@@ -72,9 +58,3 @@ class StringBuffer:
 
     def __len__(self) -> int:
         return self._pos
-
-
-buf = StringBuffer("/dev/null", 10000)
-for _ in range(1000000):
-    buf.add("2")
-buf.write()

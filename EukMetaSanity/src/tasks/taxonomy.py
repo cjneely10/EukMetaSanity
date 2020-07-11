@@ -79,7 +79,7 @@ class TaxonomyIter(TaskList):
                         return assignment.lower(), _id
             except:
                 return assignment.lower(), _id
-            return assignment.lower(), _id
+            return '"%s"' % assignment.lower(), _id
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)
