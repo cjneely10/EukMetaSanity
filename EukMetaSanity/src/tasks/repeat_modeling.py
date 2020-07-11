@@ -149,6 +149,11 @@ class RepeatsIter(TaskList):
                     final_out,
                 ]
             )
+            # Rename output file
+            os.replace(
+                self.input[0] + ".masked",
+                os.path.join(self.wdir, self.record_id + "-mask.out")
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)
