@@ -3,9 +3,9 @@ import glob
 import shutil
 from typing import List
 from pathlib import Path
-from EukMetaSanity.src.utils.helpers import prefix
+from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.taxonomy import TaxonomyIter
 
 """
 Model the repeated regions of a FASTA sequence
@@ -17,11 +17,10 @@ class RepeatsIter(TaskList):
     class Repeats(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            masked_db_path = os.path.join(self.wdir, self.record_id + "-mask_db")
-            masked_fa_path = masked_db_path[:-3] + ".out"
+            masked_fa_path = os.path.join(self.wdir, self.record_id + "-mask.out")
             self.output = [
                 masked_fa_path,  # Input FASTA file for ab initio
-                masked_db_path,  # MMseqs database for use in metaeuk
+                masked_fa_path,  # MMseqs database for use in metaeuk
                 self.input[0],  # Original input file,
                 self.input[2],  # Tax file
             ]
@@ -86,12 +85,13 @@ class RepeatsIter(TaskList):
             # Perform on de novo results
             de_novo_library = None
             _results_dir = glob.glob(os.path.join(os.getcwd(), "RM_%s*" % str(os.getpid())))
+            print(_results_dir)
             if len(_results_dir) > 0:
                 de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
             # Perform step on each file passed by user
             data_files = []
             if de_novo_library is not None:
-                data_files = [de_novo_library]
+                data_files += [de_novo_library]
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification

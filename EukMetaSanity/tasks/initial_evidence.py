@@ -1,6 +1,6 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.src.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.taxonomy import TaxonomyIter
 
 
 class EvidenceIter(TaskList):

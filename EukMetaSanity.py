@@ -6,11 +6,11 @@ from pathlib import Path
 from typing import Generator
 from string import punctuation
 from signal import signal, SIGPIPE, SIG_DFL
-from EukMetaSanity.src.utils.arg_parse import ArgParse
-from EukMetaSanity.src.utils.path_manager import PathManager
-from EukMetaSanity.src.tasks.manager.task_manager import TaskManager
-from EukMetaSanity.src.utils.helpers import prefix as _prefix
-from EukMetaSanity.src.utils.config_manager import ConfigManager
+from EukMetaSanity.utils.arg_parse import ArgParse
+from EukMetaSanity.utils.path_manager import PathManager
+from EukMetaSanity.utils.helpers import prefix as _prefix
+from EukMetaSanity.utils.config_manager import ConfigManager
+from EukMetaSanity.tasks.manager.task_manager import TaskManager
 
 """
 EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes

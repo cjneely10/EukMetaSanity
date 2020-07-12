@@ -1,6 +1,6 @@
 PYTHON = python3
 PIP = pip3
-IN_SCRIPTS_PATH = EukMetaSanity/src/scripts
+IN_SCRIPTS_PATH = EukMetaSanity/scripts
 OUT_SCRIPTS_PATH = bin
 
 .PHONY : build install all

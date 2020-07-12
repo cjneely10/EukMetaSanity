@@ -1,5 +1,5 @@
 from typing import Dict, Set, Callable, Tuple
-from EukMetaSanity.src.utils.config_manager import ConfigManager
+from EukMetaSanity.utils.config_manager import ConfigManager
 
 """
 Class to handle tracking all required datasets for each task
