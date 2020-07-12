@@ -1,6 +1,6 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 
@@ -35,28 +35,29 @@ class AbInitioIter(TaskList):
         @program_catch
         def _augustus_tax_ident(self) -> str:
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            seq_db = self.input[1]
-            # Run taxonomy search
-            self.log_and_run(
-                self.program_mmseqs[
-                    "taxonomy",
-                    seq_db,  # Input FASTA sequence db
-                    self.data,  # Input augustus-db
-                    tax_db,  # Output tax db
-                    os.path.join(self.wdir, "tmp"),
-                    (*self.added_flags),
-                    "--threads", self.threads,
-                ]
-            )
-            # Output results
-            self.log_and_run(
-                self.program_mmseqs[
-                    "taxonomyreport",
-                    self.data,  # Input augustus-db
-                    tax_db,  # Input tax db
-                    tax_db + ".taxreport"  # Output results file
-                ]
-            )
+            seq_db = self.input[4]
+            if not os.path.exists(tax_db + ".taxreport"):
+                # Run taxonomy search
+                self.log_and_run(
+                    self.program_mmseqs[
+                        "taxonomy",
+                        seq_db,  # Input FASTA sequence db
+                        self.data,  # Input augustus-db
+                        tax_db,  # Output tax db
+                        os.path.join(self.wdir, "tmp"),
+                        (*self.added_flags),
+                        "--threads", self.threads,
+                    ]
+                )
+                # Output results
+                self.log_and_run(
+                    self.program_mmseqs[
+                        "taxonomyreport",
+                        self.data,  # Input augustus-db
+                        tax_db,  # Input tax db
+                        tax_db + ".taxreport"  # Output results file
+                    ]
+                )
             # Return optimal taxonomy
             return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", float(self.cutoff))[0]
 

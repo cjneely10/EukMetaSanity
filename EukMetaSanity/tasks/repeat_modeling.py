@@ -1,6 +1,6 @@
 import os
-import glob
 import shutil
+import datetime
 from typing import List
 from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
@@ -23,6 +23,7 @@ class RepeatsIter(TaskList):
                 masked_db_path,  # MMseqs database for use in metaeuk
                 self.input[0],  # Original input file,
                 self.input[2],  # Tax file
+                self.input[1],  # MMSeqs db for tax ident
             ]
 
         def run(self) -> None:
@@ -59,7 +60,7 @@ class RepeatsIter(TaskList):
         def full(self, input_file: str):
             # BuildDatabase and RepeatModeler
             # RepeatMasker and ProcessRepeats
-            self._mask(self._model(self.simple(input_file)))
+            self._mask(*self._model(self.simple(input_file)))
 
         @program_catch
         def _model(self, input_file: str):
@@ -71,6 +72,9 @@ class RepeatsIter(TaskList):
                     input_file,
                 ]
             )
+            _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
+            # _now = datetime.datetime.now()
+            print(_now)
             # Run RepeatModeler
             self.log_and_run(
                 self.program_modeler[
@@ -79,16 +83,17 @@ class RepeatsIter(TaskList):
                     "-database", _name,
                 ]
             )
-            return input_file
+            return input_file, _now
 
         @program_catch
-        def _mask(self, input_file: str):
+        def _mask(self, input_file: str, _recorded_start_time: datetime.datetime):
             # Perform on de novo results
             from dask.distributed import get_worker
-            _results_dir = glob.glob("RM_%s*" % str(get_worker().id))
-            print(_results_dir)
             # Perform step on each file passed by user
-            data_files = [os.path.join(_results_dir[0], "consensi.fa.classified")]
+            data_files = []
+            _file = RepeatsIter.Repeats._get_results_file(_recorded_start_time)
+            if _file is not None:
+                data_files.append(_file)
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
@@ -152,6 +157,33 @@ class RepeatsIter(TaskList):
                 input_file + ".masked",
                 os.path.join(self.wdir, "".join((self.record_id, "-mask.out")))
             )
+
+        @staticmethod
+        def _get_results_file(_time: datetime.datetime):
+            # Get list of files to search
+            _formatted_time = _time.strftime("%A%b%d%H%M%S%Y")
+            print(_formatted_time)
+            _files = [_file for _file in os.listdir(os.getcwd()) if "RM" in _file]
+            if len(_files) == 1:
+                return os.path.join(_files[0], "consensi.fa.classified")
+            else:
+                _possible_time = (_time + datetime.timedelta(0, 1)).strftime("%A%b%d%H%M%S%Y")
+                print(_possible_time)
+                for _file in _files:
+                    if _formatted_time in _file or _possible_time in _file:
+                        return os.path.join(_file, "consensi.fa.classified")
+
+        @staticmethod
+        def roundTime(dt=None, roundTo=1):
+            """Round a datetime object to any time lapse in seconds
+            dt : datetime.datetime object, default now.
+            roundTo : Closest number of seconds to round to, default 1 minute.
+            Author: Thierry Husson 2012 - Use it as you want but don't blame me.
+            """
+            if dt == None: dt = datetime.datetime.now()
+            seconds = (dt.replace(tzinfo=None) - dt.min).seconds
+            rounding = (seconds + roundTo / 2) // roundTo * roundTo
+            return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)
