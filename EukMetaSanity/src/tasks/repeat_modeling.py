@@ -38,7 +38,7 @@ class RepeatsIter(TaskList):
         def simple(self, input_file: str):
             # Generate the masked sequence
             self.log_and_run(
-                self.program[
+                self.program_mmseqs[
                     "masksequence",
                     input_file,
                     os.path.join(self.wdir, self.record_id),
@@ -47,7 +47,7 @@ class RepeatsIter(TaskList):
             )
             # Output as FASTA file
             self.log_and_run(
-                self.program[
+                self.program_mmseqs[
                     "convert2fasta",
                     os.path.join(self.wdir, self.record_id),
                     input_file + ".mmseqs_simple.fasta",
@@ -66,7 +66,7 @@ class RepeatsIter(TaskList):
             # Build database
             _name = os.path.join(self.wdir, self.record_id)
             self.log_and_run(
-                self.program[
+                self.program_builddatabase[
                     "-name", _name,
                     input_file,
                 ]
