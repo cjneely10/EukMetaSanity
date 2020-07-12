@@ -31,16 +31,16 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            getattr(self, self.protocol)()
+            getattr(self, self.protocol)(self.input[1])
 
         # Simple repeat masking using mmseqs
         @program_catch
-        def simple(self):
+        def simple(self, input_file: str):
             # Generate the masked sequence
             self.log_and_run(
                 self.program[
                     "masksequence",
-                    self.input[1],
+                    input_file,
                     os.path.join(self.wdir, self.record_id),
                     "--threads", self.threads,
                 ]
@@ -50,25 +50,25 @@ class RepeatsIter(TaskList):
                 self.program[
                     "convert2fasta",
                     os.path.join(self.wdir, self.record_id),
-                    self.output[1],
+                    input_file + ".mmseqs_simple.fasta",
                 ]
             )
+            return input_file + ".mmseqs_simple.fasta"
 
         # Complete masking using RepeatModeler/Masker
-        def full(self):
+        def full(self, input_file: str):
             # BuildDatabase and RepeatModeler
-            self._model()
             # RepeatMasker and ProcessRepeats
-            self._mask()
+            self._mask(self._model(self.simple(input_file)))
 
         @program_catch
-        def _model(self):
+        def _model(self, input_file: str):
             # Build database
             _name = os.path.join(self.wdir, self.record_id)
             self.log_and_run(
                 self.program[
                     "-name", _name,
-                    self.input[0],
+                    input_file,
                 ]
             )
             # Run RepeatModeler
@@ -79,9 +79,10 @@ class RepeatsIter(TaskList):
                     "-database", _name,
                 ]
             )
+            return input_file
 
         @program_catch
-        def _mask(self):
+        def _mask(self, input_file: str):
             # Perform on de novo results
             de_novo_library = None
             _results_dir = glob.glob(os.path.join(self.wdir, "RM_%s*" % str(os.getpid())))
@@ -114,21 +115,21 @@ class RepeatsIter(TaskList):
                         (*self.added_flags),
                         (*search),
                         "-dir", self.pm.get_dir(self.record_id, _dir),
-                        self.input[0],
+                        input_file,
                     ]
                 )
                 # Move output file
                 if os.path.exists(_search):
                     shutil.move(os.path.dirname(_search), os.path.join(self.wdir))
             # Combine repeat results and process
-            self._parse_output(_added_dirs)
+            self._parse_output(_added_dirs, input_file)
 
         @program_catch
-        def _parse_output(self, repeats_dirs: List[str]):
+        def _parse_output(self, repeats_dirs: List[str], input_file: str):
             if len(repeats_dirs) == 0:
                 return
             self.pm.add_dirs(self.record_id, ["repeats_final"])
-            _basename = os.path.basename(self.input[0])
+            _basename = os.path.basename(input_file)
             # Unzip results
             all(
                 self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, _basename + ".cat.gz")])
@@ -145,13 +146,13 @@ class RepeatsIter(TaskList):
                 self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
                     "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0],
-                    "-maskSource", self.input[0],
+                    "-maskSource", input_file,
                     final_out,
                 ]
             )
             # Rename output file
             os.replace(
-                self.input[0] + ".masked",
+                input_file + ".masked",
                 os.path.join(self.wdir, self.record_id + "-mask.out")
             )
 
