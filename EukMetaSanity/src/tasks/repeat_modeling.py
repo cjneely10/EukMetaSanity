@@ -85,7 +85,7 @@ class RepeatsIter(TaskList):
         def _mask(self, input_file: str):
             # Perform on de novo results
             de_novo_library = None
-            _results_dir = glob.glob(os.path.join(self.wdir, "RM_%s*" % str(os.getpid())))
+            _results_dir = glob.glob(os.path.join(os.getcwd(), "RM_%s*" % str(os.getpid())))
             if len(_results_dir) > 0:
                 de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
             # Perform step on each file passed by user
