@@ -2,7 +2,6 @@ import os
 import glob
 import shutil
 from typing import List
-from pathlib import Path
 from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.taxonomy import TaxonomyIter
@@ -18,9 +17,10 @@ class RepeatsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             masked_fa_path = os.path.join(self.wdir, "".join((self.record_id, "-mask.out")))
+            masked_db_path = masked_fa_path[:-4] + "_db"
             self.output = [
                 masked_fa_path,  # Input FASTA file for ab initio
-                masked_fa_path,  # MMseqs database for use in metaeuk
+                masked_db_path,  # MMseqs database for use in metaeuk
                 self.input[0],  # Original input file,
                 self.input[2],  # Tax file
             ]
@@ -44,8 +44,8 @@ class RepeatsIter(TaskList):
                     "--threads", self.threads,
                 ]
             )
+            _fasta_output = os.path.join(self.wdir, "".join((self.record_id, "-mask_db")))
             # Output as FASTA file
-            _fasta_output = "".join((input_file, ".mmseqs_simple.fasta"))
             self.log_and_run(
                 self.program_mmseqs[
                     "convert2fasta",
@@ -84,14 +84,11 @@ class RepeatsIter(TaskList):
         @program_catch
         def _mask(self, input_file: str):
             # Perform on de novo results
-            de_novo_library = None
-            _results_dir = glob.glob("RM_%s*" % str(os.getpid()))
-            if len(_results_dir) > 0:
-                de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
+            from dask.distributed import get_worker
+            _results_dir = glob.glob("RM_%s*" % str(get_worker().id))
+            print(_results_dir)
             # Perform step on each file passed by user
-            data_files = []
-            if de_novo_library is not None:
-                data_files += [de_novo_library]
+            data_files = [os.path.join(_results_dir[0], "consensi.fa.classified")]
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
@@ -99,7 +96,7 @@ class RepeatsIter(TaskList):
             _added_dirs = []
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
-                if os.path.exists(str(Path(_search).resolve())):
+                if os.path.exists(_search):
                     search = ("-lib", _search)
                     _dir = "repeats_" + prefix(_search)
                 else:
