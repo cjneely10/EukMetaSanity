@@ -4,6 +4,7 @@ import sys
 import glob
 from Bio import SeqIO
 from Bio.Seq import Seq
+from io import StringIO
 from Bio.SeqRecord import SeqRecord
 
 
@@ -30,16 +31,17 @@ def write_merged(_files, output_path):
 
 def merge(glob_statement):
 	for _file in glob.glob(glob_statement):
-		seq = ""
+		seq = StringIO()
 		record_id = os.path.basename(os.path.splitext(_file)[0])
 		record_p = SeqIO.parse(_file, "fasta")
 		for record in record_p:
-			seq += str(record.seq).replace("N", "").replace("n", "").upper()
+			seq.write(str(record.seq))
 		yield SeqRecord(
-			seq=Seq(seq),
+			seq=Seq(seq.getvalue()),
 			id=record_id,
 			description="",
 		)
+		seq.close()
 
 
 def main(argv):

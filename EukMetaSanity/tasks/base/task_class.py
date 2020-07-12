@@ -7,9 +7,9 @@ from EukMetaSanity.utils.helpers import touch
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.utils.path_manager import PathManager
+from EukMetaSanity.utils.config_manager import ConfigManager
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
-from EukMetaSanity.utils.config_manager import ConfigManager
 
 """
 Task: Class that manages and handles working directory to complete an operation

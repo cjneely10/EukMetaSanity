@@ -17,7 +17,7 @@ class RepeatsIter(TaskList):
     class Repeats(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            masked_fa_path = os.path.join(self.wdir, self.record_id + "-mask.out")
+            masked_fa_path = os.path.join(self.wdir, "".join((self.record_id, "-mask.out")))
             self.output = [
                 masked_fa_path,  # Input FASTA file for ab initio
                 masked_fa_path,  # MMseqs database for use in metaeuk
@@ -45,14 +45,15 @@ class RepeatsIter(TaskList):
                 ]
             )
             # Output as FASTA file
+            _fasta_output = "".join((input_file, ".mmseqs_simple.fasta"))
             self.log_and_run(
                 self.program_mmseqs[
                     "convert2fasta",
                     os.path.join(self.wdir, self.record_id),
-                    input_file + ".mmseqs_simple.fasta",
+                    _fasta_output,
                 ]
             )
-            return input_file + ".mmseqs_simple.fasta"
+            return _fasta_output
 
         # Complete masking using RepeatModeler/Masker
         def full(self, input_file: str):
@@ -84,8 +85,7 @@ class RepeatsIter(TaskList):
         def _mask(self, input_file: str):
             # Perform on de novo results
             de_novo_library = None
-            _results_dir = glob.glob(os.path.join(os.getcwd(), "RM_%s*" % str(os.getpid())))
-            print(_results_dir)
+            _results_dir = glob.glob("RM_%s*" % str(os.getpid()))
             if len(_results_dir) > 0:
                 de_novo_library = os.path.join(_results_dir[0], "consensi.fa")
             # Perform step on each file passed by user
@@ -132,13 +132,13 @@ class RepeatsIter(TaskList):
             _basename = os.path.basename(input_file)
             # Unzip results
             all(
-                self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, _basename + ".cat.gz")])
+                self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))])
                 for rep_dir in repeats_dirs
             )
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
             all(
-                self.log_and_run(self.local["cat"][os.path.join(rep_dir, _basename + ".cat")] >> final_out)
+                self.log_and_run(self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)
                 for rep_dir in repeats_dirs
             )
             # Run ProcessRepeats
@@ -153,7 +153,7 @@ class RepeatsIter(TaskList):
             # Rename output file
             os.replace(
                 input_file + ".masked",
-                os.path.join(self.wdir, self.record_id + "-mask.out")
+                os.path.join(self.wdir, "".join((self.record_id, "-mask.out")))
             )
 
     def __init__(self, *args, **kwargs):
