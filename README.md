@@ -9,6 +9,8 @@ export PATH=/path/to/EukMetaSanity/bin/:$PATH
 export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 ```
 
+Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set
+
 ### Database downloads
 
 ## Usage
