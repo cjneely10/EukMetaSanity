@@ -1,4 +1,5 @@
 import os
+from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.utils.helpers import augustus_taxon_ids
 from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
@@ -61,12 +62,14 @@ class AbInitioIter(TaskList):
                     ]
                 )
             # Return optimal taxonomy
+            augustus_ids_dict = augustus_taxon_ids()
+            found_taxa = Counter()
             with open(tax_db + ".m8", "r") as R:
-                augustus_ids = augustus_taxon_ids()
                 for line in R:
                     line = line.rstrip("\r\n").split()
-                    if line[2] in augustus_ids:
-                        return line[3].replace(" ", "_").lower()
+                    if line[2] in augustus_ids_dict.keys():
+                        found_taxa[line[2]] += 1
+            return augustus_ids_dict[found_taxa.most_common()[0][0]]
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):
