@@ -22,7 +22,7 @@ class AbInitioIter(TaskList):
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
                 self.input[2],  # Original file,
             ]
-            self.rounds = int(self.rounds) + 1
+            self.rounds = int(self.rounds)
 
         def run(self) -> None:
             super().run()
@@ -43,12 +43,10 @@ class AbInitioIter(TaskList):
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
-            shutil.copy(out_gff, os.path.join(self.wdir, self.record_id + ".gff3"))
+            os.replace(out_gff, os.path.join(self.wdir, self.record_id + ".gff3"))
 
         def _augustus(self, species: str, _round: int, _file: str):
             out_gff = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round))
-            if os.path.exists(out_gff):
-                os.remove(out_gff)
             # Chunk file predictions
             record_p = SeqIO.parse(_file, "fasta")
             progs = []
@@ -71,8 +69,7 @@ class AbInitioIter(TaskList):
                     ]
                 )
             self.batch(progs)
-            (self.local["cat"][out_gffs] | self.local["gffread"]["-o", out_gff])()
-            # all((self.local["cat"][_path] >> out_gff)() for _path in out_gffs)
+            (self.local["cat"][out_gffs] | self.local["gffread"]["-o", out_gff, "-F", "--keep-comments"])()
             all(os.remove(_file) for _file in out_files)
             all(os.remove(_file) for _file in out_gffs)
             return out_gff
