@@ -6,7 +6,7 @@ OUT_SCRIPTS_PATH = bin
 .PHONY : build install all
 
 build:
-	$(PYTHON) -m compileall .
+	$(PYTHON) -m compileall . > /dev/null
 	mkdir -p $(OUT_SCRIPTS_PATH)
 	ln -srf $(IN_SCRIPTS_PATH)/*.py $(OUT_SCRIPTS_PATH)/
 
