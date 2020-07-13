@@ -31,20 +31,12 @@ class AbInitioIter(TaskList):
 
         def augustus(self):
             # Initial training based on best species from taxonomy search
-            out, _file = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
+            _file = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds)):
-                out, _file = self._augustus(self.record_id + str(i + 1), i + 2, _file)
-            # Move the augustus training folders to their wdir folders
-            config_dir = os.path.join(
-                os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
-                "config"
-            )
-            for i in range(int(self.rounds)):
-                shutil.move(
-                    os.path.join(config_dir, self.record_id + str(i + 2)),
-                    self.wdir
-                )
+                _file = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
+            # Move any augustus-generated config stuff
+            self._handle_config_output()
 
         @program_catch
         def _augustus_tax_ident(self) -> str:
@@ -81,9 +73,9 @@ class AbInitioIter(TaskList):
             with open(tax_db + ".m8", "r") as R:
                 for line in R:
                     line = line.rstrip("\r\n").split()
+                    # Count those that pass the user-defined cutoff value
                     if line[3] in augustus_ids_dict.keys() and float(line[2]) > (float(self.cutoff) / 100.):
                         found_taxa[line[3]] += 1
-            _most_common = found_taxa.most_common()
             return augustus_ids_dict[found_taxa.most_common()[0][0]]
 
         @program_catch
@@ -121,7 +113,23 @@ class AbInitioIter(TaskList):
                     out_gb
                 ]
             )
-            return out_gff, out_gb
+            return out_gff
+
+        @staticmethod
+        def _out_path(_file_name: str, _ext: str) -> str:
+            return os.path.basename(os.path.splitext(_file_name)[0]) + _ext
+
+        def _handle_config_output(self):
+            # Move the augustus training folders to their wdir folders
+            config_dir = os.path.join(
+                os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
+                "config"
+            )
+            for i in range(int(self.rounds)):
+                shutil.move(
+                    os.path.join(config_dir, self.record_id + str(i + 2)),
+                    self.wdir
+                )
 
         @program_catch
         def gmes(self):
@@ -137,10 +145,6 @@ class AbInitioIter(TaskList):
                     os.path.join(self.pm.get_dir(self.record_id, self.name), "genemark.gtf"),
                     self.output[0],
                 )
-
-        @staticmethod
-        def _out_path(_file_name: str, _ext: str) -> str:
-            return os.path.basename(os.path.splitext(_file_name)[0]) + _ext
 
     def __init__(self, *args, **kwargs):
         super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)
