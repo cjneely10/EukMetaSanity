@@ -119,7 +119,7 @@ class AbInitioIter(TaskList):
             # Remove old training directory, if needed
             config_dir = os.path.join(
                 os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
-                "config", self.record_id + str(_round)
+                "config", "species", self.record_id + str(_round)
             )
             if os.path.exists(config_dir):
                 shutil.rmtree(config_dir)
@@ -155,7 +155,7 @@ class AbInitioIter(TaskList):
             # Move the augustus training folders to their wdir folders
             config_dir = os.path.join(
                 os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
-                "config"
+                "config", "species"
             )
             for i in range(1, int(self.rounds)):
                 shutil.move(
