@@ -152,8 +152,9 @@ class Task(ABC):
                     break
                 print("  " + str(cmds[j]))
                 logging.info(str(cmds[j]))
-                f = cmds[j] & BG
-                running.append(f)
+                if self.mode == 1:
+                    f = cmds[j] & BG
+                    running.append(f)
             all(_f.wait() for _f in running)
 
     @abstractmethod

@@ -25,6 +25,7 @@ class RepeatsIter(TaskList):
                 self.input[2],  # Tax file
                 self.input[1],  # MMSeqs db for tax ident
             ]
+            self.delay = 3
 
         def run(self) -> None:
             super().run()
