@@ -1,4 +1,6 @@
 import os
+import shutil
+from pathlib import Path
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.utils.helpers import augustus_taxon_ids
@@ -33,8 +35,17 @@ class AbInitioIter(TaskList):
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds)):
                 out, _file = self._augustus(self.record_id + str(i + 2), i + 2, _file)
-            if self.mode == 1:
-                os.replace(out, self.output[0])
+            # Move the augustus training folders to their wdir folders
+            config_dir = os.path.join(
+                os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
+                "config"
+            )
+            for i in range(int(self.rounds)):
+                shutil.move(
+                    os.path.join(config_dir, self.record_id + str(i)),
+                    self.wdir
+                )
+
 
         @program_catch
         def _augustus_tax_ident(self) -> str:
