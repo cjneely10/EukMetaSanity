@@ -89,7 +89,7 @@ class AbInitioIter(TaskList):
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):
-            out_gff = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round)
+            out_gff = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round))
             # Run prediction
             self.log_and_run(
                 self.program_augustus[
@@ -141,7 +141,7 @@ class AbInitioIter(TaskList):
 
         @staticmethod
         def _out_path(_file_name: str, _ext: str) -> str:
-            return os.path.splitext(_file_name)[0] + _ext
+            return os.path.basename(os.path.splitext(_file_name)[0]) + _ext
 
     def __init__(self, *args, **kwargs):
         super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)

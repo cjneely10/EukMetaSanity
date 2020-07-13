@@ -16,7 +16,7 @@ class RepeatsIter(TaskList):
     class Repeats(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            masked_fa_path = os.path.join(self.wdir, "".join((self.record_id, "-mask.out")))
+            masked_fa_path = os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
             masked_db_path = masked_fa_path[:-4] + "_db"
             self.output = [
                 masked_fa_path,  # Input FASTA file for ab initio
@@ -155,7 +155,7 @@ class RepeatsIter(TaskList):
             # Rename output file
             os.replace(
                 input_file + ".masked",
-                os.path.join(self.wdir, "".join((self.record_id, "-mask.out")))
+                os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
             )
 
         @staticmethod
