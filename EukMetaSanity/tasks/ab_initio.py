@@ -34,7 +34,7 @@ class AbInitioIter(TaskList):
             out, _file = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds)):
-                out, _file = self._augustus(self.record_id + str(i + 2), i + 2, _file)
+                out, _file = self._augustus(self.record_id + str(i + 1), i + 2, _file)
             # Move the augustus training folders to their wdir folders
             config_dir = os.path.join(
                 os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
