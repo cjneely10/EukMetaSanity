@@ -82,7 +82,7 @@ def _parse_args(ap: ArgParse, tm: TaskManager) -> ConfigManager:
     assert os.path.exists(ap.args.config_file)
     assert os.path.exists(ap.args.fasta_directory)
     # Ensure command is valid
-    assert ap.args.command in tm.programs
+    assert ap.args.command in tm.programs or ap.args.command == "new_cfg"
     if ap.args.debug is True:
         ap.args.debug = 0
     else:
@@ -130,10 +130,11 @@ if __name__ == "__main__":
     # Redirect dask nanny errors
     signal(SIGPIPE, SIG_DFL)
     DEFAULT_EXTS = ".fna/.fasta/.fa"
+    _tm = TaskManager()
     _ap = ArgParse(
         (
             (("command",),
-             {"help": "Select from run/refine"}),
+             {"help": "Select from %s" % "/".join(_tm.programs)}),
             (("-f", "--fasta_directory",),
              {"help": "Directory of FASTA files to annotate", "required": True}),
             (("-c", "--config_file"),
@@ -149,8 +150,6 @@ if __name__ == "__main__":
         ),
         description="Run EukMetaSanity pipeline"
     )
-
-    _tm = TaskManager()
     _main(_ap, _parse_args(_ap, _tm), _tm)
     for func in (logging.info, print):
         func("\nEukMetaSanity pipeline complete!")

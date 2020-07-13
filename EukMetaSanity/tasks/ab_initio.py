@@ -31,12 +31,14 @@ class AbInitioIter(TaskList):
 
         def augustus(self):
             # Initial training based on best species from taxonomy search
-            _file = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
+            out_gff = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds)):
-                _file = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
+                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
             # Move any augustus-generated config stuff
             self._handle_config_output()
+            # Rename final file
+            shutil.copy(out_gff, os.path.join(self.wdir, self.record_id + ".gff3"))
 
         @program_catch
         def _augustus_tax_ident(self) -> str:

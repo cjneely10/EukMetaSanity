@@ -1,7 +1,7 @@
 import os
 import logging
 from time import sleep
-from plumbum import local
+from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
 from EukMetaSanity.utils.helpers import touch
@@ -142,6 +142,15 @@ class Task(ABC):
         logging.info(str(cmd))
         if self.mode == 1:
             logging.info(cmd())
+
+    def batch(self, cmds: LocalCommand):
+        for i in range(0, len(cmds), self.threads):
+            running = []
+            for j in range(i, i + self.threads):
+                f = cmds[j] & BG
+                self.log_and_run(f)
+                running.append(f)
+            all(_f.wait() for _f in running)
 
     @abstractmethod
     def run(self) -> None:
