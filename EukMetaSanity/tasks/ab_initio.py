@@ -22,6 +22,7 @@ class AbInitioIter(TaskList):
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
                 self.input[2],  # Original file,
             ]
+            self.delay = 3
 
         def run(self) -> None:
             super().run()
@@ -37,7 +38,7 @@ class AbInitioIter(TaskList):
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds)):
                 out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
-                self._train_augustus(1, self.input[0], out_gff)
+                self._train_augustus(i + 1, self.input[0], out_gff)
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
@@ -47,11 +48,14 @@ class AbInitioIter(TaskList):
             out_gff = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round))
             # Chunk file predictions
             record_p = SeqIO.parse(_file, "fasta")
+            progs = []
+            out_files = []
             for record in record_p:
-                out_file_path = str(record.id) + ".fna"
+                out_file_path = os.path.join(self.wdir, str(record.id) + ".fna")
+                out_files.append(out_file_path)
                 SeqIO.write([record], out_file_path, "fasta")
                 # Run prediction
-                self.log_and_run(
+                progs.append(
                     self.program_augustus[
                         "--codingseq=on",
                         "--stopCodonExcludedFromCDS=true",
@@ -60,6 +64,9 @@ class AbInitioIter(TaskList):
                         out_file_path,
                     ]
                 )
+            self.batch(progs)
+            all((self.local["cat"][_path] >> out_gff)() for _path in out_files)
+            all(os.remove(_file) for _file in out_files)
             return out_gff
 
         @program_catch
@@ -104,6 +111,13 @@ class AbInitioIter(TaskList):
 
         @program_catch
         def _train_augustus(self, _round: int, _file: str, out_gff: str):
+            # Remove old training directory, if needed
+            config_dir = os.path.join(
+                os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
+                "config", self.record_id + str(_round + 1)
+            )
+            if os.path.exists(config_dir):
+                shutil.rmtree(config_dir)
             # Parse to genbank
             out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round))
             write_genbank(
@@ -138,9 +152,9 @@ class AbInitioIter(TaskList):
                 os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
                 "config"
             )
-            for i in range(int(self.rounds)):
+            for i in range(1, int(self.rounds)):
                 shutil.move(
-                    os.path.join(config_dir, self.record_id + str(i + 2)),
+                    os.path.join(config_dir, self.record_id + str(i + 1)),
                     self.wdir
                 )
 

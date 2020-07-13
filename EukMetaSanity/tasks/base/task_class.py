@@ -57,6 +57,7 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
+        self.delay = 0
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -143,12 +144,13 @@ class Task(ABC):
         if self.mode == 1:
             logging.info(cmd())
 
-    def batch(self, cmds: LocalCommand):
-        for i in range(0, len(cmds), self.threads):
+    def batch(self, cmds: List[LocalCommand]):
+        for i in range(0, len(cmds), int(self.threads)):
             running = []
-            for j in range(i, i + self.threads):
+            for j in range(i, i + int(self.threads)):
+                print("  " + str(cmds[j]))
+                logging.info(str(cmds[j]))
                 f = cmds[j] & BG
-                self.log_and_run(f)
                 running.append(f)
             all(_f.wait() for _f in running)
 
@@ -234,7 +236,7 @@ class TaskList(ABC):
             client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
-                sleep(5)
+                sleep(_task.delay)
                 futures.append(client.submit(_task.run))
             wait(futures)
             client.close()
