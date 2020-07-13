@@ -5,6 +5,10 @@ from EukMetaSanity.utils.helpers import augustus_taxon_ids
 from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 
+class FailedAugustusIdentification(ChildProcessError):
+    pass
+
+
 class AbInitioIter(TaskList):
     class AbInitio(Task):
         def __init__(self, *args, **kwargs):
@@ -58,7 +62,7 @@ class AbInitioIter(TaskList):
                         tax_db,  # Input tax db
                         tax_db + ".m8",  # Output results file
                         "--threads", self.threads,
-                        "--format-output", "query,target,taxid,taxname,taxlineage",
+                        "--format-output", "query,target,pident,taxid,taxname,taxlineage",
                     ]
                 )
             # Return optimal taxonomy
@@ -67,9 +71,12 @@ class AbInitioIter(TaskList):
             with open(tax_db + ".m8", "r") as R:
                 for line in R:
                     line = line.rstrip("\r\n").split()
-                    if line[2] in augustus_ids_dict.keys():
-                        found_taxa[line[2]] += 1
-            return augustus_ids_dict[found_taxa.most_common()[0][0]]
+                    if line[3] in augustus_ids_dict.keys() and float(line[2]) > (float(self.cutoff) / 100.):
+                        found_taxa[line[3]] += 1
+            _most_common = found_taxa.most_common()
+            if len(_most_common) == 0:
+                return augustus_ids_dict[found_taxa.most_common()[0][0]]
+            raise FailedAugustusIdentification
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):
