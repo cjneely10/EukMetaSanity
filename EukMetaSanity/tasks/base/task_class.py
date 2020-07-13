@@ -225,6 +225,7 @@ class TaskList(ABC):
             client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
+                sleep(5)
                 futures.append(client.submit(_task.run))
             wait(futures)
             client.close()
