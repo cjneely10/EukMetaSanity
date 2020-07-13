@@ -42,7 +42,7 @@ class AbInitioIter(TaskList):
             )
             for i in range(int(self.rounds)):
                 shutil.move(
-                    os.path.join(config_dir, self.record_id + str(i)),
+                    os.path.join(config_dir, self.record_id + str(i + 2)),
                     self.wdir
                 )
 
