@@ -46,7 +46,6 @@ class AbInitioIter(TaskList):
                     self.wdir
                 )
 
-
         @program_catch
         def _augustus_tax_ident(self) -> str:
             tax_db = os.path.join(self.wdir, self.record_id + "-augustus_db")
