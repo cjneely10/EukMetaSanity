@@ -1,5 +1,6 @@
 import os
 import shutil
+from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
@@ -32,13 +33,34 @@ class AbInitioIter(TaskList):
         def augustus(self):
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
+            self._train_augustus(1, self.input[0], out_gff)
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.rounds)):
                 out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
+                self._train_augustus(1, self.input[0], out_gff)
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
             shutil.copy(out_gff, os.path.join(self.wdir, self.record_id + ".gff3"))
+
+        def _augustus(self, species: str, _round: int, _file: str):
+            out_gff = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round))
+            # Chunk file predictions
+            record_p = SeqIO.parse(_file, "fasta")
+            for record in record_p:
+                out_file_path = str(record.id) + ".fna"
+                SeqIO.write([record], out_file_path, "fasta")
+                # Run prediction
+                self.log_and_run(
+                    self.program_augustus[
+                        "--codingseq=on",
+                        "--stopCodonExcludedFromCDS=true",
+                        "--species=%s" % species,
+                        "--outfile=%s" % out_gff + "-" + str(record.id),
+                        out_file_path,
+                    ]
+                )
+            return out_gff
 
         @program_catch
         def _augustus_tax_ident(self) -> str:
@@ -81,18 +103,7 @@ class AbInitioIter(TaskList):
             return augustus_ids_dict[found_taxa.most_common()[0][0]]
 
         @program_catch
-        def _augustus(self, species: str, _round: int, _file: str):
-            out_gff = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round))
-            # Run prediction
-            self.log_and_run(
-                self.program_augustus[
-                    "--codingseq=on",
-                    "--stopCodonExcludedFromCDS=true",
-                    "--species=%s" % species,
-                    "--outfile=%s" % out_gff,
-                    _file,
-                ]
-            )
+        def _train_augustus(self, _round: int, _file: str, out_gff: str):
             # Parse to genbank
             out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round))
             write_genbank(
