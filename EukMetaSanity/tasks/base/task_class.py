@@ -138,7 +138,7 @@ class Task(ABC):
 
     # Function logs and runs dask command
     def log_and_run(self, cmd: LocalCommand):
-        print(str(cmd))
+        print("  " + str(cmd))
         logging.info(str(cmd))
         if self.mode == 1:
             logging.info(cmd())

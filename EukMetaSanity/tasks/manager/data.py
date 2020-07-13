@@ -12,7 +12,7 @@ def added(f: Callable) -> Callable:
         return (
             f.__name__,
             self.data,
-            "Identifying {} using %i workers and %i threads per worker".format(f.__name__)
+            "\nIdentifying {} using %i workers and %i threads per worker".format(f.__name__)
         )
     return _wrapper
 
