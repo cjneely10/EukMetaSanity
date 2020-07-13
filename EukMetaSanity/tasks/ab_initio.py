@@ -23,6 +23,7 @@ class AbInitioIter(TaskList):
                 self.input[2],  # Original file,
             ]
             self.delay = 3
+            self.rounds = int(self.rounds) + 1
 
         def run(self) -> None:
             super().run()
@@ -36,9 +37,10 @@ class AbInitioIter(TaskList):
             out_gff = self._augustus(self._augustus_tax_ident(), 1, self.input[0])
             self._train_augustus(1, self.input[0], out_gff)
             # Remaining rounds of re-training on generated predictions
-            for i in range(int(self.rounds)):
+            for i in range(self.rounds):
                 out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
-                self._train_augustus(i + 1, self.input[0], out_gff)
+                if i != self.rounds - 1:
+                    self._train_augustus(i + 2, self.input[0], out_gff)
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
