@@ -50,9 +50,12 @@ class AbInitioIter(TaskList):
             record_p = SeqIO.parse(_file, "fasta")
             progs = []
             out_files = []
+            out_gffs = []
             for record in record_p:
                 out_file_path = os.path.join(self.wdir, str(record.id) + ".fna")
+                _out_gff = out_gff + "-" + str(record.id)
                 out_files.append(out_file_path)
+                out_gffs.append(_out_gff)
                 SeqIO.write([record], out_file_path, "fasta")
                 # Run prediction
                 progs.append(
@@ -60,12 +63,12 @@ class AbInitioIter(TaskList):
                         "--codingseq=on",
                         "--stopCodonExcludedFromCDS=true",
                         "--species=%s" % species,
-                        "--outfile=%s" % out_gff + "-" + str(record.id),
+                        "--outfile=%s" % _out_gff,
                         out_file_path,
                     ]
                 )
             self.batch(progs)
-            all((self.local["cat"][_path] >> out_gff)() for _path in out_files)
+            all((self.local["cat"][_path] >> out_gff)() for _path in out_gffs)
             all(os.remove(_file) for _file in out_files)
             return out_gff
 

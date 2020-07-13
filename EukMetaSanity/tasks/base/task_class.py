@@ -148,6 +148,8 @@ class Task(ABC):
         for i in range(0, len(cmds), int(self.threads)):
             running = []
             for j in range(i, i + int(self.threads)):
+                if j >= len(cmds):
+                    break
                 print("  " + str(cmds[j]))
                 logging.info(str(cmds[j]))
                 f = cmds[j] & BG
