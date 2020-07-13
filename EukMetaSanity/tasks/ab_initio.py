@@ -74,9 +74,7 @@ class AbInitioIter(TaskList):
                     if line[3] in augustus_ids_dict.keys() and float(line[2]) > (float(self.cutoff) / 100.):
                         found_taxa[line[3]] += 1
             _most_common = found_taxa.most_common()
-            if len(_most_common) == 0:
-                return augustus_ids_dict[found_taxa.most_common()[0][0]]
-            raise FailedAugustusIdentification
+            return augustus_ids_dict[found_taxa.most_common()[0][0]]
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):
