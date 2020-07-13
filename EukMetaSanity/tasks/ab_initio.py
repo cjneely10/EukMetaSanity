@@ -83,7 +83,7 @@ class AbInitioIter(TaskList):
             out_gff = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round)
             # Run prediction
             self.log_and_run(
-                self.program[
+                self.program_augustus[
                     "--codingseq=on",
                     "--stopCodonExcludedFromCDS=true",
                     "--species=%s" % species,
@@ -118,7 +118,7 @@ class AbInitioIter(TaskList):
         @program_catch
         def gmes(self):
             self.log_and_run(
-                self.program[
+                self.program_gmes[
                     "--sequence", self.input[0],
                     "--ES", "--cores", self.threads, (*self.added_flags)
                 ]
