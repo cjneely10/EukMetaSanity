@@ -1,5 +1,6 @@
 import os
-from typing import Set
+from typing import Tuple, List
+
 """
 General functions
 
@@ -17,8 +18,8 @@ def prefix(_path: str) -> str:
 
 
 # All available AUGUSTUS taxon ids
-def augustus_taxon_ids() -> Set[str]:
-    return set("""9606
+def augustus_taxon_ids() -> Tuple[List[str], List[str]]:
+    tax_ids = """9606
 7227
 3702
 6279
@@ -76,4 +77,5 @@ def augustus_taxon_ids() -> Set[str]:
 7955
 562
 1280
-3067""".split())
+3067""".split()
+    identifiers =

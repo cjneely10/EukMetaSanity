@@ -1,6 +1,6 @@
 import os
-from EukMetaSanity.tasks.taxonomy import TaxonomyIter
 from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity.utils.helpers import augustus_taxon_ids
 from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 
@@ -13,7 +13,6 @@ class AbInitioIter(TaskList):
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
                 self.input[2],  # Original file,
-                self.input[3],  # Tax file
             ]
 
         def run(self) -> None:
@@ -34,13 +33,13 @@ class AbInitioIter(TaskList):
 
         @program_catch
         def _augustus_tax_ident(self) -> str:
-            tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
+            tax_db = os.path.join(self.wdir, self.record_id + "-augustus_db")
             seq_db = self.input[4]
-            if not os.path.exists(tax_db + ".taxreport"):
+            if not os.path.exists(tax_db + ".m8"):
                 # Run taxonomy search
                 self.log_and_run(
                     self.program_mmseqs[
-                        "taxonomy",
+                        "linsearch",
                         seq_db,  # Input FASTA sequence db
                         self.data,  # Input augustus-db
                         tax_db,  # Output tax db
@@ -52,14 +51,22 @@ class AbInitioIter(TaskList):
                 # Output results
                 self.log_and_run(
                     self.program_mmseqs[
-                        "taxonomyreport",
+                        "convertalis",
+                        seq_db,  # Input FASTA sequence db
                         self.data,  # Input augustus-db
                         tax_db,  # Input tax db
-                        tax_db + ".taxreport"  # Output results file
+                        tax_db + ".m8",  # Output results file
+                        "--threads", self.threads,
+                        "--format-output", "query,target,taxid,taxname,taxlineage",
                     ]
                 )
             # Return optimal taxonomy
-            return TaxonomyIter.Taxonomy.get_taxonomy(tax_db + ".taxreport", float(self.cutoff))[0]
+            with open(tax_db + ".m8", "r") as R:
+                augustus_ids = augustus_taxon_ids()
+                for line in R:
+                    line = line.rstrip("\r\n").split()
+                    if line[2] in augustus_ids:
+                        return line[3].replace(" ", "_").lower()
 
         @program_catch
         def _augustus(self, species: str, _round: int, _file: str):
@@ -70,8 +77,8 @@ class AbInitioIter(TaskList):
                     "--codingseq=on",
                     "--stopCodonExcludedFromCDS=true",
                     "--species=%s" % species,
+                    "--outfile=%s" % out_gff,
                     _file,
-                    "--outfile", out_gff
                 ]
             )
             # Parse to genbank
