@@ -40,7 +40,7 @@ class AbInitioIter(TaskList):
             for i in range(self.rounds):
                 out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
                 if i != self.rounds - 1:
-                    self._train_augustus(i + 2, self.input[0], out_gff)
+                    self._train_augustus(i + 1, self.input[0], out_gff)
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
@@ -119,12 +119,12 @@ class AbInitioIter(TaskList):
             # Remove old training directory, if needed
             config_dir = os.path.join(
                 os.path.dirname(os.path.dirname(Path(str(self.program_augustus)).resolve())),
-                "config", self.record_id + str(_round + 1)
+                "config", self.record_id + str(_round)
             )
             if os.path.exists(config_dir):
                 shutil.rmtree(config_dir)
             # Parse to genbank
-            out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round))
+            out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(_file, ".%i.gb" % _round))
             write_genbank(
                 _file,
                 out_gff,
