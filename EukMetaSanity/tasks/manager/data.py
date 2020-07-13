@@ -1,3 +1,4 @@
+from collections import namedtuple
 from typing import Dict, Set, Callable, Tuple
 from EukMetaSanity.utils.config_manager import ConfigManager
 
@@ -12,7 +13,7 @@ def added(f: Callable) -> Callable:
         return (
             f.__name__,
             self.data,
-            "\nIdentifying {} using %i workers and %i threads per worker".format(f.__name__)
+            "\nRunning {} protocol using %i workers and %i threads per worker".format(f.__name__)
         )
     return _wrapper
 
@@ -64,6 +65,15 @@ class Data:
     @added
     def evidence(self):
         pass
+
+
+UrlInfo = namedtuple("UrlInfo", ("url", "tar", "gz"))
+
+
+def data_urls() -> Dict[str, str]:
+    return {
+        "orthodb": "https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz"
+    }
 
 
 if __name__ == "__main__":

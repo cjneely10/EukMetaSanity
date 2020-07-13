@@ -9,9 +9,53 @@ export PATH=/path/to/EukMetaSanity/bin/:$PATH
 export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 ```
 
-Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set
+### Installing dependencies
+
+**EukMetaSanity** consists of 3 subprograms - `run`, `refine`, `report`.
+
+When selecting dependencies to download, please follow the instructions below:
+
+##### Run step 1: Taxonomy identification
+Install [MMseqs2](https://github.com/soedinglab/MMseqs2)
+
+##### Run step 2: Repeats modeling
+Optionally download [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) AND 
+[RepeatMasker](http://www.repeatmasker.org/RMDownload.html)
+
+##### Run step 3: *Ab initio* predictions
+Choose from [Augustus](https://github.com/Gaius-Augustus/Augustus) or 
+[GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi).
+
+*(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set prior to running)*
+
+##### Run step 4: Initial protein evidence
+Install [MetaEuk](https://github.com/soedinglab/metaeuk)
+
+##### Refine step 1 (optional)
+Install [MAKER3](http://www.yandell-lab.org/software/maker.html) and 
+[Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
+
+##### Refine step 2 (optional)
+Install [sambamba](https://lomereiter.github.io/sambamba/), [minimap2](https://github.com/lh3/minimap2), and
+[BRAKER2](https://github.com/Gaius-Augustus/BRAKER)
+
+##### Refine step 3 (optional)
+Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
+
+##### Report step 1/2 (optional)
+Install [HMMER](http://hmmer.org/)
+
+##### Report step 3 (optional)
+Install [kofamscan](ftp://ftp.genome.jp/pub/tools/kofam_scan/)
+
+##### Report step 4 (optional)
+Install [HHsuite3](https://github.com/soedinglab)
+
+##### Report step 5 (optional)
+Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper)
 
 ### Database downloads
+Use the provided `download-data.py` script to pull all required databases
 
 ## Usage
 ```

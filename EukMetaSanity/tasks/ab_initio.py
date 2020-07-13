@@ -94,7 +94,7 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Parse to genbank
-            out_gb = AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round)
+            out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gb" % _round))
             write_genbank(
                 _file,
                 out_gff,
