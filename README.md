@@ -89,7 +89,7 @@ Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
 Install [HMMER](http://hmmer.org/)
 
 ##### Report step 3 (optional)
-Install [kofamscan](ftp://ftp.genome.jp/pub/tools/kofam_scan/)
+Install [kofamscan](https://www.genome.jp/tools/kofamkoala/)
 
 ##### Report step 4 (optional)
 Install [HHsuite3](https://github.com/soedinglab)
