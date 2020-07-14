@@ -122,7 +122,7 @@ optional arguments:
   -c CONFIG_FILE, --config_file CONFIG_FILE
                         Config file
   -x EXTENSIONS, --extensions EXTENSIONS
-                        Gather files matching '/'-separated list of extensions, default .fna/.fasta/.fa
+                        Gather files matching list of extensions separated by '/', default .fna/.fasta/.fa
   -o OUTPUT, --output OUTPUT
                         Output directory, default out
   -d, --debug           Developer mode: display all commands on single thread, default False

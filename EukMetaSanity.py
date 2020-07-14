@@ -146,7 +146,7 @@ if __name__ == "__main__":
             (("-c", "--config_file"),
              {"help": "Config file", "required": True}),
             (("-x", "--extensions"),
-             {"help": "Gather files matching '/'-separated list of extensions, default %s" % DEFAULT_EXTS,
+             {"help": "Gather files matching list of extensions separated by '/', default %s" % DEFAULT_EXTS,
               "default": DEFAULT_EXTS}),
             (("-o", "--output"),
              {"help": "Output directory, default out", "default": "out"}),
