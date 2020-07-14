@@ -109,8 +109,11 @@ def _create_tax_db(_out: str, out_dir: str):
     # Create mmseqs input file
     _create_taxonomy_info(_out, os.path.join(out_dir, "mmseqs.input"))
     # Download tax info
-    wget["ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "-O", os.path.join(out_dir, "taxdump.tar.gz")]()
-    tar["xzvf", os.path.join(out_dir, "taxdump.tar.gz")]()
+    _print_and_run(
+        wget["ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "-O", os.path.join(out_dir, "taxdump.tar.gz")]
+    )
+    _print_and_run(tar["xzvf", os.path.join(out_dir, "taxdump.tar.gz")])
+    # Generate tax db
     _print_and_run(
         mmseqs[
             "createtaxdb",
