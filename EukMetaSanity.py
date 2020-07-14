@@ -128,6 +128,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
     # Must call output on last task to generate final summary statistics
     task.run()
     output = task.output()
+    # Create summary softlinks
     _link_final_output(output[1], output[3], os.path.join(ap.args.output, "results"))
 
 
