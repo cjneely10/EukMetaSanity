@@ -64,7 +64,7 @@ def run(ap: ArgParse, pm: PathManager):
                     "--threads", str(ap.args.threads),
                     "--split-memory-limit", ap.args.max_mem,
                 ]()
-            _generate_config_files(_file, ap.args.threads)
+            _generate_config_files(_file, _id, ap.args.threads, ap, pm)
 
 
 def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, ap: ArgParse, pm: PathManager):
