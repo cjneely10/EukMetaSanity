@@ -15,6 +15,9 @@ export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 
 When selecting dependencies to download, please follow the instructions below:
 
+#### Run utilities:
+Install [gffread](https://github.com/gpertea/gffread)
+
 ##### Run step 1: Taxonomy identification
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2)
 
@@ -31,6 +34,8 @@ Choose from [Augustus](https://github.com/Gaius-Augustus/Augustus) or
 ##### Run step 4: Initial protein evidence
 Install [MetaEuk](https://github.com/soedinglab/metaeuk)
 
+---
+
 ##### Refine step 1 (optional)
 Install [MAKER3](http://www.yandell-lab.org/software/maker.html) and 
 [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
@@ -41,6 +46,8 @@ Install [sambamba](https://lomereiter.github.io/sambamba/), [minimap2](https://g
 
 ##### Refine step 3 (optional)
 Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
+
+---
 
 ##### Report step 1/2 (optional)
 Install [HMMER](http://hmmer.org/)
@@ -56,6 +63,32 @@ Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper)
 
 ### Database downloads
 Use the provided `download-data.py` script to pull all required databases
+
+```
+usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
+                        [-t THREADS] [-m MAX_MEM]
+                        path
+
+Download required data and build MMseqs2 databases
+
+positional arguments:
+  path                  Download path
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b BUILD, --build BUILD
+                        Generate required MMseqs2 databases and linear indices, default True
+  -x INDEX, --index INDEX
+                        Generate search index (recommended, but takes a lot of space), default False
+  -o OUTPUT, --output OUTPUT
+                        Output default config files with included download paths, default True
+  -r REWRITE, --rewrite REWRITE
+                        Rewrite existing directory, default False
+  -t THREADS, --threads THREADS
+                        Number of threads to use in database generation, default 1
+  -m MAX_MEM, --max_mem MAX_MEM
+                        Split memory limit for database generation, default 8G
+```
 
 ## Usage
 ```
