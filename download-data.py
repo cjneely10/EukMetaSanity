@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 from plumbum import local
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -13,8 +14,12 @@ gunzip = local["gunzip"]
 mmseqs = local["mmseqs"]
 
 
+def _print_and_run(cmd):
+    print(cmd)
+    cmd()
+
+
 def _parse_args(ap: ArgParse):
-    assert os.path.exists(ap.args.path)
     if ap.args.index:
         assert ap.args.build, "Build must be set in order to index!"
     try:
@@ -29,42 +34,49 @@ def _parse_args(ap: ArgParse):
 def run(ap: ArgParse, pm: PathManager):
     pm.add_dirs(ap.args.path)
     # Download each URL to folder
-    for _id, url in data_urls():
+    for _id, url in data_urls().items():
         # Download
         pm.add_dirs(ap.args.path, [_id])
         _file = os.path.join(pm.get_dir(ap.args.path), os.path.basename(url.url))
         if not os.path.exists(_file) or ap.args.rewrite:
-            wget[url.url, "-O", _file]()
+            _print_and_run(wget[url.url, "-O", _file])
             # Tar/gunzip
             if url.tar:
-                tar[url.flags, _file]()
+                _print_and_run(tar[url.flags, _file])
             elif url.gz:
-                gunzip[_file]()
+                _print_and_run(gunzip[_file])
             # Generate MMseqs2 database
             _out = os.path.splitext(_file)[0] + "_db"
             if ap.args.build:
-                mmseqs[
-                    "createdb",
-                    _file,
-                    _out
-                ]()
+                _print_and_run(
+                    mmseqs[
+                        "createdb",
+                        _file,
+                        _out
+                    ]
+                )
             # Create MMseqs2 index file
             if ap.args.index:
-                mmseqs[
-                    "createindex",
-                    _out,
-                    os.path.join(os.path.basename(_out), "tmp"),
-                    "--threads", str(ap.args.threads),
-                    "--split-memory-limit", ap.args.max_mem,
-                ]()
-                mmseqs[
-                    "createlinindex",
-                    _out,
-                    os.path.join(os.path.basename(_out), "tmp"),
-                    "--threads", str(ap.args.threads),
-                    "--split-memory-limit", ap.args.max_mem,
-                ]()
-            _generate_config_files(_file, _id, ap.args.threads, ap, pm)
+                _print_and_run(
+                    mmseqs[
+                        "createindex",
+                        _out,
+                        os.path.join(os.path.basename(_out), "tmp"),
+                        "--threads", str(ap.args.threads),
+                        "--split-memory-limit", ap.args.max_mem,
+                    ]
+                )
+                _print_and_run(
+                    mmseqs[
+                        "createlinindex",
+                        _out,
+                        os.path.join(os.path.basename(_out), "tmp"),
+                        "--threads", str(ap.args.threads),
+                        "--split-memory-limit", ap.args.max_mem,
+                    ]
+                )
+            if ap.args.output:
+                _generate_config_files(_file, _id, ap.args.threads, ap, pm)
 
 
 def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, ap: ArgParse, pm: PathManager):
@@ -72,7 +84,7 @@ def _generate_config_files(_file_name: str, _replace_string: str, _threads: int,
     for _config_file in os.listdir(_config_directory):
         _new_file = os.path.join(pm.get_dir(ap.args.path), os.path.basename(_config_file))
         cp[os.path.abspath(_config_file), _new_file]()
-        sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file]()
+        _print_and_run(sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file])
 
 
 def main(ap: ArgParse, pm: PathManager):
