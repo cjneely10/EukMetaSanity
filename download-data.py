@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import os
+from pathlib import Path
 from plumbum import local
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.manager.data import data_urls
-from EukMetaSanity.utils.path_manager import PathManager
 
 # Dependencies
 cp = local["cp"]
@@ -91,13 +91,18 @@ def run(ap: ArgParse, out_dir: str):
 
 
 def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, _outdir: str):
-    _file_name = _file_name.replace("/", "\/")
+    _file_name = str(Path(_file_name).resolve()).replace("/", "\/")
     _replace_string = _replace_string.replace("/", "\/")
     _config_directory = os.path.join(os.path.dirname(__file__), "config")
     for _config_file in os.listdir(_config_directory):
         _new_file = os.path.join(_outdir, os.path.basename(_config_file))
         cp[os.path.join(_config_directory, _config_file), _new_file]()
-        _print_and_run(sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s/g" % (_replace_string, _file_name), _new_file])
+        _print_and_run(
+            sed[
+                "-i", "s/\/path\/to\/%s/%s/g" % (_replace_string, _file_name),
+                _new_file
+            ]
+        )
 
 
 def _create_taxonomy_info(mmseqs_db_path: str, outfile: str):
@@ -139,14 +144,16 @@ if __name__ == "__main__":
             (("path",),
              {"help": "Download path"}),
             (("-b", "--build"),
-             {"help": "Generate required MMseqs2 databases and linear indices, default True", "default": True}),
+             {"help": "Generate required MMseqs2 databases and linear indices, default True", "default": True,
+              "action": "store_false"}),
             (("-x", "--index"),
              {"help": "Generate search index (recommended, but takes a lot of space), default False",
-              "default": False}),
+              "default": False, "action": "store_true"}),
             (("-o", "--output"),
-             {"help": "Output default config files with included download paths, default True", "default": True}),
+             {"help": "Output default config files with included download paths, default True", "default": True,
+              "action": "store_false"}),
             (("-r", "--rewrite"),
-             {"help": "Rewrite existing directory, default False", "default": False}),
+             {"help": "Rewrite existing directory, default False", "default": False, "action": "store_true"}),
             (("-t", "--threads"),
              {"help": "Number of threads to use in database generation, default 1", "default": "1"}),
             (("-m", "--max_mem"),
