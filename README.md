@@ -5,6 +5,42 @@
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity
 make all
+cd ..
+./download-data.py databases -t <threads> -m <split-memory-limit>
+```
+
+The `download-data.py` script is provided to download all required base data. This will also generate MMseqs2
+databases for the data, which can be voluminous.
+
+```
+usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
+                        [-t THREADS] [-m MAX_MEM]
+                        path
+
+Download required data and build MMseqs2 databases
+
+positional arguments:
+  path                  Download path
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b BUILD, --build BUILD
+                        Generate required MMseqs2 databases and linear indices, default True
+  -x INDEX, --index INDEX
+                        Generate search index (recommended, but takes a lot of space), default False
+  -o OUTPUT, --output OUTPUT
+                        Output default config files with included download paths, default True
+  -r REWRITE, --rewrite REWRITE
+                        Rewrite existing directory, default False
+  -t THREADS, --threads THREADS
+                        Number of threads to use in database generation, default 1
+  -m MAX_MEM, --max_mem MAX_MEM
+                        Split memory limit for database generation, default 8G
+```
+
+Add EukMetaSanity to your PATH and PYTHONPATH variables
+
+```
 export PATH=/path/to/EukMetaSanity/bin/:$PATH
 export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 ```
@@ -64,33 +100,14 @@ Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper)
 ### Database downloads
 Use the provided `download-data.py` script to pull all required databases
 
-```
-usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
-                        [-t THREADS] [-m MAX_MEM]
-                        path
-
-Download required data and build MMseqs2 databases
-
-positional arguments:
-  path                  Download path
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -b BUILD, --build BUILD
-                        Generate required MMseqs2 databases and linear indices, default True
-  -x INDEX, --index INDEX
-                        Generate search index (recommended, but takes a lot of space), default False
-  -o OUTPUT, --output OUTPUT
-                        Output default config files with included download paths, default True
-  -r REWRITE, --rewrite REWRITE
-                        Rewrite existing directory, default False
-  -t THREADS, --threads THREADS
-                        Number of threads to use in database generation, default 1
-  -m MAX_MEM, --max_mem MAX_MEM
-                        Split memory limit for database generation, default 8G
-```
-
 ## Usage
+
+After running `download-data.py`, config files for Run/Refine/Report will be available in the database
+directory. These can be edited to fit your needs.
+
+If the `download-data.py` script was not used, then the default config files will be available in the 
+`config` directory.
+
 ```
 usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
                         [-o OUTPUT] [-d]
