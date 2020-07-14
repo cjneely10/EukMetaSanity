@@ -41,7 +41,7 @@ def run(ap: ArgParse, out_dir: str):
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         _file = os.path.join(new_dir, os.path.basename(url.url))
-        _out = os.path.splitext(_file)[0] + "_db"
+        _out = _id + "_db"
         if not os.path.exists(_out) or ap.args.rewrite:
             _print_and_run(wget[url.url, "-O", _file])
             # Tar/gunzip
