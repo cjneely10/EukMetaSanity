@@ -61,6 +61,7 @@ class RepeatsIter(TaskList):
         def full(self):
             # BuildDatabase and RepeatModeler
             # RepeatMasker and ProcessRepeats
+            self.simple()
             self._mask(*self._model())
 
         @program_catch
