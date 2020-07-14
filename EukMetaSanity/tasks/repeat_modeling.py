@@ -61,7 +61,7 @@ class RepeatsIter(TaskList):
         def full(self, input_file: str):
             # BuildDatabase and RepeatModeler
             # RepeatMasker and ProcessRepeats
-            self._mask(*self._model(self.simple(input_file)))
+            self._mask(*self._model(input_file))
 
         @program_catch
         def _model(self, input_file: str):
