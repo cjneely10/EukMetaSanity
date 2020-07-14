@@ -41,7 +41,8 @@ def run(ap: ArgParse, out_dir: str):
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         _file = os.path.join(new_dir, os.path.basename(url.url))
-        if not os.path.exists(_file) or ap.args.rewrite:
+        _out = os.path.splitext(_file)[0] + "_db"
+        if not os.path.exists(_out) or ap.args.rewrite:
             _print_and_run(wget[url.url, "-O", _file])
             # Tar/gunzip
             if url.tar:
@@ -51,7 +52,6 @@ def run(ap: ArgParse, out_dir: str):
                 _print_and_run(gunzip[_file])
                 _file = os.path.splitext(_file)[0]
             # Generate MMseqs2 database
-            _out = os.path.splitext(_file)[0] + "_db"
             if ap.args.build:
                 # Generate database
                 _print_and_run(
