@@ -1,4 +1,3 @@
-import os
 from EukMetaSanity import Task, TaskList, program_catch
 
 
