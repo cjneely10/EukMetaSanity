@@ -40,19 +40,27 @@ def _download_fasta_data(ap: ArgParse, pm: PathManager):
             # Generate MMseqs2 database
             _out = os.path.splitext(_file)[0] + "_db"
             if ap.args.build:
-                _create_mmseqs_database(_file, _out)
+                mmseqs[
+                    "createdb",
+                    _file,
+                    _out
+                ]()
             # Create MMseqs2 index file
             if ap.args.index:
-                pass
-
-
-def _create_mmseqs_database(fasta_file: str, output_path):
-    # Generate database
-    mmseqs[
-        "createdb",
-        fasta_file,
-        output_path
-    ]()
+                mmseqs[
+                    "createindex",
+                    _out,
+                    os.path.join(os.path.basename(_out), "tmp"),
+                    "--threads", str(ap.args.threads),
+                    "--split-memory-limit", ap.args.max_mem
+                ]()
+                mmseqs[
+                    "createlinindex",
+                    _out,
+                    os.path.join(os.path.basename(_out), "tmp"),
+                    "--threads", str(ap.args.threads),
+                    "--split-memory-limit", ap.args.max_mem
+                ]()
 
 
 def main(ap: ArgParse, pm: PathManager):
@@ -76,7 +84,7 @@ if __name__ == "__main__":
              {"help": "Rewrite existing directory, default False", "default": False}),
             (("-t", "--threads"),
              {"help": "Number of threads to use in database generation, default 1", "default": "1"}),
-            (("-m", "--max-mem"),
+            (("-m", "--max_mem"),
              {"help": "Split memory limit for database generation, default 8G", "default": "8G"}),
         ),
         description="Download required data and build MMseqs2 databases"
