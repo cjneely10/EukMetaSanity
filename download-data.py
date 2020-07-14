@@ -95,7 +95,7 @@ def _generate_config_files(_file_name: str, _replace_string: str, _threads: int,
     for _config_file in os.listdir(_config_directory):
         _new_file = os.path.join(_outdir, os.path.basename(_config_file))
         cp[os.path.join(_config_directory, _config_file), _new_file]()
-        _print_and_run(sed["-i", r"s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file])
+        _print_and_run(sed["-i", r"s/\/path\/to\/%s/\/path\/to\/%s/g" % (_file_name, _replace_string), _new_file])
 
 
 def _create_taxonomy_info(mmseqs_db_path: str, outfile: str):
