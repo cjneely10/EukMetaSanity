@@ -72,7 +72,7 @@ UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz"))
 
 def data_urls() -> Dict[str, UrlInfo]:
     return {
-        "orthodb": UrlInfo(
+        "ortho_db": UrlInfo(
             url="https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
             flags="",
             tar=False,
