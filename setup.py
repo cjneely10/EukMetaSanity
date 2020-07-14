@@ -25,7 +25,7 @@ setup(
     python_requires='>=3.6',
     packages=setuptools.find_packages(),
     include_package_data=True,
-    scripts=[
-        "EukMetaSanity/generate_config.py",
-    ]
+    # scripts=[
+    #     "EukMetaSanity/generate_config.py",
+    # ]
 )

@@ -5,6 +5,8 @@ from EukMetaSanity.tasks.manager.data import data_urls
 from EukMetaSanity.utils.path_manager import PathManager
 
 # Dependencies
+cp = local["cp"]
+sed = local["sed"]
 tar = local["tar"]
 wget = local["wget"]
 gunzip = local["gunzip"]
@@ -23,8 +25,9 @@ def _parse_args(ap: ArgParse):
     return ap
 
 
-# Dowload all data with wget from the data.py script - Part of API
-def _download_fasta_data(ap: ArgParse, pm: PathManager):
+# Download all data with wget from the data.py script - Part of API
+def run(ap: ArgParse, pm: PathManager):
+    pm.add_dirs(ap.args.path)
     # Download each URL to folder
     for _id, url in data_urls():
         # Download
@@ -52,20 +55,28 @@ def _download_fasta_data(ap: ArgParse, pm: PathManager):
                     _out,
                     os.path.join(os.path.basename(_out), "tmp"),
                     "--threads", str(ap.args.threads),
-                    "--split-memory-limit", ap.args.max_mem
+                    "--split-memory-limit", ap.args.max_mem,
                 ]()
                 mmseqs[
                     "createlinindex",
                     _out,
                     os.path.join(os.path.basename(_out), "tmp"),
                     "--threads", str(ap.args.threads),
-                    "--split-memory-limit", ap.args.max_mem
+                    "--split-memory-limit", ap.args.max_mem,
                 ]()
+            _generate_config_files(_file, ap.args.threads)
+
+
+def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, ap: ArgParse, pm: PathManager):
+    _config_directory = os.path.join(os.path.dirname(__file__), "config")
+    for _config_file in os.listdir(_config_directory):
+        _new_file = os.path.join(pm.get_dir(ap.args.path), os.path.basename(_config_file))
+        cp[os.path.abspath(_config_file), _new_file]()
+        sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file]()
 
 
 def main(ap: ArgParse, pm: PathManager):
-    pm.add_dirs(ap.args.path)
-    _download_fasta_data(ap, pm)
+    run(ap, pm)
 
 
 if __name__ == "__main__":
