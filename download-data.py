@@ -46,8 +46,10 @@ def run(ap: ArgParse, out_dir: str):
             # Tar/gunzip
             if url.tar:
                 _print_and_run(tar[url.flags, _file])
+                _file = os.path.splitext(_file.replace(".tar", ""))[0]
             elif url.gz:
                 _print_and_run(gunzip[_file])
+                _file = os.path.splitext(_file)[0]
             # Generate MMseqs2 database
             _out = os.path.splitext(_file)[0] + "_db"
             if ap.args.build:
