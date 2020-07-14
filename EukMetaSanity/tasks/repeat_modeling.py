@@ -32,16 +32,16 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            getattr(self, self.protocol)(self.input[1])
+            getattr(self, self.protocol)()
 
         # Simple repeat masking using mmseqs
         @program_catch
-        def simple(self, input_file: str):
+        def simple(self):
             # Generate the masked sequence
             self.log_and_run(
                 self.program_mmseqs[
                     "masksequence",
-                    input_file,
+                    self.input[1],
                     os.path.join(self.wdir, self.record_id),
                     "--threads", self.threads,
                 ]
@@ -64,13 +64,13 @@ class RepeatsIter(TaskList):
             self._mask(*self._model(input_file))
 
         @program_catch
-        def _model(self, input_file: str):
+        def _model(self):
             # Build database
             _name = os.path.join(self.wdir, self.record_id)
             self.log_and_run(
                 self.program_builddatabase[
                     "-name", _name,
-                    input_file,
+                    self.input[0],
                 ]
             )
             _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
@@ -84,7 +84,7 @@ class RepeatsIter(TaskList):
                     "-database", _name,
                 ]
             )
-            return input_file, _now
+            return self.input[0], _now
 
         @program_catch
         def _mask(self, input_file: str, _recorded_start_time: datetime.datetime):

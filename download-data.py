@@ -68,7 +68,7 @@ def run(ap: ArgParse, out_dir: str):
                     mmseqs[
                         "createlinindex",
                         _out,
-                        os.path.join(os.path.basename(_out), "tmp"),
+                        "tmp",
                         "--threads", str(ap.args.threads),
                         "--split-memory-limit", ap.args.max_mem,
                         "--remove-tmp-files",
@@ -80,7 +80,7 @@ def run(ap: ArgParse, out_dir: str):
                     mmseqs[
                         "createindex",
                         _out,
-                        os.path.join(os.path.basename(_out), "tmp"),
+                        "tmp",
                         "--threads", str(ap.args.threads),
                         "--split-memory-limit", ap.args.max_mem,
                         "--remove-tmp-files",
