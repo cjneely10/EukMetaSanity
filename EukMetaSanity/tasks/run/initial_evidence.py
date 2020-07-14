@@ -35,11 +35,12 @@ class EvidenceIter(TaskList):
             self.log_and_run(
                 self.program_metaeuk[
                     "easy-predict",
-                    self.input[1],
+                    self.input[2],
                     subset_db_outpath,
                     _outfile,
                     os.path.join(self.wdir, "tmp"),
                     "--threads", self.threads,
+                    "--add-orf-stop",
                 ]
             )
             # Convert to GFF3
@@ -49,14 +50,15 @@ class EvidenceIter(TaskList):
             # Merge ab initio and initial prediction results
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
-                self.program_gffread["-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-F", "--keep-comments"]
+                self.program_gffread["-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-F", "--keep-comments",
+                                     "-y", os.path.join(self.wdir, self.record_id + ".faa")]
             )
-            # Rename final output protein sequences
-            out = []
-            for record in SeqIO.parse(_outfile + ".fas", "fasta"):
-                record.seq = record.seq.upper()
-                out.append(record)
-            SeqIO.write(out, _outfile + ".faa", "fasta")
+            # # Rename final output protein sequences
+            # out = []
+            # for record in SeqIO.parse(_outfile + ".fas", "fasta"):
+            #     record.seq = record.seq.upper()
+            #     out.append(record)
+            # SeqIO.write(out, _outfile + ".faa", "fasta")
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)

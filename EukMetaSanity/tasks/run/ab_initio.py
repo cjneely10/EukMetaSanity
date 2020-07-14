@@ -22,6 +22,7 @@ class AbInitioIter(TaskList):
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
                 self.input[2],  # Original file,
                 self.input[3],  # Tax file
+                self.input[0],  # Repeat-masked FASTA file
             ]
             self.rounds = int(self.rounds)
 
