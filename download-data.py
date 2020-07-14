@@ -83,13 +83,13 @@ def run(ap: ArgParse, out_dir: str):
                     ]
                 )
         if ap.args.output:
-            _generate_config_files(_file, _id, ap.args.threads, ap, pm)
+            _generate_config_files(_file, _id, ap.args.threads, ap.args.path)
 
 
-def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, ap: ArgParse, pm: PathManager):
+def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, _outdir: str):
     _config_directory = os.path.join(os.path.dirname(__file__), "config")
     for _config_file in os.listdir(_config_directory):
-        _new_file = os.path.join(pm.get_dir(ap.args.path), os.path.basename(_config_file))
+        _new_file = os.path.join(_outdir, os.path.basename(_config_file))
         cp[os.path.abspath(_config_file), _new_file]()
         _print_and_run(sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file])
 
