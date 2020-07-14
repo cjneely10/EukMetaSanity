@@ -97,9 +97,6 @@ Install [HHsuite3](https://github.com/soedinglab)
 ##### Report step 5 (optional)
 Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper)
 
-### Database downloads
-Use the provided `download-data.py` script to pull all required databases
-
 ## Usage
 
 After running `download-data.py`, config files for Run/Refine/Report will be available in the database
