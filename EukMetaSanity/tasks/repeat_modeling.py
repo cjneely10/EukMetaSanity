@@ -58,10 +58,10 @@ class RepeatsIter(TaskList):
             return _fasta_output
 
         # Complete masking using RepeatModeler/Masker
-        def full(self, input_file: str):
+        def full(self):
             # BuildDatabase and RepeatModeler
             # RepeatMasker and ProcessRepeats
-            self._mask(*self._model(input_file))
+            self._mask(*self._model())
 
         @program_catch
         def _model(self):
