@@ -82,7 +82,7 @@ def _link_final_output(_output_files_list: List[List[str]], files_prefixes: List
         if not os.path.exists(_sub_out):
             os.makedirs(_sub_out)
         for _file in _files:
-            local["ln"]["-sf", _file, _sub_out]()
+            local["ln"]["-rsf", _file, _sub_out]()
 
 
 # Parse user arguments

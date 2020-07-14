@@ -71,6 +71,7 @@ def run(ap: ArgParse, out_dir: str):
                         os.path.join(os.path.basename(_out), "tmp"),
                         "--threads", str(ap.args.threads),
                         "--split-memory-limit", ap.args.max_mem,
+                        "--remove-tmp-files",
                     ]
                 )
             # Create MMseqs2 index file
@@ -82,6 +83,7 @@ def run(ap: ArgParse, out_dir: str):
                         os.path.join(os.path.basename(_out), "tmp"),
                         "--threads", str(ap.args.threads),
                         "--split-memory-limit", ap.args.max_mem,
+                        "--remove-tmp-files",
                     ]
                 )
         if ap.args.output:
@@ -112,7 +114,7 @@ def _create_tax_db(_out: str, out_dir: str):
     _print_and_run(
         wget["ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "-O", os.path.join(out_dir, "taxdump.tar.gz")]
     )
-    _print_and_run(tar["xzvf", os.path.join(out_dir, "taxdump.tar.gz")])
+    _print_and_run(tar["xzvf", os.path.join(out_dir, "taxdump.tar.gz"), "-C", out_dir])
     # Generate tax db
     _print_and_run(
         mmseqs[
