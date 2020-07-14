@@ -4,7 +4,7 @@ import datetime
 from typing import List
 from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
 """
 Model the repeated regions of a FASTA sequence
@@ -25,7 +25,7 @@ class RepeatsIter(TaskList):
                 self.input[2],  # Tax file
                 self.input[1],  # MMSeqs db for tax ident
             ]
-            self.delay = 3
+            self.delay = 7
 
         def run(self) -> None:
             super().run()
@@ -90,7 +90,6 @@ class RepeatsIter(TaskList):
         @program_catch
         def _mask(self, input_file: str, _recorded_start_time: datetime.datetime):
             # Perform on de novo results
-            from dask.distributed import get_worker
             # Perform step on each file passed by user
             data_files = []
             _file = RepeatsIter.Repeats._get_results_file(_recorded_start_time)

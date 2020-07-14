@@ -1,9 +1,9 @@
 from typing import Dict, List
 from EukMetaSanity.tasks.base.task_class import Task
-from EukMetaSanity.tasks.taxonomy import TaxonomyIter
-from EukMetaSanity.tasks.ab_initio import AbInitioIter
-from EukMetaSanity.tasks.repeat_modeling import RepeatsIter
-from EukMetaSanity.tasks.initial_evidence import EvidenceIter
+from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.run.ab_initio import AbInitioIter
+from EukMetaSanity.tasks.run.repeat_modeling import RepeatsIter
+from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 
 
 class TaskManager:

@@ -1,6 +1,6 @@
 import os
 from Bio import SeqIO
-from EukMetaSanity.tasks.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity import Task, TaskList, program_catch
 
 
