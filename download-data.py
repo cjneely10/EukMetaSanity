@@ -60,20 +60,22 @@ def run(ap: ArgParse, out_dir: str):
                     ]
                 )
                 # Add taxonomy info from ncbi
-            # Create MMseqs2 index file
-            if ap.args.index:
+                _create_tax_db(_out, out_dir)
+                # Generate linear index
                 _print_and_run(
                     mmseqs[
-                        "createindex",
+                        "createlinindex",
                         _out,
                         os.path.join(os.path.basename(_out), "tmp"),
                         "--threads", str(ap.args.threads),
                         "--split-memory-limit", ap.args.max_mem,
                     ]
                 )
+            # Create MMseqs2 index file
+            if ap.args.index:
                 _print_and_run(
                     mmseqs[
-                        "createlinindex",
+                        "createindex",
                         _out,
                         os.path.join(os.path.basename(_out), "tmp"),
                         "--threads", str(ap.args.threads),
@@ -92,13 +94,30 @@ def _generate_config_files(_file_name: str, _replace_string: str, _threads: int,
         _print_and_run(sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file])
 
 
-def _add_taxonomy_info(mmseqs_db_path: str, outfile: str):
+def _create_taxonomy_info(mmseqs_db_path: str, outfile: str):
     output_p = open(outfile, "w")
     mmseqs_input_fp = open(mmseqs_db_path + ".lookup", "r")
     for line in mmseqs_input_fp:
         line = line.split()
         output_p.write(line[1] + "\t" + line[1].split("_")[0] + "\n")
     output_p.close()
+
+
+def _create_tax_db(_out: str, out_dir: str):
+    # Create mmseqs input file
+    _create_taxonomy_info(_out, os.path.join(out_dir, "mmseqs.input"))
+    # Download tax info
+    wget["ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "-O", os.path.join(out_dir, "taxdump.tar.gz")]()
+    tar["xzvf", "taxdump.tar.gz"]()
+    _print_and_run(
+        mmseqs[
+            "createtaxdb",
+            _out,
+            "tmp",
+            "--ncbi-tax-dump", out_dir,
+            "--tax-mapping-file", os.path.join(out_dir, "mmseqs.input")
+        ]
+    )
 
 
 def main(ap: ArgParse, storage_dir: str):
