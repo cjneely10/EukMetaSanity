@@ -89,6 +89,15 @@ def _generate_config_files(_file_name: str, _replace_string: str, _threads: int,
         _print_and_run(sed["-i", "s/\/path\/to\/%s/\/path\/to\/%s" % (_file_name, _replace_string), _new_file])
 
 
+def _add_taxonomy_info(mmseqs_db_path: str, outfile: str):
+    output_p = open(outfile, "w")
+    mmseqs_input_fp = open(mmseqs_db_path + ".lookup", "r")
+    for line in mmseqs_input_fp:
+        line = line.split()
+        output_p.write(line[1] + "\t" + line[1].split("_")[0] + "\n")
+    output_p.close()
+
+
 def main(ap: ArgParse, pm: PathManager):
     run(ap, pm)
 

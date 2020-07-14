@@ -66,6 +66,10 @@ class Data:
     def evidence(self):
         pass
 
+    @added
+    def results(self):
+        pass
+
 
 UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz"))
 
