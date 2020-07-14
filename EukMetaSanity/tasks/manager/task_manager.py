@@ -1,5 +1,5 @@
-from typing import Dict, List
-from EukMetaSanity.tasks.base.task_class import Task
+from typing import Dict, List, Type
+from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.run.ab_initio import AbInitioIter
 from EukMetaSanity.tasks.run.repeat_modeling import RepeatsIter
@@ -20,5 +20,5 @@ class TaskManager:
         }
 
     @property
-    def programs(self) -> Dict[str, List[Task]]:
+    def programs(self) -> Dict[str, List[Type[TaskList]]]:
         return self._programs

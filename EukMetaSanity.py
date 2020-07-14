@@ -76,7 +76,7 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Create softlinks of final files to output directory
-def _link_final_output(_output_files_list: List[List[str]], files_prefixes: List[str], _final_output_dir: str):
+def _link_final_output(_output_files_list: List[List[object]], files_prefixes: List[str], _final_output_dir: str):
     for _files, _file_prefix in zip(_output_files_list, files_prefixes):
         _sub_out = os.path.join(_final_output_dir, _file_prefix)
         if not os.path.exists(_sub_out):
