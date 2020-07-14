@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import logging
 from Bio import SeqIO
 from pathlib import Path
@@ -62,14 +63,19 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     records = []
     for record in record_p:
         _i = str(i)
+        _record_id = record.id
         for val in punctuation:
-            record.id = record.id.replace(val, "")
+            _record_id = _record_id.replace(val, "")
         # Shorten id to 16 characters
-        if len(str(record.id)) > 16:
-            # Store old id in description
-            record.description = str(record.id) + " " + record.description
-            # Update new id
-            record.id = str(record.id[:16 - len(_i)]) + _i
+        _len = len(_record_id)
+        if _len > 16:
+            _len = 16
+        # Truncate and add unique number
+        _record_id = str(_record_id[:_len - len(_i)]) + _i
+        # Write ids to stderr for user
+        sys.stderr.write(_record_id + "\t" + str(record.id) + "\n")
+        # Store id
+        record.id = _record_id
         records.append(record)
         i += 1
     SeqIO.write(records, out_file, "fasta")

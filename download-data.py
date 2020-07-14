@@ -5,12 +5,16 @@ from EukMetaSanity.tasks.manager.data import data_urls
 from EukMetaSanity.utils.path_manager import PathManager
 
 # Dependencies
-mmseqs = local["mmseqs"]
+tar = local["tar"]
 wget = local["wget"]
+gunzip = local["gunzip"]
+mmseqs = local["mmseqs"]
 
 
 def _parse_args(ap: ArgParse):
     assert os.path.exists(ap.args.path)
+    if ap.args.index:
+        assert ap.args.build, "Build must be set in order to index!"
     try:
         ap.args.threads = int(ap.args.threads)
     except ValueError as e:
@@ -19,12 +23,40 @@ def _parse_args(ap: ArgParse):
     return ap
 
 
+# Dowload all data with wget from the data.py script - Part of API
 def _download_fasta_data(ap: ArgParse, pm: PathManager):
-    for key, val in data_urls():
-        pass
+    # Download each URL to folder
+    for _id, url in data_urls():
+        # Download
+        pm.add_dirs(ap.args.path, [_id])
+        _file = os.path.join(pm.get_dir(ap.args.path), os.path.basename(url.url))
+        if not os.path.exists(_file) or ap.args.rewrite:
+            wget[url.url, "-O", _file]()
+            # Tar/gunzip
+            if url.tar:
+                tar[url.flags, _file]()
+            elif url.gz:
+                gunzip[_file]()
+            # Generate MMseqs2 database
+            _out = os.path.splitext(_file)[0] + "_db"
+            if ap.args.build:
+                _create_mmseqs_database(_file, _out)
+            # Create MMseqs2 index file
+            if ap.args.index:
+                pass
+
+
+def _create_mmseqs_database(fasta_file: str, output_path):
+    # Generate database
+    mmseqs[
+        "createdb",
+        fasta_file,
+        output_path
+    ]()
 
 
 def main(ap: ArgParse, pm: PathManager):
+    pm.add_dirs(ap.args.path)
     _download_fasta_data(ap, pm)
 
 
