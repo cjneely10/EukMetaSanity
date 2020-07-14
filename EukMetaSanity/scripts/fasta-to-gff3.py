@@ -125,6 +125,8 @@ def metaeuk(metaeuk_file_path, data, ap):
 
 def _parse_metaeuk(i, ap, feature_data, record, rec):
     for features in feature_data.get(record.id, [[]]):
+        if len(features) == 0:
+            continue
         # First value is gene
         rec.features.append(
             SeqFeature(
