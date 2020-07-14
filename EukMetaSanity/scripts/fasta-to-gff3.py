@@ -229,7 +229,7 @@ if __name__ == "__main__":
             (("-m", "--mode"),
              {"help": "Map to subject/query, default subject", "default": "subject"}),
             (("-s", "--source"),
-             {"help": "Source, select from diamond/metaeuk default diamond", "default": "diamond"}),
+             {"help": "Source, select from diamond/metaeuk default diamond", "default": "metaeuk"}),
         ),
         description="Parse FASTA and BLAST results to GFF3 format"
     )

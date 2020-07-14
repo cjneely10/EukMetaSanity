@@ -48,6 +48,7 @@ def run(ap: ArgParse, pm: PathManager):
             # Generate MMseqs2 database
             _out = os.path.splitext(_file)[0] + "_db"
             if ap.args.build:
+                # Generate database
                 _print_and_run(
                     mmseqs[
                         "createdb",
@@ -55,6 +56,7 @@ def run(ap: ArgParse, pm: PathManager):
                         _out
                     ]
                 )
+                # Add taxonomy info from ncbi
             # Create MMseqs2 index file
             if ap.args.index:
                 _print_and_run(

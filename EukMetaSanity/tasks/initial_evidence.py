@@ -28,7 +28,7 @@ class EvidenceIter(TaskList):
                 ]
             )
             # Run metaeuk
-            _outfile = os.path.join(self.wdir, self.record_id + ".faa")
+            _outfile = os.path.join(self.wdir, self.record_id)
             self.log_and_run(
                 self.program_metaeuk[
                     "easy-predict",
@@ -40,7 +40,9 @@ class EvidenceIter(TaskList):
                 ]
             )
             # Convert to GFF3
-            self.local["fasta-to-gff3.py"][self.input[2], _outfile, "-o", os.path.join(self.wdir, "metaeuk.gff3")]()
+            self.local["fasta-to-gff3.py"][
+                self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
+            ]()
             # Merge ab initio and initial prediction results
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
