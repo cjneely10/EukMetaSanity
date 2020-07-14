@@ -21,6 +21,7 @@ class AbInitioIter(TaskList):
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Output gff3 ab initio predictions, final round
                 self.input[1],  # Forward masked mmseqs-db to initial evidence step
                 self.input[2],  # Original file,
+                self.input[3],  # Tax file
             ]
             self.rounds = int(self.rounds)
 
@@ -62,7 +63,7 @@ class AbInitioIter(TaskList):
                 progs.append(
                     self.program_augustus[
                         "--codingseq=on",
-                        "--stopCodonExcludedFromCDS=true",
+                        "--stopCodonExcludedFromCDS=false",
                         "--species=%s" % species,
                         "--outfile=%s" % _out_gff,
                         out_file_path,
@@ -70,8 +71,8 @@ class AbInitioIter(TaskList):
                 )
             self.batch(progs)
             (self.local["cat"][out_gffs] | self.local["gffread"]["-o", out_gff, "-F", "--keep-comments"])()
-            all(os.remove(_file) for _file in out_files)
-            all(os.remove(_file) for _file in out_gffs)
+            all([os.remove(_file) for _file in out_files])
+            all([os.remove(_file) for _file in out_gffs])
             return out_gff
 
         @program_catch

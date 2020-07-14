@@ -171,6 +171,7 @@ class Task(ABC):
         if completed:
             logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
+            sleep(self.delay)
             logging.info("%s  Running %s" % (self.record_id, self.name))
             # Gather all functions of the form run_1, run_2, etc.
             runnables = sorted(
@@ -239,7 +240,6 @@ class TaskList(ABC):
             client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
-                sleep(_task.delay)
                 futures.append(client.submit(_task.run))
             wait(futures)
             client.close()
