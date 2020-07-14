@@ -4,8 +4,9 @@ import sys
 import logging
 from Bio import SeqIO
 from pathlib import Path
-from typing import Generator
+from plumbum import local
 from string import punctuation
+from typing import Generator, List
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.utils.path_manager import PathManager
@@ -17,14 +18,6 @@ from EukMetaSanity.tasks.manager.task_manager import TaskManager
 EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
 
 """
-
-
-# # Available programs
-# Return task-list for run command
-def _run_iter(tm: TaskManager, program: str) -> Generator[type, TaskManager, None]:
-    task_list = tm.programs[program]
-    for task in task_list:
-        yield task
 
 
 # # Helper functions
@@ -82,6 +75,16 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     return out_file
 
 
+# Create softlinks of final files to output directory
+def _link_final_output(_output_files_list: List[List[str]], files_prefixes: List[str], _final_output_dir: str):
+    for _files, _file_prefix in zip(_output_files_list, files_prefixes):
+        _sub_out = os.path.join(_final_output_dir, _file_prefix)
+        if not os.path.exists(_sub_out):
+            os.makedirs(_sub_out)
+        for _file in _files:
+            local["ln"]["-sf", _file, _sub_out]()
+
+
 # Parse user arguments
 def _parse_args(ap: ArgParse, tm: TaskManager) -> ConfigManager:
     # Confirm path existence
@@ -116,20 +119,16 @@ def _main(ap: ArgParse, cfg: ConfigManager, tm: TaskManager):
 
     # # Begin task list
     # Generate first task from list
-    run_iter = _run_iter(tm, ap.args.command)
-    task = next(run_iter)(cfg, input_files, pm, input_prefixes, ap.args.debug)
-    # Run task
-    task.run()
-    # Primary program loop
-    while True:
-        try:
-            # Run next task
-            task = next(run_iter)(*task.output())
-            task.run()
-        except StopIteration:
-            break
+    task_list = tm.programs[ap.args.command]
+    task = task_list[0](cfg, input_files, pm, input_prefixes, ap.args.debug)
+    for i in range(1, len(task_list)):
+        # Run task
+        task.run()
+        task = task_list[i](*task.output())
     # Must call output on last task to generate final summary statistics
-    task.output()
+    task.run()
+    output = task.output()
+    _link_final_output(output[1], output[3], os.path.join(ap.args.output, "results"))
 
 
 if __name__ == "__main__":

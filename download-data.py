@@ -31,13 +31,16 @@ def _parse_args(ap: ArgParse):
 
 
 # Download all data with wget from the data.py script - Part of API
-def run(ap: ArgParse, pm: PathManager):
-    pm.add_dirs(ap.args.path)
+def run(ap: ArgParse, out_dir: str):
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
     # Download each URL to folder
     for _id, url in data_urls().items():
         # Download
-        pm.add_dirs(ap.args.path, [_id])
-        _file = os.path.join(pm.get_dir(ap.args.path), os.path.basename(url.url))
+        new_dir = os.path.join(out_dir, _id)
+        if not os.path.exists(new_dir):
+            os.makedirs(new_dir)
+        _file = os.path.join(new_dir, os.path.basename(url.url))
         if not os.path.exists(_file) or ap.args.rewrite:
             _print_and_run(wget[url.url, "-O", _file])
             # Tar/gunzip
@@ -98,8 +101,8 @@ def _add_taxonomy_info(mmseqs_db_path: str, outfile: str):
     output_p.close()
 
 
-def main(ap: ArgParse, pm: PathManager):
-    run(ap, pm)
+def main(ap: ArgParse, storage_dir: str):
+    run(ap, storage_dir)
 
 
 if __name__ == "__main__":
@@ -123,4 +126,4 @@ if __name__ == "__main__":
         ),
         description="Download required data and build MMseqs2 databases"
     )
-    main(_parse_args(_ap), PathManager(_ap.args.path))
+    main(_parse_args(_ap), _ap.args.path)
