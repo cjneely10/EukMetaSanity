@@ -91,7 +91,7 @@ def _parse_args(ap: ArgParse, tm: TaskManager) -> ConfigManager:
     assert os.path.exists(ap.args.config_file)
     assert os.path.exists(ap.args.fasta_directory)
     # Ensure command is valid
-    assert ap.args.command in tm.programs or ap.args.command == "new_cfg"
+    assert ap.args.command in tm.programs
     if ap.args.debug is True:
         ap.args.debug = 0
     else:
