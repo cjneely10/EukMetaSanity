@@ -181,7 +181,6 @@ class Task(ABC):
             for func in runnables:
                 if func.startswith("run_"):
                     getattr(self, func)()
-            sleep(self.delay)
 
 
 class TaskList(ABC):
@@ -241,6 +240,7 @@ class TaskList(ABC):
             # Run each future
             for _task in self._tasks:
                 futures.append(client.submit(_task.run))
+                sleep(_task.delay)
             wait(futures)
             client.close()
 

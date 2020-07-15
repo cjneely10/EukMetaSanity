@@ -168,11 +168,12 @@ class RepeatsIter(TaskList):
             if len(_files) == 1:
                 return os.path.join(_files[0], "consensi.fa.classified")
             else:
-                _possible_time = (_time + datetime.timedelta(0, 1)).strftime("%A%b%d%H%M%S%Y")
-                print(_possible_time)
-                for _file in _files:
-                    if _formatted_time in _file or _possible_time in _file:
-                        return os.path.join(_file, "consensi.fa.classified")
+                for i in range(1, 3):
+                    _possible_time = (_time + datetime.timedelta(0, i)).strftime("%A%b%d%H%M%S%Y")
+                    print(_possible_time)
+                    for _file in _files:
+                        if _formatted_time in _file or _possible_time in _file:
+                            return os.path.join(_file, "consensi.fa.classified")
 
         @staticmethod
         def roundTime(dt=None, roundTo=1):
