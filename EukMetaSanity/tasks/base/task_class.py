@@ -171,7 +171,6 @@ class Task(ABC):
         if completed:
             logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
-            sleep(self.delay)
             logging.info("%s  Running %s" % (self.record_id, self.name))
             # Gather all functions of the form run_1, run_2, etc.
             runnables = sorted(
@@ -182,6 +181,7 @@ class Task(ABC):
             for func in runnables:
                 if func.startswith("run_"):
                     getattr(self, func)()
+            sleep(self.delay)
 
 
 class TaskList(ABC):
