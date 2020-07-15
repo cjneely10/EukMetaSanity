@@ -69,14 +69,6 @@ class EvidenceIter(TaskList):
                 ]
             )
             self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".gff3")])
-            # write_genbank(self.input[4], os.path.join(self.wdir, self.record_id + ".nr.gff3"), _outfile + ".gb")
-            # out = []
-            # for seq_record in SeqIO.parse(_outfile + ".gb", "genbank"):
-            #     for seq_feature in seq_record.features:
-            #         if seq_feature.type == "CDS":
-            #             seq_record.seq = seq_record.seq.translate()
-            #             out.append(seq_record)
-            # SeqIO.write(out, os.path.join(self.wdir, self.record_id + ".faa"), "fasta")
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
