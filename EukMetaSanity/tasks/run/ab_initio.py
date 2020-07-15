@@ -39,7 +39,10 @@ class AbInitioIter(TaskList):
             self._train_augustus(1, self.input[0], out_gff)
             # Remaining rounds of re-training on generated predictions
             for i in range(self.rounds):
-                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0])
+                _last = False
+                if i == self.rounds - 1:
+                    _last = True
+                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, self.input[0], _last)
                 if i != self.rounds - 1:
                     self._train_augustus(i + 2, self.input[0], out_gff)
             # Move any augustus-generated config stuff
@@ -47,7 +50,7 @@ class AbInitioIter(TaskList):
             # Rename final file
             os.replace(out_gff, os.path.join(self.wdir, self.record_id + ".gff3"))
 
-        def _augustus(self, species: str, _round: int, _file: str):
+        def _augustus(self, species: str, _round: int, _file: str, _last: bool = False):
             out_gff = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(self.input[1], ".%i.gff3" % _round))
             # Chunk file predictions
             record_p = SeqIO.parse(_file, "fasta")
@@ -67,7 +70,7 @@ class AbInitioIter(TaskList):
                         "--stopCodonExcludedFromCDS=false",
                         "--species=%s" % species,
                         "--outfile=%s" % _out_gff,
-                        "-gff3=on",
+                        ("--gff3=on" if _last else "--gff3=off"),
                         out_file_path,
                     ]
                 )
