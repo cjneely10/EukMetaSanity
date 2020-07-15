@@ -109,7 +109,7 @@ def metaeuk(metaeuk_file_path, data, ap):
                 start, end, length = coords.split(":")
                 if strand < 0:
                     start, end = end, start
-                for _type in ("exon", "CDS"):
+                for _type in ("CDS",):
                     recs.append(
                         Result(
                             loc_type=_type,
