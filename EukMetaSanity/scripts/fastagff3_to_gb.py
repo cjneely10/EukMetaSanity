@@ -72,7 +72,7 @@ def _flatten_features(rec):
     return rec
 
 
-def write_genbank(fasta_file, gff3_file, output_file):
+def write_genbank(fasta_file, gff3_file, output_file, out_fmt="genbank"):
     if not os.path.exists(fasta_file):
         raise FileNotFoundError(fasta_file)
     if not os.path.exists(gff3_file):
@@ -84,7 +84,7 @@ def write_genbank(fasta_file, gff3_file, output_file):
             ),
         ),
         output_file,
-        "genbank",
+        out_fmt,
     )
 
 

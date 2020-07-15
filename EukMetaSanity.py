@@ -54,6 +54,7 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     record_p = SeqIO.parse(fasta_file, "fasta")
     i: int = 0
     records = []
+    sys.stderr.write(file + "\n")
     for record in record_p:
         _i = str(i)
         _record_id = record.id

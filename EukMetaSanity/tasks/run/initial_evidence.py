@@ -1,7 +1,8 @@
 import os
 from Bio import SeqIO
-from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 
 class EvidenceIter(TaskList):
@@ -12,6 +13,7 @@ class EvidenceIter(TaskList):
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined results of ab initio + evidence
                 os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
                 self.input[4],  # Masked results
+                os.path.join(self.wdir, self.record_id + ".nr.gff3"),
             ]
 
         def run(self) -> None:
@@ -46,23 +48,35 @@ class EvidenceIter(TaskList):
             )
             # Convert to GFF3
             self.local["fasta-to-gff3.py"][
-                self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
+                self.input[4], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
             ]()
             # Merge ab initio and initial prediction results
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
-                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-l", "30",
-                    "-y", os.path.join(self.wdir, self.record_id + ".faa"), "-g", self.input[4], "-S",
-                    "-Z", "-G", "-M", "-K", "-J", "-Q",
+                    "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"), "-S", "-g", self.input[4],
+                    "-Z", "-G", "-M", "-J", "-Q", "-K", "-Y",  # Squash to non-redundant
+                    # "-Z", "-G", "-J", "-M",
+                    "-y", os.path.join(self.wdir, self.record_id + ".faa")
                 ]
             )
-            # # Rename final output protein sequences
+            self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".nr.gff3")])
+            self.log_and_run(
+                self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
+                self.program_gffread[
+                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-g", self.input[4], "-S",
+                    "-G", "-M", "--cluster-only", "-J",  # All on top of each other
+                ]
+            )
+            self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".gff3")])
+            # write_genbank(self.input[4], os.path.join(self.wdir, self.record_id + ".nr.gff3"), _outfile + ".gb")
             # out = []
-            # for record in SeqIO.parse(_outfile + ".fas", "fasta"):
-            #     record.seq = record.seq.upper()
-            #     out.append(record)
-            # SeqIO.write(out, _outfile + ".faa", "fasta")
+            # for seq_record in SeqIO.parse(_outfile + ".gb", "genbank"):
+            #     for seq_feature in seq_record.features:
+            #         if seq_feature.type == "CDS":
+            #             seq_record.seq = seq_record.seq.translate()
+            #             out.append(seq_record)
+            # SeqIO.write(out, os.path.join(self.wdir, self.record_id + ".faa"), "fasta")
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
