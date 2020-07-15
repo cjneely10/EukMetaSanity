@@ -11,6 +11,7 @@ class EvidenceIter(TaskList):
             self.output = [
                 os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined results of ab initio + evidence
                 os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
+                self.input[4],  # Masked results
             ]
 
         def run(self) -> None:
@@ -35,7 +36,7 @@ class EvidenceIter(TaskList):
             self.log_and_run(
                 self.program_metaeuk[
                     "easy-predict",
-                    self.input[2],
+                    self.input[1],
                     subset_db_outpath,
                     _outfile,
                     os.path.join(self.wdir, "tmp"),
@@ -50,8 +51,11 @@ class EvidenceIter(TaskList):
             # Merge ab initio and initial prediction results
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
-                self.program_gffread["-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-F", "--keep-comments",
-                                     "-y", os.path.join(self.wdir, self.record_id + ".faa")]
+                self.program_gffread[
+                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-l", "30",
+                    "-y", os.path.join(self.wdir, self.record_id + ".faa"), "-g", self.input[2], "-S",
+                    "-Z", "-G", "-M", "-K", "-J", "-Q",
+                ]
             )
             # # Rename final output protein sequences
             # out = []

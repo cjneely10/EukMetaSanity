@@ -67,6 +67,7 @@ class AbInitioIter(TaskList):
                         "--stopCodonExcludedFromCDS=false",
                         "--species=%s" % species,
                         "--outfile=%s" % _out_gff,
+                        "-gff3=on",
                         out_file_path,
                     ]
                 )
