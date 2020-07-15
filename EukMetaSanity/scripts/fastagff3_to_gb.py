@@ -67,7 +67,7 @@ def _flatten_features(rec):
         SeqFeature(
             FeatureLocation(0, len(rec.seq)), type="source",
         ),
-        *out
+        *[_val for _val in out if _val.type == "CDS"]
     ]
     return rec
 
