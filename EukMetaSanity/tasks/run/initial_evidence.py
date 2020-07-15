@@ -53,7 +53,7 @@ class EvidenceIter(TaskList):
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
                     "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-l", "30",
-                    "-y", os.path.join(self.wdir, self.record_id + ".faa"), "-g", self.input[2], "-S",
+                    "-y", os.path.join(self.wdir, self.record_id + ".faa"), "-g", self.input[4], "-S",
                     "-Z", "-G", "-M", "-K", "-J", "-Q",
                 ]
             )
