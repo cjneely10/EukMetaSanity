@@ -77,20 +77,41 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Create softlinks of final files to output directory
+# Write summary file of reults
 def _link_final_output(_output_files_list: List[List[object]], files_prefixes: List[str], _final_output_dir: str):
+    # Store output paths as file for easy loading
+    _paths_output_file = open(os.path.join(_final_output_dir, "results.tsv"), "w")
     for _files, _file_prefix in zip(_output_files_list, files_prefixes):
         _sub_out = os.path.join(_final_output_dir, _file_prefix)
         if not os.path.exists(_sub_out):
             os.makedirs(_sub_out)
+        # Copy results to results dir for easier access
         for _file in _files:
-            local["cp"][_file, _sub_out]()
+            local["ln", "-srf"][_file, _sub_out]()
+        # Write actual paths for use in API, and as a means for users to copy files
+        _paths_output_file.write(
+            "".join((
+                "\t".join((
+                    os.path.join(_sub_out, str(_file)) for _file in _files
+                )),
+                "\n",
+            ))
+        )
+    _paths_output_file.close()
 
 
 # Parse user arguments
 def _parse_args(ap: ArgParse, tm: TaskManager) -> ConfigManager:
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
-    assert os.path.exists(ap.args.fasta_directory)
+    # Path to FASTA directory is either a simple directory or the summarized result file
+    if ap.args.fasta_directory is not None:
+        assert os.path.exists(ap.args.fasta_directory)
+    else:
+        assert os.path.exists(ap.args.output)
+        mag_dir = os.path.join(ap.args.output, "wdir/MAGS")
+        assert os.path.exists(mag_dir)
+        ap.args.fasta_directory = mag_dir
     # Ensure command is valid
     assert ap.args.command in tm.programs
     if ap.args.debug is True:
@@ -143,7 +164,7 @@ if __name__ == "__main__":
             (("command",),
              {"help": "Select from %s" % "/".join(_tm.programs)}),
             (("-f", "--fasta_directory",),
-             {"help": "Directory of FASTA files to annotate", "required": True}),
+             {"help": "Directory of FASTA files to annotate"}),
             (("-c", "--config_file"),
              {"help": "Config file", "required": True}),
             (("-x", "--extensions"),

@@ -1,8 +1,6 @@
 import os
-from Bio import SeqIO
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
-from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 
 class EvidenceIter(TaskList):
@@ -50,7 +48,7 @@ class EvidenceIter(TaskList):
             self.local["fasta-to-gff3.py"][
                 self.input[4], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
             ]()
-            # Merge ab initio and initial prediction results
+            # Merge ab initio and initial prediction results into non-redundant set
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
@@ -60,7 +58,9 @@ class EvidenceIter(TaskList):
                     "-y", os.path.join(self.wdir, self.record_id + ".faa")
                 ]
             )
+            # Remove locus lines
             self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".nr.gff3")])
+            # Generate complete set, with all redundancies
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
