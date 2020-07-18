@@ -58,6 +58,7 @@ class Task(ABC):
         # Store id of record in Task
         self._record_id = record_id
         self.delay = 0
+        self.skip = False
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -134,7 +135,7 @@ class Task(ABC):
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths:
-            if isinstance(_path, str) and not os.path.exists(_path):
+            if not self.skip and isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
                     touch(_path)
