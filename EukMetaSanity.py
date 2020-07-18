@@ -75,6 +75,16 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     return out_file
 
 
+# Get program-needed list of files for this step in pipeline
+def _get_list_of_files(summary_file: str, file_type: str) -> List[str]:
+    file_fp = open(summary_file, "r")
+    _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
+    return [
+        line.rstrip("\r\n").split()[_col_idx]
+        for line in file_fp
+    ]
+
+
 # Parse user arguments
 def _parse_args(ap: ArgParse, tm: TaskManager) -> Tuple[ConfigManager, bool]:
     # Confirm path existence
@@ -137,16 +147,6 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
     task.run()
     # Create summary softlinks using final Summarize task
     task.summarize(os.path.join(ap.args.output, "results"))
-
-
-# Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str, file_type: str) -> List[str]:
-    file_fp = open(summary_file, "r")
-    _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
-    return [
-        line.rstrip("\r\n").split()[_col_idx]
-        for line in file_fp
-    ]
 
 
 if __name__ == "__main__":

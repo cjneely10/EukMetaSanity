@@ -12,6 +12,7 @@ from EukMetaSanity.tasks.report.pfam import PfamIter
 from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.hhsuite import HHsuiteIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
+from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 
 
 class TaskManager:
@@ -30,6 +31,7 @@ class TaskManager:
                 MMseqsIter,
                 HHsuiteIter,
                 PfamIter,
+                EggNOGMapper,
                 SummarizeIter,
             ],
         }

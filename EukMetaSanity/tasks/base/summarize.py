@@ -1,5 +1,4 @@
 import os
-from typing import List
 from EukMetaSanity import Task, TaskList
 
 
