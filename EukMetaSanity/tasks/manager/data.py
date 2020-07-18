@@ -97,6 +97,14 @@ class Data:
     def hhsuite(self):
         pass
 
+    @added
+    def eggnog(self):
+        pass
+
+    @added
+    def summarize(self):
+        pass
+
 
 if __name__ == "__main__":
     pass
