@@ -40,7 +40,9 @@ class ConfigManager:
         self._config.optionxform = str
         self._config.read(config_path)
         # Confirm all paths in file are valid
-        self._validate_config_paths()
+        for k, value_dict in self.config.items():
+            # Ensure all data is valid
+            ConfigManager._validate_data(k, value_dict)
 
     @property
     def config(self):
@@ -53,22 +55,6 @@ class ConfigManager:
             _path = inner_dict.get(possible_key, None)
             if _path is not None and not os.path.exists(Path(_path).resolve()):
                 raise InvalidPathError("Invalid path %s for %s %s" % (_path, key, possible_key))
-
-    # Parse config file for PATH variables and confirm validity
-    def _validate_config_paths(self):
-        # Check if protocols are valid
-        # Iterate over all values in config file
-        for k, value_dict in self.config.items():
-            # Ensure all data is valid
-            ConfigManager._validate_data(k, value_dict)
-            # Ensure PATH sections are valid
-            possible_paths = set([val for val in value_dict.keys() if ConfigManager.PROGRAM in val])
-            # for possible_path in possible_paths:
-            #     if possible_path in value_dict.keys():
-            #         try:
-            #             local[value_dict[possible_path]]()
-            #         except CommandNotFound:
-            #             raise InvalidPathError("%s %s" % (k, value_dict[possible_path]))
 
     # Gather user-passed flags for analysis
     def get_added_flags(self, _dict_name):
