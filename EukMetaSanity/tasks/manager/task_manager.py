@@ -18,7 +18,16 @@ class TaskManager:
             "refine": [],
             "report": [],
         }
+        self._input_type = {
+            "run": None,
+            "refine": "all",  # TODO: Handle code for all step
+            "report": "prot"
+        }
 
     @property
     def programs(self) -> Dict[str, List[Type[TaskList]]]:
         return self._programs
+
+    @property
+    def input_type(self):
+        return self._input_type

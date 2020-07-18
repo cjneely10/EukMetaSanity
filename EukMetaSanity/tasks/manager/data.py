@@ -7,6 +7,19 @@ Class to handle tracking all required datasets for each task
 
 """
 
+UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz"))
+
+
+def data_urls() -> Dict[str, UrlInfo]:
+    return {
+        "ortho_db": UrlInfo(
+            url="https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
+            flags="",
+            tar=False,
+            gz=True,
+        )
+    }
+
 
 def added(f: Callable) -> Callable:
     def _wrapper(self) -> Tuple[str, Set[str], str]:
@@ -66,19 +79,9 @@ class Data:
     def evidence(self):
         pass
 
-
-UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz"))
-
-
-def data_urls() -> Dict[str, UrlInfo]:
-    return {
-        "ortho_db": UrlInfo(
-            url="https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
-            flags="",
-            tar=False,
-            gz=True,
-        )
-    }
+    @added
+    def pfam(self):
+        pass
 
 
 if __name__ == "__main__":

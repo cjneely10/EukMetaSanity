@@ -7,11 +7,15 @@ class EvidenceIter(TaskList):
     class Evidence(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            _out = {
+                "gff3": os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined results of ab initio + evidence
+                "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
+                "mask": self.input[4],  # Masked results
+                "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
+            }
             self.output = [
-                os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined results of ab initio + evidence
-                os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
-                self.input[4],  # Masked results
-                os.path.join(self.wdir, self.record_id + ".nr.gff3"),
+                _out,  # Dictionary for accessing to write final summary
+                *list(_out.values()),  # Regular list of values for final path checking
             ]
 
         def run(self) -> None:
