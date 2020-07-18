@@ -18,7 +18,7 @@ class PfamIter(TaskList):
         def run_1(self):
             self.log_and_run(
                 self.program[
-                    *self.added_flags,
+                    (*self.added_flags),
                     "--cpu", self.threads,
                     "-o", "/dev/null",
                     "--tblout", self.output[-1],

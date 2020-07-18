@@ -27,7 +27,7 @@ class HHsuiteIter(TaskList):
                     "-cpu", self.threads,
                     "-n", self.numiter,
                     "-d", self.data_uniref,
-                    *self.added_flags,
+                    (*self.added_flags),
                 ]
             )
             # Search each database
@@ -37,7 +37,7 @@ class HHsuiteIter(TaskList):
                         "-i", self.input[0], "-o", os.path.join(self.wdir, self.record_id + ".%s.hhr" % db),
                         "-oa3m", os.path.join(self.wdir, self.record_id + ".%s.a3m" % db),
                         "-cpu", self.threads, "-n", "1", "-d", db,
-                        *self.added_flags,
+                        (*self.added_flags),
                     ]
                 )
 

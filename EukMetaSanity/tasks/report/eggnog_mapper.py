@@ -22,7 +22,7 @@ class EggNOGMapper(TaskList):
                     "-i", self.input[0],
                     "--output", self.output[-1],
                     "--cpu", self.threads,
-                    *self.added_flags,
+                    (*self.added_flags),
                 ]
             )
 

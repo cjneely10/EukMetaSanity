@@ -1,7 +1,7 @@
 from typing import Dict, List, Type
 from EukMetaSanity.tasks.base.task_class import TaskList
 # Base summarize function
-from EukMetaSanity.tasks.base.summarize import SummarizeIter
+from EukMetaSanity.tasks.manager.summarize import SummarizeIter
 # Run imports
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.run.ab_initio import AbInitioIter
