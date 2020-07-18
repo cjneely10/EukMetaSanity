@@ -21,6 +21,8 @@ class KoFamScanIter(TaskList):
                     "-p", self.data_profiles,
                     "-k", self.data_kolist,
                     "--cpu", self.threads,
+                    "--format", "detail",
+                    "--create-alignment",
                     *self.added_flags,
                     "-o", os.path.join(self.wdir, self.record_id + ".kegg.out"),
                     self.input[-1],

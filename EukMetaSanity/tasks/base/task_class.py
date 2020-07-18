@@ -73,7 +73,8 @@ class Task(ABC):
                     _set_attr = local[_set_attr]
                 # Check for existence if a data value
                 elif _path.startswith("data"):
-                    assert os.path.exists(_value)
+                    for _val in _value.split(","):
+                        assert os.path.exists(_val)
                 setattr(
                     self,
                     _path,  # Name: PATH -> program/data; PATH2/DATA_2 = program2/data_2;

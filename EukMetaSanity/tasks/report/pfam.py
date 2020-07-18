@@ -21,7 +21,7 @@ class PfamIter(TaskList):
                     *self.added_flags,
                     "--cpu", self.threads,
                     "-o", "/dev/null",
-                    "--tblout", self.output[0],
+                    "--tblout", self.output[-1],
                     self.data, self.input[0],
                 ]
             )
