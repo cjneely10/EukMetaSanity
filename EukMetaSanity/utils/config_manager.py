@@ -82,6 +82,7 @@ class ConfigManager:
                                                 self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
                                                 if def_key != ""])
             # Parse remaining args as dictionary items (for those not used in API)
+            # Automatically ignores all capitalized values
             elif key not in dir(self) and not any([key.startswith(_attr) for _attr in dir(self) if _attr.isupper()]) \
                     and not any([key.startswith(_attr) for _attr in self.config[_dict_name] if _attr.isupper()]):
                 out.append(key)

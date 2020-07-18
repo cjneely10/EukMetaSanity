@@ -7,6 +7,8 @@ from EukMetaSanity.tasks.run.repeat_modeling import RepeatsIter
 from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 # Report imports
 from EukMetaSanity.tasks.report.pfam import PfamIter
+from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
+from EukMetaSanity.tasks.report.hhsuite import HHsuiteIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
 
 
@@ -19,11 +21,13 @@ class TaskManager:
                 AbInitioIter,
                 EvidenceIter,
             ],
-            "refine": [
+            "refine": [],
+            "report": [
                 PfamIter,
                 KoFamScanIter,
+                MMseqsIter,
+                HHsuiteIter
             ],
-            "report": [],
         }
         self._input_type = {
             "run": None,

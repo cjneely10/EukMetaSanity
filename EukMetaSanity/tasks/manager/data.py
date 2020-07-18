@@ -89,6 +89,14 @@ class Data:
     def kofamscan(self):
         pass
 
+    @added
+    def mmseqs(self):
+        pass
+
+    @added
+    def hhsuite(self):
+        pass
+
 
 if __name__ == "__main__":
     pass
