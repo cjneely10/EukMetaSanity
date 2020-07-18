@@ -68,8 +68,12 @@ class Task(ABC):
                 # Set as self.program is only default Config PATH variable
                 # Set attribute for ease of use in API
                 _set_attr = _value
+                # Add program from local environment
                 if _path.startswith("program"):
                     _set_attr = local[_set_attr]
+                # Check for existence if a data value
+                elif _path.startswith("data"):
+                    assert os.path.exists(_value)
                 setattr(
                     self,
                     _path,  # Name: PATH -> program/data; PATH2/DATA_2 = program2/data_2;

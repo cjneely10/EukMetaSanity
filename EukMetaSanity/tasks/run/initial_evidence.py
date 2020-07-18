@@ -12,6 +12,7 @@ class EvidenceIter(TaskList):
                 "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
                 "mask": self.input[4],  # Masked results
                 "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
+                "tax": self.input[3],  # Taxonomy results file
             }
             self.output = [
                 _out,  # Dictionary for accessing to write final summary

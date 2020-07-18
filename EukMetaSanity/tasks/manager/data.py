@@ -55,9 +55,11 @@ class Data:
 
     @property
     def data(self):
-        if ConfigManager.DATA in self._cfg.config[self._name].keys():
-            return self._cfg.config.get(self._name, ConfigManager.DATA)
-        return None
+        data = []
+        for key in self._cfg.config[self._name]:
+            if key.startswith(ConfigManager.DATA):
+                data.append(self._cfg.config.get(self._name, key))
+        return data
 
     @property
     def cfg(self) -> ConfigManager:
@@ -81,6 +83,10 @@ class Data:
 
     @added
     def pfam(self):
+        pass
+
+    @added
+    def kofamscan(self):
         pass
 
 
