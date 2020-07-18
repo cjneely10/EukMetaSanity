@@ -9,7 +9,7 @@ class MMseqsIter(TaskList):
             self.output = [
                 *self.input,  # Forward input
                 *[  # BLASTx-like results for each database provided
-                    os.path.join(self.wdir, db, self.record_id + "-results.m8")
+                    os.path.join(self.wdir, self.record_id + "%s-results.m8" % db)
                     for db in self.data.split(",")
                 ]
             ]
@@ -30,7 +30,7 @@ class MMseqsIter(TaskList):
             )
             # Search through each database
             for db in self.data.split():
-                _out_db = _file_db[:-3] + "-results_db"
+                _out_db = _file_db[:-3] + "%s-results_db" % db
                 # Linear search
                 self.log_and_run(
                     self.program[
