@@ -90,10 +90,6 @@ class Data:
         pass
 
     @added
-    def hhsuite(self):
-        pass
-
-    @added
     def eggnog(self):
         pass
 

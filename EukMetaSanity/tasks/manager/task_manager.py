@@ -9,7 +9,6 @@ from EukMetaSanity.tasks.run.repeat_modeling import RepeatsIter
 from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 # Report imports
 from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
-from EukMetaSanity.tasks.report.hhsuite import HHsuiteIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 
@@ -28,7 +27,6 @@ class TaskManager:
             "report": [
                 KoFamScanIter,
                 MMseqsIter,
-                HHsuiteIter,
                 EggNOGMapper,
                 SummarizeIter,
             ],
