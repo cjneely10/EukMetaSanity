@@ -19,7 +19,6 @@ class KoFamScanIter(TaskList):
             self.log_and_run(
                 self.program[
                     "-p", self.data_profiles,
-                    "-k", self.data_kolist,
                     "--cpu", self.threads,
                     "--format", "detail",
                     "--create-alignment",
