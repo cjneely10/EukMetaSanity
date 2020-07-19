@@ -1,4 +1,5 @@
 import os
+from plumbum import local
 from EukMetaSanity import Task, TaskList
 
 
@@ -21,6 +22,8 @@ class SummarizeIter(TaskList):
         _output = self.output()
         _output_files_list = _output[1]
         _files_prefixes = _output[3]
+        if not os.path.exists(_final_output_dir):
+            os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(_final_output_dir, "paths_summary.tsv"), "w")
         for _files, _file_prefix in zip(_output_files_list, _files_prefixes):
             _sub_out = os.path.join(_final_output_dir, _file_prefix)
@@ -31,6 +34,9 @@ class SummarizeIter(TaskList):
                 # Write info to file
                 if isinstance(_file, dict):
                     sorted_keys = sorted(list(_file.keys()))
+                    # Header
+                    _paths_output_file.write("".join(("\t".join(sorted_keys), "\n")))
+                    # Path info
                     _paths_output_file.write(
                         "".join((
                             "\t".join((
@@ -41,10 +47,7 @@ class SummarizeIter(TaskList):
                     )
                 # Generate link of path
                 elif isinstance(_file, str):
-                    self.local["ln", "-srf"][_file, _sub_out]()
-            # Write actual paths for use in API, and as a means for users to copy files
-            _paths_output_file.write(
-                "".join(("\t".join((os.path.join(_sub_out, str(_file)) for _file in _files)), "\n")))
+                    local["ln"]["-srf", _file, _sub_out]()
         _paths_output_file.close()
 
 

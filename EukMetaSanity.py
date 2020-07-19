@@ -78,11 +78,13 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 # Get program-needed list of files for this step in pipeline
 def _get_list_of_files(summary_file: str, file_type: str) -> List[str]:
     file_fp = open(summary_file, "r")
-    _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
-    return [
-        line.rstrip("\r\n").split()[_col_idx]
-        for line in file_fp
-    ]
+    out = []
+    try:
+        while True:
+            _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
+            out.append(next(file_fp).rstrip("\r\n").split("\t")[_col_idx])
+    except StopIteration:
+        return out
 
 
 # Parse user arguments
