@@ -9,8 +9,7 @@ cd ..
 ./download-data.py databases -t <threads> -m <split-memory-limit>
 ```
 
-The `download-data.py` script is provided to download all required base data. This will also generate MMseqs2
-databases for the data, which can be voluminous.
+The `download-data.py` script is provided to download all required base data.
 
 ```
 usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
@@ -51,7 +50,6 @@ export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 
 When selecting dependencies to download, please follow the instructions below:
 
-#### Run utilities:
 Install [gffread](https://github.com/gpertea/gffread)
 
 ##### Run step 1: Taxonomy identification
@@ -86,16 +84,14 @@ Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
 ---
 
 ##### Report step 1/2 (optional)
-Install [HMMER](http://hmmer.org/)
+Install [MMseqs2](https://github.com/soedinglab/MMseqs2), and install any databases you wish to incorporate by following
+the [github page](https://github.com/soedinglab/mmseqs2/wiki#downloading-databases)
 
 ##### Report step 3 (optional)
-Install [kofamscan](https://www.genome.jp/tools/kofamkoala/)
-
-##### Report step 4 (optional)
-Install [HHsuite3](https://github.com/soedinglab)
+Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required databases
 
 ##### Report step 5 (optional)
-Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper)
+Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
 
 ## Usage
 
