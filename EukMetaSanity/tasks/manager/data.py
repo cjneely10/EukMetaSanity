@@ -82,10 +82,6 @@ class Data:
         pass
 
     @added
-    def pfam(self):
-        pass
-
-    @added
     def kofamscan(self):
         pass
 
