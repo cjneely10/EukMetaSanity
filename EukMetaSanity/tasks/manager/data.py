@@ -36,7 +36,7 @@ class Data:
     def _confirm_data(obj):
         # Assert only correct protocols used in config file
         for step, possible_protocols in obj.protocols.items():
-            if ConfigManager.PROTOCOL in obj._cfg.config[step].keys():
+            if step in obj._cfg.config.keys() and ConfigManager.PROTOCOL in obj._cfg.config[step].keys():
                 assert obj.cfg.config.get(step, ConfigManager.PROTOCOL) in possible_protocols
 
     def __init__(self, cfg: ConfigManager, name: str):
