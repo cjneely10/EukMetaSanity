@@ -1,4 +1,5 @@
 import os
+from Bio import SeqIO
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -60,9 +61,18 @@ class EvidenceIter(TaskList):
                     "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"), "-S", "-g", self.input[4],
                     "-Z", "-G", "-M", "-J", "-Q", "-K", "-Y",  # Squash to non-redundant
                     # "-Z", "-G", "-J", "-M",
-                    "-y", os.path.join(self.wdir, self.record_id + ".faa")
+                    "-y", os.path.join(self.wdir, self.record_id + ".tmp.faa")
                 ]
             )
+            # Rename proteins
+            record_fp = SeqIO.parse(os.path.join(self.wdir, self.record_id + ".tmp.faa"), "fasta")
+            out = []
+            i = 1
+            for record in record_fp:
+                record.id = str(record.id) + "_" + str(i)
+                i += 1
+                out.append(record)
+            SeqIO.write(out, os.path.join(self.wdir, self.record_id + ".faa"), "fasta")
             # Remove locus lines
             self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".nr.gff3")])
             # Generate complete set, with all redundancies

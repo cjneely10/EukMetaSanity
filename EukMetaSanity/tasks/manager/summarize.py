@@ -35,7 +35,7 @@ class SummarizeIter(TaskList):
                 if isinstance(_file, dict):
                     sorted_keys = sorted(list(_file.keys()))
                     # Header
-                    _paths_output_file.write("".join(("\t".join(sorted_keys), "\n")))
+                    _paths_output_file.write("".join(("\t".join(["ID"] + sorted_keys), "\n")))
                     # Path info
                     _paths_output_file.write(
                         "".join((
