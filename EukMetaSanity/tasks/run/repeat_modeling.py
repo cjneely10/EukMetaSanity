@@ -77,6 +77,7 @@ class RepeatsIter(TaskList):
             _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
             # _now = datetime.datetime.now()
             print(_now)
+            print(_now.strftime("%a%b%d%H%M%S%Y"))
             # Run RepeatModeler
             self.log_and_run(
                 self.program_modeler[
@@ -162,14 +163,14 @@ class RepeatsIter(TaskList):
         @staticmethod
         def _get_results_file(_time: datetime.datetime):
             # Get list of files to search
-            _formatted_time = _time.strftime("%A%b%d%H%M%S%Y")
+            _formatted_time = _time.strftime("%a%b%d%H%M%S%Y")
             print(_formatted_time)
             _files = [_file for _file in os.listdir(os.getcwd()) if "RM" in _file]
             if len(_files) == 1:
                 return os.path.join(_files[0], "consensi.fa.classified")
             else:
                 for i in range(1, 3):
-                    _possible_time = (_time + datetime.timedelta(0, i)).strftime("%A%b%d%H%M%S%Y")
+                    _possible_time = (_time + datetime.timedelta(0, i)).strftime("%a%b%d%H%M%S%Y")
                     print(_possible_time)
                     for _file in _files:
                         if _formatted_time in _file or _possible_time in _file:

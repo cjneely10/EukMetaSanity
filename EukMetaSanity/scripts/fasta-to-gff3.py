@@ -62,18 +62,18 @@ def _parse_diamond(i, ap, feature_data, record, rec):
         )
         # Default retain codon and CDS information
         rec.features[-1].sub_features = [
-            SeqFeature(
-                FeatureLocation(span[0], span[0] + 3), type="start_codon", strand=feature.strand,
-                qualifiers={"source": ap.args.source}
-            ),
+            # SeqFeature(
+            #     FeatureLocation(span[0], span[0] + 3), type="start_codon", strand=feature.strand,
+            #     qualifiers={"source": ap.args.source}
+            # ),
             SeqFeature(
                 FeatureLocation(span[0], span[1]), type="CDS", strand=feature.strand,
                 qualifiers={"source": ap.args.source}
             ),
-            SeqFeature(
-                FeatureLocation(span[1] - 3, span[1]), type="stop_codon", strand=feature.strand,
-                qualifiers={"source": ap.args.source}
-            ),
+            # SeqFeature(
+            #     FeatureLocation(span[1] - 3, span[1]), type="stop_codon", strand=feature.strand,
+            #     qualifiers={"source": ap.args.source}
+            # ),
         ]
     i += 1
     return i
