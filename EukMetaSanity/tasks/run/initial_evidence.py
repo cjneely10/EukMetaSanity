@@ -42,7 +42,7 @@ class EvidenceIter(TaskList):
             self.log_and_run(
                 self.program_metaeuk[
                     "easy-predict",
-                    self.input[1],
+                    self.input[2],
                     subset_db_outpath,
                     _outfile,
                     os.path.join(self.wdir, "tmp"),
@@ -52,13 +52,13 @@ class EvidenceIter(TaskList):
             )
             # Convert to GFF3
             self.local["fasta-to-gff3.py"][
-                self.input[4], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
+                self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
             ]()
             # Merge ab initio and initial prediction results into non-redundant set
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
-                    "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"), "-S", "-g", self.input[4],
+                    "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"), "-S", "-g", self.input[2],
                     "-Z", "-G", "-M", "-J", "-Q", "-K", "-Y",  # Squash to non-redundant
                     # "-Z", "-G", "-J", "-M",
                     "-y", os.path.join(self.wdir, self.record_id + ".tmp.faa")
@@ -79,7 +79,7 @@ class EvidenceIter(TaskList):
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
-                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-g", self.input[4], "-S",
+                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-g", self.input[2], "-S",
                     "-G", "-M", "--cluster-only", "-J",  # All on top of each other
                 ]
             )
