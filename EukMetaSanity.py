@@ -32,7 +32,6 @@ def _initialize_logging(ap: ArgParse) -> None:
         "All log statements are redirected to %s" % log_file, "",
         "*" * 80, "",
         "Displaying step summaries here:\n\n",
-        "Simplifying FASTA sequences",
         sep="\n"
     )
 
