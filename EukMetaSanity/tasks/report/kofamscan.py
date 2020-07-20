@@ -18,11 +18,11 @@ class KoFamScanIter(TaskList):
         def run_1(self):
             self.log_and_run(
                 self.program[
-                    "-p", self.data_profiles,
                     "--cpu", self.threads,
                     "--format", "detail",
                     (*self.added_flags),
                     "-o", os.path.join(self.wdir, self.record_id + ".kegg.out"),
+                    "--tmp-dir", os.path.join(self.wdir, "tmp"),
                     self.input[-1],
                 ]
             )

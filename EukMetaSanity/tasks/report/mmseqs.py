@@ -9,8 +9,9 @@ class MMseqsIter(TaskList):
             self.output = [
                 *self.input,  # Forward input
                 *[  # BLASTx-like results for each database provided
-                    os.path.join(self.wdir, self.record_id + "%s-results.m8" % db)
-                    for db in self.data.split(",")
+                    os.path.join(
+                        self.wdir, self.record_id + "_%s-results.m8" % os.path.basename(os.path.splitext(db)[0])
+                    ) for db in self.data.split(",")
                 ]
             ]
 
@@ -29,12 +30,12 @@ class MMseqsIter(TaskList):
                 ]
             )
             # Search through each database
-            for db in self.data.split():
-                _out_db = _file_db[:-3] + "%s-results_db" % db
+            for db in self.data.split(","):
+                _out_db = _file_db[:-3] + "_%s-results_db" % os.path.basename(os.path.splitext(db)[0])
                 # Linear search
                 self.log_and_run(
                     self.program[
-                        "linsearch",
+                        "search",
                         _file_db,  # Input FASTA sequence db
                         db,  # Input augustus-db
                         _out_db,  # Output tax db
