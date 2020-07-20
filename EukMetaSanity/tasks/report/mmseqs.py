@@ -6,12 +6,14 @@ class MMseqsIter(TaskList):
     class MMseqs(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            dbs = (os.path.basename(os.path.splitext(db)[0]) for db in self.data.split(","))
             self.output = [
                 *self.input,  # Forward input
                 *[  # BLASTx-like results for each database provided
                     os.path.join(
-                        self.wdir, self.record_id + "_results.%s-m8" % os.path.basename(os.path.splitext(db)[0])
-                    ) for db in self.data.split(",")
+                        self.wdir,
+                        self.record_id + "_%s-results.%s-m8" % (db, db)
+                    ) for db in dbs
                 ]
             ]
 

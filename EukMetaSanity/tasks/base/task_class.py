@@ -270,7 +270,7 @@ class TaskList(ABC):
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(_final_output_dir, "%s-paths_summary.tsv" % _name), "w")
-        for _files, _file_prefix in zip(_output_files_list, _files_prefixes):
+        for _files, _file_prefix, _task in zip(_output_files_list, _files_prefixes, self.tasks):
             _sub_out = os.path.join(_final_output_dir, _file_prefix)
             if not os.path.exists(_sub_out):
                 os.makedirs(_sub_out)
@@ -290,9 +290,14 @@ class TaskList(ABC):
                             )), "\n"
                         ))
                     )
-                # Generate link of path
+                # Generate link of path, or create copy as requested
                 elif isinstance(_file, str):
-                    local["ln"]["-srf", _file, _sub_out]()
+                    _task.log_and_run(
+                        _task.program[
+                            (*_task.added_flags),
+                            _file, _sub_out,
+                        ]
+                    )
         _paths_output_file.close()
 
 
