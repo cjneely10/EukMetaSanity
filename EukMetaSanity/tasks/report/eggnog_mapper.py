@@ -10,6 +10,7 @@ class EggNOGMapper(TaskList):
                 *self.input,  # Forward values
                 os.path.join(self.wdir, self.record_id + ".emapper")  # Results of mapper
             ]
+            # Truncate final output to remove original input data
             self.output = self.output[1:]
 
         def run(self):

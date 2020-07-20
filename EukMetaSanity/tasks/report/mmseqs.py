@@ -53,7 +53,6 @@ class MMseqsIter(TaskList):
                         _out_db,  # Input tax db
                         _out_db[:-3] + ".%s-m8" % os.path.basename(os.path.splitext(db)[0]),  # Output results file
                         "--threads", self.threads,
-                        "--format-output", "query,target,evalue,bits,pident",
                     ]
                 )
 
