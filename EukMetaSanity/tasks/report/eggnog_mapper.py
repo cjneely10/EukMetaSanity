@@ -20,7 +20,7 @@ class EggNOGMapper(TaskList):
                 self.program_python27[
                     self.emapper,
                     "-i", self.input[0],
-                    "--output", self.output[-1],
+                    "--output", os.path.join(self.wdir, self.record_id),
                     "--cpu", self.threads,
                     (*self.added_flags),
                 ]
