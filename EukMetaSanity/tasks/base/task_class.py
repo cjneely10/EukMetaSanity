@@ -135,7 +135,7 @@ class Task(ABC):
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths:
-            if not self.skip and isinstance(_path, str) and not os.path.exists(_path):
+            if self.skip == "False" and isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
                     touch(_path)
@@ -260,7 +260,7 @@ class TaskList(ABC):
             self._mode,
         )
 
-    def summarize(self, _final_output_dir: str):
+    def summarize(self, _final_output_dir: str, _name: str):
         # Create softlinks of final files to output directory
         # Write summary file of reults
         # Store output paths as file for easy loading
@@ -269,7 +269,7 @@ class TaskList(ABC):
         _files_prefixes = _output[3]
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
-        _paths_output_file = open(os.path.join(_final_output_dir, "paths_summary.tsv"), "w")
+        _paths_output_file = open(os.path.join(_final_output_dir, "%s-paths_summary.tsv" % _name), "w")
         for _files, _file_prefix in zip(_output_files_list, _files_prefixes):
             _sub_out = os.path.join(_final_output_dir, _file_prefix)
             if not os.path.exists(_sub_out):

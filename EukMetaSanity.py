@@ -23,7 +23,7 @@ EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
 # Logging initialize
 def _initialize_logging(ap: ArgParse) -> None:
     # Initialize logging
-    log_file = os.path.join(ap.args.output, "eukmetasanity.log")
+    log_file = os.path.join(ap.args.output, "%s-eukmetasanity.log" % ap.args.command)
     if os.path.exists(log_file):
         os.remove(log_file)
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
@@ -94,13 +94,9 @@ def _parse_args(ap: ArgParse, tm: TaskManager) -> Tuple[ConfigManager, bool]:
     assert os.path.exists(ap.args.config_file)
     is_continued = False
     # FASTA directory provided by user
-    if ap.args.fasta_directory is not None:
-        # Confirm that path exists
-        assert os.path.exists(ap.args.fasta_directory)
+    assert os.path.exists(ap.args.fasta_directory)
     # Directory not provided, based on output directory
-    else:
-        assert os.path.exists(ap.args.output)
-        # Generate list of files to parse
+    if ap.args.fasta_directory[-3:] == "tsv":
         is_continued = True
     # Ensure command is valid
     assert ap.args.command in tm.programs
@@ -124,7 +120,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
         # Gather from existing data
         logging.info("Getting files from last run...")
         input_files = _get_list_of_files(
-            os.path.join(ap.args.output, "results/paths_summary.tsv"),
+            ap.args.fasta_directory,
             tm.input_type[ap.args.command],
         )
         input_prefixes = [_prefix(_file) for _file in input_files]
@@ -150,7 +146,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
     # Must call output on last task to generate final summary statistics
     task.run()
     # Create summary softlinks using final Summarize task
-    task.summarize(os.path.join(ap.args.output, "results"))
+    task.summarize(os.path.join(ap.args.output, "results"), ap.args.command)
 
 
 if __name__ == "__main__":

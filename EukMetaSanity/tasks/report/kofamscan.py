@@ -8,7 +8,7 @@ class KoFamScanIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = [
                 *self.input,  # Forward initially passed values (in this case prot FASTA file)
-                os.path.join(self.wdir, self.record_id + ".kegg.out"),  # KEGG output file
+                os.path.join(self.wdir, self.record_id + ".kegg"),  # KEGG output file
             ]
 
         def run(self):
@@ -21,7 +21,7 @@ class KoFamScanIter(TaskList):
                     "--cpu", self.threads,
                     "--format", "detail",
                     (*self.added_flags),
-                    "-o", os.path.join(self.wdir, self.record_id + ".kegg.out"),
+                    "-o", os.path.join(self.wdir, self.record_id + ".kegg"),
                     "--tmp-dir", os.path.join(self.wdir, "tmp"),
                     self.input[-1],
                 ]
