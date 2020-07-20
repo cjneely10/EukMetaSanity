@@ -275,10 +275,10 @@ class TaskList(ABC):
             if not os.path.exists(_sub_out):
                 os.makedirs(_sub_out)
             # Copy results to results dir for easier access
+            sorted_keys = sorted([os.path.splitext(_file)[1][1:] for _file in _files if isinstance(_file, str)])
             for _file in _files:
                 # Write info to file
                 if isinstance(_file, dict):
-                    sorted_keys = sorted(list(_file.keys()))
                     # Header
                     _paths_output_file.write("".join(("\t".join(["ID"] + sorted_keys), "\n")))
                     # Path info

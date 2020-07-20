@@ -6,16 +6,13 @@ class SummarizeIter(TaskList):
     class Summarize(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.output = self.input + ["none"]
-            print(self.output)
+            self.output = self.input
+            _data = {}
             for _val in self.output:
                 if isinstance(_val, str):
-                    print(_val)
-                    for _prefix, _ext in os.path.splitext(_val):
-                        self.output.append(
-                            {_prefix: _ext}
-                        )
-            print(self.output)
+                    _prefix, _ext = os.path.splitext(_val)
+                    _data.update({_ext[1:]: _val})
+            self.output.append(_data)
 
         def run(self):
             super().run()

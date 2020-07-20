@@ -8,8 +8,9 @@ class EggNOGMapper(TaskList):
             super().__init__(*args, **kwargs)
             self.output = [
                 *self.input,  # Forward values
-                os.path.join(self.wdir, self.record_id + ".emapper.annotations")  # Results of mapper
+                os.path.join(self.wdir, self.record_id + ".emapper")  # Results of mapper
             ]
+            self.output = self.output[1:]
 
         def run(self):
             super().run()
@@ -24,6 +25,10 @@ class EggNOGMapper(TaskList):
                     "--cpu", self.threads,
                     (*self.added_flags),
                 ]
+            )
+            os.replace(
+                os.path.join(self.wdir, self.record_id) + ".emmapper.annotations",
+                os.path.join(self.wdir, self.record_id) + ".emmapper"
             )
 
     def __init__(self, *args, **kwargs):

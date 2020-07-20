@@ -8,6 +8,7 @@ from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 # Report imports
 from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
+from EukMetaSanity.tasks.report.summarize import SummarizeIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 
 
@@ -25,6 +26,7 @@ class TaskManager:
                 KoFamScanIter,
                 MMseqsIter,
                 EggNOGMapper,
+                SummarizeIter,
             ],
         }
         self._input_type = {
