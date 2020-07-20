@@ -118,15 +118,17 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
     # Gather list of files to analyze
     if is_continued:
         # Gather from existing data
-        logging.info("Getting files from last run...")
+        for f in (logging.info, print):
+            f("Getting files from last run...")
         input_files = _get_list_of_files(
             ap.args.fasta_directory,
             tm.input_type[ap.args.command],
         )
         input_prefixes = [_prefix(_file) for _file in input_files]
     else:
-        logging.info("Creating working directory")
-        logging.info("Simplifying FASTA sequences")
+        for f in (logging.info, print):
+            f("Creating working directory")
+            f("Simplifying FASTA sequences")
         # Simplify FASTA files into working directory
         pm.add_dirs("MAGS")
         input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))

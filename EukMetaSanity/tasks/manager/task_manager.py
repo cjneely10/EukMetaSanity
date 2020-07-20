@@ -20,6 +20,7 @@ class TaskManager:
                 RepeatsIter,
                 AbInitioIter,
                 EvidenceIter,
+                SummarizeIter,
             ],
             "refine": [],
             "report": [
