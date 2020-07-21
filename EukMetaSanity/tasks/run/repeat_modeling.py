@@ -93,14 +93,15 @@ class RepeatsIter(TaskList):
             # Perform on de novo results
             # Perform step on each file passed by user
             data_files = []
+            _added_dirs = []
             _file = RepeatsIter.Repeats._get_results_file(_recorded_start_time)
-            if _file is not None:
-                data_files.append(_file)
+            # if _file is not None:
+            #     data_files.append(_file)
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
             data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0]]
-            _added_dirs = []
+            data_files.append(_file)
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
                 if os.path.exists(_search):
