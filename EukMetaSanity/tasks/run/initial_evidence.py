@@ -55,6 +55,12 @@ class EvidenceIter(TaskList):
                 self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
             ]()
             # Merge ab initio and initial prediction results into non-redundant set
+            # self.log_and_run(
+            #     self.program_bedtools[
+            #         "-a", os.path.join(self.wdir, "metaeuk.gff3"),
+            #         "-b", self.input[0], "-wa",
+            #     ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            # )
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[

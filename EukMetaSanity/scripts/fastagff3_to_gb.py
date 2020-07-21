@@ -4,6 +4,7 @@ import sys
 from Bio import Seq
 from BCBio import GFF
 from Bio import SeqIO
+from Bio.Seq import UnknownSeq
 from Bio.Alphabet import generic_dna
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -16,6 +17,7 @@ https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
 def _parse_args(ap):
     assert os.path.exists(ap.args.fasta_file)
     assert os.path.exists(ap.args.gff3_file)
+    assert ap.args.format in ("genbank", "CDS")
 
 
 def _fix_ncbi_id(fasta_iter):
@@ -37,11 +39,11 @@ def _fix_ncbi_id(fasta_iter):
         yield rec
 
 
-def _check_gff(gff_iterator):
+def _check_gff(gff_iterator, _type=None):
     """Check GFF files before feeding to SeqIO to be sure they have sequences.
     """
     for rec in gff_iterator:
-        if isinstance(rec.seq, Seq.UnknownSeq):
+        if isinstance(rec.seq, UnknownSeq):
             print("Warning: FASTA sequence not found for '%s' in GFF file" % (
                 rec.id))
             rec.seq.alphabet = generic_dna
@@ -72,7 +74,7 @@ def _flatten_features(rec):
     return rec
 
 
-def write_genbank(fasta_file, gff3_file, output_file, out_fmt="genbank"):
+def write_genbank(fasta_file, gff3_file, output_file):
     if not os.path.exists(fasta_file):
         raise FileNotFoundError(fasta_file)
     if not os.path.exists(gff3_file):
@@ -84,12 +86,24 @@ def write_genbank(fasta_file, gff3_file, output_file, out_fmt="genbank"):
             ),
         ),
         output_file,
-        out_fmt,
+        "genbank",
     )
 
 
+def write_cds(genbank_file, output_file):
+    out = []
+    for seq_record in SeqIO.parse(genbank_file, "genbank"):
+        for seq_feature in seq_record.features:
+            if seq_feature.type == "CDS":
+                out.append(seq_feature.translate(seq_record.seq, cds=False))
+    SeqIO.write(out, output_file, "fasta")
+
+
 def main(ap):
-    write_genbank(ap.args.fasta_file, ap.args.gff3_file, ap.args.output)
+    if ap.args.format == "genbank":
+        write_genbank(ap.args.fasta_file, ap.args.gff3_file, ap.args.output)
+    elif ap.args.format == "CDS":
+        write_cds(ap.args.fasta_file, ap.args.output)
 
 
 if __name__ == "__main__":
@@ -101,6 +115,8 @@ if __name__ == "__main__":
              {"help": "GFF3 mapping file"}),
             (("-o", "--output"),
              {"help": "Output path, default stdout", "default": "/dev/stdout"}),
+            (("-f", "--format"),
+             {"help": "Select from genbank/CDS, default genbank", "default": "genbank"})
         ),
         description="Convert FASTA and GFF3 file to Genbank format"
     )
