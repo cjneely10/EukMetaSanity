@@ -1,6 +1,5 @@
 import os
 import logging
-from time import sleep
 from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
@@ -177,7 +176,6 @@ class Task(ABC):
         if completed:
             logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
-            sleep(self.delay)
             logging.info("%s  Running %s" % (self.record_id, self.name))
             # Gather all functions of the form run_1, run_2, etc.
             runnables = sorted(

@@ -1,7 +1,10 @@
 import os
 import shutil
 import datetime
+from time import sleep
 from typing import List
+from pathlib import Path
+from random import randint
 from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
@@ -25,13 +28,13 @@ class RepeatsIter(TaskList):
                 self.input[2],  # Tax file
                 self.input[1],  # MMSeqs db for tax ident
             ]
-            self.delay = 7
 
         def run(self) -> None:
             super().run()
 
         def run_1(self):
             # Call protocol method
+            sleep(randint(randint(1, 5), randint(7, 10)))
             getattr(self, self.protocol)()
 
         # Simple repeat masking using mmseqs
@@ -76,8 +79,7 @@ class RepeatsIter(TaskList):
             )
             _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
             # _now = datetime.datetime.now()
-            print(_now)
-            print(_now.strftime("%a%b%d%H%M%S%Y"))
+            print(_now, _now.strftime("%a%b%d%H%M%S%Y"))
             # Run RepeatModeler
             self.log_and_run(
                 self.program_modeler[
@@ -101,11 +103,12 @@ class RepeatsIter(TaskList):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
             data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0]]
-            data_files.append(_file)
+            if _file is not None:
+                data_files.append(_file)
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
-                if os.path.exists(_search):
-                    search = ("-lib", _search)
+                if _search[:2] == "RM":
+                    search = ("-lib", str(Path(_search).resolve()))
                     _dir = "repeats_" + prefix(_search)
                 else:
                     search = ("-species", _search)
@@ -139,6 +142,7 @@ class RepeatsIter(TaskList):
             all(
                 self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))])
                 for rep_dir in repeats_dirs
+                if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat.gz"))))
             )
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
@@ -167,14 +171,15 @@ class RepeatsIter(TaskList):
             _formatted_time = _time.strftime("%a%b%d%H%M%S%Y")
             print(_formatted_time)
             _files = [_file for _file in os.listdir(os.getcwd()) if "RM" in _file]
-            if len(_files) == 1:
-                return os.path.join(_files[0], "consensi.fa.classified")
+            for _file in _files:
+                if _formatted_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
+                    return os.path.join(_file, "consensi.fa.classified")
             else:
                 for i in range(1, 3):
                     _possible_time = (_time + datetime.timedelta(0, i)).strftime("%a%b%d%H%M%S%Y")
                     print(_possible_time)
                     for _file in _files:
-                        if _formatted_time in _file or _possible_time in _file:
+                        if _possible_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
                             return os.path.join(_file, "consensi.fa.classified")
 
         @staticmethod
