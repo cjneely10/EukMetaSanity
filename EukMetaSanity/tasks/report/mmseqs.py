@@ -24,13 +24,14 @@ class MMseqsIter(TaskList):
         def run_1(self):
             # Generate MMseqs database for proteins
             _file_db = os.path.join(self.wdir, self.record_id + "_db")
-            self.log_and_run(
-                self.program[
-                    "createdb",
-                    self.input[0],
-                    _file_db,
-                ]
-            )
+            if not os.path.exists(_file_db):
+                self.log_and_run(
+                    self.program[
+                        "createdb",
+                        self.input[0],
+                        _file_db,
+                    ]
+                )
             # Search through each database
             for db in self.data.split(","):
                 _out_db = _file_db[:-3] + "_%s-results_db" % os.path.basename(os.path.splitext(db)[0])
