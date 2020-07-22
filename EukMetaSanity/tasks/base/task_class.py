@@ -70,6 +70,7 @@ class Task(ABC):
                 _set_attr = _value
                 # Add program from local environment
                 if _path.startswith("program"):
+                    assert os.path.exists(_value)
                     _set_attr = local[_set_attr]
                 # Check for existence if a data value
                 elif _path.startswith("data"):

@@ -13,6 +13,7 @@ class EvidenceIter(TaskList):
                 "mask": self.input[4],  # Masked results
                 "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
                 "tax": self.input[3],  # Taxonomy results file
+                "mask_tbl": self.input[5],  # Summarized mask results
             }
             self.output = [
                 _out,  # Dictionary for accessing to write final summary
