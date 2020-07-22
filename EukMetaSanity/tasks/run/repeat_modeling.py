@@ -113,6 +113,9 @@ class RepeatsIter(TaskList):
                 else:
                     search = ("-species", _search)
                     _dir = "repeats_" + _search.replace(" ", "_")
+                # Do not repeat if step is already present
+                if os.path.exists(os.path.join(os.path.dirname(self.wdir), _dir)):
+                    continue
                 # Create contained directory
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
@@ -139,17 +142,17 @@ class RepeatsIter(TaskList):
             self.pm.add_dirs(self.record_id, ["repeats_final"])
             _basename = os.path.basename(input_file)
             # Unzip results
-            all(
+            all([
                 self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))])
                 for rep_dir in repeats_dirs
                 if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat.gz"))))
-            )
+            ])
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
-            all(
+            all([
                 self.log_and_run(self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)
                 for rep_dir in repeats_dirs
-            )
+            ])
             # Run ProcessRepeats
             self.log_and_run(
                 self.program_process_repeats[
