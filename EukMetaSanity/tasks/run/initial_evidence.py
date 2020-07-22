@@ -1,5 +1,4 @@
 import os
-from Bio import SeqIO
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -39,17 +38,18 @@ class EvidenceIter(TaskList):
                 )
             # Run metaeuk
             _outfile = os.path.join(self.wdir, self.record_id)
-            self.log_and_run(
-                self.program_metaeuk[
-                    "easy-predict",
-                    self.input[2],
-                    subset_db_outpath,
-                    _outfile,
-                    os.path.join(self.wdir, "tmp"),
-                    "--threads", self.threads,
-                    "--add-orf-stop",
-                ]
-            )
+            if not os.path.exists(_outfile):
+                self.log_and_run(
+                    self.program_metaeuk[
+                        "easy-predict",
+                        self.input[2],
+                        subset_db_outpath,
+                        _outfile,
+                        os.path.join(self.wdir, "tmp"),
+                        "--threads", self.threads,
+                        "--add-orf-stop",
+                    ]
+                )
             # Convert to GFF3
             self.local["fasta-to-gff3.py"][
                 self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
@@ -61,26 +61,26 @@ class EvidenceIter(TaskList):
             #         "-b", self.input[0], "-wa",
             #     ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
             # )
-            self.log_and_run(
-                self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
-                self.program_gffread[
-                    "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"), "-S", "-g", self.input[2],
-                    "-Z", "-G", "-M", "-J", "-Q", "-K", "-Y",  # Squash to non-redundant
-                    # "-Z", "-G", "-J", "-M",
-                    "-y", os.path.join(self.wdir, self.record_id + ".tmp.faa")
-                ]
-            )
-            # Rename proteins
-            record_fp = SeqIO.parse(os.path.join(self.wdir, self.record_id + ".tmp.faa"), "fasta")
-            out = []
-            i = 1
-            for record in record_fp:
-                record.id = str(record.id) + "_" + str(i)
-                i += 1
-                out.append(record)
-            SeqIO.write(out, os.path.join(self.wdir, self.record_id + ".faa"), "fasta")
-            # Remove locus lines
-            self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".nr.gff3")])
+            # self.log_and_run(
+            #     self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
+            #     self.program_gffread[
+            #         "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"), "-S", "-g", self.input[2],
+            #         "-Z", "-G", "-M", "-J", "-Q", "-K", "-Y",  # Squash to non-redundant
+            #         # "-Z", "-G", "-J", "-M",
+            #         "-y", os.path.join(self.wdir, self.record_id + ".tmp.faa")
+            #     ]
+            # )
+            # # Rename proteins
+            # record_fp = SeqIO.parse(os.path.join(self.wdir, self.record_id + ".tmp.faa"), "fasta")
+            # out = []
+            # i = 1
+            # for record in record_fp:
+            #     record.id = str(record.id) + "_" + str(i)
+            #     i += 1
+            #     out.append(record)
+            # SeqIO.write(out, os.path.join(self.wdir, self.record_id + ".faa"), "fasta")
+            # # Remove locus lines
+            # self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".nr.gff3")])
             # Generate complete set, with all redundancies
             self.log_and_run(
                 self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
@@ -89,7 +89,31 @@ class EvidenceIter(TaskList):
                     "-G", "-M", "--cluster-only", "-J",  # All on top of each other
                 ]
             )
-            self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".gff3")])
+            # Create non-redundant gff
+            self.log_and_run(
+                self.program_gffcompare[
+                    os.path.join(self.wdir, self.record_id + ".gff3"), "-o", os.path.join(self.wdir, self.record_id)
+                ]
+            )
+            # Make non-redundant
+            self.log_and_run(
+                self.program_gffread[
+                    os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G",
+                ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            )
+            self.log_and_run(
+                self.local["sed"][
+                    "-i", "s/transcript/CDS/g",
+                    os.path.join(self.wdir, self.record_id + ".nr.gff3")
+                ]
+            )
+            self.log_and_run(
+                self.program_gffread[
+                    os.path.join(self.wdir, self.record_id + ".nr.gff3"),
+                    "-y", os.path.join(self.wdir, self.record_id + ".faa"),
+                    "-g", self.input[2],
+                ]
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
