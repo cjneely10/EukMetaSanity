@@ -50,7 +50,7 @@ export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 
 When selecting dependencies to download, please follow the instructions below:
 
-Install [gffread](https://github.com/gpertea/gffread)
+Install [gffread](https://github.com/gpertea/gffread) AND [gffcompare](https://github.com/gpertea/gffcompare)
 
 ##### Run step 1: Taxonomy identification
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2)
