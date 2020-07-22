@@ -46,7 +46,7 @@ export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 
 ### Installing dependencies
 
-**EukMetaSanity** consists of 3 subprograms - `run`, `refine`, `report`.
+**EukMetaSanity** consists of 3 subprograms - `run`, `report`, `refine`.
 
 When selecting dependencies to download, please follow the instructions below:
 
@@ -70,6 +70,18 @@ Install [MetaEuk](https://github.com/soedinglab/metaeuk)
 
 ---
 
+##### Report step 1/2 (optional)
+Install [MMseqs2](https://github.com/soedinglab/MMseqs2), and install any databases you wish to incorporate by following
+the [github page](https://github.com/soedinglab/mmseqs2/wiki#downloading-databases)
+
+##### Report step 3 (optional)
+Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required databases
+
+##### Report step 5 (optional)
+Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
+
+---
+
 ##### Refine step 1 (optional)
 Install [MAKER3](http://www.yandell-lab.org/software/maker.html) and 
 [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
@@ -80,18 +92,6 @@ Install [sambamba](https://lomereiter.github.io/sambamba/), [minimap2](https://g
 
 ##### Refine step 3 (optional)
 Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
-
----
-
-##### Report step 1/2 (optional)
-Install [MMseqs2](https://github.com/soedinglab/MMseqs2), and install any databases you wish to incorporate by following
-the [github page](https://github.com/soedinglab/mmseqs2/wiki#downloading-databases)
-
-##### Report step 3 (optional)
-Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required databases
-
-##### Report step 5 (optional)
-Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
 
 ## Usage
 
@@ -109,12 +109,12 @@ usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
 Run EukMetaSanity pipeline
 
 positional arguments:
-  command               Select from run/refine
+  command               Select from run/report/refine
 
 optional arguments:
   -h, --help            show this help message and exit
   -f FASTA_DIRECTORY, --fasta_directory FASTA_DIRECTORY
-                        Directory of FASTA files to annotate
+                        Directory of FASTA files to annotate, or paths_summary.tsv for report step
   -c CONFIG_FILE, --config_file CONFIG_FILE
                         Config file
   -x EXTENSIONS, --extensions EXTENSIONS
