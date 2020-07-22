@@ -13,7 +13,6 @@ class EvidenceIter(TaskList):
                 "mask": self.input[4],  # Masked results
                 "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
                 "tax": self.input[3],  # Taxonomy results file
-                "mask_tbl": self.input[5],  # Summarized mask results
             }
             self.output = [
                 _out,  # Dictionary for accessing to write final summary
@@ -99,7 +98,7 @@ class EvidenceIter(TaskList):
             # Make non-redundant
             self.log_and_run(
                 self.program_gffread[
-                    os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G",
+                    os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G", "-S",
                 ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
             )
             self.log_and_run(
@@ -112,7 +111,7 @@ class EvidenceIter(TaskList):
                 self.program_gffread[
                     os.path.join(self.wdir, self.record_id + ".nr.gff3"),
                     "-y", os.path.join(self.wdir, self.record_id + ".faa"),
-                    "-g", self.input[2],
+                    "-g", self.input[2], "-S",
                 ]
             )
 
