@@ -23,6 +23,7 @@ class AbInitioIter(TaskList):
                 self.input[2],  # Original file,
                 self.input[3],  # Tax file
                 self.input[0],  # Repeat-masked FASTA file
+                self.input[5],  # Summarized repeats file
             ]
             self.rounds = int(self.rounds)
 

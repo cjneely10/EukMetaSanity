@@ -27,6 +27,7 @@ class RepeatsIter(TaskList):
                 self.input[0],  # Original input file,
                 self.input[2],  # Tax file
                 self.input[1],  # MMSeqs db for tax ident
+                os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.tbl")  # Mask results
             ]
 
         def run(self) -> None:
