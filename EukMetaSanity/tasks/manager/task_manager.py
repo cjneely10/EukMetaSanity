@@ -5,6 +5,7 @@ from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.run.ab_initio import AbInitioIter
 from EukMetaSanity.tasks.run.repeat_modeling import RepeatsIter
 from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
+from EukMetaSanity.tasks.run.merge_gffs import MergeIter
 # Report imports
 from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
@@ -20,6 +21,7 @@ class TaskManager:
                 RepeatsIter,
                 AbInitioIter,
                 EvidenceIter,
+                MergeIter,
                 SummarizeIter,
             ],
             "refine": [],

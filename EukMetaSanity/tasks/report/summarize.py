@@ -11,6 +11,7 @@ class SummarizeIter(TaskList):
             for _obj in self.output:
                 if isinstance(_obj, dict):
                     has_dict = True
+                    break
             if not has_dict:
                 _data = {}
                 for _val in self.output:
