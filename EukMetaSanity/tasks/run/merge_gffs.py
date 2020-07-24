@@ -24,12 +24,42 @@ class MergeIter(TaskList):
 
         @program_catch
         def run_1(self):
+            pass
             # Merge ab initio and initial prediction results into non-redundant set
             # self.log_and_run(
             #     self.program_bedtools[
             #         "-a", os.path.join(self.wdir, "metaeuk.gff3"),
-            #         "-b", self.input[0], "-wa",
+            #         "-b", self.input[0], "-wa", "-loj",
+            #     ] > os.path.join(self.wdir, self.record_id + ".tmp.gff3")
+            # )
+            # # Merge LOJ results to remove duplicates
+            # self.log_and_run(
+            #     self.program_gffcompare[
+            #         os.path.join(self.wdir, self.record_id + ".tmp.gff3"), "-o", os.path.join(self.wdir, self.record_id)
+            #     ]
+            # )
+            # # Convert to gff3
+            # self.log_and_run(
+            #     self.program_gffread[
+            #         os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G", "-S",
             #     ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            # )
+            # # Replace transcript with CDS for easier CDS conversion
+            # self.log_and_run(
+            #     self.local["sed"][
+            #         "-i", "s/transcript/CDS/g",
+            #         os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            #     ]
+            # )
+            # # Remove tmp file
+            # os.remove(os.path.join(self.wdir, self.record_id + ".tmp.gff3"))
+            # # Output proteins for file
+            # self.log_and_run(
+            #     self.program_gffread[
+            #         os.path.join(self.wdir, self.record_id + ".nr.gff3"),
+            #         "-y", os.path.join(self.wdir, self.record_id + ".faa"),
+            #         "-g", self.input[2], "-S",
+            #     ]
             # )
             # self.log_and_run(
             #     self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
@@ -51,39 +81,39 @@ class MergeIter(TaskList):
             # SeqIO.write(out, os.path.join(self.wdir, self.record_id + ".faa"), "fasta")
             # # Remove locus lines
             # self.log_and_run(self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".nr.gff3")])
-            # Generate complete set, with all redundancies
-            self.log_and_run(
-                self.local["cat"][self.input[0], self.input[-1]] |
-                self.program_gffread[
-                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-g", self.input[2], "-S",
-                    "-G", "-M", "--cluster-only", "-J",  # All on top of each other
-                ]
-            )
-            # Create non-redundant gff
-            self.log_and_run(
-                self.program_gffcompare[
-                    os.path.join(self.wdir, self.record_id + ".gff3"), "-o", os.path.join(self.wdir, self.record_id)
-                ]
-            )
-            # Make non-redundant
-            self.log_and_run(
-                self.program_gffread[
-                    os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G", "-S",
-                ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
-            )
-            self.log_and_run(
-                self.local["sed"][
-                    "-i", "s/transcript/CDS/g",
-                    os.path.join(self.wdir, self.record_id + ".nr.gff3")
-                ]
-            )
-            self.log_and_run(
-                self.program_gffread[
-                    os.path.join(self.wdir, self.record_id + ".nr.gff3"),
-                    "-y", os.path.join(self.wdir, self.record_id + ".faa"),
-                    "-g", self.input[2], "-S",
-                ]
-            )
+            # # Generate complete set, with all redundancies
+            # self.log_and_run(
+            #     self.local["cat"][self.input[0], self.input[-1]] |
+            #     self.program_gffread[
+            #         "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-g", self.input[2], "-S",
+            #         "-G", "-M", "--cluster-only", "-J",  # All on top of each other
+            #     ]
+            # )
+            # # Create non-redundant gff
+            # self.log_and_run(
+            #     self.program_gffcompare[
+            #         os.path.join(self.wdir, self.record_id + ".gff3"), "-o", os.path.join(self.wdir, self.record_id)
+            #     ]
+            # )
+            # # Make non-redundant
+            # self.log_and_run(
+            #     self.program_gffread[
+            #         os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G", "-S",
+            #     ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            # )
+            # self.log_and_run(
+            #     self.local["sed"][
+            #         "-i", "s/transcript/CDS/g",
+            #         os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            #     ]
+            # )
+            # self.log_and_run(
+            #     self.program_gffread[
+            #         os.path.join(self.wdir, self.record_id + ".nr.gff3"),
+            #         "-y", os.path.join(self.wdir, self.record_id + ".faa"),
+            #         "-g", self.input[2], "-S",
+            #     ]
+            # )
 
     def __init__(self, *args, **kwargs):
         super().__init__(MergeIter.Merge, "merge", *args, **kwargs)

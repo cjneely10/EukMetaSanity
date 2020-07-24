@@ -21,7 +21,7 @@ class TaskManager:
                 RepeatsIter,
                 AbInitioIter,
                 EvidenceIter,
-                MergeIter,
+                # MergeIter,
                 SummarizeIter,
             ],
             "refine": [],
