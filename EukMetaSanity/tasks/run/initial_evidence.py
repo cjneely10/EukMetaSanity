@@ -8,10 +8,12 @@ class EvidenceIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             _out = {
-                "gff3": os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined results of ab initio + evidence
+                "metaeuk": os.path.join(self.wdir, "metaeuk.gff3"),  # Combined results of ab initio + evidence
                 "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
                 "mask": self.input[4],  # Masked results
                 "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
+                "abinitio": self.input[0],  # Ab initio file
+                "gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined data
                 "tax": self.input[3],  # Taxonomy results file
                 "mask_tbl": self.input[5],  # Summarized mask results
             }
@@ -55,17 +57,24 @@ class EvidenceIter(TaskList):
             self.local["fasta-to-gff3.py"][
                 self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
             ]()
-            self.log_and_run(
-                self.program_bedtools[
-                    "intersect",
-                    "-a", os.path.join(self.wdir, "metaeuk.gff3"),
-                    "-b", self.input[0], "-wa", "-loj",
-                ] > os.path.join(self.wdir, self.record_id + ".tmp.gff3")
-            )
+            # self.log_and_run(
+            #     self.program_bedtools[
+            #         "intersect",
+            #         "-a", os.path.join(self.wdir, "metaeuk.gff3"),
+            #         "-b", self.input[0], "-wa", "-loj",
+            #     ] > os.path.join(self.wdir, self.record_id + ".tmp.3.gff3")
+            # )
+            # # Trim end region
+            # self.log_and_run(
+            #     self.local["cut"][
+            #         "-f1,2,3,4,5,6,7,8,9", os.path.join(self.wdir, self.record_id + ".tmp.3.gff3")
+            #     ] > os.path.join(self.wdir, self.record_id + ".tmp.2.gff3")
+            # )
             # Merge LOJ results to remove duplicates
             self.log_and_run(
                 self.program_gffcompare[
-                    os.path.join(self.wdir, self.record_id + ".tmp.gff3"),
+                    os.path.join(self.wdir, "metaeuk.gff3"),
+                    self.input[0],
                     "-o", os.path.join(self.wdir, self.record_id + ".tmp")
                 ]
             )
@@ -83,7 +92,7 @@ class EvidenceIter(TaskList):
                 ]
             )
             # Remove tmp file
-            os.remove(os.path.join(self.wdir, self.record_id + ".tmp.gff3"))
+            # os.remove(os.path.join(self.wdir, self.record_id + ".tmp.gff3"))
             # Output proteins for file
             self.log_and_run(
                 self.program_gffread[
@@ -94,11 +103,18 @@ class EvidenceIter(TaskList):
             )
             # # Generate complete set, with all redundancies
             self.log_and_run(
-                self.local["cat"][self.input[0], self.input[-1]] |
+                self.local["cat"][self.input[0], os.path.join(self.wdir, "metaeuk.gff3")] |
                 self.program_gffread[
-                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"), "-g", self.input[2], "-S",
+                    "-o", os.path.join(self.wdir, self.record_id + ".all.gff3"), "-g", self.input[2], "-S",
                     "-G", "-M", "--cluster-only", "-J",  # All on top of each other
                 ]
+            )
+            # Remove added locus id and replace transcript tag with CDS tag to match metaeuk format
+            self.log_and_run(
+                self.local["sed"]["-i", "/gffcl/d", os.path.join(self.wdir, self.record_id + ".all.gff3")]
+            )
+            self.log_and_run(
+                self.local["sed"]["-i", "s/transcript/CDS/g", os.path.join(self.wdir, self.record_id + ".all.gff3")]
             )
 
     def __init__(self, *args, **kwargs):
