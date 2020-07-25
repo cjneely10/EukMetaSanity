@@ -16,12 +16,6 @@ struct Node {
     bool is_best;  // Track if part of optimal exon structure
 };
 
-// Path for traceback
-struct Path {
-    Node* cur;
-    Node* next;
-};
-
 class GeneStructure {
     public:
         GeneStructure(std::istream*, std::istream*, std::ostream*);
@@ -32,10 +26,10 @@ class GeneStructure {
         void write();  // Write and clear current region chunk
     private:
         Node* gene_structure;  // Internal exon/intron structure
-        Path* optimal_path;  // Store best path for ease in writing
+        Node* optimal_path;  // Store best path for ease in writing
         void clear_gene(Node*);  // Erase internal structure
         void add_node(long long, Type);  // Add a node
         Node* find_prev(long long*);  // Find node with closest value
         void insert_after(Node*);  // Place node after a found node
-        void find_best_path(Node*, Path*);  // Load optimal path
+        void find_best_path(Node*, Node*);  // Load optimal path
 };
