@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "gene_structure.h"
 
 /// Helper function declarations
 bool get_fasta_file(int*, char*[], std::string*);
@@ -30,7 +31,11 @@ int main(int argc, char* argv[]) {
         std::cout << "GFF3 file does not exist" << std::endl;
         return 2;
     }
-
+    std::ofstream outfile(output);
+    if (outfile.fail()) {
+        std::cout << "Unable to open output file" << std::endl;
+        return 3;
+    }
     return 0;
 }
 
