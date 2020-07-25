@@ -1,4 +1,5 @@
 .idea/
 build/
 bin/
+!EukMetaSanity/bin/
 __pycache__/
