@@ -3,3 +3,4 @@ build/
 bin/
 !EukMetaSanity/bin/
 __pycache__/
+.vscode/
