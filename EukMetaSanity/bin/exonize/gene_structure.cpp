@@ -15,8 +15,10 @@ GeneStructure::GeneStructure(std::istream* _fasta, std::istream* _gff3,
 }
 
 GeneStructure::~GeneStructure() {
-
+    delete repeats;
 }
+
+/// Private
 
 // Create node using 1-based coordinate
 Node* GeneStructure::new_node(GenomeCoord pos, bool is_best, Type val_type) {
@@ -27,6 +29,9 @@ Node* GeneStructure::new_node(GenomeCoord pos, bool is_best, Type val_type) {
     node->pos_type = val_type;
     return node;
 }
+
+
+/// Public
 
 // Get left-most coordinate of current region
 GenomeCoord GeneStructure::get_region_start() {

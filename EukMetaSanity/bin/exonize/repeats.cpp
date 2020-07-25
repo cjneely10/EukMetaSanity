@@ -2,14 +2,27 @@
 
 RepeatsLocation::RepeatsLocation(std::istream* infile) {
     file = infile;
-    repeats = new std::set<GenomeCoord>;
+    repeats = NULL;
 }
 
 RepeatsLocation::~RepeatsLocation() {
-    delete repeats;
+    clear_repeats();
 }
 
+/// Private
+
+// Clear repeats data struct
+void RepeatsLocation::clear_repeats() {
+    if (repeats) delete repeats;
+}
+
+
+/// Public
+
+// Read in contig data
 void RepeatsLocation::read_next() {
+    clear_repeats();
+    repeats = new std::set<GenomeCoord>;
     std::string line;
     getline(*file, line);
     // Read in id
@@ -31,7 +44,13 @@ void RepeatsLocation::read_next() {
     }
 }
 
+// Search for coord in set of coordinates for contig
 bool RepeatsLocation::is_in_repeat_region(GenomeCoord* pos) {
     if (repeats->find(*pos) != repeats->end()) return true;
     return false;
+}
+
+// Get stored id
+std::string RepeatsLocation::get_id() {
+    return id;
 }

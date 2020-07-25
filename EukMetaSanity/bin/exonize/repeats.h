@@ -14,9 +14,11 @@ class RepeatsLocation {
         ~RepeatsLocation();
         void read_next();  // Read in next record's repeat data
         bool is_in_repeat_region(GenomeCoord*);  // Check if genomic coord is a repeat
-        std::string id;
+        std::string get_id();
     private:
         std::set<GenomeCoord>* repeats;  // Repeats in contig
         std::istream *file;  // File pointer
+        std::string id;  // Current FASTA record id
+        void clear_repeats();
 };
 #endif
