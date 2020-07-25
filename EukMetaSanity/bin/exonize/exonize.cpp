@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include "gene_structure.h"
+#include "gene_structure.cpp"
 
 /// Helper function declarations
 bool get_fasta_file(int*, char*[], std::string*);
@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Unable to open output file" << std::endl;
         return 3;
     }
+    GeneStructure gene_structure(&fasta_file, &gff3_file, &outfile);
     return 0;
 }
 

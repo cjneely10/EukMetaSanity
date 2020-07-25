@@ -2,9 +2,12 @@
 #include <string>
 #include <tuple>
 #include <set>
+#include <iostream>
 
-typedef long long int GenomeCoord;
+typedef unsigned long long int GenomeCoord;
 
+#ifndef REPEATS_H
+#define REPEATS_H
 class RepeatsLocation {
     public:
         RepeatsLocation(std::istream*);
@@ -16,3 +19,4 @@ class RepeatsLocation {
         std::set<GenomeCoord>* repeats;  // Repeats in contig
         std::istream *file;  // File pointer
 };
+#endif

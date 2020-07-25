@@ -3,8 +3,6 @@
 RepeatsLocation::RepeatsLocation(std::istream* infile) {
     file = infile;
     repeats = new std::set<GenomeCoord>;
-    // Read in first record's repeats
-    read_next();
 }
 
 RepeatsLocation::~RepeatsLocation() {
@@ -26,10 +24,10 @@ void RepeatsLocation::read_next() {
     GenomeCoord pos = 1;
     while (val != '>') {
         // Read repeats structure into internal data struct
-        if (val == 'N') {
-            repeats->insert(pos);
-        }
-        pos += 1;
+        if (val == 'N') repeats->insert(pos - num_endlines);
+        if (val == '\n') num_endlines += 1;
+        else pos += 1;
+        *file >> val;
     }
 }
 
