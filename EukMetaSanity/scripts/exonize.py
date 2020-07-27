@@ -50,20 +50,20 @@ class Coordinate:
 
 # Convert gff3 file to dictionary
 def gff3_to_dict(gff3_file: str) -> Dict[str, List[GFFCoord]]:
-    gff3_fp = open(gff3_file, "rb")
+    gff3_fp = open(gff3_file, "r")
     out_data = defaultdict(list)
     for _line in gff3_fp:
-        if _line.startswith(b"#"):
+        if _line.startswith("#"):
             continue
-        line = _line.rstrip(b"\r\n").split()
+        line = _line.rstrip("\r\n").split()
         out_data[line[0]].append(
             GFFCoord(
-                evidence="".join((chr(v) for v in line[1])),
-                loc_type="".join((chr(v) for v in line[2])),
+                evidence=line[1],
+                loc_type=line[2],
                 start=int(line[3]),
                 end=int(line[4]),
-                strand="".join((chr(v) for v in line[6])),
-                parent_id="".join((chr(v) for v in line[8].split(b";")[0].split(b"=")[1])),
+                strand=line[6],
+                parent_id=line[8].split(";")[0].split("=")[1]
             )
         )
     return dict(out_data)
@@ -103,7 +103,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                 elif not region[k].is_exon and exon_started:
                     exon_started = False
                     exon_list[-1] = (exon_list[-1], k + 1)
-        if end_pos != 0 and end_pos - start_pos > _min_seq_length:
+        if end_pos - start_pos > _min_seq_length:
             # Transcript/gene info
             fp.write("".join((
                 "\t".join((
