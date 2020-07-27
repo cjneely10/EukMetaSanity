@@ -161,7 +161,10 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
         # Create bare region
         region = generate_initial_region(record)
         for gff_dict in gff_dict_list:
-            for coord_data in gff_dict[record.id]:
+            coord_datas = gff_dict.get(record.id, None)
+            if coord_datas is None:
+                continue
+            for coord_data in coord_datas:
                 # Parse region info
                 for i in range(coord_data.start - 1, coord_data.end - 2):
                     region[i].parent_id = coord_data.parent_id
