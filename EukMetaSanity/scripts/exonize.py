@@ -209,8 +209,7 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
 
 
 # https://stackoverflow.com/questions/31757876/python-find-longest-orf-in-dna-sequence
-def find_orfs(cds_list: List[SeqRecord]) -> List[SeqRecord]:
-    out_data = []
+def find_orfs(cds_list: List[SeqRecord]):
     for record in cds_list:
         longest = (0,)
         for nuc in (str(record.seq), str(record.reverse_complement().seq)):
@@ -219,14 +218,11 @@ def find_orfs(cds_list: List[SeqRecord]) -> List[SeqRecord]:
                     pro = Seq(nuc)[m.start():].translate(to_stop=True)
                     longest = (len(pro), m.start(), str(pro))
         if longest[0] >= 30:
-            out_data.append(
-                SeqRecord(
+            yield SeqRecord(
                     seq=Seq(longest[2] + "*"),
                     id=record.id,
                     description=record.description
                 )
-            )
-    return out_data
 
 
 if __name__ == "__main__":
