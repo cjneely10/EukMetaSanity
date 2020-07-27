@@ -228,6 +228,7 @@ def find_orfs(cds_list: List[SeqRecord]) -> List[SeqRecord]:
                 description=record.description
             )
         )
+    return out_data
 
 
 if __name__ == "__main__":
