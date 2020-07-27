@@ -14,7 +14,7 @@ class Coordinate:
     __slots__ = (
         "is_repeat_region",
         "is_exon",
-        "is_intron",
+        "loc_type",
         "parent_id",
         "evidence",
         "strand",
@@ -22,16 +22,28 @@ class Coordinate:
     )
 
     def __init__(self, nucleotide: str):
+        self.parent_id = None
+        self.nucleotide = nucleotide
+        self.is_exon = False
         if nucleotide == "N":
             self.is_repeat_region = True
         else:
             self.is_repeat_region = False
-        self.is_exon = False
-        self.is_intron = False
-        self.parent_id = None
-        self.evidence = []
+        self.evidence = set()
         self.strand = None
-        self.nucleotide = nucleotide
+        self.loc_type = None
+
+    def __repr__(self):
+        # parent_id nucleotide is_exon is_intron is_repeat_region strand loc_type evidence
+        return "%s %s %i %i %s %s %s" % (
+            self.parent_id,
+            self.nucleotide,
+            self.is_exon,
+            self.is_repeat_region,
+            self.strand,
+            self.loc_type,
+            self.evidence
+        )
 
 
 # Convert gff3 file to dictionary
@@ -63,6 +75,10 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
     ]
 
 
+def write_region(region: List[Coordinate]):
+    pass
+
+
 # # Program driver logic
 
 def _parse_args(ap: ArgParse):
@@ -70,21 +86,28 @@ def _parse_args(ap: ArgParse):
         assert os.path.exists(_path)
 
 
+# GFFCoord = namedtuple("GFFCoord", ("evidence", "loc_type", "start", "end", "strand", "parent_id"))
+# "is_repeat_region", "is_exon", "parent_id", "evidence", "strand", "nucleotide"
 def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
     w = open(output_file, "w")
     # Get FASTA file as dict
     record_p = SeqIO.parse(fasta_file, "fasta")
     # Generate list of GFF data dictionaries
-    gff_dict_list = [
-        gff3_to_dict(_file) for _file in gff3_files
-    ]
+    gff_dict_list = [gff3_to_dict(_file) for _file in gff3_files]
     # Iterate over each record
     for record in record_p:
         # Create bare region
         region = generate_initial_region(record)
         for gff_dict in gff_dict_list:
-            pass
-
+            for coord_data in gff_dict[record.id]:
+                # Parse region info
+                for i in range(coord_data.start - 1, coord_data.end - 2):
+                    region[i].parent_id = coord_data.parent_id
+                    region[i].is_exon = True
+                    region[i].loc_type = coord_data.loc_type
+                    region[i].evidence.add(coord_data.evidence)
+                    region[i].strand = coord_data.strand
+        # Write results in gff format
     w.close()
 
 
