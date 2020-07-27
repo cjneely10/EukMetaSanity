@@ -77,10 +77,9 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
     ]
 
 
-def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRecord], _min_seq_length: int):
+def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRecord], _min_seq_length: int, j: int):
     started = False
     start_pos = 0
-    j = 1
     _id = ""
     end_pos = 0
     evidence = ""
@@ -103,14 +102,14 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                     exon_list.append(k + 1)
                 elif not region[k].is_exon and exon_started:
                     exon_started = False
-                    exon_list[-1] = (exon_list[-1], k)
+                    exon_list[-1] = (exon_list[-1], k + 1)
         if end_pos - start_pos > _min_seq_length:
-            # gene info
+            # Transcript/gene info
             fp.write("".join((
                 "\t".join((
                     record_id,
                     evidence,
-                    "gene",
+                    "transcript",
                     str(start_pos),
                     str(end_pos),
                     ".",
@@ -148,6 +147,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                 seq = Seq("".join((
                     char.nucleotide for char in region[start_pos - 1: end_pos]
                 )))
+            # Generate CDS sequence
             _cds.append(
                 SeqRecord(
                     seq=seq,
@@ -156,6 +156,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                     name="",
                 )
             )
+            # Reset counter/storage variables
             end_pos = 0
             j += 1
             evidence = ""
@@ -182,6 +183,7 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
     # Generate list of GFF data dictionaries
     gff_dict_list = [gff3_to_dict(_file) for _file in gff3_files]
     out_cds = []
+    j = 1
     # Iterate over each record
     for record in record_p:
         # Create bare region
@@ -200,7 +202,7 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
                     if "metaeuk" in region[i].evidence and not region[i].is_repeat_region:
                         region[i].is_exon = True
         # Write results in gff format
-        write_region(region, w, record.id, out_cds, min_len)
+        write_region(region, w, record.id, out_cds, min_len, j)
     if write_cds is not None:
         SeqIO.write(out_cds, write_cds, "fasta")
     if write_prot is not None:
