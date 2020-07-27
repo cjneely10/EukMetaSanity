@@ -41,7 +41,7 @@ class EvidenceIter(TaskList):
                 )
             # Run metaeuk
             _outfile = os.path.join(self.wdir, self.record_id)
-            if not os.path.exists(_outfile):
+            if not os.path.exists(_outfile + ".fas"):
                 self.log_and_run(
                     self.program_metaeuk[
                         "easy-predict",
@@ -62,7 +62,7 @@ class EvidenceIter(TaskList):
             # Merge to non-redundant set
             self.log_and_run(
                 self.local["exonize.py"][
-                    "-f", self.input[2],
+                    "-f", self.input[4],
                     "-g", os.path.join(self.wdir, "metaeuk.gff3"), self.input[0],
                     "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"),
                     "-c", os.path.join(self.wdir, self.record_id + ".cds.fna"),
