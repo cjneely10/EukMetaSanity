@@ -95,7 +95,7 @@ def write_region(region: List[Coordinate], fp, record_id: str):
             started = False
             end_pos = i + 1
             # Gather valid exon sections
-            for k in range(start_pos - 1, end_pos - 1):
+            for k in range(start_pos - 1, end_pos):
                 if region[k].is_exon and not exon_started:
                     exon_started = True
                     exon_list.append(str(k + 1))
@@ -121,22 +121,21 @@ def write_region(region: List[Coordinate], fp, record_id: str):
             for exon in exon_list:
                 if not isinstance(exon, tuple):
                     continue
-                for ev in ("exon", "CDS"):
-                    fp.write("".join((
-                        "".join((
-                            "\t".join((
-                                record_id,
-                                evidence,
-                                ev,
-                                exon[0],
-                                exon[1],
-                                ".",
-                                strand,
-                                "parentID=%s" % ("gene" + str(j))
-                            )),
-                            "\n"
+                fp.write("".join((
+                    "".join((
+                        "\t".join((
+                            record_id,
+                            evidence,
+                            "CDS",
+                            exon[0],
+                            exon[1],
+                            ".",
+                            strand,
+                            "parentID=%s" % ("gene" + str(j))
                         )),
-                    )))
+                        "\n"
+                    )),
+                )))
             end_pos = 0
             j += 1
             evidence = ""
