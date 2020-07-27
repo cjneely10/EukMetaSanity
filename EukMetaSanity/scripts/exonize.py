@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
+import re
 from Bio import SeqIO
+from Bio.Seq import Seq
 from typing import List, Dict
 from collections import namedtuple
 from Bio.SeqRecord import SeqRecord
@@ -75,7 +77,7 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
     ]
 
 
-def write_region(region: List[Coordinate], fp, record_id: str):
+def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRecord]):
     started = False
     start_pos = 0
     j = 1
@@ -98,17 +100,17 @@ def write_region(region: List[Coordinate], fp, record_id: str):
             for k in range(start_pos - 1, end_pos):
                 if region[k].is_exon and not exon_started:
                     exon_started = True
-                    exon_list.append(str(k + 1))
+                    exon_list.append(k + 1)
                 elif not region[k].is_exon and exon_started:
                     exon_started = False
-                    exon_list[-1] = (exon_list[-1], str(k + 2))
-        if end_pos != 0:
-            # CDS info
+                    exon_list[-1] = (exon_list[-1], k)
+        if end_pos - start_pos > 0:
+            # gene info
             fp.write("".join((
                 "\t".join((
                     record_id,
                     evidence,
-                    "transcript",
+                    "gene",
                     str(start_pos),
                     str(end_pos),
                     ".",
@@ -126,16 +128,34 @@ def write_region(region: List[Coordinate], fp, record_id: str):
                         "\t".join((
                             record_id,
                             evidence,
-                            "CDS",
-                            exon[0],
-                            exon[1],
+                            "exon",
+                            str(exon[0]),
+                            str(exon[1]),
                             ".",
                             strand,
-                            "parentID=%s" % ("gene" + str(j))
+                            "Parent=%s" % ("gene" + str(j))
                         )),
                         "\n"
                     )),
                 )))
+            # Add FASTA CDS if requested
+            if len(exon_list) > 0:
+                seq = Seq("".join((
+                        char.nucleotide
+                        for exon in exon_list for char in region[exon[0]:exon[1] + 1]
+                    )))
+            else:
+                seq = Seq("".join((
+                    char.nucleotide for char in region[start_pos - 1: end_pos]
+                )))
+            _cds.append(
+                SeqRecord(
+                    seq=seq,
+                    id=record_id + "_" + "gene" + str(j),
+                    description="strand=%s" % strand,
+                    name="",
+                )
+            )
             end_pos = 0
             j += 1
             evidence = ""
@@ -147,14 +167,16 @@ def write_region(region: List[Coordinate], fp, record_id: str):
 def _parse_args(ap: ArgParse):
     for _path in (ap.args.fasta_file, *ap.args.gff3_files):
         assert os.path.exists(_path)
+    assert ap.args.output_file is not None
 
 
-def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
+def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds: str, write_prot: str):
     w = open(output_file, "w")
     # Get FASTA file as dict
     record_p = SeqIO.parse(fasta_file, "fasta")
     # Generate list of GFF data dictionaries
     gff_dict_list = [gff3_to_dict(_file) for _file in gff3_files]
+    out_cds = []
     # Iterate over each record
     for record in record_p:
         # Create bare region
@@ -173,8 +195,39 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
                     if "metaeuk" in region[i].evidence and not region[i].is_repeat_region:
                         region[i].is_exon = True
         # Write results in gff format
-        write_region(region, w, record.id)
+        write_region(region, w, record.id, out_cds)
+    if write_cds is not None:
+        SeqIO.write(out_cds, write_cds, "fasta")
+    if write_prot is not None:
+        SeqIO.write(find_orfs(out_cds), write_prot, "fasta")
     w.close()
+
+
+# https://stackoverflow.com/questions/31757876/python-find-longest-orf-in-dna-sequence
+def find_orfs(cds_list: List[SeqRecord]) -> List[SeqRecord]:
+    out_data = []
+    for record in cds_list:
+        longest = (0,)
+        nuc = str(record.seq)
+        m = re.search("ATG", nuc)
+        if m is None:
+            nuc = str(record.reverse_complement().seq)
+            m = re.search("ATG", nuc)
+        if m is None:
+            continue
+        if len(Seq(nuc)[m.start():].translate(to_stop=True)) > longest[0]:
+            pro = Seq(nuc)[m.start():].translate(to_stop=True)
+            longest = (len(pro),
+                       m.start(),
+                       str(pro),
+                       nuc[m.start():m.start() + len(pro) * 3 + 3])
+        out_data.append(
+            SeqRecord(
+                seq=Seq(longest[2]),
+                id=record.id,
+                description=record.description
+            )
+        )
 
 
 if __name__ == "__main__":
@@ -185,9 +238,13 @@ if __name__ == "__main__":
             (("-g", "--gff3_files"),
              {"help": "Input GFF3 files", "required": True, "nargs": "+"}),
             (("-o", "--output_file"),
-             {"help": "Output path, default stdout", "default": "/dev/stdout"}),
+             {"help": "Output path, default stdout"}),
+            (("-c", "--cds"),
+             {"help": "Output CDS sequences to path"}),
+            (("-p", "--prot"),
+             {"help": "Output amino acid sequences to path"}),
         ),
         description="Convert EukMetaSanity .merged.gff3 into exonized .nr.gff3 file"
     )
     _parse_args(_ap)
-    exonize(_ap.args.fasta_file, _ap.args.gff3_files, _ap.args.output_file)
+    exonize(_ap.args.fasta_file, _ap.args.gff3_files, _ap.args.output_file, _ap.args.cds, _ap.args.prot)
