@@ -75,7 +75,7 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
     ]
 
 
-def write_region(region: List[Coordinate], fp):
+def write_region(region: List[Coordinate], fp, record_id: str):
     started = False
     start_pos = 0
     j = 1
@@ -84,6 +84,8 @@ def write_region(region: List[Coordinate], fp):
     evidence = ""
     strand = ""
     for i, coord in enumerate(region):
+        exon_list = []
+        exon_started = False
         if coord.loc_type is not None and not started:
             started = True
             start_pos = i + 1
@@ -92,25 +94,49 @@ def write_region(region: List[Coordinate], fp):
         elif coord.loc_type is None and started:
             started = False
             end_pos = i + 1
+            # Gather valid exon sections
+            for k in range(start_pos - 1, end_pos - 1):
+                if region[k].is_exon and not exon_started:
+                    exon_started = True
+                    exon_list.append(str(k + 1))
+                elif not region[k].is_exon and exon_started:
+                    exon_started = False
+                    exon_list[-1] = (exon_list[-1], str(k + 2))
         if end_pos != 0:
+            # CDS info
             fp.write("".join((
-                # CDS info
                 "\t".join((
-                    "gene" + str(j),
+                    record_id,
                     evidence,
-                    "CDS",
+                    "transcript",
                     str(start_pos),
                     str(end_pos),
                     ".",
                     strand,
-                    "ID=%s" % "gene" + str(j)
-                )),
-                # Exon info
-                "\t".join((
-
+                    "ID=%s" % ("gene" + str(j))
                 )),
                 "\n",
             )))
+            # Exon/CDS info
+            for exon in exon_list:
+                if not isinstance(exon, tuple):
+                    continue
+                for ev in ("exon", "CDS"):
+                    fp.write("".join((
+                        "".join((
+                            "\t".join((
+                                record_id,
+                                evidence,
+                                ev,
+                                exon[0],
+                                exon[1],
+                                ".",
+                                strand,
+                                "parentID=%s" % ("gene" + str(j))
+                            )),
+                            "\n"
+                        )),
+                    )))
             end_pos = 0
             j += 1
             evidence = ""
@@ -142,10 +168,10 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
                     region[i].loc_type = coord_data.loc_type
                     region[i].evidence.add(coord_data.evidence)
                     region[i].strand = coord_data.strand
-                    if "metaeuk" in region[i].evidence:
+                    if "metaeuk" in region[i].evidence and not region[i].is_repeat_region:
                         region[i].is_exon = True
         # Write results in gff format
-        write_region(region, w)
+        write_region(region, w, record.id)
     w.close()
 
 
