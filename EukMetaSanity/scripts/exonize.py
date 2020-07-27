@@ -224,15 +224,24 @@ def find_orfs(cds_list: List[SeqRecord]) -> List[SeqRecord]:
             pro = Seq(nuc)[m.start():].translate(to_stop=True)
             longest = (len(pro),
                        m.start(),
-                       str(pro),
-                       nuc[m.start():m.start() + len(pro) * 3 + 3])
-        out_data.append(
-            SeqRecord(
-                seq=Seq(longest[2] + "*"),
-                id=record.id,
-                description=record.description
+                       str(pro))
+        nuc = str(record.reverse_complement().seq)
+        m = re.search("ATG", nuc)
+        if m is None:
+            continue
+        if len(Seq(nuc)[m.start():].translate(to_stop=True)) > longest[0]:
+            pro = Seq(nuc)[m.start():].translate(to_stop=True)
+            longest = (len(pro),
+                       m.start(),
+                       str(pro))
+        if longest[0] >= 30:
+            out_data.append(
+                SeqRecord(
+                    seq=Seq(longest[2] + "*"),
+                    id=record.id,
+                    description=record.description
+                )
             )
-        )
     return out_data
 
 
