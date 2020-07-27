@@ -50,20 +50,20 @@ class Coordinate:
 
 # Convert gff3 file to dictionary
 def gff3_to_dict(gff3_file: str) -> Dict[str, List[GFFCoord]]:
-    gff3_fp = open(gff3_file, "r")
+    gff3_fp = open(gff3_file, "rb")
     out_data = defaultdict(list)
     for _line in gff3_fp:
-        if _line.startswith("#"):
+        if _line.startswith(b"#"):
             continue
-        line = _line.rstrip("\r\n").split()
+        line = _line.rstrip(b"\r\n").split()
         out_data[line[0]].append(
             GFFCoord(
-                evidence=line[1],
-                loc_type=line[2],
+                evidence="".join((chr(v) for v in line[1])),
+                loc_type="".join((chr(v) for v in line[2])),
                 start=int(line[3]),
                 end=int(line[4]),
-                strand=line[6],
-                parent_id=line[8].split(";")[0].split("=")[1]
+                strand="".join((chr(v) for v in line[6])),
+                parent_id="".join((chr(v) for v in line[8].split(b";")[0].split(b"=")[1])),
             )
         )
     return dict(out_data)
@@ -90,7 +90,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
         if coord.loc_type is not None and not started:
             started = True
             start_pos = i + 1
-            evidence = ("metaeuk" if "metaeuk" in coord.evidence else "AUGUSTUS")
+            evidence = ("metaeuk" if "metaeuk" in coord.evidence else "ab-initio")
             strand = coord.strand
         elif coord.loc_type is None and started:
             started = False
@@ -103,7 +103,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                 elif not region[k].is_exon and exon_started:
                     exon_started = False
                     exon_list[-1] = (exon_list[-1], k + 1)
-        if end_pos - start_pos > _min_seq_length:
+        if end_pos != 0 and end_pos - start_pos > _min_seq_length:
             # Transcript/gene info
             fp.write("".join((
                 "\t".join((
@@ -114,6 +114,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                     str(end_pos),
                     ".",
                     strand,
+                    ".",
                     "ID=%s" % ("gene" + str(j))
                 )),
                 "\n",
@@ -132,6 +133,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                             str(exon[1]),
                             ".",
                             strand,
+                            ".",
                             "Parent=%s" % ("gene" + str(j))
                         )),
                         "\n"
@@ -161,6 +163,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
             j += 1
             evidence = ""
             strand = ""
+    return j
 
 
 # # Program driver logic
@@ -199,10 +202,10 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
                     region[i].loc_type = coord_data.loc_type
                     region[i].evidence.add(coord_data.evidence)
                     region[i].strand = coord_data.strand
-                    if "metaeuk" in region[i].evidence and not region[i].is_repeat_region:
+                    if not region[i].is_repeat_region:
                         region[i].is_exon = True
         # Write results in gff format
-        write_region(region, w, record.id, out_cds, min_len, j)
+        j = write_region(region, w, record.id, out_cds, min_len, j)
     if write_cds is not None:
         SeqIO.write(out_cds, write_cds, "fasta")
     if write_prot is not None:
@@ -216,15 +219,15 @@ def find_orfs(cds_list: List[SeqRecord]):
         longest = (0,)
         for nuc in (str(record.seq), str(record.reverse_complement().seq)):
             for m in re.finditer("ATG", nuc):
-                if len(Seq(nuc)[m.start():].translate(to_stop=True)) > longest[0]:
-                    pro = Seq(nuc)[m.start():].translate(to_stop=True)
+                pro = Seq(nuc)[m.start():].translate(to_stop=True)
+                if len(pro) > longest[0]:
                     longest = (len(pro), m.start(), str(pro))
         if longest[0] >= 30:
             yield SeqRecord(
-                    seq=Seq(longest[2] + "*"),
-                    id=record.id,
-                    description=record.description
-                )
+                seq=Seq(longest[2] + "*"),
+                id=record.id,
+                description=record.description
+            )
 
 
 if __name__ == "__main__":
