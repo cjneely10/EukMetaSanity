@@ -75,8 +75,46 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
     ]
 
 
-def write_region(region: List[Coordinate]):
-    pass
+def write_region(region: List[Coordinate], fp):
+    started = False
+    start_pos = 0
+    j = 1
+    _id = ""
+    end_pos = 0
+    evidence = ""
+    strand = ""
+    for i, coord in enumerate(region):
+        if coord.loc_type is not None and not started:
+            started = True
+            start_pos = i + 1
+            evidence = ("metaeuk" if "metaeuk" in coord.evidence else "AUGUSTUS")
+            strand = coord.strand
+        elif coord.loc_type is None and started:
+            started = False
+            end_pos = i + 1
+        if end_pos != 0:
+            fp.write("".join((
+                # CDS info
+                "\t".join((
+                    "gene" + str(j),
+                    evidence,
+                    "CDS",
+                    str(start_pos),
+                    str(end_pos),
+                    ".",
+                    strand,
+                    "ID=%s" % "gene" + str(j)
+                )),
+                # Exon info
+                "\t".join((
+
+                )),
+                "\n",
+            )))
+            end_pos = 0
+            j += 1
+            evidence = ""
+            strand = ""
 
 
 # # Program driver logic
@@ -86,8 +124,6 @@ def _parse_args(ap: ArgParse):
         assert os.path.exists(_path)
 
 
-# GFFCoord = namedtuple("GFFCoord", ("evidence", "loc_type", "start", "end", "strand", "parent_id"))
-# "is_repeat_region", "is_exon", "parent_id", "evidence", "strand", "nucleotide"
 def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
     w = open(output_file, "w")
     # Get FASTA file as dict
@@ -103,11 +139,13 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str):
                 # Parse region info
                 for i in range(coord_data.start - 1, coord_data.end - 2):
                     region[i].parent_id = coord_data.parent_id
-                    region[i].is_exon = True
                     region[i].loc_type = coord_data.loc_type
                     region[i].evidence.add(coord_data.evidence)
                     region[i].strand = coord_data.strand
+                    if "metaeuk" in region[i].evidence:
+                        region[i].is_exon = True
         # Write results in gff format
+        write_region(region, w)
     w.close()
 
 
