@@ -77,7 +77,7 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
     ]
 
 
-def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRecord]):
+def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRecord], _min_seq_length: int):
     started = False
     start_pos = 0
     j = 1
@@ -148,14 +148,15 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                 seq = Seq("".join((
                     char.nucleotide for char in region[start_pos - 1: end_pos]
                 )))
-            _cds.append(
-                SeqRecord(
-                    seq=seq,
-                    id=record_id + "_" + "gene" + str(j),
-                    description="strand=%s" % strand,
-                    name="",
+            if len(seq) > _min_seq_length:
+                _cds.append(
+                    SeqRecord(
+                        seq=seq,
+                        id=record_id + "_" + "gene" + str(j),
+                        description="strand=%s" % strand,
+                        name="",
+                    )
                 )
-            )
             end_pos = 0
             j += 1
             evidence = ""
@@ -167,10 +168,15 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
 def _parse_args(ap: ArgParse):
     for _path in (ap.args.fasta_file, *ap.args.gff3_files):
         assert os.path.exists(_path)
+    try:
+        ap.args.min_seq_length = int(ap.args.min_seq_length)
+    except ValueError as e:
+        print(e)
+        exit(1)
     assert ap.args.output_file is not None
 
 
-def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds: str, write_prot: str):
+def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds: str, write_prot: str, min_len: int):
     w = open(output_file, "w")
     # Get FASTA file as dict
     record_p = SeqIO.parse(fasta_file, "fasta")
@@ -195,7 +201,7 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
                     if "metaeuk" in region[i].evidence and not region[i].is_repeat_region:
                         region[i].is_exon = True
         # Write results in gff format
-        write_region(region, w, record.id, out_cds)
+        write_region(region, w, record.id, out_cds, min_len)
     if write_cds is not None:
         SeqIO.write(out_cds, write_cds, "fasta")
     if write_prot is not None:
@@ -223,7 +229,7 @@ def find_orfs(cds_list: List[SeqRecord]) -> List[SeqRecord]:
                        nuc[m.start():m.start() + len(pro) * 3 + 3])
         out_data.append(
             SeqRecord(
-                seq=Seq(longest[2]),
+                seq=Seq(longest[2] + "*"),
                 id=record.id,
                 description=record.description
             )
@@ -244,8 +250,17 @@ if __name__ == "__main__":
              {"help": "Output CDS sequences to path"}),
             (("-p", "--prot"),
              {"help": "Output amino acid sequences to path"}),
+            (("-m", "--min_seq_length"),
+             {"help": "Minimum CDS sequence to report with -c, default 500", "default": "500"}),
         ),
         description="Convert EukMetaSanity .merged.gff3 into exonized .nr.gff3 file"
     )
     _parse_args(_ap)
-    exonize(_ap.args.fasta_file, _ap.args.gff3_files, _ap.args.output_file, _ap.args.cds, _ap.args.prot)
+    exonize(
+        _ap.args.fasta_file,
+        _ap.args.gff3_files,
+        _ap.args.output_file,
+        _ap.args.cds,
+        _ap.args.prot,
+        _ap.args.min_seq_length
+    )
