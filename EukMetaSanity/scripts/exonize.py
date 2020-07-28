@@ -104,18 +104,19 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                     exon_started = False
                     exon_list[-1] = (exon_list[-1], k + 1)
         if end_pos - start_pos > _min_seq_length:
+            gene_id = "gene" + str(j)
             # Transcript/gene info
             fp.write("".join((
                 "\t".join((
                     record_id,
                     evidence,
-                    "transcript",
+                    "gene",
                     str(start_pos),
                     str(end_pos),
                     ".",
                     strand,
                     ".",
-                    "ID=%s" % ("gene" + str(j))
+                    "ID=%s" % gene_id
                 )),
                 "\n",
             )))
@@ -133,8 +134,8 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                             str(exon[1]),
                             ".",
                             strand,
-                            ".",
-                            "Parent=%s" % ("gene" + str(j))
+                            "0",
+                            "Parent=%s" % gene_id
                         )),
                         "\n"
                     )),
@@ -153,7 +154,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
             _cds.append(
                 SeqRecord(
                     seq=seq,
-                    id=record_id + "_" + "gene" + str(j),
+                    id=record_id + "_" + gene_id,
                     description="strand=%s" % strand,
                     name="",
                 )
