@@ -50,7 +50,8 @@ class EvidenceIter(TaskList):
                         _outfile,
                         os.path.join(self.wdir, "tmp"),
                         "--threads", self.threads,
-                        "--add-orf-stop",
+                        # "--add-orf-stop",
+                        (*self.added_flags),
                     ]
                 )
             # Convert to GFF3
