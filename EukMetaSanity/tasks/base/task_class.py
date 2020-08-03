@@ -161,7 +161,7 @@ class Task(ABC):
                 if self.mode == 1:
                     f = cmds[j] & BG
                     running.append(f)
-            all(_f.wait() for _f in running)
+            all([_f.wait() for _f in running])
 
     @abstractmethod
     def run(self) -> None:
