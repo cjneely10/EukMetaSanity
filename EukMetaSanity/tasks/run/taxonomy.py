@@ -60,7 +60,7 @@ class TaxonomyIter(TaskList):
             )
 
         @staticmethod
-        def get_taxonomy(tax_results_file: str, cutoff: float) -> Tuple[str, int]:
+        def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "species") -> Tuple[str, int]:
             assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
             _id: int = 2759
             try:
@@ -69,13 +69,13 @@ class TaxonomyIter(TaskList):
                 while True:
                     line = next(_tax_results_file).rstrip("\r\n").split("\t")
                     # Parse line for assignment
-                    _score, _tax_id, _assignment = float(line[0]), int(line[4]), line[5].lstrip(" ")
+                    _score, _level, _tax_id, _assignment = float(line[0]), line[3], int(line[4]), line[5].lstrip(" ")
                     if _assignment in ("unclassified", "root"):
                         continue
                     if _score >= cutoff:
                         assignment = _assignment
                         _id = _tax_id
-                    if _score < cutoff:
+                    if _level == deepest_level or _score < cutoff:
                         return assignment.lower(), _id
             except:
                 return assignment.lower(), _id

@@ -35,7 +35,9 @@ class EvidenceIter(TaskList):
                         "filtertaxseqdb",
                         self.data,
                         subset_db_outpath,
-                        "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], float(self.cutoff))[1],
+                        "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(
+                            self.input[3], float(self.cutoff), self.level,
+                        )[1],
                         "--threads", self.threads,
                     ]
                 )
