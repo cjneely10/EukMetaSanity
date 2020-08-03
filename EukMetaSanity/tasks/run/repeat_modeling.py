@@ -35,7 +35,7 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            sleep(randint(randint(1, 5), randint(20, 25)))
+            sleep(randint(randint(5, 10), randint(25, 30)))
             getattr(self, self.protocol)()
 
         # Simple repeat masking using mmseqs
@@ -78,10 +78,10 @@ class RepeatsIter(TaskList):
                     self.input[0],
                 ]
             )
-            sleep(randint(randint(1, 5), randint(20, 25)))
+            sleep(randint(randint(5, 15), randint(30, 35)))
             _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
             # _now = datetime.datetime.now()
-            # print(_now, _now.strftime("%a%b%d%H%M%S%Y"))
+            print(_now, _now.strftime("%a%b%d%H%M%S%Y"))
             # Run RepeatModeler
             self.log_and_run(
                 self.program_modeler[
@@ -174,16 +174,16 @@ class RepeatsIter(TaskList):
         def _get_results_file(_time: datetime.datetime):
             # Get list of files to search
             _formatted_time = _time.strftime("%a%bX%d%H%M%S%Y").replace("X0", "X").replace("X", "")
-            # print(_formatted_time)
+            print(_formatted_time)
             _files = [_file for _file in os.listdir(os.getcwd()) if "RM" in _file]
             for _file in _files:
                 if _formatted_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
                     return os.path.join(_file, "consensi.fa.classified")
             else:
-                for i in range(1, 3):
+                for i in range(1, 6):
                     _possible_time = (_time + datetime.timedelta(0, i)).strftime("%a%bX%d%H%M%S%Y")\
                                         .replace("X0", "X").replace("X", "")
-                    # print(_possible_time)
+                    print(_possible_time)
                     for _file in _files:
                         if _possible_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
                             return os.path.join(_file, "consensi.fa.classified")
