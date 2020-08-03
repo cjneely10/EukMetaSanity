@@ -174,6 +174,8 @@ class RepeatsIter(TaskList):
         def _get_results_file(_time: datetime.datetime):
             # Get list of files to search
             _formatted_time = _time.strftime("%a%b%d%H%M%S%Y")
+            if _formatted_time[0] == "0":
+                _formatted_time = _formatted_time[1:]
             print(_formatted_time)
             _files = [_file for _file in os.listdir(os.getcwd()) if "RM" in _file]
             for _file in _files:
@@ -182,6 +184,8 @@ class RepeatsIter(TaskList):
             else:
                 for i in range(1, 3):
                     _possible_time = (_time + datetime.timedelta(0, i)).strftime("%a%b%d%H%M%S%Y")
+                    if _possible_time[0] == "0":
+                        _possible_time = _possible_time[1:]
                     print(_possible_time)
                     for _file in _files:
                         if _possible_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
