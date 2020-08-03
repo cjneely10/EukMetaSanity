@@ -35,7 +35,7 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            sleep(randint(randint(1, 5), randint(7, 10)))
+            sleep(randint(randint(1, 5), randint(20, 25)))
             getattr(self, self.protocol)()
 
         # Simple repeat masking using mmseqs
