@@ -34,11 +34,14 @@ class MMseqsIter(TaskList):
                 )
             # Search through each database
             for db in self.data.split(","):
+                search_prog = "search"
+                if os.path.exists(db + ".linidx"):
+                    search_prog = "linsearch"
                 _out_db = _file_db[:-3] + "_%s-results_db" % os.path.basename(os.path.splitext(db)[0])
                 # Linear search
                 self.log_and_run(
                     self.program[
-                        "search",
+                        search_prog,
                         _file_db,  # Input FASTA sequence db
                         db,  # Input augustus-db
                         _out_db,  # Output tax db
