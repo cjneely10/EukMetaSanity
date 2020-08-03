@@ -181,7 +181,8 @@ class RepeatsIter(TaskList):
                     return os.path.join(_file, "consensi.fa.classified")
             else:
                 for i in range(1, 3):
-                    _possible_time = _time.strftime("%a%bX%d%H%M%S%Y").replace("X0", "X").replace("X", "")
+                    _possible_time = (_time + datetime.timedelta(0, i)).strftime("%a%bX%d%H%M%S%Y")\
+                                        .replace("X0", "X").replace("X", "")
                     print(_possible_time)
                     for _file in _files:
                         if _possible_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
