@@ -60,7 +60,7 @@ class TaxonomyIter(TaskList):
             )
 
         @staticmethod
-        def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "species") -> Tuple[str, int]:
+        def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> Tuple[str, int]:
             assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
             _id: int = 2759
             try:
