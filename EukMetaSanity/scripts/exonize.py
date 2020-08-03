@@ -218,14 +218,18 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
 def find_orfs(cds_list: List[SeqRecord]):
     for record in cds_list:
         longest = (0,)
-        for nuc in (str(record.seq), str(record.reverse_complement().seq)):
-            for m in re.finditer("ATG", nuc):
-                pro = Seq(nuc)[m.start():].translate(to_stop=True)
-                if len(pro) > longest[0]:
-                    longest = (len(pro), m.start(), str(pro))
+        if record.description[-1] == "+":
+            nuc = str(record.seq)
+        else:
+            nuc = str(record.reverse_complement().seq)
+        # for nuc in (str(record.seq), str(record.reverse_complement().seq)):
+        for m in re.finditer("ATG", nuc):
+            pro = Seq(nuc)[m.start():].translate(to_stop=True)
+            if len(pro) > longest[0]:
+                longest = (len(pro), m.start(), str(pro))
         if longest[0] >= 30:
             yield SeqRecord(
-                seq=Seq(longest[2] + "*"),
+                seq=Seq(str(longest[2]) + "*"),
                 id=record.id,
                 description=record.description
             )
