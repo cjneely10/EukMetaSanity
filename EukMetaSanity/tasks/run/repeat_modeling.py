@@ -65,7 +65,7 @@ class RepeatsIter(TaskList):
         def full(self):
             # BuildDatabase and RepeatModeler
             # RepeatMasker and ProcessRepeats
-            self.simple()
+            # self.simple()
             self._mask(*self._model())
 
         @program_catch
@@ -78,6 +78,7 @@ class RepeatsIter(TaskList):
                     self.input[0],
                 ]
             )
+            sleep(randint(randint(1, 5), randint(20, 25)))
             _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
             # _now = datetime.datetime.now()
             print(_now, _now.strftime("%a%b%d%H%M%S%Y"))
