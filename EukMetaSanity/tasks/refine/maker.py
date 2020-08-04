@@ -8,8 +8,9 @@ class MakerIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = [
                 *self.input,
-                os.path.join(self.wdir, self.record_id + ".all.maker.gff"),
-                os.path.join(self.wdir, self.record_id + ".all.maker.fna"),
+                os.path.join(self.wdir, self.record_id + ".all.maker.gff"),  # MAKER output gff
+                os.path.join(self.wdir, self.record_id + ".proteins.fasta"),  # Proteins output
+                os.path.join(self.wdir, self.record_id + ".transcripts.fasta"),  # CDS output
             ]
 
         def run(self):
@@ -145,7 +146,7 @@ class MakerIter(TaskList):
             self.log_and_run(
                 self.program_fastamerge[
                     "-d", os.path.join(self.wdir, self.record_id + "_master_datastore_index.log")
-                ] > os.path.join(self.wdir, self.record_id + ".all.maker.fna")
+                ]
             )
 
     def __init__(self, *args, **kwargs):
