@@ -27,7 +27,8 @@ class RepeatsIter(TaskList):
                 self.input[0],  # Original input file,
                 self.input[2],  # Tax file
                 self.input[1],  # MMSeqs db for tax ident
-                os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.tbl")  # Mask results
+                os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.tbl"),  # Mask results
+                os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")  # Mask results gff3
             ]
 
         def run(self) -> None:
@@ -168,6 +169,12 @@ class RepeatsIter(TaskList):
             os.replace(
                 input_file + ".masked",
                 os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
+            )
+            # Output the repeats file as a gff3 file
+            self.log_and_run(
+                self.program_rmouttogff3[
+                    os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
+                ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")
             )
 
         @staticmethod
