@@ -12,6 +12,7 @@ from EukMetaSanity.tasks.base.summarize import SummarizeIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 # Refine imports
 from EukMetaSanity.tasks.refine.maker import MakerIter
+from EukMetaSanity.tasks.refine.assemble import AssembleIter
 
 
 class TaskManager:
@@ -26,6 +27,7 @@ class TaskManager:
             ],
             "refine": [
                 MakerIter,
+                AssembleIter,
             ],
             "report": [
                 KoFamScanIter,
