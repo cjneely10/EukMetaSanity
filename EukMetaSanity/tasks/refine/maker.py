@@ -17,28 +17,29 @@ class MakerIter(TaskList):
 
         def generate_ctl_file(self):
             # Create base file and move to wdir
-            self.log_and_run(self.program["-CTL"])
-            self.log_and_run(self.local["cp"]["*.ctl", self.wdir])
+            if not os.path.exists("maker_opts.ctl"):
+                self.log_and_run(self.program["-CTL"])
+                self.log_and_run(self.local["cp"]["*.ctl", self.wdir])
             opts_file = os.path.join(self.wdir, "maker_opts.ctl")
             # Add proper paths to file
             # Edit path to genome
             self.log_and_run(
                 self.local["sed"][
-                    "-i", "s/%s/%s/g" % ("genome=", "genome=%s" % self.input[4]),
+                    "-i", "s/%s/%s/" % ("genome=", "genome=%s" % self.input[4]),
                     opts_file,
                 ]
             )
             # Incorporate search for simple repeats with MAKER, use existing models from Run
             self.log_and_run(
                 self.local["sed"][
-                    "-i", "s/%s/%s/g" % ("model_org=", "model_org=simple"),
+                    "-i", "s/%s/%s/" % ("model_org=", "model_org=simple"),
                     opts_file,
                 ]
             )
             self.log_and_run(
                 self.local["sed"][
                     "-i",
-                    "s/%s/%s/g" % (
+                    "s/%s/%s/" % (
                         "rm_gff=", "rm_gff=%s" % os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
                     ),
                     opts_file,
@@ -47,11 +48,40 @@ class MakerIter(TaskList):
             # Add metaeuk evidence
             self.log_and_run(
                 self.local["sed"][
-                    "-i", "s/%s/%s/g" % ("other_gff=", "other_gff=%s" % self.input[5]),
+                    "-i", "s/%s/%s/" % ("other_gff=", "other_gff=%s" % self.input[5]),
                     opts_file,
                 ]
             )
             # Parse additional evidence as needed
+            prot_file = self.get_data_file(self.proteins)
+            if prot_file is not None:
+                self.log_and_run(
+                    self.local["sed"][
+                        "-i", "s/%s/%s/" % ("protein=", "protein=%s" % prot_file),
+                        opts_file
+                    ]
+                )
+                self.log_and_run(
+                    self.local["sed"][
+                        "-i", "s/protein2genome=0/protein2genome=1/",
+                        opts_file
+                    ]
+                )
+            est_file = self.get_data_file(self.est)
+            if est_file is not None:
+                self.log_and_run(
+                    self.local["sed"][
+                        "-i", "s/%s/%s/g" % ("est=", "est=%s" % est_file),
+                        opts_file
+                    ]
+                )
+                self.log_and_run(
+                    self.local["sed"][
+                        "-i", "s/est2genome=0/est2genome=1/",
+                        opts_file
+                    ]
+                )
+            # Parse user args into config file
 
         def reformat_repeats_gff3(self):
             # Isolate complex repeats
@@ -71,13 +101,13 @@ class MakerIter(TaskList):
                 ] > os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
             )
 
-        @staticmethod
-        def get_proteins_file(file_path: str) -> str:
-            pass
-
-        @staticmethod
-        def get_est_file(file_path: str) -> str:
-            pass
+        def get_data_file(self, file_path: str):
+            if not os.path.exists(file_path):
+                return
+            with open(file_path, "r") as w:
+                for line in w:
+                    if line.startswith(self.record_id):
+                        return line.rstrip("\r\n").split("\t")[1]
 
     def __init__(self, *args, **kwargs):
         super().__init__(MakerIter.Maker, "maker", *args, **kwargs)
