@@ -101,6 +101,10 @@ class Data:
     def maker(self):
         pass
 
+    @added
+    def assemble(self):
+        pass
+
 
 if __name__ == "__main__":
     pass
