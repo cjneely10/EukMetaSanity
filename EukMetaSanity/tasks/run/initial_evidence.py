@@ -17,6 +17,7 @@ class EvidenceIter(TaskList):
                 "tax": self.input[3],  # Taxonomy results file
                 "mask_tbl": self.input[5],  # Summarized mask results
                 "mask_gff3": self.input[6],  # Mask gff3 file
+                "fna": self.input[2],  # Original fna file
             }
             self.output = [
                 _out,  # Dictionary for accessing to write final summary

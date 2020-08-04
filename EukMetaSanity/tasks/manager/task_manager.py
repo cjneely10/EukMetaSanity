@@ -35,7 +35,7 @@ class TaskManager:
             ],
         }
         self._input_type = {
-            "refine": ["abinitio", "mask", "nr_gff3"],
+            "refine": ["abinitio", "mask", "nr_gff3", "mask_gff3", "fna", "metaeuk"],
             "report": ["prot"]
         }
 
