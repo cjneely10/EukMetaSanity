@@ -120,35 +120,51 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                 )),
                 "\n",
             )))
+            fp.write("".join((
+                "\t".join((
+                    record_id,
+                    evidence,
+                    "mRNA",
+                    str(start_pos),
+                    str(end_pos),
+                    ".",
+                    strand,
+                    ".",
+                    "ID=%s;Parent=%s" % (gene_id + "-mRNA", gene_id)
+                )),
+                "\n",
+            )))
             # Exon/CDS info
-            for exon in exon_list:
-                if not isinstance(exon, tuple):
-                    continue
-                fp.write("".join((
-                    "".join((
-                        "\t".join((
-                            record_id,
-                            evidence,
-                            "exon",
-                            str(exon[0]),
-                            str(exon[1]),
-                            ".",
-                            strand,
-                            "0",
-                            "Parent=%s" % gene_id
+            for _ident in ("exon", "CDS"):
+                for exon in exon_list:
+                    if not isinstance(exon, tuple):
+                        continue
+                    fp.write("".join((
+                        "".join((
+                            "\t".join((
+                                record_id,
+                                evidence,
+                                _ident,
+                                str(exon[0]),
+                                str(exon[1]),
+                                ".",
+                                strand,
+                                "0",
+                                "Parent=%s" % gene_id
+                            )),
+                            "\n"
                         )),
-                        "\n"
-                    )),
-                )))
+                    )))
             # Add FASTA CDS if requested
             if len(exon_list) > 0:
                 seq = Seq("".join((
-                        char.nucleotide
-                        for exon in exon_list for char in region[exon[0]:exon[1] + 1]
-                    )))
+                    char.nucleotide
+                    for exon in exon_list for char in region[exon[0]:exon[1] + 1]
+                )))
             else:
                 seq = Seq("".join((
-                    char.nucleotide for char in region[start_pos - 1: end_pos]
+                    char.nucleotide
+                    for char in region[start_pos - 1: end_pos]
                 )))
             # Generate CDS sequence
             _cds.append(
