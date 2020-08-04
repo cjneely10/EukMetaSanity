@@ -14,6 +14,16 @@ class MakerIter(TaskList):
         def run_1(self):
             self.reformat_repeats_gff3()
             self.generate_ctl_file()
+            # Run maker using editted config files
+            self.log_and_run(
+                self.program_mpi[
+                    "-n", self.threads, self.program,
+                    "-base", self.wdir,
+                    os.path.join(self.wdir, "maker_opts.ctl"),
+                    os.path.join(self.wdir, "maker_bopts.ctl"),
+                    os.path.join(self.wdir, "maker_exe.ctl"),
+                ] | self.local["tee"][os.path.join(self.wdir, "maker.log")]
+            )
 
         def generate_ctl_file(self):
             # Create base file and move to wdir
@@ -82,6 +92,17 @@ class MakerIter(TaskList):
                     ]
                 )
             # Parse user args into config file
+            for _i in range(0, len(self.added_flags) - 1, 2):
+                self.log_and_run(
+                    self.local["sed"][
+                        "-i",
+                        "s/%s/%s" % (
+                            self.added_flags[_i] + "=",
+                            self.added_flags[_i] + "=" + self.added_flags[_i + 1]
+                        ),
+                        opts_file
+                    ]
+                )
 
         def reformat_repeats_gff3(self):
             # Isolate complex repeats
