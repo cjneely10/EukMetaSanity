@@ -6,6 +6,11 @@ class MakerIter(TaskList):
     class Maker(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            self.output = [
+                *self.input,
+                os.path.join(self.wdir, self.record_id + ".all.maker.gff"),
+                os.path.join(self.wdir, self.record_id + ".all.maker.fna"),
+            ]
 
         def run(self):
             super().run()
@@ -14,16 +19,17 @@ class MakerIter(TaskList):
         def run_1(self):
             self.reformat_repeats_gff3()
             self.generate_ctl_file()
-            # Run maker using editted config files
+            # Run maker using edited config files
             self.log_and_run(
                 self.program_mpi[
                     "-n", self.threads, self.program,
-                    "-base", self.wdir,
+                    "-base", os.path.join(self.wdir, self.record_id),
                     os.path.join(self.wdir, "maker_opts.ctl"),
                     os.path.join(self.wdir, "maker_bopts.ctl"),
                     os.path.join(self.wdir, "maker_exe.ctl"),
                 ] | self.local["tee"][os.path.join(self.wdir, "maker.log")]
             )
+            self.merge_output()
 
         def generate_ctl_file(self):
             # Create base file and move to wdir
@@ -129,6 +135,18 @@ class MakerIter(TaskList):
                 for line in w:
                     if line.startswith(self.record_id):
                         return line.rstrip("\r\n").split("\t")[1]
+
+        def merge_output(self):
+            self.log_and_run(
+                self.program_gff3merge[
+                    "-s", "-d", os.path.join(self.wdir, self.record_id + "_master_datastore_index.log")
+                ] > os.path.join(self.wdir, self.record_id + ".all.maker.gff")
+            )
+            self.log_and_run(
+                self.program_fastamerge[
+                    "-d", os.path.join(self.wdir, self.record_id + "_master_datastore_index.log")
+                ] > os.path.join(self.wdir, self.record_id + ".all.maker.fna")
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(MakerIter.Maker, "maker", *args, **kwargs)
