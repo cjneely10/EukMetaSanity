@@ -26,8 +26,8 @@ class TaskManager:
                 SummarizeIter,
             ],
             "refine": [
-                MakerIter,
                 AssembleIter,
+                MakerIter,
             ],
             "report": [
                 KoFamScanIter,
