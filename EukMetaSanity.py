@@ -75,15 +75,17 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str, file_type: str) -> List[str]:
+def _get_list_of_files(summary_file: str, file_types: List[str]) -> List[List[str]]:
     file_fp = open(summary_file, "r")
     out = []
     try:
         while True:
-            _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
-            out.append(
-                str(Path(next(file_fp).rstrip("\r\n").split("\t")[_col_idx]).resolve())
-            )
+            line = next(file_fp).rstrip("\r\n").split("\t")
+            inner = []
+            for file_type in file_types:
+                _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
+                inner.append(str(Path(line[_col_idx]).resolve()))
+            out.append(inner)
     except StopIteration:
         return out
 
@@ -124,7 +126,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
             ap.args.fasta_directory,
             tm.input_type[ap.args.command],
         )
-        input_prefixes = [_prefix(_file) for _file in input_files]
+        input_prefixes = [_prefix(_file[0]) for _file in input_files]
     else:
         for f in (logging.info, print):
             f("Creating working directory")

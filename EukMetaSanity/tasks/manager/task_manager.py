@@ -31,9 +31,8 @@ class TaskManager:
             ],
         }
         self._input_type = {
-            "run": None,
-            "refine": "all",  # TODO: Handle code for all step
-            "report": "prot"
+            "refine": ["abinitio", "mask", "nr_gff3"],
+            "report": ["prot"]
         }
 
     @property
