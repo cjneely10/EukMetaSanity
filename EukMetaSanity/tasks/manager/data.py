@@ -97,6 +97,10 @@ class Data:
     def summarize(self):
         pass
 
+    @added
+    def maker(self):
+        pass
+
 
 if __name__ == "__main__":
     pass

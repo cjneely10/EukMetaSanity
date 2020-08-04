@@ -10,6 +10,8 @@ from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.base.summarize import SummarizeIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
+# Refine imports
+from EukMetaSanity.tasks.refine.maker import MakerIter
 
 
 class TaskManager:
@@ -22,7 +24,9 @@ class TaskManager:
                 EvidenceIter,
                 SummarizeIter,
             ],
-            "refine": [],
+            "refine": [
+                MakerIter,
+            ],
             "report": [
                 KoFamScanIter,
                 MMseqsIter,
