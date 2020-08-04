@@ -55,10 +55,10 @@ class MakerIter(TaskList):
                     opts_file,
                 ]
             )
-            # Add metaeuk evidence
+            # Add nr evidence
             self.log_and_run(
                 self.local["sed"][
-                    "-i", "s/%s/%s/" % ("other_gff=", "other_gff=%s" % self.input[5]),
+                    "-i", "s/%s/%s/" % ("other_gff=", "other_gff=%s" % self.input[2]),
                     opts_file,
                 ]
             )
