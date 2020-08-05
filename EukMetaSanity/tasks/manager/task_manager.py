@@ -14,6 +14,7 @@ from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 from EukMetaSanity.tasks.refine.maker import MakerIter
 from EukMetaSanity.tasks.refine.assemble import AssembleIter
 from EukMetaSanity.tasks.refine.align import AlignIter
+from EukMetaSanity.tasks.refine.braker import BrakerIter
 
 
 class TaskManager:
@@ -30,6 +31,8 @@ class TaskManager:
                 AssembleIter,
                 AlignIter,
                 MakerIter,
+                BrakerIter,
+                SummarizeIter,
             ],
             "report": [
                 KoFamScanIter,
