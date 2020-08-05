@@ -105,6 +105,10 @@ class Data:
     def assemble(self):
         pass
 
+    @added
+    def align(self):
+        pass
+
 
 if __name__ == "__main__":
     pass

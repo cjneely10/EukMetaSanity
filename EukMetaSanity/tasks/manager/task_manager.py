@@ -13,6 +13,7 @@ from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 # Refine imports
 from EukMetaSanity.tasks.refine.maker import MakerIter
 from EukMetaSanity.tasks.refine.assemble import AssembleIter
+from EukMetaSanity.tasks.refine.align import AlignIter
 
 
 class TaskManager:
@@ -27,6 +28,7 @@ class TaskManager:
             ],
             "refine": [
                 AssembleIter,
+                AlignIter,
                 MakerIter,
             ],
             "report": [
