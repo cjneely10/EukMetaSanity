@@ -19,6 +19,7 @@ class MakerIter(TaskList):
         @program_catch
         def run_1(self):
             self.reformat_repeats_gff3()
+            # # Run initial MAKER
             self.generate_ctl_file()
             # Run maker using edited config files
             self.log_and_run(
@@ -31,8 +32,10 @@ class MakerIter(TaskList):
                 ] | self.local["tee"][os.path.join(self.wdir, "maker.log")]
             )
             self.merge_output()
+            # # Run on remaining transcriptomes that were assembled in assemble task
 
-        def generate_ctl_file(self):
+        # Generate either using 'maker' or 'initial' type
+        def generate_ctl_file(self, file_path: str, file_type: str = "initial"):
             # Create base file and move to wdir
             if not os.path.exists("maker_opts.ctl"):
                 self.log_and_run(self.program["-CTL"])

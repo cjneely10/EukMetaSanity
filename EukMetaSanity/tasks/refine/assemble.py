@@ -16,7 +16,7 @@ class AssembleIter(TaskList):
                 )
             self.output = [
                 *self.input,
-                *built_files,  # Assembled transcriptome
+                *built_files,  # Assembled transcriptomes
             ]
 
         def run(self):
