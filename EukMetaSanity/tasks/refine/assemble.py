@@ -6,9 +6,11 @@ class AssembleIter(TaskList):
     class Assemble(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            files = self.get_reads_files(self.rnaseq)
             self.output = [
                 *self.input,
-                os.path.join(self.wdir, self.record_id + "trinity", "Trinity.fasta")  # Assembled transcriptome
+                os.path.join(self.wdir, self.record_id + "trinity", "Trinity.fasta"),  # Assembled transcriptome
+                *(files if files is not None else [])  # Identified read files
             ]
 
         def run(self):
@@ -16,6 +18,7 @@ class AssembleIter(TaskList):
 
         @program_catch
         def run_1(self):
+            # Get reads files
             left, right = self.get_reads_files(self.rnaseq)
             if not (os.path.exists(left) and os.path.exists(right)):
                 return

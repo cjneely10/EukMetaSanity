@@ -100,6 +100,7 @@ class MakerIter(TaskList):
                     ]
                 )
             # Parse user args into config file
+            assert len(self.added_flags) // 2 == 0
             for _i in range(0, len(self.added_flags) - 1, 2):
                 self.log_and_run(
                     self.local["sed"][
