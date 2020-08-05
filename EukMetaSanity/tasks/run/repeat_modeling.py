@@ -5,6 +5,9 @@ from time import sleep
 from typing import List
 from pathlib import Path
 from random import randint
+
+from plumbum import BG
+
 from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
@@ -36,7 +39,6 @@ class RepeatsIter(TaskList):
 
         def run_1(self):
             # Call protocol method
-            sleep(randint(randint(5, 10), randint(25, 30)))
             getattr(self, self.protocol)()
 
         # Simple repeat masking using mmseqs
@@ -64,8 +66,6 @@ class RepeatsIter(TaskList):
 
         # Complete masking using RepeatModeler/Masker
         def full(self):
-            # BuildDatabase and RepeatModeler
-            # RepeatMasker and ProcessRepeats
             # self.simple()
             self._mask(*self._model())
 
@@ -79,29 +79,23 @@ class RepeatsIter(TaskList):
                     self.input[0],
                 ]
             )
-            sleep(randint(randint(5, 15), randint(30, 35)))
-            _now = RepeatsIter.Repeats.roundTime(datetime.datetime.now())
-            # _now = datetime.datetime.now()
-            print(_now, _now.strftime("%a%b%d%H%M%S%Y"))
             # Run RepeatModeler
-            self.log_and_run(
-                self.program_modeler[
+            cmd = self.program_modeler[
                     "-pa", self.threads,
                     (*self.added_flags),
                     "-database", _name,
-                ]
-            )
-            return self.input[0], _now
+                ] & BG
+            print(str(cmd))
+            cmd.wait()
+            return self.input[0], str(cmd.proc._proc.pid)
 
         @program_catch
-        def _mask(self, input_file: str, _recorded_start_time: datetime.datetime):
+        def _mask(self, input_file: str, pid: str):
             # Perform on de novo results
             # Perform step on each file passed by user
             data_files = []
             _added_dirs = []
-            _file = RepeatsIter.Repeats._get_results_file(_recorded_start_time)
-            # if _file is not None:
-            #     data_files.append(_file)
+            _file = [_file for _file in os.listdir(os.getcwd()) if pid in _file][0]
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
@@ -176,36 +170,6 @@ class RepeatsIter(TaskList):
                     os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
                 ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")
             )
-
-        @staticmethod
-        def _get_results_file(_time: datetime.datetime):
-            # Get list of files to search
-            _formatted_time = _time.strftime("%a%bX%d%H%M%S%Y").replace("X0", "X").replace("X", "")
-            print(_formatted_time)
-            _files = [_file for _file in os.listdir(os.getcwd()) if "RM" in _file]
-            for _file in _files:
-                if _formatted_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
-                    return os.path.join(_file, "consensi.fa.classified")
-            else:
-                for i in range(1, 6):
-                    _possible_time = (_time + datetime.timedelta(0, i)).strftime("%a%bX%d%H%M%S%Y")\
-                                        .replace("X0", "X").replace("X", "")
-                    print(_possible_time)
-                    for _file in _files:
-                        if _possible_time in _file and os.path.exists(os.path.join(_file, "consensi.fa.classified")):
-                            return os.path.join(_file, "consensi.fa.classified")
-
-        @staticmethod
-        def roundTime(dt=None, roundTo=1):
-            """Round a datetime object to any time lapse in seconds
-            dt : datetime.datetime object, default now.
-            roundTo : Closest number of seconds to round to, default 1 minute.
-            Author: Thierry Husson 2012 - Use it as you want but don't blame me.
-            """
-            if dt == None: dt = datetime.datetime.now()
-            seconds = (dt.replace(tzinfo=None) - dt.min).seconds
-            rounding = (seconds + roundTo / 2) // roundTo * roundTo
-            return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)
