@@ -29,8 +29,8 @@ class TaskManager:
             ],
             "refine": [
                 AssembleIter,
-                AlignIter,
                 MakerIter,
+                AlignIter,
                 BrakerIter,
                 SummarizeIter,
             ],

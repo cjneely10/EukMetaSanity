@@ -85,6 +85,7 @@ class MakerIter(TaskList):
                         opts_file
                     ]
                 )
+            # Integrate assembed transcriptomes, if available
             est_file = self.get_data_file(self.est)
             if est_file is not None:
                 self.log_and_run(
