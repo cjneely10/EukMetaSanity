@@ -103,7 +103,7 @@ class RepeatsIter(TaskList):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
             data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0]]
-            if _file is not None:
+            if os.path.exists(_file):
                 data_files.append(_file)
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
