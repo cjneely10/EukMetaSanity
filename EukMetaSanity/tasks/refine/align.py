@@ -17,35 +17,36 @@ class AlignIter(TaskList):
         @program_catch
         def run_1(self):
             # Align to genome
-            self.log_and_run(
-                self.program_minimap2[
-                    "-ax", self.minimap_option,
-                    self.input[4], self.input[-2], self.input[-1],
-                    (*self.added_flags),
-                ] > os.path.join(self.wdir, self.record_id + ".sam")
-            )
-            # Convert to bam
-            self.log_and_run(
-                self.program_sambamba[
-                    "view",
-                    "-S", os.path.join(self.wdir, self.record_id + ".sam"),
-                    "--format=bam", "-o", os.path.join(self.wdir, self.record_id + ".bam"),
-                    "-t", self.threads,
-                ]
-            )
-            # Sort
-            self.log_and_run(
-                self.program_sambamba[
-                    "sort",
-                    "--format=bam", "-o", os.path.join(self.wdir, self.record_id + ".sorted.bam"),
-                    "--tmpdir=%s" % os.path.join(self.wdir, "tmp"),
-                    "-t", self.threads, "-m", self.memory_limit,
-                    os.path.join(self.wdir, self.record_id + ".bam"),
-                ]
-            )
-            # Remove intermediaries
-            self.local["rm"][os.path.join(self.wdir, self.record_id + ".bam")]()
-            self.local["rm"][os.path.join(self.wdir, self.record_id + ".sam")]()
+            for i in range(0, len(self.input[-1]), 2):
+                self.log_and_run(
+                    self.program_minimap2[
+                        "-ax", self.minimap_option,
+                        self.input[4], self.input[-1][i], self.input[-1][i + 1],
+                        (*self.added_flags),
+                    ] > os.path.join(self.wdir, self.record_id + "%s.sam" % str(i))
+                )
+                # Convert to bam
+                self.log_and_run(
+                    self.program_sambamba[
+                        "view",
+                        "-S", os.path.join(self.wdir, self.record_id + "%s.sam" % str(i)),
+                        "--format=bam", "-o", os.path.join(self.wdir, self.record_id + "%s.bam" % str(i)),
+                        "-t", self.threads,
+                    ]
+                )
+                # Sort
+                self.log_and_run(
+                    self.program_sambamba[
+                        "sort",
+                        "--format=bam", "-o", os.path.join(self.wdir, self.record_id + "%s.sorted.bam" % str(i)),
+                        "--tmpdir=%s" % os.path.join(self.wdir, "tmp"),
+                        "-t", self.threads, "-m", self.memory_limit,
+                        os.path.join(self.wdir, self.record_id + "%s.bam" % str(i)),
+                    ]
+                )
+                # Remove intermediaries
+                self.local["rm"][os.path.join(self.wdir, self.record_id + "%s.bam" % str(i))]()
+                self.local["rm"][os.path.join(self.wdir, self.record_id + "%s.sam" % str(i))]()
 
     def __init__(self, *args, **kwargs):
         super().__init__(AlignIter.Align, "align", *args, **kwargs)

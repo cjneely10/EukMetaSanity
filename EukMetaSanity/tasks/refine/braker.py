@@ -12,7 +12,14 @@ class BrakerIter(TaskList):
 
         @program_catch
         def run_1(self):
-            pass
+            # Call braker
+            self.log_and_run(
+                self.program[
+                    "--species=%s" % os.path.join(self.wdir, self.record_id),
+                    "--genome=%s" % self.input[1],  # Masked genome
+                    "--bam=%s" % ",".join()
+                ]
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)
