@@ -95,7 +95,10 @@ class RepeatsIter(TaskList):
             # Perform step on each file passed by user
             data_files = []
             _added_dirs = []
-            _file = [_file for _file in os.listdir(os.getcwd()) if pid in _file][0]
+            _file = os.path.join(
+                [_file for _file in os.listdir(os.getcwd()) if pid in _file and "RM" in _file][0],
+                "consensi.fa.classified"
+            )
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
