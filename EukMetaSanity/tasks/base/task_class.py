@@ -56,7 +56,6 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
-        self.delay = 0
         self.skip = False
         super().__init__()
 

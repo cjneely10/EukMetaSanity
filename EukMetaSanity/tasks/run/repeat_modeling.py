@@ -1,13 +1,8 @@
 import os
 import shutil
-import datetime
-from time import sleep
+from plumbum import BG
 from typing import List
 from pathlib import Path
-from random import randint
-
-from plumbum import BG
-
 from EukMetaSanity.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
