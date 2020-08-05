@@ -14,7 +14,7 @@ from EukMetaSanity.utils.config_manager import ConfigManager
 from EukMetaSanity.tasks.manager.task_manager import TaskManager
 
 """
-EukMetaSanity - Generate structural/functional annotations for simple Eukaryotes
+EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 """
 

@@ -1,6 +1,12 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+Annotate using HMMER
+**Not currently in use**
+
+"""
+
 
 class PfamIter(TaskList):
     class Pfam(Task):

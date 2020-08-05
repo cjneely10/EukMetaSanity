@@ -1,6 +1,12 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+Use search/linsearch in MMseqs program for annotation of all
+user-provided datasets
+
+"""
+
 
 class MMseqsIter(TaskList):
     class MMseqs(Task):

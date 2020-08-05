@@ -1,6 +1,11 @@
 import os
 from EukMetaSanity import TaskList, Task, program_catch
 
+"""
+Annotate with EggNOG-mapper
+
+"""
+
 
 class EggNOGMapper(TaskList):
     class EggNOG(Task):

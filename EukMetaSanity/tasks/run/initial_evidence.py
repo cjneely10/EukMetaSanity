@@ -2,6 +2,12 @@ import os
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
+"""
+Add protein evidence using MetaEuk
+Provides custom summary for easy in use in next pipelines
+
+"""
+
 
 class EvidenceIter(TaskList):
     class Evidence(Task):

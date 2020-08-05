@@ -5,6 +5,11 @@ from plumbum import local
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.manager.data import data_urls
 
+"""
+Download required ODB dataset for Run pipeline
+
+"""
+
 # Dependencies
 cp = local["cp"]
 sed = local["sed"]

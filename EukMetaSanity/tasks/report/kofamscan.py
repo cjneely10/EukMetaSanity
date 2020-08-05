@@ -1,6 +1,11 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+Assign KO annotations using kofamscan
+
+"""
+
 
 class KoFamScanIter(TaskList):
     class KoFamScan(Task):

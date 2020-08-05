@@ -1,6 +1,11 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+Call BRAKER2 pipeline
+
+"""
+
 
 class BrakerIter(TaskList):
     class Braker(Task):

@@ -1,6 +1,13 @@
 import os
 from EukMetaSanity import Task, TaskList
 
+"""
+Class automatically converts output to summary format
+If a dict of data is present, its data is populated to be the final output
+Otherwise, the data in the output is labelled using the extension on the file
+
+"""
+
 
 class SummarizeIter(TaskList):
     class Summarize(Task):

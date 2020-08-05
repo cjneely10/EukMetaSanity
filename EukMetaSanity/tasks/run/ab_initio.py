@@ -7,6 +7,11 @@ from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.utils.helpers import augustus_taxon_ids
 from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
+"""
+Perform ab initio gene identification using either Augustus or GeneMark
+
+"""
+
 
 class FailedAugustusIdentification(ChildProcessError):
     pass

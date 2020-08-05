@@ -1,6 +1,11 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+Call MAKER3 pipeline
+
+"""
+
 
 class MakerIter(TaskList):
     class Maker(Task):

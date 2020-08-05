@@ -16,6 +16,11 @@ from EukMetaSanity.tasks.refine.assemble import AssembleIter
 from EukMetaSanity.tasks.refine.align import AlignIter
 from EukMetaSanity.tasks.refine.braker import BrakerIter
 
+"""
+Class handles ordering of tasks to complete
+
+"""
+
 
 class TaskManager:
     def __init__(self):

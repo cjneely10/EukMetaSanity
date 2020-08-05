@@ -1,6 +1,11 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+De novo assembly RNAseq
+
+"""
+
 
 class AssembleIter(TaskList):
     class Assemble(Task):

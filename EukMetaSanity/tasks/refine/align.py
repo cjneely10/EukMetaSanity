@@ -1,6 +1,11 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
+"""
+Align RNAseq to genome
+
+"""
+
 
 class AlignIter(TaskList):
     class Align(Task):
