@@ -215,6 +215,10 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
             for coord_data in coord_datas:
                 # Parse region info
                 for i in range(coord_data.start - 1, coord_data.end - 2):
+                    # TODO: Determine how this is happening
+                    if i >= len(region):
+                        print("Contig issue: %s" % str(coord_data))
+                        break
                     region[i].parent_id = coord_data.parent_id
                     region[i].loc_type = coord_data.loc_type
                     region[i].evidence.add(coord_data.evidence)

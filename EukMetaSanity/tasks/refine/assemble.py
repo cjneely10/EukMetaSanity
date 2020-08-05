@@ -32,7 +32,9 @@ class AssembleIter(TaskList):
             # Get reads files
             files = self.get_reads_files(self.rnaseq)
             for i in range(0, len(files) - 1, 2):
+                # Get left and right fq read files
                 left, right = files[i], files[i + 1]
+                # Determine basename to give for assembly
                 _basename = os.path.basename(os.path.splitext(files[i])[0])
                 if not (os.path.exists(left) and os.path.exists(right)):
                     continue
@@ -48,6 +50,7 @@ class AssembleIter(TaskList):
                         ),
                     ]
                 )
+                # Rename output file
                 os.replace(
                     os.path.join(
                         self.wdir,

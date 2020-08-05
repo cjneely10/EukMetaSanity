@@ -61,7 +61,7 @@ class RepeatsIter(TaskList):
 
         # Complete masking using RepeatModeler/Masker
         def full(self):
-            # self.simple()
+            self.simple()
             self._mask(*self._model())
 
         @program_catch
