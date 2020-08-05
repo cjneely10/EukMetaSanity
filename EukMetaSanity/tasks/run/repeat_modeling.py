@@ -85,7 +85,7 @@ class RepeatsIter(TaskList):
                     (*self.added_flags),
                     "-database", _name,
                 ] & BG
-            passed_args = eval(str(cmd)[8:-5])
+            passed_args = eval(str(cmd)[8:-11])
             print(" ".join(passed_args))
             cmd.wait()
             return self.input[0], str(cmd.proc._proc.pid)
