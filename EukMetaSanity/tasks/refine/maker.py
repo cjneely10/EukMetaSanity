@@ -57,7 +57,8 @@ class MakerIter(TaskList):
                 self.local["sed"][
                     "-i",
                     "s/%s/%s/" % (
-                        "rm_gff=", "rm_gff=%s" % os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
+                        "rm_gff=",
+                        "rm_gff=%s" % os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
                     ),
                     opts_file,
                 ]
