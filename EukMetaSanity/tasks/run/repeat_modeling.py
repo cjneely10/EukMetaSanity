@@ -76,7 +76,7 @@ class RepeatsIter(TaskList):
             )
             # Run RepeatModeler
             cmd = self.program_modeler[
-                    "-pa", self.threads,
+                    "-pa", str(int(self.threads) // 4 or 1),
                     (*self.added_flags),
                     "-database", _name,
                 ] & BG
