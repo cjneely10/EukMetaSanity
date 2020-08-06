@@ -55,6 +55,8 @@ def gff3_to_dict(gff3_file: str) -> Dict[str, List[GFFCoord]]:
     for _line in gff3_fp:
         if _line.startswith("#"):
             continue
+        if _line.startswith(">"):
+            break
         line = _line.rstrip("\r\n").split()
         out_data[line[0]].append(
             GFFCoord(

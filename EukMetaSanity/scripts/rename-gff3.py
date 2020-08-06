@@ -9,33 +9,29 @@ def _parse_args(ap: ArgParse):
         assert os.path.exists(_arg)
 
 
-def rename_gff3(gff3_file: str, id_mapping_file: str, output_file: str, use_id: str):
-
-    _file_prefix = os.path.basename(os.path.splitext(gff3_file)[0])
+def rename_gff3(gff3_file: str, id_mapping_file: str, output_file: str, use_id: str, reverse: bool):
     # Load ids into dict
+    _file_prefix = (use_id if use_id is not None else os.path.basename(os.path.splitext(gff3_file)[0]))
     _ids_dict = _parse_ids_file(
         id_mapping_file,
-        (use_id if use_id is not None else os.path.basename(os.path.splitext(gff3_file)[0]))
+        _file_prefix,
+        reverse
     )
     # Write file
     out_fp = open(output_file, "w")
     in_fp = open(gff3_file, "r")
     for line in in_fp:
         # Write comments
-        if line.startswith("#"):
-            out_fp.write(line)
+        if line.startswith(_file_prefix[0]):
+            _line = line.rstrip("\r\n").split("\t", maxsplit=1)
+            out_fp.write(line.replace(_line[0], _ids_dict[_line[0]]))
         else:
-            # Get first part of line
-            line = line.split("\t", maxsplit=1)
-            # Write replaced value
-            out_fp.write("\t".join((
-                _ids_dict[line[0]],
-                line[1]
-            )))
+            out_fp.write(line)
+
     out_fp.close()
 
 
-def _parse_ids_file(ids_file: str, file_prefix: str, reverse: bool = False) -> Dict[str, str]:
+def _parse_ids_file(ids_file: str, file_prefix: str, reverse: bool) -> Dict[str, str]:
     _ids_fp = open(ids_file, "r")
     line = next(_ids_fp)
     # Determine which id column to use
@@ -48,10 +44,12 @@ def _parse_ids_file(ids_file: str, file_prefix: str, reverse: bool = False) -> D
         line = next(_ids_fp)
     # Load into dictionary
     out = {}
-    line = line.rstrip("\r\n").split("\t")
-    while len(line) == 2:
+    line = next(_ids_fp).rstrip("\r\n").split("\t")
+    while True:
+        if len(line) != 2:
+            break
+        out[line[key]] = line[val]
         try:
-            out[line[key]] = line[val]
             line = next(_ids_fp).rstrip("\r\n").split("\t")
         except StopIteration:
             break
@@ -76,4 +74,4 @@ if __name__ == "__main__":
         description="Rename .gff3 ids in EukMetaSanity output using ids from run"
     )
     _parse_args(_ap)
-    rename_gff3(_ap.args.gff3_file, _ap.args.id_mapping_file, _ap.args.output_file, _ap.args.use_id)
+    rename_gff3(_ap.args.gff3_file, _ap.args.id_mapping_file, _ap.args.output_file, _ap.args.use_id, _ap.args.reverse)
