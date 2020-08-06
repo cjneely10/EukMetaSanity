@@ -38,21 +38,23 @@ def _initialize_logging(ap: ArgParse) -> None:
 
 # Gather all files to parse that match user-passed extensions
 def _files_iter(ap: ArgParse, storage_dir: str) -> Generator[str, ArgParse, None]:
+    w = open("ids.list", "w")
     for file in os.listdir(ap.args.fasta_directory):
         for ext in ap.args.extensions:
             if file.endswith(ext):
-                yield _simplify_fasta(ap, file, storage_dir)
+                yield _simplify_fasta(ap, file, storage_dir, w)
+    w.close()
     return None
 
 
-def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
+def _simplify_fasta(ap: ArgParse, file, storage_dir: str, w) -> str:
     # Simplify FASTA of complex-named sequences
     fasta_file = str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
     out_file = os.path.join(storage_dir, os.path.basename(os.path.splitext(fasta_file)[0]) + ".fna")
     record_p = SeqIO.parse(fasta_file, "fasta")
     i: int = 0
     records = []
-    sys.stderr.write(file + "\n")
+    w.write(file + "\n")
     for record in record_p:
         _i = str(i)
         _record_id = record.id
@@ -65,12 +67,13 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
         # Truncate and add unique number
         _record_id = str(_record_id[:_len - len(_i)]) + _i
         # Write ids to stderr for user
-        sys.stderr.write(_record_id + "\t" + str(record.id) + "\n")
+        w.write(_record_id + "\t" + str(record.id) + "\n")
         # Store id
         record.id = _record_id
         records.append(record)
         i += 1
     SeqIO.write(records, out_file, "fasta")
+    w.close()
     return out_file
 
 

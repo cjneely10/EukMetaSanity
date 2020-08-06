@@ -16,7 +16,8 @@ class AssembleIter(TaskList):
             for i in range(0, len(files) - 1, 2):
                 built_files.append(
                     os.path.join(
-                        self.wdir, self.record_id + ".%s.fna" % os.path.basename(os.path.splitext(files[i])[0])
+                        self.wdir,
+                        self.record_id + ".%s.fna" % os.path.basename(os.path.splitext(files[i])[0]),
                     )
                 )
             self.output = [
