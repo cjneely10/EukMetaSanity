@@ -44,7 +44,7 @@ class EvidenceIter(TaskList):
                         self.data,
                         subset_db_outpath,
                         "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(
-                            self.input[3], float(self.cutoff), self.level,
+                            self.input[3], float(self.cutoff), self.level,  # Allow for level override by user
                         )[1],
                         "--threads", self.threads,
                     ]

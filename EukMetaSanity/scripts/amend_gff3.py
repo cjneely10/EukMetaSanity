@@ -31,40 +31,50 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
         elif line.startswith(">"):
             break
         line = line.split()
-        if line[2] == "gene":
+        if line[2] in ("gene", "transcript"):
             seq = StringIO()
             gene_id = "gene%i" % i
             mrna_id = gene_id + "-mRNA"
             out_p.write("\t".join((
-                *line[:-1],
+                *line[:2],
+                "gene",
+                *line[3:-1],
                 "ID=%s;Name=%s\n" % (gene_id, gene_id),
             )))
             out_p.write("\t".join((
                 *line[:2],
                 "mRNA",
-                *line[2:-1],
-                "ID=%s;Name=%s\n" % (mrna_id, mrna_id),
+                *line[3:-1],
+                "ID=%s;Name=%s;Parent=%s\n" % (mrna_id, mrna_id, gene_id),
             )))
             strand = line[6]
             line = next(gff3_p).split()
-            while line[2] != "gene":
+            j = 1
+            while line[2] not in ("gene", "transcript"):
                 out_p.write("\t".join((
-                    *line[:-1],
-                    "Parent=%s\n" % mrna_id,
+                    *line[:2],
+                    "exon",
+                    *line[3:-2],
+                    ".",
+                    "Parent=%s;ID=%s\n" % (mrna_id, mrna_id + "-exon%i" % j),
                 )))
                 out_p.write("\t".join((
                     *line[:2],
                     "CDS",
-                    *line[2:-2],
+                    *line[3:-2],
                     "0",
-                    "Parent=%s\n" % mrna_id,
+                    "Parent=%s;ID=%s\n" % (mrna_id, mrna_id + "-cds%i" % j),
                 )))
                 start, end = int(line[3]), int(line[4])
                 if strand == "+":
                     seq.write(str(fasta_dict[line[0]].seq[start - 1:end]))
                 else:
                     seq.write(str(fasta_dict[line[0]].reverse_complement().seq[start - 1:end]))
-                line = next(gff3_p).split()
+                try:
+                    line = next(gff3_p).split()
+                except StopIteration:
+                    break
+                j += 1
             i += 1
             cds_list.append(
                 SeqRecord(
@@ -74,6 +84,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
                     name="",
                 )
             )
+    gff3_p.close()
     SeqIO.write(cds_list, output_prefix + ".cds.fna", "fasta")
     SeqIO.write(find_orfs(cds_list), output_prefix + ".faa", "fasta")
 
