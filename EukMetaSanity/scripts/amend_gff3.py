@@ -96,7 +96,6 @@ def find_orfs(cds_list: List[SeqRecord]):
             nuc = str(record.seq)
         else:
             nuc = str(record.reverse_complement().seq)
-        # for nuc in (str(record.seq), str(record.reverse_complement().seq)):
         for m in re.finditer("ATG", nuc):
             pro = Seq(nuc)[m.start():].translate(to_stop=True)
             if len(pro) > longest[0]:

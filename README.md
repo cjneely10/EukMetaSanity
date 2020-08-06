@@ -129,3 +129,7 @@ optional arguments:
 (All programs used in process)
 (Python documentation + module documentation)
 https://www.biostars.org/p/261203/
+
+https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
+
+

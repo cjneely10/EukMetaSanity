@@ -123,7 +123,7 @@ class AbInitioIter(TaskList):
                 for line in R:
                     line = line.rstrip("\r\n").split()
                     # Count those that pass the user-defined cutoff value
-                    if line[3] in augustus_ids_dict.keys() and float(line[2]) > (float(self.cutoff) / 100.):
+                    if line[3] in augustus_ids_dict.keys() and float(line[2]) >= (float(self.cutoff) / 100.):
                         found_taxa[line[3]] += 1
             return augustus_ids_dict[found_taxa.most_common()[0][0]]
 

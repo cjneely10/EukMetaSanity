@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import sys
-from Bio import Seq
 from BCBio import GFF
 from Bio import SeqIO
 from Bio.Seq import UnknownSeq
@@ -47,7 +46,8 @@ def _check_gff(gff_iterator, _type=None):
             print("Warning: FASTA sequence not found for '%s' in GFF file" % (
                 rec.id))
             rec.seq.alphabet = generic_dna
-        yield _flatten_features(rec)
+        # yield _flatten_features(rec)
+        yield rec
 
 
 def _flatten_features(rec):
