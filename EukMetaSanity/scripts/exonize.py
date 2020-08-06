@@ -58,6 +58,8 @@ def gff3_to_dict(gff3_file: str) -> Dict[str, List[GFFCoord]]:
         if _line.startswith(">"):
             break
         line = _line.rstrip("\r\n").split()
+        if line[2] in ("match", "match_part"):
+            continue
         out_data[line[0]].append(
             GFFCoord(
                 evidence=line[1],
@@ -82,13 +84,14 @@ def generate_initial_region(record: SeqRecord) -> List[Coordinate]:
 def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRecord], _min_seq_length: int, j: int):
     started = False
     start_pos = 0
-    _id = ""
+    _id = set()
     end_pos = 0
     evidence = ""
     strand = ""
     for i, coord in enumerate(region):
         exon_list = []
         exon_started = False
+        _id.add(coord.parent_id)
         if coord.loc_type is not None and not started:
             started = True
             start_pos = i + 1
@@ -105,7 +108,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                 elif not region[k].is_exon and exon_started:
                     exon_started = False
                     exon_list[-1] = (exon_list[-1], k + 1)
-        if end_pos - start_pos > _min_seq_length:
+        if end_pos - start_pos >= _min_seq_length:
             gene_id = "gene" + str(j)
             # Transcript/gene info
             fp.write("".join((
@@ -118,7 +121,7 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                     ".",
                     strand,
                     ".",
-                    "ID=%s" % gene_id
+                    "ID=%s;Name=%s" % (gene_id, gene_id)
                 )),
                 "\n",
             )))
@@ -132,31 +135,49 @@ def write_region(region: List[Coordinate], fp, record_id: str, _cds: List[SeqRec
                     ".",
                     strand,
                     ".",
-                    "ID=%s;Parent=%s" % (gene_id + "-mRNA", gene_id)
+                    "ID=%s;Parent=%s;Name=%s" % (gene_id + "-mRNA", gene_id, gene_id + "-mRNA")
                 )),
                 "\n",
             )))
             # Exon/CDS info
-            for _ident in ("exon", "CDS"):
-                for exon in exon_list:
-                    if not isinstance(exon, tuple):
-                        continue
-                    fp.write("".join((
-                        "".join((
-                            "\t".join((
-                                record_id,
-                                evidence,
-                                _ident,
-                                str(exon[0]),
-                                str(exon[1]),
-                                ".",
-                                strand,
-                                "0",
-                                "Parent=%s" % gene_id
-                            )),
-                            "\n"
+            for exon in exon_list:
+                if not isinstance(exon, tuple):
+                    continue
+                fp.write("".join((
+                    "".join((
+                        "\t".join((
+                            record_id,
+                            evidence,
+                            "exon",
+                            str(exon[0]),
+                            str(exon[1]),
+                            ".",
+                            strand,
+                            ".",
+                            "Parent=%s" % gene_id
                         )),
-                    )))
+                        "\n"
+                    )),
+                )))
+            for exon in exon_list:
+                if not isinstance(exon, tuple):
+                    continue
+                fp.write("".join((
+                    "".join((
+                        "\t".join((
+                            record_id,
+                            evidence,
+                            "CDS",
+                            str(exon[0]),
+                            str(exon[1]),
+                            ".",
+                            strand,
+                            "0",
+                            "Parent=%s" % gene_id
+                        )),
+                        "\n"
+                    )),
+                )))
             # Add FASTA CDS if requested
             if len(exon_list) > 0:
                 seq = Seq("".join((
@@ -225,8 +246,8 @@ def exonize(fasta_file: str, gff3_files: List[str], output_file: str, write_cds:
                     region[i].loc_type = coord_data.loc_type
                     region[i].evidence.add(coord_data.evidence)
                     region[i].strand = coord_data.strand
-                    if not region[i].is_repeat_region:
-                        region[i].is_exon = True
+                    # if "metaeuk" in region[i].evidence:
+                    region[i].is_exon = True
         # Write results in gff format
         j = write_region(region, w, record.id, out_cds, min_len, j)
     if write_cds is not None:
@@ -271,7 +292,7 @@ if __name__ == "__main__":
             (("-p", "--prot"),
              {"help": "Output amino acid sequences to path"}),
             (("-m", "--min_seq_length"),
-             {"help": "Minimum CDS sequence to report with -c, default 500", "default": "500"}),
+             {"help": "Minimum CDS sequence to report with -c, default 500", "default": "10"}),
         ),
         description="Convert EukMetaSanity .merged.gff3 into exonized .nr.gff3 file"
     )

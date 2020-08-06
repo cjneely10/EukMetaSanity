@@ -72,12 +72,22 @@ class EvidenceIter(TaskList):
             )
             # Merge to non-redundant set
             self.log_and_run(
-                self.local["exonize.py"][
-                    "-f", self.input[4],
-                    "-g", os.path.join(self.wdir, "metaeuk.gff3"), self.input[0],
-                    "-o", os.path.join(self.wdir, self.record_id + ".nr.gff3"),
-                    "-c", os.path.join(self.wdir, self.record_id + ".cds.fna"),
-                    "-p", os.path.join(self.wdir, self.record_id + ".faa"),
+                self.program_gffcompare[
+                    self.input[0], os.path.join(self.wdir, "metaeuk.gff3"),
+                    "-C", "-X", "-M", "-o", os.path.join(self.wdir, self.record_id)
+                ]
+            )
+            # Convert to gff3 file
+            self.log_and_run(
+                self.program_gffread[
+                    os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G",
+                ] > os.path.join(self.wdir, self.record_id + ".gff3")
+            )
+            # Replace transcripts with gene identifier
+            self.log_and_run(
+                self.local["amend_gff3.py"][
+                    "-g", os.path.join(self.wdir, self.record_id + ".gff3"),
+                    "-f", self.input[2],
                 ]
             )
 
