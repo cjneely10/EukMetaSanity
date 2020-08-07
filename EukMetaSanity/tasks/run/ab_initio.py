@@ -4,7 +4,7 @@ from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.utils.helpers import augustus_taxon_ids
+from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids
 
 """
 Perform ab initio gene identification using either Augustus or GeneMark

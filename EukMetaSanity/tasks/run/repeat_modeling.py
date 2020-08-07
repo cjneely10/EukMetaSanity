@@ -3,7 +3,7 @@ import shutil
 from plumbum import BG
 from typing import List
 from pathlib import Path
-from EukMetaSanity.utils.helpers import prefix
+from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 

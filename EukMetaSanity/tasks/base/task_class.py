@@ -3,7 +3,7 @@ import logging
 from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
-from EukMetaSanity.utils.helpers import touch
+from EukMetaSanity.tasks.utils.helpers import touch
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.utils.path_manager import PathManager
@@ -258,10 +258,9 @@ class TaskList(ABC):
             self._mode,
         )
 
+    # Write summary file of results
     def summarize(self, _final_output_dir: str, _name: str):
-        # Create softlinks of final files to output directory
-        # Write summary file of reults
-        # Store output paths as file for easy loading
+        # Create softlinks (or copies) of final output files to output directory
         _output = self.output()
         _output_files_list = _output[1]
         _files_prefixes = _output[3]
@@ -269,6 +268,7 @@ class TaskList(ABC):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(_final_output_dir, "%s-paths_summary.tsv" % _name), "w")
         for _files, _file_prefix, _task in zip(_output_files_list, _files_prefixes, self.tasks):
+            # Create subdirectory
             _sub_out = os.path.join(_final_output_dir, _file_prefix)
             if not os.path.exists(_sub_out):
                 os.makedirs(_sub_out)

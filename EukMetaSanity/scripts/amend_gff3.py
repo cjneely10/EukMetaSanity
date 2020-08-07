@@ -23,6 +23,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
     for _ in range(2):
         next(gff3_p)
     cds_list = []
+    cds_ids = set()
     i = 1
     for line in gff3_p:
         if line.startswith("#"):
@@ -76,6 +77,13 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
                     break
                 j += 1
             i += 1
+            while gene_id in cds_ids:
+                if "_" in gene_id:
+                    _num = gene_id.split("_")[1]
+                    gene_id = gene_id[:-1 * (len(_num) + 1)] + "_" + str(int(_num) + 1)
+                else:
+                    gene_id = gene_id + "_" + "1"
+            cds_ids.add(gene_id)
             cds_list.append(
                 SeqRecord(
                     id=gene_id,

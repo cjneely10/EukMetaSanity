@@ -4,13 +4,11 @@ import logging
 from Bio import SeqIO
 from pathlib import Path
 from random import choices
-from string import punctuation
 from string import ascii_letters
 from typing import Generator, List, Tuple
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.utils.path_manager import PathManager
-from EukMetaSanity.utils.helpers import prefix as _prefix
 from EukMetaSanity.utils.config_manager import ConfigManager
 from EukMetaSanity.tasks.manager.task_manager import TaskManager
 
@@ -21,6 +19,11 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 
 # # Helper functions
+# File prefix
+def _prefix(_file: str) -> str:
+    return os.path.basename(os.path.splitext(_file)[0])
+
+
 # Logging initialize
 def _initialize_logging(ap: ArgParse) -> None:
     # Initialize logging

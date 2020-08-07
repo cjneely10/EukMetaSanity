@@ -83,7 +83,7 @@ class EvidenceIter(TaskList):
                     os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G",
                 ] > os.path.join(self.wdir, self.record_id + ".gff3")
             )
-            # Replace transcripts with gene identifier
+            # Replace transcripts with gene identifier and write cds/aa sequences
             self.log_and_run(
                 self.local["amend_gff3.py"][
                     "-g", os.path.join(self.wdir, self.record_id + ".gff3"),
