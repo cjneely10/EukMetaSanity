@@ -82,7 +82,9 @@ class AbInitioIter(TaskList):
                     ]
                 )
             self.batch(progs)
-            (self.local["cat"][out_gffs] | self.local["gffread"]["-o", out_gff, "-F", "--keep-comments"])()
+            (self.local["cat"][out_gffs] | self.local["gffread"][
+                "-o", out_gff, "-F", "--keep-comments", "--cluster-only"
+            ])()
             all([os.remove(_file) for _file in out_files])
             all([os.remove(_file) for _file in out_gffs])
             return out_gff

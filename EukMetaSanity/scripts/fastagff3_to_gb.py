@@ -64,6 +64,9 @@ def _flatten_features(rec):
                 if len(curf.sub_features) > 0:
                     nextf.extend(curf.sub_features)
             cur = nextf
+    for feat in out:
+        if feat.type == "transcript":
+            feat.type = "mRNA"
     rec.features = [
         SeqFeature(
             FeatureLocation(0, len(rec.seq)), type="source",
