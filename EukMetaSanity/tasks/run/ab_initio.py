@@ -82,9 +82,41 @@ class AbInitioIter(TaskList):
                     ]
                 )
             self.batch(progs)
-            (self.local["cat"][out_gffs] | self.local["gffread"][
-                "-o", out_gff, "-F", "--keep-comments", "--cluster-only"
-            ])()
+            (self.local["cat"][out_gffs] | self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"])()
+
+            gff_fp = open(out_gff + ".tmp", "r")
+            out_fp = open(out_gff, "w")
+            i = 1
+            line = next(gff_fp)
+            while True:
+                if line.startswith("#"):
+                    out_fp.write(line)
+                else:
+                    line = line.split("\t")
+                    if line[2] == "transcript":
+                        out_fp.write("\t".join((
+                            *line[0:-1],
+                            "ID=gene%i\n" % i
+                        )))
+                    try:
+                        line = next(gff_fp).split("\t")
+                    except StopIteration:
+                        break
+                    while line[2] != "transcript":
+                        out_fp.write("\t".join((
+                            *line[0:-1],
+                            "Parent=gene%i\n" % i
+                        )))
+                        try:
+                            line = next(gff_fp).split("\t")
+                        except StopIteration:
+                            break
+                    try:
+                        line = next(gff_fp).split("\t")
+                    except StopIteration:
+                        break
+                i += 1
+            out_fp.close()
             all([os.remove(_file) for _file in out_files])
             all([os.remove(_file) for _file in out_gffs])
             return out_gff
