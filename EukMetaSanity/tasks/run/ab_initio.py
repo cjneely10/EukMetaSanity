@@ -5,7 +5,6 @@ from pathlib import Path
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.utils.helpers import augustus_taxon_ids
-from EukMetaSanity.scripts.fastagff3_to_gb import write_genbank
 
 """
 Perform ab initio gene identification using either Augustus or GeneMark
@@ -174,12 +173,6 @@ class AbInitioIter(TaskList):
                 shutil.rmtree(config_dir)
             # Parse to genbank
             out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(_file, ".%i.gb" % _round))
-            # write_genbank(
-            #     _file,
-            #     out_gff,
-            #     out_gb
-            # )
-
             self.log_and_run(
                 self.local["gff2gbSmallDNA.pl"][
                     out_gff,

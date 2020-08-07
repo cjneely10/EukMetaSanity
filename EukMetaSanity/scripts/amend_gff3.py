@@ -15,7 +15,7 @@ def _parse_args(ap: ArgParse):
 
 
 def convert_final_gff3(gff3_file: str, fasta_file: str):
-    output_prefix = os.path.basename(os.path.splitext(gff3_file)[0])
+    output_prefix = os.path.splitext(gff3_file)[0]
     gff3_p = open(gff3_file, "r")
     out_p = open(output_prefix + ".nr.gff3", "w")
     fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
@@ -84,7 +84,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
                     name="",
                 )
             )
-    gff3_p.close()
+    out_p.close()
     SeqIO.write(cds_list, output_prefix + ".cds.fna", "fasta")
     SeqIO.write(find_orfs(cds_list), output_prefix + ".faa", "fasta")
 
