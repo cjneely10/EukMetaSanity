@@ -84,10 +84,11 @@ def _get_list_of_files(summary_file: str, file_types: List[str]) -> List[List[st
     out = []
     try:
         while True:
-            line = next(file_fp).rstrip("\r\n").split("\t")
+            head = next(file_fp).rstrip("\r\n").split("\t")
             inner = []
+            line = next(file_fp).rstrip("\r\n").split("\t")
             for file_type in file_types:
-                _col_idx = next(file_fp).rstrip("\r\n").split("\t").index(file_type)
+                _col_idx = head.index(file_type)
                 inner.append(str(Path(line[_col_idx]).resolve()))
             out.append(inner)
     except StopIteration:
