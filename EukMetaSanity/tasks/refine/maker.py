@@ -36,8 +36,10 @@ class MakerIter(TaskList):
                             ("model_org", ("simple" if i == 0 else "")),
                             ("rm_gff", (
                                 os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
-                                if i == 0 else
+                                if i == 0 else out_files[2]
                             )),
+                            ("other_gff", (self.input[2] if i == 0 else "")),
+                            (),
                             (),
                         ],
                         i + 1
@@ -81,23 +83,6 @@ class MakerIter(TaskList):
                         opts_file,
                     ]
                 )
-            # self.log_and_run(
-            #     self.local["sed"][
-            #         "-i",
-            #         "s/%s/%s/" % (
-            #             "rm_gff=",
-            #             "rm_gff=%s" % os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
-            #         ),
-            #         opts_file,
-            #     ]
-            # )
-            # # Add nr evidence
-            # self.log_and_run(
-            #     self.local["sed"][
-            #         "-i", "s/%s/%s/" % ("other_gff=", "other_gff=%s" % self.input[2]),
-            #         opts_file,
-            #     ]
-            # )
             # # Parse additional evidence as needed
             # prot_file = self.get_data_file(self.proteins)
             # if prot_file is not None:
