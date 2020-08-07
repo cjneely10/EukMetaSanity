@@ -84,7 +84,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
                     name="",
                 )
             )
-    gff3_p.close()
+    out_p.close()
     SeqIO.write(cds_list, output_prefix + ".cds.fna", "fasta")
     SeqIO.write(find_orfs(cds_list), output_prefix + ".faa", "fasta")
 

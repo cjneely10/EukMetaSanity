@@ -16,7 +16,6 @@ https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
 def _parse_args(ap):
     assert os.path.exists(ap.args.fasta_file)
     assert os.path.exists(ap.args.gff3_file)
-    assert ap.args.format in ("genbank", "CDS")
 
 
 def _fix_ncbi_id(fasta_iter):
@@ -64,9 +63,30 @@ def _flatten_features(rec):
                 if len(curf.sub_features) > 0:
                     nextf.extend(curf.sub_features)
             cur = nextf
+    i = 1
     for feat in out:
         if feat.type == "transcript":
             feat.type = "mRNA"
+        gene_id = (
+            feat.qualifiers["ID"][0] if "ID" in feat.qualifiers.keys()
+            else feat.qualifiers["Parent"][0]
+        )
+        feat_id = gene_id + "|" + feat.type
+        if feat.type == "exon":
+            feat_id = feat_id + "|" + str(i)
+            feat.qualifiers["number"] = [str(i)]
+            i += 1
+        feat.qualifiers["label"] = [feat_id]
+    i = 1
+    for feat in out:
+        if feat.type == "CDS":
+            feat_id = (
+                feat.qualifiers["ID"][0] if "ID" in feat.qualifiers.keys()
+                else feat.qualifiers["Parent"][0]
+            ) + "|" + feat.type + "|" + str(i)
+            feat.qualifiers["number"] = [str(i)]
+            i += 1
+            feat.qualifiers["label"] = [feat_id]
     rec.features = [
         SeqFeature(
             FeatureLocation(0, len(rec.seq)), type="source",
@@ -102,10 +122,7 @@ def write_cds(genbank_file, output_file):
 
 
 def main(ap):
-    if ap.args.format == "genbank":
-        write_genbank(ap.args.fasta_file, ap.args.gff3_file, ap.args.output)
-    elif ap.args.format == "CDS":
-        write_cds(ap.args.fasta_file, ap.args.output)
+    write_genbank(ap.args.fasta_file, ap.args.gff3_file, ap.args.output)
 
 
 if __name__ == "__main__":
@@ -117,8 +134,6 @@ if __name__ == "__main__":
              {"help": "GFF3 mapping file"}),
             (("-o", "--output"),
              {"help": "Output path, default stdout", "default": "/dev/stdout"}),
-            (("-f", "--format"),
-             {"help": "Select from genbank/CDS, default genbank", "default": "genbank"})
         ),
         description="Convert FASTA and GFF3 file to Genbank format"
     )
