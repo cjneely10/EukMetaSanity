@@ -51,8 +51,8 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str, w) -> str:
     # Simplify FASTA of complex-named sequences
     fasta_file = str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
     out_file = os.path.join(storage_dir, os.path.basename(os.path.splitext(fasta_file)[0]) + ".fna")
-    if os.path.exists(out_file):
-        return out_file
+    # if os.path.exists(out_file):
+    #     return out_file
     record_p = SeqIO.parse(fasta_file, "fasta")
     i: int = 0
     records = []

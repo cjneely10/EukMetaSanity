@@ -46,8 +46,7 @@ def _check_gff(gff_iterator, _type=None):
             print("Warning: FASTA sequence not found for '%s' in GFF file" % (
                 rec.id))
             rec.seq.alphabet = generic_dna
-        # yield _flatten_features(rec)
-        yield rec
+        yield _flatten_features(rec)
 
 
 def _flatten_features(rec):

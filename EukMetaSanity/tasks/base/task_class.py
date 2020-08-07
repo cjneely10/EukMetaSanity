@@ -160,10 +160,7 @@ class Task(ABC):
                 if self.mode == 1:
                     f = cmds[j] & BG
                     running.append(f)
-            res = all([_f.ready() for _f in running])
-            while res is False:
-                all([_f.wait() for _f in running])
-                res = all([_f.ready() for _f in running])
+            all([_f.wait() for _f in running])
 
     @abstractmethod
     def run(self) -> None:
