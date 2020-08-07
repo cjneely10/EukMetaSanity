@@ -120,4 +120,3 @@ if __name__ == "__main__":
     )
     _parse_args(_ap)
     convert_final_gff3(_ap.args.gff3_file, _ap.args.fasta_file)
-
