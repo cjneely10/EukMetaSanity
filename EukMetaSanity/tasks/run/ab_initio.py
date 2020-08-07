@@ -81,43 +81,14 @@ class AbInitioIter(TaskList):
                     ]
                 )
             self.batch(progs)
+            # Combine files
             (
                 self.local["cat"][out_gffs] |
                 self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"]
             )()
-            gff_fp = open(out_gff + ".tmp", "r")
-            out_fp = open(out_gff, "w")
-            i = 1
-            line = next(gff_fp)
-            while True:
-                if line.startswith("#"):
-                    out_fp.write(line)
-                else:
-                    line = line.split("\t")
-                    if line[2] == "transcript":
-                        out_fp.write("\t".join((
-                            *line[0:-1],
-                            "ID=gene%i\n" % i
-                        )))
-                        try:
-                            line = next(gff_fp).split("\t")
-                        except StopIteration:
-                            break
-                        while line[2] != "transcript":
-                            out_fp.write("\t".join((
-                                *line[0:-1],
-                                "Parent=gene%i\n" % i
-                            )))
-                            try:
-                                line = next(gff_fp).split("\t")
-                            except StopIteration:
-                                break
-                        i += 1
-                try:
-                    line = next(gff_fp)
-                except StopIteration:
-                    break
-            out_fp.close()
+            # Make ids unique
+            self._make_unique(out_gff)
+            # Remove intermediary files
             all([os.remove(_file) for _file in out_files])
             all([os.remove(_file) for _file in out_gffs])
             return out_gff
@@ -202,6 +173,42 @@ class AbInitioIter(TaskList):
         @staticmethod
         def _out_path(_file_name: str, _ext: str) -> str:
             return os.path.basename(os.path.splitext(_file_name)[0]) + _ext
+
+        @staticmethod
+        def _make_unique(out_gff):
+            gff_fp = open(out_gff + ".tmp", "r")
+            out_fp = open(out_gff, "w")
+            i = 1
+            line = next(gff_fp)
+            while True:
+                if line.startswith("#"):
+                    out_fp.write(line)
+                else:
+                    line = line.split("\t")
+                    if line[2] == "transcript":
+                        out_fp.write("\t".join((
+                            *line[0:-1],
+                            "ID=gene%i\n" % i
+                        )))
+                        try:
+                            line = next(gff_fp).split("\t")
+                        except StopIteration:
+                            break
+                        while line[2] != "transcript":
+                            out_fp.write("\t".join((
+                                *line[0:-1],
+                                "Parent=gene%i\n" % i
+                            )))
+                            try:
+                                line = next(gff_fp).split("\t")
+                            except StopIteration:
+                                break
+                        i += 1
+                try:
+                    line = next(gff_fp)
+                except StopIteration:
+                    break
+            out_fp.close()
 
         def _handle_config_output(self):
             # Move the augustus training folders to their wdir folders
