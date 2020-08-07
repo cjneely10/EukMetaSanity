@@ -74,7 +74,7 @@ class EvidenceIter(TaskList):
             self.log_and_run(
                 self.program_gffcompare[
                     self.input[0], os.path.join(self.wdir, "metaeuk.gff3"),
-                    "-D", "-S", "-A", "-o", os.path.join(self.wdir, self.record_id)
+                    "-D", "-S", "-C", "-o", os.path.join(self.wdir, self.record_id)
                 ]
             )
             # Convert to gff3 file
