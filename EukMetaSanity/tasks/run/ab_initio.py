@@ -82,8 +82,10 @@ class AbInitioIter(TaskList):
                     ]
                 )
             self.batch(progs)
-            (self.local["cat"][out_gffs] | self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"])()
-
+            (
+                self.local["cat"][out_gffs] |
+                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"]
+            )()
             gff_fp = open(out_gff + ".tmp", "r")
             out_fp = open(out_gff, "w")
             i = 1
@@ -98,24 +100,24 @@ class AbInitioIter(TaskList):
                             *line[0:-1],
                             "ID=gene%i\n" % i
                         )))
-                    try:
-                        line = next(gff_fp).split("\t")
-                    except StopIteration:
-                        break
-                    while line[2] != "transcript":
-                        out_fp.write("\t".join((
-                            *line[0:-1],
-                            "Parent=gene%i\n" % i
-                        )))
                         try:
                             line = next(gff_fp).split("\t")
                         except StopIteration:
                             break
-                    try:
-                        line = next(gff_fp).split("\t")
-                    except StopIteration:
-                        break
-                i += 1
+                        while line[2] != "transcript":
+                            out_fp.write("\t".join((
+                                *line[0:-1],
+                                "Parent=gene%i\n" % i
+                            )))
+                            try:
+                                line = next(gff_fp).split("\t")
+                            except StopIteration:
+                                break
+                        i += 1
+                try:
+                    line = next(gff_fp)
+                except StopIteration:
+                    break
             out_fp.close()
             all([os.remove(_file) for _file in out_files])
             all([os.remove(_file) for _file in out_gffs])
@@ -172,11 +174,21 @@ class AbInitioIter(TaskList):
                 shutil.rmtree(config_dir)
             # Parse to genbank
             out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(_file, ".%i.gb" % _round))
-            write_genbank(
-                _file,
-                out_gff,
-                out_gb
+            # write_genbank(
+            #     _file,
+            #     out_gff,
+            #     out_gb
+            # )
+
+            self.log_and_run(
+                self.local["gff2gbSmallDNA.pl"][
+                    out_gff,
+                    _file,
+                    "1000",
+                    out_gb
+                ]
             )
+
             species_config_prefix = self.record_id + str(_round)
             # Write new species config file
             self.log_and_run(
