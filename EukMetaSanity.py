@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import os
-import sys
 import logging
 from Bio import SeqIO
 from pathlib import Path
+from random import choices
 from string import punctuation
+from string import ascii_letters
 from typing import Generator, List, Tuple
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -51,23 +52,16 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str, w) -> str:
     # Simplify FASTA of complex-named sequences
     fasta_file = str(Path(os.path.join(ap.args.fasta_directory, file)).resolve())
     out_file = os.path.join(storage_dir, os.path.basename(os.path.splitext(fasta_file)[0]) + ".fna")
-    # if os.path.exists(out_file):
-    #     return out_file
     record_p = SeqIO.parse(fasta_file, "fasta")
     i: int = 0
     records = []
     w.write(file + "\n")
+    added_records = set()
     for record in record_p:
-        _i = str(i)
-        _record_id = record.id
-        for val in punctuation:
-            _record_id = _record_id.replace(val, "")
-        # Shorten id to 16 characters
-        _len = len(_record_id)
-        if _len > 16:
-            _len = 16
-        # Truncate and add unique number
-        _record_id = str(_record_id[:_len - len(_i)]) + _i
+        _record_id = "".join(choices(ascii_letters, k=16))
+        while _record_id in added_records:
+            _record_id = "".join(choices(ascii_letters, k=16))
+        added_records.add(_record_id)
         # Write ids to stderr for user
         w.write(_record_id + "\t" + str(record.id) + "\n")
         # Store id
