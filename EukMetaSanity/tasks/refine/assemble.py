@@ -14,18 +14,15 @@ class AssembleIter(TaskList):
     class Assemble(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            # TODO: Ensure that this override step on wdir functions as expected
+            self._wdir = os.path.join(os.path.dirname(self.wdir), "transcriptomes")
             files_dict = AssembleIter.Assemble.get_reads_files(self.rnaseq)
             built_files = []
             for files_tuple in files_dict[self.record_id]:
                 if not all(os.path.exists(_f) for f in files_tuple for _f in f):
                     raise FileNotFoundError
                 for file_tuple in files_tuple:
-                    built_files.append(
-                        os.path.join(
-                            self.wdir,
-                            self.record_id + "trinity" + self.record_id + "_" + prefix(file_tuple[0]),
-                        )
-                    )
+                    built_files.append(os.path.join(self.wdir, prefix(file_tuple[0]) + ".transcriptome.fna"))
             self.output = [
                 *self.input,
                 *built_files,  # Assembled transcriptomes
@@ -44,6 +41,10 @@ class AssembleIter(TaskList):
                     raise FileNotFoundError
                 for file_tuple in files_tuple:
                     _rna_basename = prefix(file_tuple[0])
+                    out_file = os.path.join(self.wdir, _rna_basename + ".transcriptome.fna")
+                    # Only assemble if not already done so
+                    if os.path.exists(out_file):
+                        continue
                     # Run Trinity
                     self.log_and_run(
                         self.program[
@@ -52,7 +53,7 @@ class AssembleIter(TaskList):
                             "--left", file_tuple[0], "--right", file_tuple[1],
                             "--CPU", self.threads,
                             "--output", os.path.join(
-                                self.wdir, self.record_id + "trinity" + self.record_id + "_" + _rna_basename
+                                self.wdir, "trinity" + "_" + _rna_basename
                             ),
                         ]
                     )
@@ -60,10 +61,10 @@ class AssembleIter(TaskList):
                     os.replace(
                         os.path.join(
                             self.wdir,
-                            self.record_id + "trinity" + self.record_id + "_" + _rna_basename,
+                            "trinity" + "_" + _rna_basename,
                             "Trinity.fasta"
                         ),
-                        os.path.join(self.wdir, self.record_id + "_" + _rna_basename)
+                        out_file
                     )
 
         # Line format:

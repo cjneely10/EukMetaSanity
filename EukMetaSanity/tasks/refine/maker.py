@@ -28,6 +28,7 @@ class MakerIter(TaskList):
             self.reformat_repeats_gff3()
             # Run MAKER on assembled transcriptomes
             out_files = None
+            prot_file = self.get_data_file(self.proteins)
             for i, assembled_transcriptome in enumerate(self.input[-1]):
                 out_files = self.maker(
                     *self.generate_ctl_file(
@@ -38,9 +39,9 @@ class MakerIter(TaskList):
                                 os.path.join(self.wdir, self.record_id + ".mask.complex.reformat.gff3")
                                 if i == 0 else out_files[2]
                             )),
-                            ("other_gff", (self.input[2] if i == 0 else "")),
-                            (),
-                            (),
+                            ("other_gff", (self.input[2] if i == 0 else out_files[0])),  # Use est evidence from prior
+                            *(("protein", prot_file) if prot_file is not None else out_files[1]),
+                            ("est", assembled_transcriptome),
                         ],
                         i + 1
                     ),
@@ -83,36 +84,13 @@ class MakerIter(TaskList):
                         opts_file,
                     ]
                 )
-            # # Parse additional evidence as needed
-            # prot_file = self.get_data_file(self.proteins)
-            # if prot_file is not None:
-            #     self.log_and_run(
-            #         self.local["sed"][
-            #             "-i", "s/%s/%s/" % ("protein=", "protein=%s" % prot_file),
-            #             opts_file
-            #         ]
-            #     )
-            #     self.log_and_run(
-            #         self.local["sed"][
-            #             "-i", "s/protein2genome=0/protein2genome=1/",
-            #             opts_file
-            #         ]
-            #     )
-            # # Integrate assembed transcriptomes, if available
-            # est_file = self.get_data_file(self.est)
-            # if est_file is not None:
-            #     self.log_and_run(
-            #         self.local["sed"][
-            #             "-i", "s/%s/%s/g" % ("est=", "est=%s" % est_file),
-            #             opts_file
-            #         ]
-            #     )
-            #     self.log_and_run(
-            #         self.local["sed"][
-            #             "-i", "s/est2genome=0/est2genome=1/",
-            #             opts_file
-            #         ]
-            #     )
+                if replace_tuple[0] in ("protein", "est"):
+                    self.log_and_run(
+                        self.local["sed"][
+                            "-i", "s/%s2genome=0/%s2genome=1/" % (replace_tuple[0], replace_tuple[0]),
+                            opts_file
+                        ]
+                    )
             # Parse user args into config file
             assert len(self.added_flags) // 2 == 0
             for _i in range(0, len(self.added_flags) - 1, 2):
