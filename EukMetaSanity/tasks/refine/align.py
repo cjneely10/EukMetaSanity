@@ -1,4 +1,5 @@
 import os
+from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 
 """
@@ -21,21 +22,32 @@ class AlignIter(TaskList):
 
         @program_catch
         def run_1(self):
-            # Align to genome
-            for i in range(0, len(self.input[-1]), 2):
+            # Create index
+            self.log_and_run(
+                self.program_hisat2build[
+                    self.input[4],
+                    os.path.join(self.wdir, prefix(self.input[4]))
+                ]
+            )
+            # Perform on each transcriptome
+            for files_tuple in self.input[-2]:
+                _basename = prefix(files_tuple[0])
+                # Align to genome
                 self.log_and_run(
-                    self.program_minimap2[
-                        "-ax", self.minimap_option,
-                        self.input[4], self.input[-1][i], self.input[-1][i + 1],
-                        (*self.added_flags),
-                    ] > os.path.join(self.wdir, self.record_id + "%s.sam" % str(i))
+                    self.program_hisat2[
+                        "-p", self.threads,
+                        "-x", os.path.join(self.wdir, prefix(self.input[4])),
+                        "-1", files_tuple[0],
+                        "-2", files_tuple[1],
+                        "-S", os.path.join(self.wdir, _basename + ".sam")
+                    ]
                 )
                 # Convert to bam
                 self.log_and_run(
                     self.program_sambamba[
                         "view",
-                        "-S", os.path.join(self.wdir, self.record_id + "%s.sam" % str(i)),
-                        "--format=bam", "-o", os.path.join(self.wdir, self.record_id + "%s.bam" % str(i)),
+                        "-S", os.path.join(self.wdir, _basename + ".sam"),
+                        "-f", "bam", "-o", os.path.join(self.wdir, _basename + ".bam"),
                         "-t", self.threads,
                     ]
                 )
@@ -43,15 +55,15 @@ class AlignIter(TaskList):
                 self.log_and_run(
                     self.program_sambamba[
                         "sort",
-                        "--format=bam", "-o", os.path.join(self.wdir, self.record_id + "%s.sorted.bam" % str(i)),
-                        "--tmpdir=%s" % os.path.join(self.wdir, "tmp"),
+                        "--format=bam", "-o", os.path.join(self.wdir, _basename + ".sorted.bam"),
+                        "--tmpdir", os.path.join(self.wdir, "tmp"),
                         "-t", self.threads, "-m", self.memory_limit,
-                        os.path.join(self.wdir, self.record_id + "%s.bam" % str(i)),
+                        os.path.join(self.wdir, _basename + ".bam"),
                     ]
                 )
                 # Remove intermediaries
-                self.local["rm"][os.path.join(self.wdir, self.record_id + "%s.bam" % str(i))]()
-                self.local["rm"][os.path.join(self.wdir, self.record_id + "%s.sam" % str(i))]()
+                self.local["rm"][os.path.join(self.wdir, _basename + ".bam")]()
+                self.local["rm"][os.path.join(self.wdir, _basename + ".sam")]()
 
     def __init__(self, *args, **kwargs):
         super().__init__(AlignIter.Align, "align", *args, **kwargs)

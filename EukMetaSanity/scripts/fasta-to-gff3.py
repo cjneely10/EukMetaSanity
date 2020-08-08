@@ -79,46 +79,45 @@ def _parse_diamond(i, ap, feature_data, record, rec):
     return i
 
 
-def metaeuk(metaeuk_file_path, data, ap):
+def metaeuk(metaeuk_file_path, data, *args, **kwargs):
     records_fp = SeqIO.parse(metaeuk_file_path, "fasta")
     for record in records_fp:
         # Metaeuk header contains pipes as delimiters - be sure to remove all in input seqs!
         line = record.id.split("|")
         # Retain gene info in nested lists
         recs = []
-        if Decimal(line[4]) < ap.args.evalue:
-            # Determine strand
-            if line[2] == "+":
-                strand = 1
-            elif line[2] == "-":
-                strand = -1
-            else:
-                strand = 0
-            # Add base record as first record in nested list
-            recs.append(
-                Result(
-                    loc_type="gene",
-                    sstart=int(line[6]),
-                    send=int(line[7]),
-                    strand=strand,
-                    score=line[3],
-                )
+        # Determine strand
+        if line[2] == "+":
+            strand = 1
+        elif line[2] == "-":
+            strand = -1
+        else:
+            strand = 0
+        # Add base record as first record in nested list
+        recs.append(
+            Result(
+                loc_type="gene",
+                sstart=int(line[6]),
+                send=int(line[7]),
+                strand=strand,
+                score=line[3],
             )
-            # Store exon/CDS info from rest of header at nested list loc
-            for coords in line[8:]:
-                start, end, length = coords.split(":")
-                if strand < 0:
-                    start, end = end, start
-                for _type in ("CDS",):
-                    recs.append(
-                        Result(
-                            loc_type=_type,
-                            sstart=int(start.split("[")[0]),
-                            send=int(end.split("[")[0]),
-                            strand=strand,
-                            score=".",
-                        )
+        )
+        # Store exon/CDS info from rest of header at nested list loc
+        for coords in line[8:]:
+            start, end, length = coords.split(":")
+            if strand < 0:
+                start, end = end, start
+            for _type in ("CDS",):
+                recs.append(
+                    Result(
+                        loc_type=_type,
+                        sstart=int(start.split("[")[0]),
+                        send=int(end.split("[")[0]),
+                        strand=strand,
+                        score=".",
                     )
+                )
         # Add nested list
         data[line[1]].append(recs)
 

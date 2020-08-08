@@ -23,9 +23,11 @@ class AssembleIter(TaskList):
                     raise FileNotFoundError
                 for file_tuple in files_tuple:
                     built_files.append(os.path.join(self.wdir, prefix(file_tuple[0]) + ".transcriptome.fna"))
+            # Assign output as file paths and list of file paths
             self.output = [
                 *self.input,
                 *built_files,  # Assembled transcriptomes
+                files_dict[self.record_id],  # List of reads files
                 built_files,  # List of files
             ]
 

@@ -67,7 +67,7 @@ class EvidenceIter(TaskList):
             # Convert to GFF3
             self.log_and_run(
                 self.local["fasta-to-gff3.py"][
-                    self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3")
+                    self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3"),
                 ]
             )
             # Merge to non-redundant set

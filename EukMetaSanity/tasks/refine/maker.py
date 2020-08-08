@@ -13,11 +13,16 @@ class MakerIter(TaskList):
     class Maker(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            out = []
+            for i, assembled_transcriptome in enumerate(self.input[-1]):
+                run_id = os.path.join(self.wdir, prefix(assembled_transcriptome) + self.record_id)
+                for ext in (".all.maker.gff", ".proteins.fasta", ".transcripts.fasta"):
+                    out.append(os.path.join(self.wdir, run_id + ext))
             self.output = [
                 *self.input,
-                os.path.join(self.wdir, self.record_id + ".all.maker.gff"),  # MAKER output gff
-                os.path.join(self.wdir, self.record_id + ".proteins.fasta"),  # Proteins output
-                os.path.join(self.wdir, self.record_id + ".transcripts.fasta"),  # CDS output
+                *out,  # MAKER output paths
+                self.input[-2],  # Forward the list of reads
+                out,  # List of MAKER results files
             ]
 
         def run(self):
@@ -29,6 +34,8 @@ class MakerIter(TaskList):
             # Run MAKER on assembled transcriptomes
             out_files = None
             prot_file = self.get_data_file(self.proteins)
+            if prot_file is None:
+                prot_file = ""
             for i, assembled_transcriptome in enumerate(self.input[-1]):
                 out_files = self.maker(
                     *self.generate_ctl_file(
@@ -40,12 +47,12 @@ class MakerIter(TaskList):
                                 if i == 0 else out_files[2]
                             )),
                             ("other_gff", (self.input[2] if i == 0 else out_files[0])),  # Use est evidence from prior
-                            *(("protein", prot_file) if prot_file is not None else out_files[1]),
+                            *(("protein", prot_file) if i == 0 else out_files[1]),
                             ("est", assembled_transcriptome),
                         ],
                         i + 1
                     ),
-                    os.path.join(self.wdir, prefix(assembled_transcriptome))
+                    os.path.join(self.wdir, prefix(assembled_transcriptome) + self.record_id)
                 )
             # # Run on remaining transcriptomes that were assembled in assemble task
 
