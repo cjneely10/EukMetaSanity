@@ -3,8 +3,6 @@ import os
 import logging
 from Bio import SeqIO
 from pathlib import Path
-from random import choices
-from string import ascii_letters
 from typing import Generator, List, Tuple
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -42,15 +40,10 @@ def _initialize_logging(ap: ArgParse) -> None:
 
 # Gather all files to parse that match user-passed extensions
 def _files_iter(ap: ArgParse, storage_dir: str) -> Generator[str, ArgParse, None]:
-    # w = None
-    # if not os.path.exists("ids.list"):
-    #     w = open("ids.list", "w")
     for file in os.listdir(ap.args.fasta_directory):
         for ext in ap.args.extensions:
             if file.endswith(ext):
                 yield _simplify_fasta(ap, file, storage_dir)
-    # if w is not None:
-    #     w.close()
     return None
 
 
@@ -60,24 +53,6 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
     out_file = os.path.join(storage_dir, os.path.basename(os.path.splitext(fasta_file)[0]) + ".fna")
     if os.path.exists(out_file):
         return out_file
-    # record_p = SeqIO.parse(fasta_file, "fasta")
-    # i: int = 0
-    # records = []
-    # if w is not None:
-    #     w.write(file + "\n")
-    # added_records = set()
-    # for record in record_p:
-    #     _record_id = "".join(choices(ascii_letters, k=16))
-    #     while _record_id in added_records:
-    #         _record_id = "".join(choices(ascii_letters, k=16))
-    #     added_records.add(_record_id)
-    #     # Write ids to stderr for user
-    #     if w is not None:
-    #         w.write(_record_id + "\t" + str(record.id) + "\n")
-    #     # Store id
-    #     record.id = _record_id
-    #     records.append(record)
-    #     i += 1
     SeqIO.write(SeqIO.parse(fasta_file, "fasta"), out_file, "fasta")
     return out_file
 

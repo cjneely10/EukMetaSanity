@@ -6,7 +6,7 @@ git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity
 make all
 cd ..
-./download-data.py databases -t <threads> -m <split-memory-limit>
+EukMetaSanity/download-data.py databases -t <threads> -m <split-memory-limit>
 ```
 
 The `download-data.py` script is provided to download all required base data.
@@ -47,7 +47,7 @@ ln -s /path/to/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
 
 ### Installing dependencies
 
-**EukMetaSanity** consists of 3 subprograms - `run`, `report`, `refine`.
+**EukMetaSanity** consists of 4 subprograms - `run`, `report`, `fast_refine`, and `refine`.
 
 When selecting dependencies to download, please follow the instructions below:
 
@@ -88,6 +88,18 @@ Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required da
 Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
 
 ---
+#### Fast refine
+
+Install [sambamba](https://lomereiter.github.io/sambamba/docs/sambamba-sort.html) AND
+[BEDtools](https://github.com/arq5x/bedtools2/releases/tag/v2.29.2)
+
+##### Fast refine step 1: Incorporate RNAseq data (optional)
+Install [hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-source)
+
+##### Fast refine step 2: Incorporate trancriptomic data (optional)
+Install [gmap](http://research-pub.gene.com/gmap/)
+
+---
 #### Refine
 
 ##### Refine step 1 (optional)
@@ -100,18 +112,6 @@ Install [sambamba](https://lomereiter.github.io/sambamba/), [hisat2](https://git
 
 ##### Refine step 3 (optional)
 Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
-
----
-#### Fast refine
-
-Install [sambamba](https://lomereiter.github.io/sambamba/docs/sambamba-sort.html) AND
-[BEDtools](https://github.com/arq5x/bedtools2/releases/tag/v2.29.2)
-
-##### Fast refine step 1: Incorporate RNAseq data (optional)
-Install [hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-source)
-
-##### Fast refine step 2: Incorporate trancriptomic data (optional)
-Install [gmap](https://github.com/juliangehring/GMAP-GSNAP)
 
 ## Usage
 
@@ -164,7 +164,7 @@ Generate initial annotation models using the command:
 EukMetaSanity -f MAGs -c run-config.ini run
 ```
 
-Add the `-x <ext>` if your extension does not match the default list, or if other files are present in the directory
+Add the `-x <ext>` if your extension does not match the default list, or if other files are present in the directory.
 
 This will create a directory structure resembling:
 ```
@@ -173,11 +173,12 @@ out/
       ..
   |-- results/
       |-- run-paths_summary.tsv
-      |-- mag1/
+      |-- run/
+          |-- mag1/
+              ..
+          |-- mag2/
+              .. 
           ..
-      |-- mag2/
-          .. 
-      ..
 ```
 
 #### Fast refine
@@ -189,7 +190,26 @@ Generate additional models using the command:
 EukMetaSanity -f out/run-paths_summary.tsv -c fast_refine-config.ini fast_refine
 ```
 
-This will add a new .nr file to the existing directory of results
+This will update the directory structure:
+```
+out/
+  |-- wdir/
+      ..
+  |-- results/
+      |-- run-paths_summary.tsv
+      |-- fast_refine-paths_summary.tsv
+      |-- run/
+          |-- mag1/
+              ..
+          |-- mag2/
+              .. 
+          ..
+      |-- fast_refine/
+          |-- mag1/
+              ..
+          |-- mag2/
+              ..
+```
 
 ## Citations
 

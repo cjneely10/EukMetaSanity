@@ -266,7 +266,7 @@ class TaskList(ABC):
         _files_prefixes = _output[3]
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
-        _paths_output_file = open(os.path.join(_final_output_dir, "%s-paths_summary.tsv" % _name), "w")
+        _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s-paths_summary.tsv" % _name), "w")
         for _files, _file_prefix, _task in zip(_output_files_list, _files_prefixes, self.tasks):
             # Create subdirectory
             _sub_out = os.path.join(_final_output_dir, _file_prefix)
