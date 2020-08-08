@@ -181,7 +181,7 @@ out/
           ..
 ```
 
-#### Fast refine
+#### Fast refine (optional)
 Copy and edit the `fast_refine-config.ini` config file to fit your analysis needs.
 
 Generate additional models using the command:
@@ -205,6 +205,44 @@ out/
               .. 
           ..
       |-- fast_refine/
+          |-- mag1/
+              ..
+          |-- mag2/
+              ..
+```
+
+#### Report (optional)
+Copy and edit the `report-config.ini` config file to fit your analysis needs.
+
+Annotate gene models using the command:
+
+```
+EukMetaSanity -f out/{}-paths_summary.tsv -c report-config.ini report
+```
+
+Replacing `{}` with either `run` or `fast_refine` (if this step was completed).
+
+This will update the directory structure:
+```
+out/
+  |-- wdir/
+      ..
+  |-- results/
+      |-- report-paths_summary.tsv
+      |-- run-paths_summary.tsv
+      |-- fast_refine-paths_summary.tsv
+      |-- run/
+          |-- mag1/
+              ..
+          |-- mag2/
+              .. 
+          ..
+      |-- fast_refine/
+          |-- mag1/
+              ..
+          |-- mag2/
+              ..
+      |-- report/
           |-- mag1/
               ..
           |-- mag2/
