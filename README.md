@@ -69,7 +69,7 @@ Optionally download [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) 
 Choose from [Augustus](https://github.com/Gaius-Augustus/Augustus) or 
 [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi).
 
-*(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set prior to running)*
+*(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set and writable prior to running)*
 
 ##### Run step 4: Initial protein evidence
 Install [MetaEuk](https://github.com/soedinglab/metaeuk)

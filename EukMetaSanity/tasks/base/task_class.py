@@ -3,9 +3,9 @@ import logging
 from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
-from EukMetaSanity.tasks.utils.helpers import touch
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data
+from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.utils.path_manager import PathManager
 from EukMetaSanity.utils.config_manager import ConfigManager
 from plumbum.commands.processes import ProcessExecutionError
