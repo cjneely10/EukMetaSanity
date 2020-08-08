@@ -155,7 +155,6 @@ For a directory of MAGs:
 MAGs/
   |-- mag1.fna
   |-- mag2.fna
-  ...
 ```
 
 Generate initial annotation models using the command:
@@ -170,7 +169,7 @@ This will create a directory structure resembling:
 ```
 out/
   |-- wdir/
-      ..
+  |-- run-eukmetasanity.log
   |-- results/
       |-- run-paths_summary.tsv
       |-- run/
@@ -178,7 +177,6 @@ out/
               ..
           |-- mag2/
               .. 
-          ..
 ```
 
 #### Fast refine (optional)
@@ -194,21 +192,22 @@ This will update the directory structure:
 ```
 out/
   |-- wdir/
-      ..
+  |-- fast_refine-eukmetasanity.log
+  |-- run-eukmetasanity.log
   |-- results/
-      |-- run-paths_summary.tsv
       |-- fast_refine-paths_summary.tsv
+      |-- run-paths_summary.tsv
+      |-- fast_refine/
+          |-- mag1/
+              ..
+          |-- mag2/
+              ..
       |-- run/
           |-- mag1/
               ..
           |-- mag2/
               .. 
           ..
-      |-- fast_refine/
-          |-- mag1/
-              ..
-          |-- mag2/
-              ..
 ```
 
 #### Report (optional)
@@ -226,27 +225,29 @@ This will update the directory structure:
 ```
 out/
   |-- wdir/
-      ..
+  |-- report-eukmetasanity.log
+  |-- fast_refine-eukmetasanity.log
+  |-- run-eukmetasanity.log
   |-- results/
       |-- report-paths_summary.tsv
-      |-- run-paths_summary.tsv
       |-- fast_refine-paths_summary.tsv
+      |-- run-paths_summary.tsv
+      |-- report/
+          |-- mag1/
+              ..
+          |-- mag2/
+              ..
+      |-- fast_refine/
+          |-- mag1/
+              ..
+          |-- mag2/
+              ..
       |-- run/
           |-- mag1/
               ..
           |-- mag2/
               .. 
           ..
-      |-- fast_refine/
-          |-- mag1/
-              ..
-          |-- mag2/
-              ..
-      |-- report/
-          |-- mag1/
-              ..
-          |-- mag2/
-              ..
 ```
 
 ## Citations
