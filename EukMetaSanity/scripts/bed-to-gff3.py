@@ -11,20 +11,34 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 def get_gene(fp: TextIOWrapper):
     line = next(fp).rstrip("\r\n").split("\t")
-    while True:
-        exons = []
-        _id = line[3]
-        contig_id = line[0]
+    exons = []
+    _id = line[3]
+    contig_id = line[0]
+    exons.append((int(line[1]), int(line[2])))
+    for line in fp:
+        line = line.rstrip("\r\n").split("\t")
+        if line[3] != _id:
+            yield contig_id, _id, exons
+            exons = []
+            _id = line[3]
+            contig_id = line[0]
         exons.append((int(line[1]), int(line[2])))
-        while True:
-            try:
-                line = next(fp).rstrip("\r\n").split("\t")
-            except StopIteration:
-                break
-            if line[3] != _id:
-                break
-            exons.append((int(line[1]), int(line[2])))
-        yield contig_id, _id, exons
+    yield contig_id, _id, exons
+
+    # while True:
+    #     exons = []
+    #     _id = line[3]
+    #     contig_id = line[0]
+    #     exons.append((int(line[1]), int(line[2])))
+    #     while True:
+    #         try:
+    #             line = next(fp).rstrip("\r\n").split("\t")
+    #         except StopIteration:
+    #             break
+    #         if line[3] != _id:
+    #             break
+    #         exons.append((int(line[1]), int(line[2])))
+    #     yield contig_id, _id, exons
 
 
 def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
@@ -107,7 +121,7 @@ def find_orfs(record: SeqRecord):
             pro = Seq(nuc)[m.start():].translate(to_stop=True)
             if len(pro) > longest[0]:
                 longest = (len(pro), m.start(), str(pro))
-        if longest[0] >= 30:
+        if longest[0] > 0:
             return _dir
 
 
