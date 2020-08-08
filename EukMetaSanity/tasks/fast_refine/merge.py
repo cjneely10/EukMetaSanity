@@ -8,9 +8,15 @@ class MergeIter(TaskList):
     class Merge(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            _out = {
+                "nr_gff3": os.path.join(self.wdir, self.record_id) + ".nr.gff3",
+                "mask": self.input[0],
+                "prot": os.path.join(self.wdir, self.record_id) + ".faa",
+                "cds": os.path.join(self.wdir, self.record_id) + ".cds.fna",
+            }
             self.output = [
-                *self.output,
-                os.path.join(self.wdir, self.record_id) + ".nr.gff3"
+                _out,  # Dictionary for accessing to write final summary
+                *list(_out.values()),  # Regular list of values for final path checking
             ]
         
         def run(self):
