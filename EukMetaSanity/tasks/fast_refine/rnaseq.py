@@ -1,4 +1,5 @@
 import os
+from typing import List, Optional, Tuple
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 
@@ -22,7 +23,7 @@ class RnaSeqIter(TaskList):
             # Get pairs to align
             read_pairs = self.get_rna_read_pairs()
             if read_pairs is None:
-                self.output = []
+                self.output = [*self.input]
                 return
             # Generate genome index
             genome_prefix = os.path.join(self.wdir, prefix(self.input[0]) + "_db")
@@ -56,14 +57,14 @@ class RnaSeqIter(TaskList):
                 out,  # List of data
             ]
 
-        def get_rna_read_pairs(self) -> [(str, str)]:
+        def get_rna_read_pairs(self) -> Optional[List[Tuple[str, str]]]:
             if not os.path.exists(self.rnaseq):
                 return
             fp = open(self.rnaseq, "r")
             for line in fp:
                 if self.record_id in line:
-                    pairs_string = line.rstrip("\r\n").split("\t")[1].split(";")
-                    return [(p[0], p[1]) for pair in pairs_string for p in pair.split(",")]
+                    pairs_string = [_l for _l in line.rstrip("\r\n").split("\t")[1].split(";") if _l != ""]
+                    return [(p[0], p[1]) for pair in pairs_string for p in pair.split(",") if p != ""]
 
         @staticmethod
         def sambamba(task_object: Task, out_prefix: str):
