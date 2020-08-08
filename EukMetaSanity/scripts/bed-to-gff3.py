@@ -4,12 +4,11 @@ import re
 from Bio import SeqIO
 from Bio.Seq import Seq
 from io import StringIO
-from io import TextIOWrapper
 from Bio.SeqRecord import SeqRecord
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 
-def get_gene(fp: TextIOWrapper):
+def get_gene(fp):
     line = next(fp).rstrip("\r\n").split("\t")
     exons = []
     _id = line[3]

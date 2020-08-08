@@ -22,7 +22,6 @@ class BrakerIter(TaskList):
                 self.program[
                     "--species=%s" % os.path.join(self.wdir, self.record_id),
                     "--genome=%s" % self.input[1],  # Masked genome
-                    "--bam=%s" % ",".join()
                 ]
             )
 
