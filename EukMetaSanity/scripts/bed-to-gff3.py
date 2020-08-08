@@ -39,7 +39,7 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
         for coord in coords:
             seq.write(str(fasta_dict[contig_id].seq[coord[0]: coord[1]]))
         # Find direction
-        _dir = find_orfs(SeqRecord(
+        _dir, _offset = find_orfs(SeqRecord(
             id="1",
             seq=Seq(seq.getvalue()),
         ))
@@ -72,6 +72,7 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
         i = 1
         for coord in coords:
             # Write exon info
+            _feat_id = mrna_id + str(i)
             out_fp.write("\t".join((
                 contig_id,
                 source,
@@ -81,7 +82,7 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
                 ".",
                 _dir,
                 ".",
-                "ID=%s-exon;Name=%s-exon;Parent=%s\n" % (mrna_id + str(i), mrna_id + str(i), mrna_id),
+                "ID=%s-exon;Name=%s-exon;Parent=%s\n" % (_feat_id, _feat_id, mrna_id),
             )))
             # Write CDS info
             out_fp.write("\t".join((
@@ -92,8 +93,8 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
                 str(coord[1]),
                 ".",
                 _dir,
-                "0",
-                "ID=%s-CDS;Name=%s-CDS;Parent=%s\n" % (mrna_id + str(i), mrna_id + str(i), mrna_id),
+                str(_offset % 3),
+                "ID=%s-CDS;Name=%s-CDS;Parent=%s\n" % (_feat_id, _feat_id, mrna_id),
             )))
             i += 1
     out_fp.close()
@@ -107,7 +108,8 @@ def find_orfs(record: SeqRecord):
             if len(pro) > longest[0]:
                 longest = (len(pro), m.start(), str(pro))
         if longest[0] > 0:
-            return _dir
+            return _dir, longest[1]
+    return None, None
 
 
 if __name__ == "__main__":
