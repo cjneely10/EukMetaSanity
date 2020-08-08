@@ -12,19 +12,19 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 def get_gene(fp: TextIOWrapper):
     line = next(fp).rstrip("\r\n").split("\t")
     while True:
-        try:
-            exons = []
-            _id = line[3]
-            contig_id = line[0]
-            exons.append((int(line[1]), int(line[2])))
-            while True:
+        exons = []
+        _id = line[3]
+        contig_id = line[0]
+        exons.append((int(line[1]), int(line[2])))
+        while True:
+            try:
                 line = next(fp).rstrip("\r\n").split("\t")
-                if line[3] != _id:
-                    break
-                exons.append((int(line[1]), int(line[2])))
-            yield contig_id, _id, exons
-        except StopIteration:
-            return
+            except StopIteration:
+                break
+            if line[3] != _id:
+                break
+            exons.append((int(line[1]), int(line[2])))
+        yield contig_id, _id, exons
 
 
 def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
@@ -32,8 +32,8 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     out_fp = open(out_file, "w")
     fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
     for contig_id, _gene_id, coords in get_gene(fp):
-        _min = coords[0][0]
-        _max = coords[-1][1]
+        _min = str(coords[0][0] + 1)
+        _max = str(coords[-1][1])
         gene_id = "gene" + _gene_id
         # Build CDS
         seq = StringIO()
@@ -42,7 +42,7 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
         # Find direction
         _dir = find_orfs(SeqRecord(
             id="1",
-            seq=seq.getvalue(),
+            seq=Seq(seq.getvalue()),
         ))
         if _dir is None:
             continue
@@ -51,24 +51,24 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
             contig_id,
             source,
             "gene",
-            _min + 1,
+            _min,
             _max,
             ".",
             _dir,
             ".",
-            "ID=%s;Name=%s\n" % (gene_id, gene_id)
+            "ID=%s;Name=%s\n" % (gene_id, gene_id),
         )))
         mrna_id = gene_id + "-mRNA"
         out_fp.write("\t".join((
             contig_id,
             source,
             "mRNA",
-            _min + 1,
+            _min,
             _max,
             ".",
             _dir,
             ".",
-            "ID=%s;Name=%s;Parent=%s\n" % (mrna_id, mrna_id, gene_id)
+            "ID=%s;Name=%s;Parent=%s\n" % (mrna_id, mrna_id, gene_id),
         )))
         i = 1
         for coord in coords:
@@ -77,24 +77,24 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
                 contig_id,
                 source,
                 "exon",
-                coord[0] + 1,
-                coord[1],
+                str(coord[0] + 1),
+                str(coord[1]),
                 ".",
                 _dir,
                 ".",
-                "ID=%s-exon;Name=%s-exon;Parent=%s\n" % (mrna_id + str(i), mrna_id + str(i), mrna_id)
+                "ID=%s-exon;Name=%s-exon;Parent=%s\n" % (mrna_id + str(i), mrna_id + str(i), mrna_id),
             )))
             # Write CDS info
             out_fp.write("\t".join((
                 contig_id,
                 source,
                 "CDS",
-                coord[0] + 1,
-                coord[1],
+                str(coord[0] + 1),
+                str(coord[1]),
                 ".",
                 _dir,
                 "0",
-                "ID=%s-CDS;Name=%s-CDS;Parent=%s\n" % (mrna_id + str(i), mrna_id + str(i), mrna_id)
+                "ID=%s-CDS;Name=%s-CDS;Parent=%s\n" % (mrna_id + str(i), mrna_id + str(i), mrna_id),
             )))
             i += 1
     out_fp.close()
@@ -108,7 +108,7 @@ def find_orfs(record: SeqRecord):
             if len(pro) > longest[0]:
                 longest = (len(pro), m.start(), str(pro))
         if longest[0] >= 30:
-            yield _dir
+            return _dir
 
 
 if __name__ == "__main__":
