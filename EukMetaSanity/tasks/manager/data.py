@@ -113,6 +113,14 @@ class Data:
     def braker(self):
         pass
 
+    @added
+    def rnaseq(self):
+        pass
+
+    @added
+    def transcriptomes(self):
+        pass
+
 
 if __name__ == "__main__":
     pass

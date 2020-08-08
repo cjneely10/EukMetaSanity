@@ -15,6 +15,8 @@ from EukMetaSanity.tasks.refine.maker import MakerIter
 from EukMetaSanity.tasks.refine.assemble import AssembleIter
 from EukMetaSanity.tasks.refine.align import AlignIter
 from EukMetaSanity.tasks.refine.braker import BrakerIter
+# Fast_refine imports
+from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
 
 """
 Class handles ordering of tasks to complete
@@ -45,10 +47,14 @@ class TaskManager:
                 EggNOGMapper,
                 SummarizeIter,
             ],
+            "fast_refine": [
+                RnaSeqIter,
+            ],
         }
         self._input_type = {
             "refine": ["abinitio", "mask", "nr_gff3", "mask_gff3", "fna", "metaeuk"],
-            "report": ["prot"]
+            "report": ["prot"],
+            "fast_refine": ["mask", "nr_gff3"],
         }
 
     @property
