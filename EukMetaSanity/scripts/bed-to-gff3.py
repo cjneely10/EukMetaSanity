@@ -25,21 +25,6 @@ def get_gene(fp: TextIOWrapper):
         exons.append((int(line[1]), int(line[2])))
     yield contig_id, _id, exons
 
-    # while True:
-    #     exons = []
-    #     _id = line[3]
-    #     contig_id = line[0]
-    #     exons.append((int(line[1]), int(line[2])))
-    #     while True:
-    #         try:
-    #             line = next(fp).rstrip("\r\n").split("\t")
-    #         except StopIteration:
-    #             break
-    #         if line[3] != _id:
-    #             break
-    #         exons.append((int(line[1]), int(line[2])))
-    #     yield contig_id, _id, exons
-
 
 def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     fp = open(bed_file, "r")
