@@ -13,24 +13,26 @@ def get_gene(fp: TextIOWrapper):
     line = next(fp).rstrip("\r\n").split("\t")
     exons = []
     _id = line[3]
+    _strand = line[5]
     contig_id = line[0]
     exons.append((int(line[1]), int(line[2])))
     for line in fp:
         line = line.rstrip("\r\n").split("\t")
         if line[3] != _id:
-            yield contig_id, _id, exons
+            yield contig_id, _id, exons, _strand
             exons = []
             _id = line[3]
+            _strand = line[5]
             contig_id = line[0]
         exons.append((int(line[1]), int(line[2])))
-    yield contig_id, _id, exons
+    yield contig_id, _id, exons, _strand
 
 
 def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     fp = open(bed_file, "r")
     out_fp = open(out_file, "w")
     fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
-    for contig_id, _gene_id, coords in get_gene(fp):
+    for contig_id, _gene_id, coords, _dir in get_gene(fp):
         _min = str(coords[0][0] + 1)
         _max = str(coords[-1][1])
         gene_id = "gene" + _gene_id
@@ -39,12 +41,13 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
         for coord in coords:
             seq.write(str(fasta_dict[contig_id].seq[coord[0]: coord[1]]))
         # Find direction
-        _dir, _offset = find_orfs(SeqRecord(
+        _offset = find_orfs(SeqRecord(
             id="1",
             seq=Seq(seq.getvalue()),
         ))
-        if _dir is None:
-            continue
+        if _offset is None:
+            _offset = 0
+        _offset = str(_offset % 3)
         # Write gene/mRNA info
         out_fp.write("\t".join((
             contig_id,
@@ -93,7 +96,7 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
                 str(coord[1]),
                 ".",
                 _dir,
-                str(_offset % 3),
+                _offset,
                 "ID=%s-CDS;Name=%s-CDS;Parent=%s\n" % (_feat_id, _feat_id, mrna_id),
             )))
             i += 1
@@ -108,8 +111,8 @@ def find_orfs(record: SeqRecord):
             if len(pro) > longest[0]:
                 longest = (len(pro), m.start(), str(pro))
         if longest[0] > 0:
-            return _dir, longest[1]
-    return None, None
+            return longest[1]
+    return None
 
 
 if __name__ == "__main__":

@@ -38,13 +38,14 @@ class MergeIter(TaskList):
                 self.log_and_run(
                     self.program_bedtools[
                         "merge",
-                        "-i", out_prefix + ".bed"
+                        "-i", out_prefix + ".bed",
+                        "-s", "-c", "6", "-o", "distinct"
                     ] > out_prefix + ".merged.bed"
                 )
                 # Cluster to putative CDS regions
                 self.log_and_run(
                     self.program_bedtools[
-                        "cluster",
+                        "cluster", "-s",
                         "-i", out_prefix + ".merged.bed",
                         (*self.added_flags),
                     ] > out_prefix + ".clustered.bed"

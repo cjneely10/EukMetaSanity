@@ -75,8 +75,8 @@ class TaxonomyIter(TaskList):
                     if _score >= cutoff:
                         assignment = _assignment
                         _id = _tax_id
-                    if _level == "no rank":
-                        continue
+                    # if _level == "no rank":
+                    #     continue
                     if _level == deepest_level or _score < cutoff:
                         return assignment.lower(), _id
             except:
