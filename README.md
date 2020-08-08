@@ -42,6 +42,7 @@ Add EukMetaSanity to your PATH and PYTHONPATH variables
 ```
 export PATH=/path/to/EukMetaSanity/bin/:$PATH
 export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
+ln -s /path/to/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
 ### Installing dependencies
@@ -50,7 +51,12 @@ export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 
 When selecting dependencies to download, please follow the instructions below:
 
+---
+#### Run
+
 Install [gffread](https://github.com/gpertea/gffread) AND [gffcompare](https://github.com/gpertea/gffcompare)
+
+`awk`, `sed`, `grep`, `cp`, `rm`, should be on your PATH
 
 ##### Run step 1: Taxonomy identification
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2)
@@ -69,6 +75,7 @@ Choose from [Augustus](https://github.com/Gaius-Augustus/Augustus) or
 Install [MetaEuk](https://github.com/soedinglab/metaeuk)
 
 ---
+#### Report
 
 ##### Report step 1/2 (optional)
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2), and install any databases you wish to incorporate by following
@@ -81,17 +88,30 @@ Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required da
 Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
 
 ---
+#### Refine
 
 ##### Refine step 1 (optional)
-Install [MAKER3](http://www.yandell-lab.org/software/maker.html) and 
+Install [MAKER3](http://www.yandell-lab.org/software/maker.html) AND 
 [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
 
 ##### Refine step 2 (optional)
-Install [sambamba](https://lomereiter.github.io/sambamba/), [minimap2](https://github.com/lh3/minimap2), and
+Install [sambamba](https://lomereiter.github.io/sambamba/), [hisat2](https://github.com/lh3/minimap2), AND
 [BRAKER2](https://github.com/Gaius-Augustus/BRAKER)
 
 ##### Refine step 3 (optional)
 Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
+
+---
+#### Fast refine
+
+Install [sambamba](https://lomereiter.github.io/sambamba/docs/sambamba-sort.html) AND
+[BEDtools](https://github.com/arq5x/bedtools2/releases/tag/v2.29.2)
+
+##### Fast refine step 1: Incorporate RNAseq data (optional)
+Install [hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-source)
+
+##### Fast refine step 2: Incorporate trancriptomic data (optional)
+Install [gmap](https://github.com/juliangehring/GMAP-GSNAP)
 
 ## Usage
 
@@ -109,7 +129,7 @@ usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
 Run EukMetaSanity pipeline
 
 positional arguments:
-  command               Select from run/report/refine
+  command               Select from run/report/refine/fast_refine
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -124,12 +144,57 @@ optional arguments:
   -d, --debug           Developer mode: display all commands on single thread, default False
 ```
 
+### Example usage
+
+
+#### Run
+Copy and edit the `run-config.ini` config file to fit your analysis needs.
+
+For a directory of MAGs:
+```
+MAGs/
+  |-- mag1.fna
+  |-- mag2.fna
+  ...
+```
+
+Generate initial annotation models using the command:
+
+```
+EukMetaSanity -f MAGs -c run-config.ini run
+```
+
+Add the `-x <ext>` if your extension does not match the default list, or if other files are present in the directory
+
+This will create a directory structure resembling:
+```
+out/
+  |-- wdir/
+      ..
+  |-- results/
+      |-- run-paths_summary.tsv
+      |-- mag1/
+          ..
+      |-- mag2/
+          .. 
+      ..
+```
+
+#### Fast refine
+Copy and edit the `fast_refine-config.ini` config file to fit your analysis needs.
+
+Generate additional models using the command:
+
+```
+EukMetaSanity -f out/run-paths_summary.tsv -c fast_refine-config.ini fast_refine
+```
+
+This will add a new .nr file to the existing directory of results
+
 ## Citations
 
 (All programs used in process)
 (Python documentation + module documentation)
 https://www.biostars.org/p/261203/
-
-https://github.com/chapmanb/bcbb/blob/master/gff/Scripts/gff/gff_to_genbank.py
 
 
