@@ -17,6 +17,8 @@ from EukMetaSanity.tasks.refine.align import AlignIter
 from EukMetaSanity.tasks.refine.braker import BrakerIter
 # Fast_refine imports
 from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
+from EukMetaSanity.tasks.fast_refine.transcriptomes import TranscriptomesIter
+from EukMetaSanity.tasks.fast_refine.merge import MergeIter
 
 """
 Class handles ordering of tasks to complete
@@ -49,6 +51,9 @@ class TaskManager:
             ],
             "fast_refine": [
                 RnaSeqIter,
+                TranscriptomesIter,
+                MergeIter,
+                SummarizeIter,
             ],
         }
         self._input_type = {

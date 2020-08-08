@@ -121,6 +121,10 @@ class Data:
     def transcriptomes(self):
         pass
 
+    @added
+    def merge(self):
+        pass
+
 
 if __name__ == "__main__":
     pass

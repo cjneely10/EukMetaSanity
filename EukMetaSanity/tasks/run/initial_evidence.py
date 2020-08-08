@@ -1,4 +1,5 @@
 import os
+from typing import List
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -70,24 +71,33 @@ class EvidenceIter(TaskList):
                     self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3"),
                 ]
             )
+            # Merge final results
+            EvidenceIter.Evidence.merge(
+                self, [self.input[0], os.path.join(self.wdir, "metaeuk.gff3")],
+                self.input[2],
+                os.path.join(self.wdir, self.record_id)
+            )
+            
+        @staticmethod
+        def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str):
             # Merge to non-redundant set
-            self.log_and_run(
-                self.program_gffcompare[
-                    self.input[0], os.path.join(self.wdir, "metaeuk.gff3"),
-                    "-D", "-S", "-C", "-o", os.path.join(self.wdir, self.record_id)
+            task_object.log_and_run(
+                task_object.program_gffcompare[
+                    (*input_list),
+                    "-D", "-S", "-C", "-o", out_prefix,
                 ]
             )
             # Convert to gff3 file
-            self.log_and_run(
-                self.program_gffread[
-                    os.path.join(self.wdir, self.record_id + ".combined.gtf"), "-G",
-                ] > os.path.join(self.wdir, self.record_id + ".gff3")
+            task_object.log_and_run(
+                task_object.program_gffread[
+                    out_prefix + ".combined.gtf", "-G",
+                ] > out_prefix + ".gff3"
             )
             # Replace transcripts with gene identifier and write cds/aa sequences
-            self.log_and_run(
-                self.local["amend_gff3.py"][
-                    "-g", os.path.join(self.wdir, self.record_id + ".gff3"),
-                    "-f", self.input[2],
+            task_object.log_and_run(
+                task_object.local["amend_gff3.py"][
+                    "-g", out_prefix + ".gff3",
+                    "-f", fasta_file,
                 ]
             )
 

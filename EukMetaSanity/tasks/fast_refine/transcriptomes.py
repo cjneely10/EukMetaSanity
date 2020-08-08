@@ -48,9 +48,9 @@ class TranscriptomesIter(TaskList):
                 # Store path to file in new output
                 out.append(out_prefix + ".sorted.bam")
             self.output = [
-                *self.output,  # Forward original data
+                *self.output[:-1],  # Forward original data, less list of mapped reads
                 *out,  # Paths
-                out,  # List of data
+                [*out, *self.output[-1]],  # List of data combined with final reads
             ]
 
         def get_transcripts(self) -> Optional[List[str]]:
