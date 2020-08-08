@@ -1,6 +1,5 @@
 import os
 from typing import List, Optional
-
 from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
