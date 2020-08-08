@@ -115,7 +115,7 @@ Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
 
 ## Usage
 
-After running `download-data.py`, config files for Run/Refine/Report will be available in the database
+After running `download-data.py`, config files will be available in the database
 directory. These can be edited to fit your needs.
 
 If the `download-data.py` script was not used, then the default config files will be available in the 
