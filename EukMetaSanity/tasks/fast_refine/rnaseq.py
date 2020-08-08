@@ -46,6 +46,7 @@ class RnaSeqIter(TaskList):
                         (*self.added_flags),
                     ]
                 )
+                # Run sambamba
                 RnaSeqIter.RnaSeq.sambamba(self, out_prefix)
                 # Store path to file in new output
                 out.append(out_prefix + ".sorted.bam")
