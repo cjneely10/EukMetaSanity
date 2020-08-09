@@ -34,13 +34,17 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     for contig_id, _gene_id, coords, _dir in get_gene(fp):
         _min = str(coords[0][0] + 1)
         _max = str(coords[-1][1])
+        if _dir == "-":
+            _seq = fasta_dict[contig_id].seq.reverse_translate()
+        else:
+            _seq = fasta_dict[contig_id].seq
         gene_id = "gene" + _gene_id
         # Build CDS
         seq = StringIO()
         for coord in coords:
-            seq.write(str(fasta_dict[contig_id].seq[coord[0]: coord[1]]))
+            seq.write(str(_seq[coord[0]: coord[1]]))
         # Find direction
-        _offset = find_orfs(SeqRecord(
+        _offset = find_offset(SeqRecord(
             id="1",
             seq=Seq(seq.getvalue()),
         ))
@@ -102,15 +106,15 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     out_fp.close()
 
 
-def find_orfs(record: SeqRecord):
+def find_offset(record: SeqRecord):
     longest = (0,)
-    for _dir, nuc in (("+", str(record.seq)), ("-", str(record.reverse_complement().seq))):
-        for m in re.finditer("ATG", nuc):
-            pro = Seq(nuc)[m.start():].translate(to_stop=True)
-            if len(pro) > longest[0]:
-                longest = (len(pro), m.start(), str(pro))
-        if longest[0] > 0:
-            return longest[1]
+    nuc = str(record.seq)
+    for m in re.finditer("ATG", nuc):
+        pro = Seq(nuc)[m.start():].translate(to_stop=True)
+        if len(pro) > longest[0]:
+            longest = (len(pro), m.start(), str(pro))
+    if longest[0] > 0:
+        return longest[1]
     return None
 
 
