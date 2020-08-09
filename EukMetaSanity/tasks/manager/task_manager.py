@@ -10,11 +10,6 @@ from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.base.summarize import SummarizeIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
-# Refine imports
-from EukMetaSanity.tasks.refine.maker import MakerIter
-from EukMetaSanity.tasks.refine.assemble import AssembleIter
-from EukMetaSanity.tasks.refine.align import AlignIter
-from EukMetaSanity.tasks.refine.braker import BrakerIter
 # Fast_refine imports
 from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
 from EukMetaSanity.tasks.fast_refine.transcriptomes import TranscriptomesIter
@@ -36,13 +31,6 @@ class TaskManager:
                 EvidenceIter,
                 SummarizeIter,
             ],
-            "refine": [
-                AssembleIter,
-                MakerIter,
-                AlignIter,
-                BrakerIter,
-                SummarizeIter,
-            ],
             "report": [
                 KoFamScanIter,
                 MMseqsIter,
@@ -57,7 +45,6 @@ class TaskManager:
             ],
         }
         self._input_type = {
-            "refine": ["abinitio", "mask", "nr_gff3", "mask_gff3", "fna", "metaeuk"],
             "report": ["prot"],
             "fast_refine": ["fna", "nr_gff3"],
         }

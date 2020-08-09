@@ -99,20 +99,6 @@ Install [hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-
 ##### Fast refine step 2: Incorporate trancriptomic data (optional)
 Install [gmap](http://research-pub.gene.com/gmap/)
 
----
-#### Refine
-
-##### Refine step 1 (optional)
-Install [MAKER3](http://www.yandell-lab.org/software/maker.html) AND 
-[Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki)
-
-##### Refine step 2 (optional)
-Install [sambamba](https://lomereiter.github.io/sambamba/), [hisat2](https://github.com/lh3/minimap2), AND
-[BRAKER2](https://github.com/Gaius-Augustus/BRAKER)
-
-##### Refine step 3 (optional)
-Install [GeMoMa](http://www.jstacs.de/index.php/GeMoMa)
-
 ## Usage
 
 After running `download-data.py`, config files will be available in the database

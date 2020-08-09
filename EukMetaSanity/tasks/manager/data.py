@@ -98,22 +98,6 @@ class Data:
         pass
 
     @added
-    def assemble(self):
-        pass
-
-    @added
-    def align(self):
-        pass
-
-    @added
-    def maker(self):
-        pass
-
-    @added
-    def braker(self):
-        pass
-
-    @added
     def rnaseq(self):
         pass
 
