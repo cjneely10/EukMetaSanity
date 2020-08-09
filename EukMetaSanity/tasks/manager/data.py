@@ -1,3 +1,4 @@
+import os
 from collections import namedtuple
 from typing import Dict, Set, Callable, Tuple
 from EukMetaSanity.utils.config_manager import ConfigManager
