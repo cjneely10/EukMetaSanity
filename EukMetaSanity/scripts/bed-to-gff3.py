@@ -48,8 +48,6 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
             id="1",
             seq=Seq(seq.getvalue()),
         ))
-        if _offset is None:
-            _offset = 0
         _offset = str(_offset % 3)
         # Write gene/mRNA info
         out_fp.write("\t".join((
@@ -106,7 +104,7 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     out_fp.close()
 
 
-def find_offset(record: SeqRecord):
+def find_offset(record: SeqRecord) -> int:
     longest = (0,)
     nuc = str(record.seq)
     for m in re.finditer("ATG", nuc):
@@ -115,7 +113,7 @@ def find_offset(record: SeqRecord):
             longest = (len(pro), m.start(), str(pro))
     if longest[0] > 0:
         return longest[1]
-    return None
+    return 0
 
 
 if __name__ == "__main__":
