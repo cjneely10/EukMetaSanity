@@ -28,7 +28,7 @@ class KoFamScanIter(TaskList):
                     (*self.added_flags),
                     "-o", os.path.join(self.wdir, self.record_id + ".kegg"),
                     "--tmp-dir", os.path.join(self.wdir, "tmp"),
-                    self.input[-1],
+                    self.input[0],
                 ]
             )
 

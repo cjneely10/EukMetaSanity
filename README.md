@@ -42,6 +42,11 @@ Add EukMetaSanity to your PATH and PYTHONPATH variables
 ```
 export PATH=/path/to/EukMetaSanity/bin/:$PATH
 export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
+```
+
+Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable
+
+```
 ln -s /path/to/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
@@ -54,7 +59,7 @@ When selecting dependencies to download, please follow the instructions below:
 
 Install [gffread](https://github.com/gpertea/gffread) AND [gffcompare](https://github.com/gpertea/gffcompare)
 
-`awk`, `sed`, `grep`, `cp`, `rm`, should be on your PATH
+`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat` should be on your PATH
 
 ##### Run step 1: Taxonomy identification
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2)
@@ -102,7 +107,7 @@ Install [gmap](http://research-pub.gene.com/gmap/)
 After running `download-data.py`, config files will be available in the database
 directory. These can be edited to fit your needs.
 
-If the `download-data.py` script was not used, then the default config files will be available in the 
+If the `download-data.py` script was not used, then the default config files will be available in this repo's 
 `config` directory.
 
 ```
@@ -141,13 +146,13 @@ MAGs/
   |-- mag2.fna
 ```
 
-Generate initial annotation models using the command:
+Generate initial ab initio and protein-based annotation models using the command:
 
 ```
 EukMetaSanity -f MAGs -c run-config.ini run
 ```
 
-Add the `-x <ext>` if your extension does not match the default list, or if other files are present in the directory.
+Add `-x <ext[,ext]>` if your extension does not match the default list, or if other files are present in the directory.
 
 This will create a directory structure resembling:
 ```
@@ -166,7 +171,7 @@ out/
 #### Fast refine (optional)
 Copy and edit the `fast_refine-config.ini` config file to fit your analysis needs.
 
-Generate additional models using the command:
+Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 
 ```
 EukMetaSanity -f out/run-paths_summary.tsv -c fast_refine-config.ini fast_refine

@@ -45,7 +45,7 @@ class TaskManager:
             ],
         }
         self._input_type = {
-            "report": ["prot"],
+            "report": ["prot", "nr_gff3"],
             "fast_refine": ["fna", "nr_gff3"],
         }
 
