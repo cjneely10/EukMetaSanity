@@ -9,7 +9,15 @@ class TranscriptomesIter(TaskList):
     class Transcriptomes(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.output = [*self.input]
+            out = []
+            transcripts = self.get_transcripts()
+            for transcript in transcripts:
+                out.append(os.path.join(self.wdir, prefix(transcript)) + ".sorted.bam")
+            self.output = [
+                *self.input,  # Forward original data
+                *out,  # Paths
+                out,  # List of data
+            ]
         
         def run(self):
             super().run()
@@ -18,47 +26,38 @@ class TranscriptomesIter(TaskList):
         def run_1(self):
             # Get transcripts
             transcripts = self.get_transcripts()
-            if transcripts is None:
-                self.output = [*self.input]
-                return
-            # Generate genome index
-            genome_idx = prefix(self.input[0]) + "_db"
-            _genome_dir = os.path.dirname(self.input[0])
-            _genome_basename = os.path.basename(self.input[0])
-            self.log_and_run(
-                self.program_gmapbuild[
-                    "-d", genome_idx,
-                    "-D", _genome_dir, _genome_basename
-                ]
-            )
-            out = []
-            for transcript in transcripts:
-                out_prefix = os.path.join(self.wdir, prefix(transcript))
-                # Align
+            if len(transcripts) > 0:
+                # Generate genome index
+                genome_idx = prefix(self.input[0]) + "_db"
+                _genome_dir = os.path.dirname(self.input[0])
+                _genome_basename = os.path.basename(self.input[0])
                 self.log_and_run(
-                    self.program_gmap[
-                        "-D", _genome_dir, "-d", genome_idx,
-                        "-t", self.threads,
-                        "-f", "samse", transcript
-                    ] > out_prefix + ".sam"
+                    self.program_gmapbuild[
+                        "-d", genome_idx,
+                        "-D", _genome_dir, _genome_basename
+                    ]
                 )
-                # Run sambamba
-                RnaSeqIter.RnaSeq.sambamba(self, out_prefix)
-                # Store path to file in new output
-                out.append(out_prefix + ".sorted.bam")
-            self.output = [
-                *self.output[:-1],  # Forward original data, less list of mapped reads
-                *out,  # Paths
-                [*out, *self.output[-1]],  # List of data combined with final reads
-            ]
+                for transcript in transcripts:
+                    out_prefix = os.path.join(self.wdir, prefix(transcript))
+                    # Align
+                    self.log_and_run(
+                        self.program_gmap[
+                            "-D", _genome_dir, "-d", genome_idx,
+                            "-t", self.threads,
+                            "-f", "samse", transcript
+                        ] > out_prefix + ".sam"
+                    )
+                    # Run sambamba
+                    RnaSeqIter.RnaSeq.sambamba(self, out_prefix)
 
         def get_transcripts(self) -> Optional[List[str]]:
             if not os.path.exists(self.transcriptomes):
-                return
+                return []
             fp = open(self.transcriptomes, "r")
             for line in fp:
                 if self.record_id in line:
                     return [p for p in line.rstrip("\r\n").split("\t")[1].split(";") if p != ""]
+            return []
             
     def __init__(self, *args, **kwargs):
         super().__init__(TranscriptomesIter.Transcriptomes, "transcriptomes", *args, **kwargs)

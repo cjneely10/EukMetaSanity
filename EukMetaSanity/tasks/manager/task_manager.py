@@ -59,7 +59,7 @@ class TaskManager:
         self._input_type = {
             "refine": ["abinitio", "mask", "nr_gff3", "mask_gff3", "fna", "metaeuk"],
             "report": ["prot"],
-            "fast_refine": ["mask", "nr_gff3"],
+            "fast_refine": ["fna", "nr_gff3"],
         }
 
     @property
