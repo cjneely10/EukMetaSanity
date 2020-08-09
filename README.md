@@ -9,7 +9,7 @@ experience can easily extend the **EukMetaSanity** code base to add to or create
 This software suite is broken up into several sub-programs
 
 ### Run
-Identify putative taxonomy using the [OrthoDB](https://www.orthodb.org/?page=filelist) and annotate repeated regions of
+Identify putative taxonomy using the OrthoDB and annotate repeated regions of
 the genome.
 
 Generate *ab initio* and protein-driven structural predictions of coding regions of the genome.
