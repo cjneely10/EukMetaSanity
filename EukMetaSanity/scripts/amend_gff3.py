@@ -128,7 +128,7 @@ def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
         pro = Seq(nuc)[m.start():].translate(to_stop=True)
         if len(pro) > longest[0]:
             longest = (len(pro), m.start(), str(pro))
-    if longest[0] >= 0:
+    if longest[0] > 0:
         return SeqRecord(
             seq=Seq(str(longest[2]) + "*"),
             id=record.id,

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional, Tuple
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
@@ -56,13 +57,14 @@ class RnaSeqIter(TaskList):
                     RnaSeqIter.RnaSeq.sambamba(self, out_prefix)
 
         def get_rna_read_pairs(self) -> Optional[List[Tuple[str, str]]]:
-            if not os.path.exists(self.rnaseq):
+            _path = str(Path(self.rnaseq).resolve())
+            if not os.path.exists(_path):
                 return []
-            fp = open(self.rnaseq, "r")
+            fp = open(_path, "r")
             for line in fp:
                 if line.startswith(self.record_id):
-                    pairs_string = [_l for _l in line.rstrip("\r\n").split("\t")[1].split(";") if _l != ""]
-                    return [(p[0], p[1]) for pair in pairs_string for p in pair.split(",") if p != ""]
+                    pairs_string = line.rstrip("\r\n").split("\t")[1].split(";")
+                    return [tuple(pair.split(",")) for pair in pairs_string]
             return []
 
         @staticmethod

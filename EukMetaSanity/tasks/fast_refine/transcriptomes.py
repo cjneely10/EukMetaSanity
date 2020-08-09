@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional
 from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
 from EukMetaSanity.tasks.utils.helpers import prefix
@@ -51,12 +52,13 @@ class TranscriptomesIter(TaskList):
                     RnaSeqIter.RnaSeq.sambamba(self, out_prefix)
 
         def get_transcripts(self) -> Optional[List[str]]:
-            if not os.path.exists(self.transcriptomes):
+            _path = str(Path(self.transcriptomes).resolve())
+            if not os.path.exists(_path):
                 return []
-            fp = open(self.transcriptomes, "r")
+            fp = open(_path, "r")
             for line in fp:
                 if self.record_id in line:
-                    return [p for p in line.rstrip("\r\n").split("\t")[1].split(";") if p != ""]
+                    return line.rstrip("\r\n").split("\t")[1].split(",")
             return []
             
     def __init__(self, *args, **kwargs):
