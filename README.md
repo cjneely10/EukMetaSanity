@@ -110,8 +110,11 @@ the [github page](https://github.com/soedinglab/mmseqs2/wiki#downloading-databas
 ##### Report step 3 (optional)
 Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required databases
 
-##### Report step 5 (optional)
+##### Report step 4 (optional)
 Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
+
+##### Report step 5 (optional)
+Install [Rfam/Infernal](https://docs.rfam.org/en/latest/genome-annotation.html) and its required databases
 
 ---
 #### Fast refine
