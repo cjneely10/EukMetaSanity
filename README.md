@@ -107,6 +107,8 @@ Install [MetaEuk](https://github.com/soedinglab/metaeuk)
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2), and install any databases you wish to incorporate by following
 the [github page](https://github.com/soedinglab/mmseqs2/wiki#downloading-databases)
 
+Generate indices and/or linear search indices for these databases to speed up search times
+
 ##### Report step 3 (optional)
 Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required databases
 
