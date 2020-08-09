@@ -39,7 +39,14 @@ class MergeIter(TaskList):
                     self.program_bedtools[
                         "merge",
                         "-i", out_prefix + ".bed",
-                        "-s", "-c", "6", "-o", "distinct"
+                        "-s", "-c", "6", "-o", "distinct,count"
+                    ] > out_prefix + ".tmp.merged.bed"
+                )
+                # Remove regions that do not have enough coverage
+                self.log_and_run(
+                    self.local["awk"][
+                        '$5 > %s' % self.min_depth,
+                        out_prefix + ".tmp.merged.bed"
                     ] > out_prefix + ".merged.bed"
                 )
                 # Cluster to putative CDS regions
