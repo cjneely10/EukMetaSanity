@@ -68,7 +68,9 @@ def _get_list_of_files(summary_file: str, file_types: List[str]) -> List[List[st
             line = next(file_fp).rstrip("\r\n").split("\t")
             for file_type in file_types:
                 _col_idx = head.index(file_type)
-                inner.append(str(Path(line[_col_idx]).resolve()))
+                _path = str(Path(line[_col_idx]).resolve())
+                assert os.path.exists(_path)
+                inner.append(_path)
             out.append(inner)
     except StopIteration:
         return out
