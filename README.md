@@ -1,5 +1,28 @@
 # EukMetaSanity
 
+## About
+Eukaryotic genome annotation is a laborious and time-intensive process. **EukMetaSanity** provides a structural and 
+functional annotation of MAGs in a highly-parallel fashion, allowing for quick and in-depth analyses. The software is
+customizable - users may choose from several provided options based on their analysis needs, and power users with Python
+experience can easily extend the **EukMetaSanity** code base to add to or create new pipelines!
+
+This software suite is broken up into several sub-programs
+
+### Run
+Identify putative taxonomy using the [OrthoDB](https://www.orthodb.org/?page=filelist) and annotate repeated regions of
+the genome.
+
+Generate *ab initio* and protein-driven structural predictions of coding regions of the genome.
+
+### Fast refine
+Map RNA-seq and assembled transcriptome evidence from closely related organisms (same organism or species) to the genome
+to add additional evidence.
+
+### Report
+Identify RNA (noncoding, tRNA, etc.) regions of the genome.
+
+Search KEGG, EggNOG, and any MMseqs2 database for functional annotation of putative proteins.
+
 ## Installation
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
