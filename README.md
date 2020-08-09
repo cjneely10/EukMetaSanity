@@ -64,7 +64,7 @@ Add EukMetaSanity to your PATH and PYTHONPATH variables
 
 ```
 export PATH=/path/to/EukMetaSanity/bin/:$PATH
-export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
+export PYTHONPATH=/path/to/EukMetaSanity:$PYTHONPATH
 ```
 
 Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable
@@ -125,10 +125,10 @@ Install [sambamba](https://lomereiter.github.io/sambamba/docs/sambamba-sort.html
 [BEDtools](https://github.com/arq5x/bedtools2/releases/tag/v2.29.2)
 
 ##### Fast refine step 1: Incorporate RNAseq data (optional)
-Install [hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-source)
+Install [HISAT2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-source)
 
 ##### Fast refine step 2: Incorporate trancriptomic data (optional)
-Install [gmap](http://research-pub.gene.com/gmap/)
+Install [GMAP](http://research-pub.gene.com/gmap/)
 
 ## Usage
 

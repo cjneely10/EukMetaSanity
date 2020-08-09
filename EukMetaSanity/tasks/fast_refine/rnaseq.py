@@ -89,7 +89,7 @@ class RnaSeqIter(TaskList):
                 ]
             )
             # Remove intermediary files
-            task_object.local["rm"][out_prefix + ".{sam,bam}"]()
+            task_object.local["rm"][out_prefix + ".sam", out_prefix + ".bam"]()
 
     def __init__(self, *args, **kwargs):
         super().__init__(RnaSeqIter.RnaSeq, "rnaseq", *args, **kwargs)
