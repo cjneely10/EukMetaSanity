@@ -47,8 +47,6 @@ ln -s /path/to/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
 
 ### Installing dependencies
 
-**EukMetaSanity** consists of 4 subprograms - `run`, `report`, `fast_refine`, and `refine`.
-
 When selecting dependencies to download, please follow the instructions below:
 
 ---
