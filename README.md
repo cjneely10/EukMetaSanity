@@ -272,6 +272,7 @@ out/
 Neely, Christopher. EukMetaSanity. Source code is available at [https://github.com/cjneely10/EukMetaSanity](). 
 It is implemented in Python 3 under the GNU General Public License v3.0.
 
-Also cite all dependencies, as **EukMetaSanity** would not be possible were it not for the developers of these programs.
+Also cite all dependencies that you used, as **EukMetaSanity** would not be possible were it not for the developers of 
+these programs.
 
 
