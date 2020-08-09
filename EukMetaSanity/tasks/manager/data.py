@@ -94,6 +94,10 @@ class Data:
         pass
 
     @added
+    def rfam(self):
+        pass
+
+    @added
     def summarize(self):
         pass
 

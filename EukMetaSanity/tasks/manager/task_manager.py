@@ -1,5 +1,7 @@
 from typing import Dict, List, Type
 from EukMetaSanity.tasks.base.task_class import TaskList
+# General imports
+from EukMetaSanity.tasks.base.summarize import SummarizeIter
 # Run imports
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.run.ab_initio import AbInitioIter
@@ -8,8 +10,8 @@ from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 # Report imports
 from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
-from EukMetaSanity.tasks.base.summarize import SummarizeIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
+from EukMetaSanity.tasks.report.rfam import FindRNAIter
 # Fast_refine imports
 from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
 from EukMetaSanity.tasks.fast_refine.transcriptomes import TranscriptomesIter
@@ -35,6 +37,7 @@ class TaskManager:
                 KoFamScanIter,
                 MMseqsIter,
                 EggNOGMapper,
+                FindRNAIter,
                 SummarizeIter,
             ],
             "fast_refine": [
