@@ -25,7 +25,9 @@ class MergeIter(TaskList):
         @program_catch
         def run_1(self):
             gff3s = []
-            for sorted_bam in self.input[-1]:
+            all_files = self.input[-2] + self.input[-1]
+            for sorted_bam in all_files:
+                print(sorted_bam)
                 out_prefix = os.path.join(self.wdir, prefix(sorted_bam))
                 # Convert to BED
                 self.log_and_run(

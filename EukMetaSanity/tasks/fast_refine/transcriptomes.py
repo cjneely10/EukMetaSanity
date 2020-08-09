@@ -15,8 +15,9 @@ class TranscriptomesIter(TaskList):
             for transcript in transcripts:
                 out.append(os.path.join(self.wdir, prefix(transcript)) + ".sorted.bam")
             self.output = [
-                *self.input,  # Forward original data
+                *self.input[:-1],  # Forward original data
                 *out,  # Paths
+                self.input[-1],  # aligned reads
                 out,  # List of data
             ]
         
