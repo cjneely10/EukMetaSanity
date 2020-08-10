@@ -247,9 +247,10 @@ class AbInitioIter(TaskList):
             )
             # Move program to match required output name
             if self.mode == 1:
-                os.replace(
-                    os.path.join(self.wdir, "genemark.gtf"),
-                    self.output[0],
+                self.log_and_run(
+                    self.local["gffread"][
+                        os.path.join(self.wdir, "genemark.gtf"), "-G"
+                    ] > self.output[0]
                 )
 
         @staticmethod

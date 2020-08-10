@@ -5,6 +5,18 @@
 large.
 
 ## Docker installation
+**EukMetaSanity**'s Docker image is packaged with all (most) of required and optional dependencies listed below.
+
+Users who wish to substitute GeneMark for Augustus, or RepeatModeler/Masker for MMseqs2, must have these programs 
+installed on their system.
+
+Download the Docker image using the command:
+
+```
+docker pull cjneely10/eukmetasanity:v0.1.0
+```
+
+Follow the instructions below for installing required databases.
 
 
 ## Standalone installation
@@ -32,7 +44,6 @@ ln -s /path/to/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
 
 When selecting dependencies to download, please follow the instructions below:
 
----
 #### Run
 
 Install [gffread](https://github.com/gpertea/gffread) AND [gffcompare](https://github.com/gpertea/gffcompare)

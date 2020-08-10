@@ -9,17 +9,18 @@ experience can easily extend the **EukMetaSanity** code base to add to or create
 This software suite is broken up into several sub-programs
 
 ### Run
-Identify putative taxonomy using the OrthoDB and annotate repeated regions of
-the genome.
+Identify putative taxonomy using the OrthoDB and MMseqs2 and annotate repeated regions of
+the genome with either MMseqs2 or RepeatModeler/RepeatMasker. 
 
-Generate *ab initio* and protein-driven structural predictions of coding regions of the genome.
+Generate *ab initio* structural predictions of coding regions of the genome using either Augustus or GeneMark.
+Add protein evidence using MetaEuk.
 
 ### Fast refine
-Map RNA-seq and assembled transcriptome evidence from closely related organisms (same organism or species) to the genome
-to add additional evidence.
+Map RNA-seq (using HISAT2) and assembled transcriptome (using GMAP) evidence from closely related organisms (same 
+organism or species) to the genome to add additional evidence.
 
 ### Report
-Identify RNA (noncoding, tRNA, etc.) regions of the genome.
+Identify RNA (noncoding, tRNA, etc.) regions of the genome using Rfam.
 
 Search KEGG, EggNOG, and any MMseqs2 database for functional annotation of putative proteins.
 
