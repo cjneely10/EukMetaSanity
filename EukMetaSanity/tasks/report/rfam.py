@@ -25,6 +25,7 @@ class FindRNAIter(TaskList):
                     (*self.added_flags),
                     "--tblout", os.path.join(self.wdir, self.record_id + ".all.tblout"),
                     "--clanin", self.data_clanin,
+                    "--cpu", self.threads,
                     self.data_cm,
                     self.input[0],
                 ] > os.path.join(self.wdir, self.record_id + ".cmscan")
