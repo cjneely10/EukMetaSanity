@@ -68,6 +68,10 @@ class MergeIter(TaskList):
                         "-o", out_prefix + ".gff3"
                     ]
                 )
+                # Remove intermediary files
+                self.local["rm"][
+                    out_prefix + ".tmp.merged.bed", out_prefix + ".merged.bed", out_prefix + ".clustered.bed"
+                ]()
                 gff3s.append(out_prefix + ".gff3")
             # Merge all results
             EvidenceIter.Evidence.merge(
