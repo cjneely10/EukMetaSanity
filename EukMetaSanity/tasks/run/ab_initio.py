@@ -6,6 +6,7 @@ from typing import Tuple, List
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids
+from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
 """
 Perform ab initio gene identification using either Augustus or GeneMark
@@ -228,6 +229,7 @@ class AbInitioIter(TaskList):
             # Copy runner script
             new_path = os.path.join(self.wdir, "run_gmes.sh")
             self.log_and_run(self.local["cp"][self.local["which"]["run_gmes.sh"]().rstrip("\r\n"), self.wdir])
+            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], self.cutoff, "kingdom")[0]
             # Edit in proper locations
             self.log_and_run(
                 self.local["sed"][
@@ -237,6 +239,7 @@ class AbInitioIter(TaskList):
                             str(self.program_gmes).replace("/", "\/"),
                             "--sequence", self.input[0].replace("/", "\/"),
                             "--ES", "--cores", self.threads, (*self.added_flags),
+                            ("--fungus" if tax == "fungi" else "")
                         ))
                     ), new_path
                 ]

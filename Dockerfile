@@ -13,7 +13,7 @@ RUN apt-get update && \
     touch /home/appuser/scripts/.scripts && \
     echo "source /home/appuser/scripts/.scripts" >> /home/appuser/.bashrc && \
     # Add bin folder to PATH
-    echo "PATH=/home/appuser/bin:\$PATH" >> /home/appuser/scripts/.scripts && \
+    echo "export PATH=/home/appuser/bin:\$PATH" >> /home/appuser/scripts/.scripts && \
     # EukMetaSanity
     mkdir /home/appuser/opt/EukMetaSanity
 
@@ -23,63 +23,96 @@ COPY * /home/appuser/opt/EukMetaSanity/
 # Installation of dependencies and adding to PATH
 # EukMetaSanity install
 RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
-    echo "PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
-    echo "PYTHONPATH=$(pwd)/EukMetaSanity/:\$PYTHONPATH" >> /home/appuser/scripts/.scripts && \
+    echo "export PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
+    echo "export PYTHONPATH=$(pwd)/EukMetaSanity/:\$PYTHONPATH" >> /home/appuser/scripts/.scripts && \
     ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py /home/appuser/bin/EukMetaSanity && \
-    # AUGUSTUS
-    apt-get -y install augustus augustus-data augustus-doc && \
     # Move to opt directory for remaining program installations
     cd /home/appuser/opt && \
-    # GFFread
+    # # AUGUSTUS
+    # apt dependencies
+    apt-get -y install libboost-iostreams-dev zlib1g-dev libbamtools-dev libboost-all-dev libboost-all-dev && \
+    # bam2wig installation
+    git clone https://github.com/samtools/htslib.git && \
+    cd htslib && \
+    autoheader && \
+    autoconf && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    git clone https://github.com/samtools/bcftools.git && \
+    cd bcftools && \
+    autoheader && \
+    autoconf && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    git clone https://github.com/samtools/samtools.git && \
+    cd samtools && \
+    autoheader && \
+    autoconf -Wno-syntax && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    # AUGUSTUS
+    git clone https://github.com/Gaius-Augustus/Augustus.git && \
+    cd Augustus && make && cd - && \
+    echo "export PATH=$(pwd)/Augustus/bin:$(pwd)/Augustus/scripts:\$PATH" >> /home/appuser/scripts/.scripts && \
+    echo "export AUGUSTUS_CONFIG_PATH=$(pwd)/Augustus/config/" && \
+    ln -s $(pwd)/Augustus/bin/* /home/appuser/bin/ && \
+    #apt-get -y install augustus augustus-data augustus-doc && \
+    # # GFFread
     git clone https://github.com/gpertea/gffread && cd gffread && make release && \
     ln -s $(pwd)/gffread /home/appuser/bin/ && cd - && \
-    # GFFcompare
+    # # GFFcompare
     git clone https://github.com/gpertea/gffcompare && cd gffcompare && make release && \
     ln -s $(pwd)/gffcompare /home/appuser/bin/ && cd - && \
-    # MMseqs2
+    # # MMseqs2
     wget https://mmseqs.com/latest/mmseqs-linux-avx2.tar.gz && \
     tar "xzf" mmseqs-linux-avx2.tar.gz && rm mmseqs-linux-avx2.tar.gz && \
-    echo "PATH=$(pwd)/mmseqs/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
-    # MetaEuk
+    echo "export PATH=$(pwd)/mmseqs/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
+    # # MetaEuk
     wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz && \
     tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz && \
-    echo "PATH=$(pwd)/metaeuk/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
-    # kofamscan
+    echo "export PATH=$(pwd)/metaeuk/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
+    # # kofamscan
     wget ftp://ftp.genome.jp/pub/tools/kofam_scan/kofam_scan-1.3.0.tar.gz && \
     tar "xzvf" kofam_scan-1.3.0.tar.gz && rm kofam_scan-1.3.0.tar.gz && \
     ln -s $(pwd)/kofam_scan-1.3.0/exec_annotation /home/appuser/bin/ && \
-    # EggNOG mapper
+    # # EggNOG mapper
     git clone https://github.com/jhcepas/eggnog-mapper.git && \
     ln -s $(pwd)/eggnog-mapper/emapper.py /home/appuser/bin/ && \
-    # Infernal
+    # # Infernal
     wget eddylab.org/infernal/infernal-1.1.2.tar.gz && \
     tar xf infernal-1.1.2.tar.gz && rm infernal-1.1.2.tar.gz && \
     cd infernal-1.1.2 && ./configure --prefix $(pwd)/bin && make && make install && cd - && \
     ln -s $(pwd)/infernal-1.1.2/bin/bin/* /home/appuser/bin/ && \
-    # sambamba
+    # # sambamba
     wget https://github.com/biod/sambamba/releases/download/v0.7.1/sambamba-0.7.1-linux-static.gz && \
     gunzip sambamba-0.7.1-linux-static.gz && chmod +x sambamba-0.7.1-linux-static && \
     mv sambamba-0.7.1-linux-static /home/appuser/bin/sambamba && \
-    # BEDtools
+    # # BEDtools
     wget https://github.com/arq5x/bedtools2/releases/download/v2.29.2/bedtools-2.29.2.tar.gz && \
     tar "-xzf" bedtools-2.29.2.tar.gz && rm bedtools-2.29.2.tar.gz && \
     cd bedtools2 && make && cd - && \
     ln -s $(pwd)/bedtools2/bin/* /home/appuser/bin/ && \
-    # HISAT2
+    # # HISAT2
     wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip && \
     unzip hisat2-2.1.0-Linux_x86_64.zip && rm hisat2-2.1.0-Linux_x86_64.zip && \
     ln -s $(pwd)/hisat2-2.1.0/hisat2* /home/appuser/bin/ && \
     ln -s $(pwd)/hisat2-2.1.0/extract* /home/appuser/bin/ && \
-    # GMAP
+    # # GMAP
     wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2020-06-30.tar.gz && \
     tar "xzf" gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz && \
     cd gmap-2020-06-30 && ./configure && make && cd - && \
-    ln -s $(pwd)/gmap-gsnap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ && \
-    # Add locations for RepeatModeler/Masker and GeneMark
+    ln -s $(pwd)/gmap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ && \
+    # # Add locations for RepeatModeler/Masker and GeneMark
     ln -s $(pwd)/repeatmodeler/* /home/appuser/bin/ && \
     ln -s $(pwd)/repeatmasker/* /home/appuser/bin/ && \
     ln -s $(pwd)/gmes/* /home/appuser/bin/ && \
-    # Add final permissions
+    # # Add final permissions
     chown -R appuser:appuser /home/appuser && chmod 777 /home/appuser/data && chmod 777 /home/appuser/tmp
 
 VOLUME ["/home/appuser/data", "/home/appuser/opt/repeatmodeler", "/home/appuser/opt/repeatmasker"]
