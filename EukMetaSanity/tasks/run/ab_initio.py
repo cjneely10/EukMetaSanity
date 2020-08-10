@@ -2,6 +2,7 @@ import os
 import shutil
 from Bio import SeqIO
 from pathlib import Path
+from typing import Tuple, List
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids
@@ -224,18 +225,46 @@ class AbInitioIter(TaskList):
 
         @program_catch
         def gmes(self):
+            assert os.path.exists(self.gmes_cfg)
+            # Copy base config file to working dir
+            def_cfg = os.path.join(self.wdir, "gmes.default.cfg")
+            new_cfg = os.path.join(self.wdir, "gmes.cfg")
+            self.local["cp"][self.gmes_cfg, def_cfg]()
+            # Update working directory path in cfg file
+            AbInitioIter.AbInitio.update_cfg(
+                def_cfg,
+                [
+                    ("def_cfg", new_cfg),
+                    ("work_dir", self.wdir),
+                ],
+                new_cfg
+            )
+            # Run GeneMark with updated config file
             self.log_and_run(
                 self.program_gmes[
                     "--sequence", self.input[0],
-                    "--ES", "--cores", self.threads, (*self.added_flags)
+                    "--ES", "--cores", self.threads, (*self.added_flags),
+                    "--usr_cfg", new_cfg
                 ]
             )
             # Move program to match required output name
             if self.mode == 1:
                 os.replace(
-                    os.path.join(self.pm.get_dir(self.record_id, self.name), "genemark.gtf"),
+                    os.path.join(self.wdir, "genemark.gtf"),
                     self.output[0],
                 )
+
+        @staticmethod
+        def update_cfg(in_path: str, replace_tuple: List[Tuple[str, str]], out_path: str):
+            in_fp = open(in_path, "r")
+            out_fp = open(out_path, "w")
+            for line in in_fp:
+                for _tuple in replace_tuple:
+                    if _tuple[0] not in line:
+                        out_fp.write(line)
+                    else:
+                        out_fp.write("  %s:  %s" % _tuple)
+            out_fp.close()
 
     def __init__(self, *args, **kwargs):
         super().__init__(AbInitioIter.AbInitio, "abinitio", *args, **kwargs)
