@@ -33,7 +33,7 @@ class RnaSeqIter(TaskList):
             read_pairs = self.get_rna_read_pairs()
             if len(read_pairs) > 0:
                 # Generate genome index
-                genome_prefix = os.path.join(self.wdir, prefix(self.input[0]) + "_db")
+                genome_prefix = os.path.join(self.wdir, self.record_id + "_db")
                 self.log_and_run(
                     self.program_hisat2build[
                         self.input[0],
@@ -61,8 +61,9 @@ class RnaSeqIter(TaskList):
             if not os.path.exists(_path):
                 return []
             fp = open(_path, "r")
+            _id = self.record_id.replace("-mask", "")
             for line in fp:
-                if line.startswith(self.record_id):
+                if line.startswith(_id):
                     pairs_string = line.rstrip("\r\n").split("\t")[1].split(";")
                     return [tuple(pair.split(",")) for pair in pairs_string]
             return []

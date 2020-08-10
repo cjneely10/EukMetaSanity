@@ -30,7 +30,7 @@ class TranscriptomesIter(TaskList):
             transcripts = self.get_transcripts()
             if len(transcripts) > 0:
                 # Generate genome index
-                genome_idx = prefix(self.input[0]) + "_db"
+                genome_idx = self.record_id + "_db"
                 _genome_dir = os.path.dirname(self.input[0])
                 _genome_basename = os.path.basename(self.input[0])
                 self.log_and_run(
@@ -57,8 +57,9 @@ class TranscriptomesIter(TaskList):
             if not os.path.exists(_path):
                 return []
             fp = open(_path, "r")
+            _id = self.record_id.replace("-mask", "")
             for line in fp:
-                if self.record_id in line:
+                if _id in line:
                     return line.rstrip("\r\n").split("\t")[1].split(",")
             return []
             
