@@ -1,6 +1,5 @@
 import os
 from Bio import SeqIO
-from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 
 
@@ -8,7 +7,6 @@ class FindRNAIter(TaskList):
     class FindRNA(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            print(self.input)
             self.output = [
                 *self.input,
                 os.path.join(self.wdir, self.record_id + ".tblout"),
