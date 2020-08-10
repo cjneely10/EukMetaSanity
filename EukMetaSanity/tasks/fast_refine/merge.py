@@ -40,7 +40,7 @@ class MergeIter(TaskList):
                 # Merge overlapping reads
                 self.log_and_run(
                     self.program_bedtools[
-                        "merge"
+                        "merge",
                         "-i", out_prefix + ".bed",
                         "-c", "1", "-o", "count"
                     ] > out_prefix + ".tmp.merged.bed"

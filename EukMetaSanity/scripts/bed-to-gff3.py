@@ -12,17 +12,15 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 def get_gene(fp):
     line = next(fp).rstrip("\r\n").split("\t")
     exons = []
-    _id = line[5]
-    _dir = line[3]
+    _id = line[4]
     contig_id = line[0]
     exons.append((int(line[1]), int(line[2])))
     for line in fp:
         line = line.rstrip("\r\n").split("\t")
-        if line[5] != _id or (line[5] == _id and line[3] != _dir):
+        if line[4] != _id:
             yield contig_id, _id, exons
             exons = []
-            _id = line[5]
-            _dir = line[3]
+            _id = line[4]
             contig_id = line[0]
         exons.append((int(line[1]), int(line[2])))
     yield contig_id, _id, exons
