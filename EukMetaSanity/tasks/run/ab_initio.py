@@ -225,27 +225,25 @@ class AbInitioIter(TaskList):
 
         @program_catch
         def gmes(self):
-            assert os.path.exists(self.gmes_cfg)
-            # Copy base config file to working dir
-            def_cfg = os.path.join(self.wdir, "gmes.default.cfg")
-            new_cfg = os.path.join(self.wdir, "gmes.cfg")
-            self.local["cp"][self.gmes_cfg, def_cfg]()
-            # Update working directory path in cfg file
-            AbInitioIter.AbInitio.update_cfg(
-                def_cfg,
-                [
-                    ("def_cfg", new_cfg),
-                    ("work_dir", self.wdir),
-                ],
-                new_cfg
-            )
-            # Run GeneMark with updated config file
+            # Copy runner script
+            new_path = os.path.join(self.wdir, "run_gmes.sh")
+            self.log_and_run(self.local["cp"][self.local["which"]["run_gmes.sh"]().rstrip("\r\n"), self.wdir])
+            # Edit in proper locations
             self.log_and_run(
-                self.program_gmes[
-                    "--sequence", self.input[0],
-                    "--ES", "--cores", self.threads, (*self.added_flags),
-                    "--usr_cfg", new_cfg
+                self.local["sed"][
+                    "-i", "s/%s/%s/g" % (
+                        "CMD",
+                        " ".join((
+                            str(self.program_gmes).replace("/", "\/"),
+                            "--sequence", self.input[0].replace("/", "\/"),
+                            "--ES", "--cores", self.threads, (*self.added_flags),
+                        ))
+                    ), new_path
                 ]
+            )
+            # Run script
+            self.log_and_run(
+                self.local[new_path][self.wdir]
             )
             # Move program to match required output name
             if self.mode == 1:
@@ -259,11 +257,15 @@ class AbInitioIter(TaskList):
             in_fp = open(in_path, "r")
             out_fp = open(out_path, "w")
             for line in in_fp:
+                found_tuple = None
                 for _tuple in replace_tuple:
-                    if _tuple[0] not in line:
-                        out_fp.write(line)
-                    else:
-                        out_fp.write("  %s:  %s" % _tuple)
+                    if _tuple[0] in line:
+                        found_tuple = _tuple
+                        break
+                if found_tuple is not None:
+                    out_fp.write("  %s:  %s\n" % found_tuple)
+                else:
+                    out_fp.write(line)
             out_fp.close()
 
     def __init__(self, *args, **kwargs):

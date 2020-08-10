@@ -11,6 +11,7 @@ build:
 	$(PYTHON) -m compileall . > /dev/null
 	mkdir -p $(OUT_BIN_PATH)
 	ln -srf $(BASE)/$(IN_SCRIPTS_PATH)/*.py $(OUT_BIN_PATH)/
+	ln -srf $(BASE)/$(IN_SCRIPTS_PATH)/*.sh $(OUT_BIN_PATH)/
 
 install:
 	$(PIP) install -r requirements.txt
