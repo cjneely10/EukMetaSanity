@@ -239,7 +239,7 @@ class AbInitioIter(TaskList):
                             str(self.program_gmes).replace("/", "\/"),
                             "--sequence", self.input[0].replace("/", "\/"),
                             "--ES", "--cores", self.threads, (*self.added_flags),
-                            ("--fungus" if tax == "fungi" else "")
+                            ("--fungus" if "fungi" in tax else "")
                         ))
                     ), new_path
                 ]

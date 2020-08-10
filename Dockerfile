@@ -31,6 +31,7 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     # # AUGUSTUS
     # apt dependencies
     apt-get -y install libboost-iostreams-dev zlib1g-dev libbamtools-dev libboost-all-dev libboost-all-dev && \
+    apt-get -y install libgsl-dev libboost-all-dev libsuitesparse-dev liblpsolve55-dev libsqlite3-dev libmysql++-dev && \
     # bam2wig installation
     git clone https://github.com/samtools/htslib.git && \
     cd htslib && \
