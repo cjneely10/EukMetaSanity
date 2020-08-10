@@ -33,6 +33,7 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     apt-get -y install libboost-iostreams-dev zlib1g-dev libbamtools-dev libboost-all-dev libboost-all-dev && \
     apt-get -y install libgsl-dev libboost-all-dev libsuitesparse-dev liblpsolve55-dev libsqlite3-dev libmysql++-dev && \
     # bam2wig installation
+    mkdir bam2wig && cd bam2wig && \
     git clone https://github.com/samtools/htslib.git && \
     cd htslib && \
     autoheader && \
@@ -56,10 +57,11 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     ./configure && \
     make && \
     make install && \
-    cd .. && \
+    cd ../../ && \
+    echo "export TOOLDIR=$(pwd)/bam2wig:\$PATH" >> /home/appuser/scripts/.scripts && \
     # AUGUSTUS
     git clone https://github.com/Gaius-Augustus/Augustus.git && \
-    cd Augustus && make && cd - && \
+    cd Augustus && mkdir -r bin src && cd src && make && cd ../auxprogs && make && cd ../../ && \
     echo "export PATH=$(pwd)/Augustus/bin:$(pwd)/Augustus/scripts:\$PATH" >> /home/appuser/scripts/.scripts && \
     echo "export AUGUSTUS_CONFIG_PATH=$(pwd)/Augustus/config/" && \
     ln -s $(pwd)/Augustus/bin/* /home/appuser/bin/ && \

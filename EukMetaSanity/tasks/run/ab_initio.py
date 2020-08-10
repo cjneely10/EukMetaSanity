@@ -229,7 +229,7 @@ class AbInitioIter(TaskList):
             # Copy runner script
             new_path = os.path.join(self.wdir, "run_gmes.sh")
             self.log_and_run(self.local["cp"][self.local["which"]["run_gmes.sh"]().rstrip("\r\n"), self.wdir])
-            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], self.cutoff, "kingdom")[0]
+            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], 0, "kingdom")[0]
             # Edit in proper locations
             self.log_and_run(
                 self.local["sed"][
