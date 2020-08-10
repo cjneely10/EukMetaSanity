@@ -29,6 +29,9 @@ instructions
 
 ## Usage
 
+#### Note for Docker users
+Use the Docker CL API to call EukMetaSanity
+
 After running `download-data.py`, config files will be available in the database
 directory. These can be edited to fit your needs.
 
@@ -165,7 +168,7 @@ out/
 
 ## Citations
 
-Neely, Christopher. EukMetaSanity. Source code is available at [https://github.com/cjneely10/EukMetaSanity](). 
+Neely, C. J., & Tully, B. *EukMetaSanity*. Source code is available at [https://github.com/cjneely10/EukMetaSanity](). 
 It is implemented in Python 3 under the GNU General Public License v3.0.
 
 Also cite all dependencies that you used, as **EukMetaSanity** would not be possible were it not for the developers of 
