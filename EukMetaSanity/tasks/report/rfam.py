@@ -27,7 +27,7 @@ class FindRNAIter(TaskList):
                     "--clanin", self.data_clanin,
                     "--cpu", self.threads,
                     self.data_cm,
-                    self.input[0],
+                    self.input[2],
                 ] > os.path.join(self.wdir, self.record_id + ".cmscan")
             )
             # Save non-overlapping hits

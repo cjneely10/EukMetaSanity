@@ -27,7 +27,7 @@ def added(f: Callable) -> Callable:
         return (
             f.__name__,
             self.data,
-            "\nRunning {} protocol using %i worker(s) and %i threads per worker".format(f.__name__)
+            "\nRunning {} protocol using %i worker(s) and %i thread(s) per worker".format(f.__name__)
         )
     return _wrapper
 

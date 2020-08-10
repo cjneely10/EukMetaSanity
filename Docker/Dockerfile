@@ -63,7 +63,7 @@ RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-
     # GMAP
     wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2020-06-30.tar.gz && \
     tar "xzf" gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz && \
-    cd gmap-gsnap-2020-06-30 && ./configure && make && cd - && \
+    cd gmap-2020-06-30 && ./configure && make && cd - && \
     ln -s $(pwd)/gmap-gsnap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ && \
     # EukMetaSanity
     git clone https://github.com/cjneely10/EukMetaSanity.git && \
