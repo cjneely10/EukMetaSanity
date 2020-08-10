@@ -64,7 +64,7 @@ Add EukMetaSanity to your PATH and PYTHONPATH variables
 
 ```
 export PATH=/path/to/EukMetaSanity/bin/:$PATH
-export PYTHONPATH=/path/to/EukMetaSanity:$PYTHONPATH
+export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
 ```
 
 Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable

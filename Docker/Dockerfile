@@ -2,81 +2,79 @@
 FROM conda/miniconda3:latest
 
 # Run initial updates/upgrades
-RUN apt-get update &&
+RUN apt-get update && \
     # Create user and give permissions
-    groupadd -g 999 appuser && useradd -r -u 999 -g appuser appuser &&
+    groupadd -g 999 appuser && useradd -r -u 999 -g appuser appuser && \
     # Create user directories
-    mkdir -p /home/appuser/{opt,bin,scripts,tmp} &&
-    # Create data volume directory
-    mkdir -p /home/appuser/data &&
+    mkdir /home/appuser && cd /home/appuser && mkdir opt bin scripts data tmp && cd - && \
     # Create .scripts file and source it
-    touch /home/appuser/scripts/.scripts &&
-    echo "source /home/appuser/scripts/.scripts" >> /home/appuser/.bashrc &&
+    touch /home/appuser/scripts/.scripts && \
+    echo "source /home/appuser/scripts/.scripts" >> /home/appuser/.bashrc && \
     # Add bin folder to PATH
     echo "PATH=/home/appuser/bin:\$PATH" >> /home/appuser/scripts/.scripts
 
 # Begin installations and add to path (either add to bin or add to PATH variable)
 # apt installations
-RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 &&
+RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev && \
     # AUGUSTUS
-    apt-get -y install augustus augustus-data augustus-doc &&
+    apt-get -y install augustus augustus-data augustus-doc && \
     # Move to opt directory for remaining program installations
-    cd /home/appuser/opt &&
+    cd /home/appuser/opt && \
     # GFFread
-    git clone https://github.com/gpertea/gffread && cd gffread && make release &&
-    ln -s $(pwd)/gffread /home/appuser/bin/ && cd - &&
+    git clone https://github.com/gpertea/gffread && cd gffread && make release && \
+    ln -s $(pwd)/gffread /home/appuser/bin/ && cd - && \
     # GFFcompare
-    git clone https://github.com/gpertea/gffcompare && cd gffcompare && make release &&
-    ln -s $(pwd)/gffcompare /home/appuser/bin/ && cd - &&
+    git clone https://github.com/gpertea/gffcompare && cd gffcompare && make release && \
+    ln -s $(pwd)/gffcompare /home/appuser/bin/ && cd - && \
     # MMseqs2
-    wget https://mmseqs.com/latest/mmseqs-linux-avx2.tar.gz &&
-    tar -xvfz mmseqs-linux-avx2.tar.gz && rm mmseqs-linux-avx2.tar.gz &&
-    echo "PATH=$(pwd)/mmseqs/bin/:\$PATH" >> /home/appuser/scripts/.scripts &&
+    wget https://mmseqs.com/latest/mmseqs-linux-avx2.tar.gz && \
+    tar "xzf" mmseqs-linux-avx2.tar.gz && rm mmseqs-linux-avx2.tar.gz && \
+    echo "PATH=$(pwd)/mmseqs/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
     # MetaEuk
-    wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz &&
-    tar -xvfz metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz &&
-    echo "PATH=$(pwd)/metaeuk/bin/:\$PATH" >> /home/appuser/scripts/.scripts &&
+    wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz && \
+    tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz && \
+    echo "PATH=$(pwd)/metaeuk/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
     # kofamscan
-    wget ftp://ftp.genome.jp/pub/tools/kofam_scan/kofam_scan-1.3.0.tar.gz &&
-    tar -xzvf kofam_scan-1.3.0.tar.gz && rm kofam_scan-1.3.0.tar.gz &&
-    ln -s $(pwd)/kofam_scan-1.3.0/exec_annotation /home/appuser/bin/ &&
+    wget ftp://ftp.genome.jp/pub/tools/kofam_scan/kofam_scan-1.3.0.tar.gz && \
+    tar "xzvf" kofam_scan-1.3.0.tar.gz && rm kofam_scan-1.3.0.tar.gz && \
+    ln -s $(pwd)/kofam_scan-1.3.0/exec_annotation /home/appuser/bin/ && \
     # EggNOG mapper
-    git clone https://github.com/jhcepas/eggnog-mapper.git &&
-    ln -s $(pwd)/eggnog-mapper/emapper.py /home/appuser/bin/ &&
+    git clone https://github.com/jhcepas/eggnog-mapper.git && \
+    ln -s $(pwd)/eggnog-mapper/emapper.py /home/appuser/bin/ && \
     # Infernal
-    wget eddylab.org/infernal/infernal-1.1.2.tar.gz &&
-    tar xf infernal-1.1.2.tar.gz && rm infernal-1.1.2.tar.gz &&
-    cd infernal-1.1.2 && ./configure --prefix $(pwd)/bin && make && make install && cd - &&
-    ln -s $(pwd)/infernal-1.1.2/bin/bin/* /home/appuser/bin/ &&
+    wget eddylab.org/infernal/infernal-1.1.2.tar.gz && \
+    tar xf infernal-1.1.2.tar.gz && rm infernal-1.1.2.tar.gz && \
+    cd infernal-1.1.2 && ./configure --prefix $(pwd)/bin && make && make install && cd - && \
+    ln -s $(pwd)/infernal-1.1.2/bin/bin/* /home/appuser/bin/ && \
     # sambamba
-    wget https://github.com/biod/sambamba/releases/download/v0.7.1/sambamba-0.7.1-linux-static.gz &&
-    gunzip sambamba-0.7.1-linux-static.gz && chmod +x sambamba-0.7.1-linux-static &&
-    mv sambamba-0.7.1-linux-static /home/appuser/bin/sambamba &&
+    wget https://github.com/biod/sambamba/releases/download/v0.7.1/sambamba-0.7.1-linux-static.gz && \
+    gunzip sambamba-0.7.1-linux-static.gz && chmod +x sambamba-0.7.1-linux-static && \
+    mv sambamba-0.7.1-linux-static /home/appuser/bin/sambamba && \
     # BEDtools
-    wget https://github.com/arq5x/bedtools2/releases/download/v2.29.2/bedtools-2.29.2.tar.gz &&
-    tar -xzf bedtools-2.29.2.tar.gz && rm bedtools-2.29.2.tar.gz &&
-    cd bedtools2 && make && cd - &&
-    ln -s $(pwd)/bedtools2/bin/* /home/appuser/bin/ &&
+    wget https://github.com/arq5x/bedtools2/releases/download/v2.29.2/bedtools-2.29.2.tar.gz && \
+    tar "-xzf" bedtools-2.29.2.tar.gz && rm bedtools-2.29.2.tar.gz && \
+    cd bedtools2 && make && cd - && \
+    ln -s $(pwd)/bedtools2/bin/* /home/appuser/bin/ && \
     # HISAT2
-    wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip &&
-    unzip hisat2-2.1.0-Linux_x86_64.zip && rm hisat2-2.1.0-Linux_x86_64.zip
-    ln -s $(pwd)/hisat2-2.1.0/hisat2* /home/appuser/bin/ &&
-    ln -s $(pwd)/hisat2-2.1.0/extract* /home/appuser/bin/ &&
+    wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-Linux_x86_64.zip && \
+    unzip hisat2-2.1.0-Linux_x86_64.zip && rm hisat2-2.1.0-Linux_x86_64.zip && \
+    ln -s $(pwd)/hisat2-2.1.0/hisat2* /home/appuser/bin/ && \
+    ln -s $(pwd)/hisat2-2.1.0/extract* /home/appuser/bin/ && \
     # GMAP
-    wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2020-06-30.tar.gz &&
-    tar -xzf gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz &&
-    cd gmap-gsnap-2020-06-30 && ./configure && make && cd - &&
-    ln -s $(pwd)/gmap-gsnap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ &&
+    wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2020-06-30.tar.gz && \
+    tar "xzf" gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz && \
+    cd gmap-gsnap-2020-06-30 && ./configure && make && cd - && \
+    ln -s $(pwd)/gmap-gsnap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ && \
     # EukMetaSanity
-    git clone https://github.com/cjneely10/EukMetaSanity.git &&
-    cd EukMetaSanity && make all && cd - &&
-    echo "PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts &&
-    echo "PYTHONPATH=$(pwd)/EukMetaSanity:\$PYTHONPATH" >> /home/appuser/scripts/.scripts &&
-    ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py /home/appuser/bin/EukMetaSanity &&
+    git clone https://github.com/cjneely10/EukMetaSanity.git && \
+    cd EukMetaSanity && make all && cd - && \
+    echo "PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
+    echo "PYTHONPATH=$(pwd)/EukMetaSanity/:\$PYTHONPATH" >> /home/appuser/scripts/.scripts && \
+    ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py /home/appuser/bin/EukMetaSanity && \
     # Add locations for RepeatModeler/Masker and GeneMark
-    ln -s $(pwd)/repeatmodeler/* /home/appuser/bin/ &&
-    ln -s $(pwd)/repeatmasker/* /home/appuser/bin/ &&
-    ln -s $(pwd)/gmes/* /home/appuser/bin/ &&
+    ln -s $(pwd)/repeatmodeler/* /home/appuser/bin/ && \
+    ln -s $(pwd)/repeatmasker/* /home/appuser/bin/ && \
+    ln -s $(pwd)/gmes/* /home/appuser/bin/ && \
     # Add final permissions
     chown -R appuser:appuser /home/appuser && chmod 777 /home/appuser/data && chmod 777 /home/appuser/tmp
 

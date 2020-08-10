@@ -29,32 +29,33 @@ class MergeIter(TaskList):
             for sorted_bam in all_files:
                 print(sorted_bam)
                 out_prefix = os.path.join(self.wdir, prefix(sorted_bam))
-                # Convert to BED
-                self.log_and_run(
-                    self.program_bedtools[
-                        "bamtobed",
-                        "-i", sorted_bam
-                    ] > out_prefix + ".bed"
-                )
+                if not os.path.exists(out_prefix + ".bed"):
+                    # Convert to BED
+                    self.log_and_run(
+                        self.program_bedtools[
+                            "bamtobed",
+                            "-i", sorted_bam
+                        ] > out_prefix + ".bed"
+                    )
                 # Merge overlapping reads
                 self.log_and_run(
                     self.program_bedtools[
-                        "merge",
+                        "merge"
                         "-i", out_prefix + ".bed",
-                        "-s", "-c", "6", "-o", "distinct,count"
+                        "-c", "1", "-o", "count"
                     ] > out_prefix + ".tmp.merged.bed"
                 )
                 # Remove regions that do not have enough coverage
                 self.log_and_run(
                     self.local["awk"][
-                        '$5 > %s' % self.min_depth,
+                        '$4 > %s' % self.min_depth,
                         out_prefix + ".tmp.merged.bed"
                     ] > out_prefix + ".merged.bed"
                 )
                 # Cluster to putative CDS regions
                 self.log_and_run(
                     self.program_bedtools[
-                        "cluster", "-s",
+                        "cluster",
                         "-i", out_prefix + ".merged.bed",
                         (*self.added_flags),
                     ] > out_prefix + ".clustered.bed"

@@ -1,6 +1,5 @@
 #!/bin/bash
-cd ~/Docker/MetaSanity
-git checkout v0.1.2
-docker Docker -t pipedm:v0.0.6 .
-docker tag pipedm:v0.0.6 cjneely10/metasanity:v0.1.2
-docker push cjneely10/metasanity:v0.1.2
+cd ~/BioProjects/EukMetaSanity/Docker/ || return
+docker build -t eukmetasanity:v0.1.0 .
+docker tag eukmetasanity:v0.1.0 cjneely10/eukmetasanity:v0.1.0
+docker push cjneely10/eukmetasanity:v0.1.0

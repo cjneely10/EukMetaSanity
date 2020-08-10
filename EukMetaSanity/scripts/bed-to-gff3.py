@@ -4,6 +4,7 @@ import re
 from Bio import SeqIO
 from Bio.Seq import Seq
 from io import StringIO
+from typing import Tuple, Optional
 from Bio.SeqRecord import SeqRecord
 from EukMetaSanity.utils.arg_parse import ArgParse
 
@@ -11,43 +12,41 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 def get_gene(fp):
     line = next(fp).rstrip("\r\n").split("\t")
     exons = []
-    _id = line[3]
-    _strand = line[5]
+    _id = line[5]
+    _dir = line[3]
     contig_id = line[0]
     exons.append((int(line[1]), int(line[2])))
     for line in fp:
         line = line.rstrip("\r\n").split("\t")
-        if line[3] != _id:
-            yield contig_id, _id, exons, _strand
+        if line[5] != _id or (line[5] == _id and line[3] != _dir):
+            yield contig_id, _id, exons
             exons = []
-            _id = line[3]
-            _strand = line[5]
+            _id = line[5]
+            _dir = line[3]
             contig_id = line[0]
         exons.append((int(line[1]), int(line[2])))
-    yield contig_id, _id, exons, _strand
+    yield contig_id, _id, exons
 
 
 def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     fp = open(bed_file, "r")
     out_fp = open(out_file, "w")
     fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
-    for contig_id, _gene_id, coords, _dir in get_gene(fp):
+    for contig_id, _gene_id, coords in get_gene(fp):
         _min = str(coords[0][0] + 1)
         _max = str(coords[-1][1])
-        if _dir == "-":
-            _seq = fasta_dict[contig_id].seq.reverse_translate()
-        else:
-            _seq = fasta_dict[contig_id].seq
         gene_id = "gene" + _gene_id
         # Build CDS
         seq = StringIO()
         for coord in coords:
-            seq.write(str(_seq[coord[0]: coord[1]]))
-        # Find direction
-        _offset = find_offset(SeqRecord(
+            seq.write(str(fasta_dict[contig_id].seq[coord[0]: coord[1]]))
+        # Find direction and offset
+        _offset, _dir = find_orfs(SeqRecord(
             id="1",
             seq=Seq(seq.getvalue()),
         ))
+        if _dir is None:
+            continue
         _offset = str(_offset % 3)
         # Write gene/mRNA info
         out_fp.write("\t".join((
@@ -104,16 +103,16 @@ def bed_to_gff3(bed_file: str, fasta_file: str, out_file: str, source: str):
     out_fp.close()
 
 
-def find_offset(record: SeqRecord) -> int:
+def find_orfs(record: SeqRecord) -> Tuple[int, Optional[str]]:
     longest = (0,)
-    nuc = str(record.seq)
-    for m in re.finditer("ATG", nuc):
-        pro = Seq(nuc)[m.start():].translate(to_stop=True)
-        if len(pro) > longest[0]:
-            longest = (len(pro), m.start(), str(pro))
+    for _dir, nuc in (("+", str(record.seq)), ("-", str(record.reverse_complement().seq))):
+        for m in re.finditer("ATG", nuc):
+            pro = Seq(nuc)[m.start():].translate(to_stop=True)
+            if len(pro) > longest[0]:
+                longest = (len(pro), m.start(), str(pro))
     if longest[0] > 0:
-        return longest[1]
-    return 0
+        return longest[1], _dir
+    return 0, None
 
 
 if __name__ == "__main__":
