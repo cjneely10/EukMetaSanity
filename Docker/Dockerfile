@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 # Begin installations and add to path (either add to bin or add to PATH variable)
 # apt installations
-RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev && \
+RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev zip && \
     # AUGUSTUS
     apt-get -y install augustus augustus-data augustus-doc && \
     # Move to opt directory for remaining program installations
