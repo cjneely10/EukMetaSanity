@@ -9,7 +9,7 @@ class FindRNAIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = [
                 *self.input,
-                os.path.join(self.wdir, self.record_id + ".tblout"),
+                os.path.join(self.wdir, self.record_id + ".rfam"),
             ]
         
         def run(self):
@@ -34,7 +34,7 @@ class FindRNAIter(TaskList):
                 self.local["grep"][
                     "-v", " = ",
                     os.path.join(self.wdir, self.record_id + ".all.tblout")
-                ] > os.path.join(self.wdir, self.record_id + ".tblout")
+                ] > os.path.join(self.wdir, self.record_id + ".rfam")
             )
 
         @staticmethod
