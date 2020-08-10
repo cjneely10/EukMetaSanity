@@ -8,6 +8,7 @@ class FindRNAIter(TaskList):
     class FindRNA(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            print(self.input)
             self.output = [
                 *self.input,
                 os.path.join(self.wdir, self.record_id + ".tblout"),
@@ -21,7 +22,7 @@ class FindRNAIter(TaskList):
             # Run cmscan
             self.log_and_run(
                 self.program_cmscan[
-                    "-Z", str(FindRNAIter.FindRNA.calculate_z(self.input[0])),
+                    "-Z", str(FindRNAIter.FindRNA.calculate_z(self.input[2])),
                     (*self.added_flags),
                     "--tblout", os.path.join(self.wdir, self.record_id + ".all.tblout"),
                     "--clanin", self.data_clanin,

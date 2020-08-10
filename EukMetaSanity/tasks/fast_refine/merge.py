@@ -10,7 +10,7 @@ class MergeIter(TaskList):
             super().__init__(*args, **kwargs)
             _out = {
                 "nr_gff3": os.path.join(self.wdir, self.record_id) + ".nr.gff3",
-                "mask": self.input[0],
+                "fna": self.input[0],
                 "prot": os.path.join(self.wdir, self.record_id) + ".faa",
                 "cds": os.path.join(self.wdir, self.record_id) + ".cds.fna",
             }
@@ -27,7 +27,6 @@ class MergeIter(TaskList):
             gff3s = []
             all_files = self.input[-2] + self.input[-1]
             for sorted_bam in all_files:
-                print(sorted_bam)
                 out_prefix = os.path.join(self.wdir, prefix(sorted_bam))
                 if not os.path.exists(out_prefix + ".bed"):
                     # Convert to BED

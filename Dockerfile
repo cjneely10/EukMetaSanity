@@ -5,17 +5,27 @@ FROM conda/miniconda3:latest
 RUN apt-get update && \
     # Create user and give permissions
     groupadd -g 999 appuser && useradd -r -u 999 -g appuser appuser && \
+    # Install apt dependencies
+    apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev zip python3-pip && \
     # Create user directories
     mkdir /home/appuser && cd /home/appuser && mkdir opt bin scripts data tmp && cd - && \
     # Create .scripts file and source it
     touch /home/appuser/scripts/.scripts && \
     echo "source /home/appuser/scripts/.scripts" >> /home/appuser/.bashrc && \
     # Add bin folder to PATH
-    echo "PATH=/home/appuser/bin:\$PATH" >> /home/appuser/scripts/.scripts
+    echo "PATH=/home/appuser/bin:\$PATH" >> /home/appuser/scripts/.scripts && \
+    # EukMetaSanity
+    mkdir /home/appuser/opt/EukMetaSanity
 
-# Begin installations and add to path (either add to bin or add to PATH variable)
-# apt installations
-RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev zip && \
+# Copy repo contents
+COPY * /home/appuser/opt/EukMetaSanity/
+
+# Installation of dependencies and adding to PATH
+# EukMetaSanity install
+RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
+    echo "PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
+    echo "PYTHONPATH=$(pwd)/EukMetaSanity/:\$PYTHONPATH" >> /home/appuser/scripts/.scripts && \
+    ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py /home/appuser/bin/EukMetaSanity && \
     # AUGUSTUS
     apt-get -y install augustus augustus-data augustus-doc && \
     # Move to opt directory for remaining program installations
@@ -65,12 +75,6 @@ RUN apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-
     tar "xzf" gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz && \
     cd gmap-2020-06-30 && ./configure && make && cd - && \
     ln -s $(pwd)/gmap-gsnap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ && \
-    # EukMetaSanity
-    git clone https://github.com/cjneely10/EukMetaSanity.git && \
-    cd EukMetaSanity && make all && cd - && \
-    echo "PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
-    echo "PYTHONPATH=$(pwd)/EukMetaSanity/:\$PYTHONPATH" >> /home/appuser/scripts/.scripts && \
-    ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py /home/appuser/bin/EukMetaSanity && \
     # Add locations for RepeatModeler/Masker and GeneMark
     ln -s $(pwd)/repeatmodeler/* /home/appuser/bin/ && \
     ln -s $(pwd)/repeatmasker/* /home/appuser/bin/ && \
