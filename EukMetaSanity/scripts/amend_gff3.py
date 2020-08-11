@@ -4,8 +4,8 @@ import re
 from Bio import SeqIO
 from io import StringIO
 from Bio.Seq import Seq
+from typing import Optional, Tuple
 from Bio.SeqRecord import SeqRecord
-from typing import List, Optional, Tuple
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 

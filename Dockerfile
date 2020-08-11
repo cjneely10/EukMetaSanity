@@ -29,43 +29,43 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     # Move to opt directory for remaining program installations
     cd /home/appuser/opt && \
     # # AUGUSTUS
-    # apt dependencies
-    apt-get -y install libboost-iostreams-dev zlib1g-dev libbamtools-dev libboost-all-dev libboost-all-dev && \
-    apt-get -y install libgsl-dev libboost-all-dev libsuitesparse-dev liblpsolve55-dev libsqlite3-dev libmysql++-dev && \
-    # bam2wig installation
-    mkdir bam2wig && cd bam2wig && \
-    git clone https://github.com/samtools/htslib.git && \
-    cd htslib && \
-    autoheader && \
-    autoconf && \
-    ./configure && \
-    make && \
-    make install && \
-    cd .. && \
-    git clone https://github.com/samtools/bcftools.git && \
-    cd bcftools && \
-    autoheader && \
-    autoconf && \
-    ./configure && \
-    make && \
-    make install && \
-    cd .. && \
-    git clone https://github.com/samtools/samtools.git && \
-    cd samtools && \
-    autoheader && \
-    autoconf -Wno-syntax && \
-    ./configure && \
-    make && \
-    make install && \
-    cd ../../ && \
-    echo "export TOOLDIR=$(pwd)/bam2wig:\$PATH" >> /home/appuser/scripts/.scripts && \
-    # AUGUSTUS
-    git clone https://github.com/Gaius-Augustus/Augustus.git && \
-    cd Augustus && mkdir -r bin src && cd src && make && cd ../auxprogs && make && cd ../../ && \
-    echo "export PATH=$(pwd)/Augustus/bin:$(pwd)/Augustus/scripts:\$PATH" >> /home/appuser/scripts/.scripts && \
-    echo "export AUGUSTUS_CONFIG_PATH=$(pwd)/Augustus/config/" && \
-    ln -s $(pwd)/Augustus/bin/* /home/appuser/bin/ && \
-    #apt-get -y install augustus augustus-data augustus-doc && \
+#    # apt dependencies
+#    apt-get -y install libboost-iostreams-dev zlib1g-dev libbamtools-dev libboost-all-dev libboost-all-dev && \
+#    apt-get -y install libgsl-dev libboost-all-dev libsuitesparse-dev liblpsolve55-dev libsqlite3-dev libmysql++-dev && \
+#    # bam2wig installation
+#    mkdir bam2wig && cd bam2wig && \
+#    git clone https://github.com/samtools/htslib.git && \
+#    cd htslib && \
+#    autoheader && \
+#    autoconf && \
+#    ./configure && \
+#    make && \
+#    make install && \
+#    cd .. && \
+#    git clone https://github.com/samtools/bcftools.git && \
+#    cd bcftools && \
+#    autoheader && \
+#    autoconf && \
+#    ./configure && \
+#    make && \
+#    make install && \
+#    cd .. && \
+#    git clone https://github.com/samtools/samtools.git && \
+#    cd samtools && \
+#    autoheader && \
+#    autoconf -Wno-syntax && \
+#    ./configure && \
+#    make && \
+#    make install && \
+#    cd ../../ && \
+#    echo "export TOOLDIR=$(pwd)/bam2wig:\$PATH" >> /home/appuser/scripts/.scripts && \
+#    # AUGUSTUS
+#    git clone https://github.com/Gaius-Augustus/Augustus.git && \
+#    cd Augustus && mkdir -p bin src && cd src && make && cd ../auxprogs && make && cd ../../ && \
+#    echo "export PATH=$(pwd)/Augustus/bin:$(pwd)/Augustus/scripts:\$PATH" >> /home/appuser/scripts/.scripts && \
+#    echo "export AUGUSTUS_CONFIG_PATH=$(pwd)/Augustus/config/" && \
+#    ln -s $(pwd)/Augustus/bin/* /home/appuser/bin/ && \
+    apt-get -y install augustus augustus-data augustus-doc && \
     # # GFFread
     git clone https://github.com/gpertea/gffread && cd gffread && make release && \
     ln -s $(pwd)/gffread /home/appuser/bin/ && cd - && \
@@ -110,7 +110,8 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2020-06-30.tar.gz && \
     tar "xzf" gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz && \
     cd gmap-2020-06-30 && ./configure && make && cd - && \
-    ln -s $(pwd)/gmap-2020-06-30/src/{gmap,gmapindex} /home/appuser/bin/ && \
+    ln -s $(pwd)/gmap-2020-06-30/src/gmap /home/appuser/bin/ && \
+    ln -s $(pwd)/gmap-2020-06-30/src/gmapindex /home/appuser/bin/ && \
     # # Add locations for RepeatModeler/Masker and GeneMark
     ln -s $(pwd)/repeatmodeler/* /home/appuser/bin/ && \
     ln -s $(pwd)/repeatmasker/* /home/appuser/bin/ && \
