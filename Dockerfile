@@ -110,12 +110,11 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     wget http://research-pub.gene.com/gmap/src/gmap-gsnap-2020-06-30.tar.gz && \
     tar "xzf" gmap-gsnap-2020-06-30.tar.gz && rm gmap-gsnap-2020-06-30.tar.gz && \
     cd gmap-2020-06-30 && ./configure && make && cd - && \
-    ln -s $(pwd)/gmap-2020-06-30/src/gmap /home/appuser/bin/ && \
-    ln -s $(pwd)/gmap-2020-06-30/src/gmapindex /home/appuser/bin/ && \
+    ln -s $(pwd)/gmap-2020-06-30/src/gmap* /home/appuser/bin/ && \
     # # Add locations for RepeatModeler/Masker and GeneMark
-    ln -s $(pwd)/repeatmodeler/* /home/appuser/bin/ && \
-    ln -s $(pwd)/repeatmasker/* /home/appuser/bin/ && \
-    ln -s $(pwd)/gmes/* /home/appuser/bin/ && \
+    mkdir $(pwd)/repeatmodeler && \
+    mkdir $(pwd)/repeatmasker && \
+    mkdir $(pwd)/gmes && \
     # # Add final permissions
     chown -R appuser:appuser /home/appuser && chmod 777 /home/appuser/data && chmod 777 /home/appuser/tmp
 

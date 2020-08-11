@@ -4,6 +4,10 @@
 **Note for Docker users**: The EukMetaSanity output is quite large. Ensure that the default docker container size is
 large.
 
+## General requirements
+Regardless of installation, ensure that `python3` and `pip3` are installed on your system and on your PATH.
+Python version should be &ge; 3.6.
+
 ## Docker installation
 **EukMetaSanity**'s Docker image is packaged with all (most) of required and optional dependencies listed below.
 
@@ -97,7 +101,7 @@ Install [HISAT2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-
 Install [GMAP](http://research-pub.gene.com/gmap/)
 
 
-## Installing MMseqs2 OrthoDB
+## Installing required databases
 ```
 EukMetaSanity/download-data.py databases -t <threads> -m <split-memory-limit>
 ```
