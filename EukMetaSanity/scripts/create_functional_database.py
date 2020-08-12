@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import sqlite3
-import string
 from decimal import Decimal
 from typing import List, Tuple, Generator
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -56,7 +55,7 @@ def _parse_args(_ap: ArgParse) -> List[Tuple[str, str]]:
     for annot in _ap.args.annotations:
         assert "=" in annot
         f_string = annot.split("=")
-        assert os.path.exists(f_string[1])
+        assert os.path.exists(f_string[1]), f_string[1]
         annotation_files.append((f_string[0], f_string[1]))
     return annotation_files
 
@@ -102,7 +101,7 @@ def _fasta_id_iter(fasta_file: str) -> Generator[str, str, None]:
 def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: Decimal):
     # Create database, or load existing
     table_col_ids = sorted([annotation[0] for annotation in annotations])
-    db_path = "annotations.db"
+    db_path = os.path.splitext(fasta_file)[0] + ".db"
     if os.path.exists(db_path):
         os.remove(db_path)
     conn = generate(
