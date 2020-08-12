@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import os
-from pathlib import Path
 from typing import List
-
+from pathlib import Path
 from plumbum import local
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.manager.data import data_urls
@@ -118,6 +117,8 @@ def _generate_config_files(_file_names: List[str], _replace_strings: List[str], 
         _new_file = os.path.join(_outdir, os.path.basename(_config_file))
         cp[os.path.join(_config_directory, _config_file), _new_file]()
         for _file_name, _replace_string in zip(_file_names, _replace_strings):
+            _file_name = str(Path(_file_name).resolve()).replace("/", "\/")
+            _replace_string = str(Path(_replace_string).resolve()).replace("/", "\/")
             _print_and_run(
                 sed[
                     "-i", "s/\/path\/to\/%s/%s/g" % (_replace_string, _file_name),
