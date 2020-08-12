@@ -41,8 +41,18 @@ class MMseqsIter(TaskList):
             # Search through each database
             for db in self.data.split(","):
                 search_prog = "search"
+                added_flags = self.added_flags
                 if os.path.exists(db + ".linidx"):
                     search_prog = "linsearch"
+                    for _v in ("-s", "-k"):
+                        if _v in added_flags:
+                            del added_flags[added_flags.index(_v) + 1]
+                            added_flags.remove(_v)
+                else:
+                    for _v in ("--kmer-per-seq-scale", "--kmer-per-seq"):
+                        if _v in added_flags:
+                            del added_flags[added_flags.index(_v) + 1]
+                            added_flags.remove(_v)
                 _out_db = _file_db[:-3] + "_%s-results_db" % os.path.basename(os.path.splitext(db)[0])
                 # Linear search
                 self.log_and_run(
@@ -52,7 +62,7 @@ class MMseqsIter(TaskList):
                         db,  # Input augustus-db
                         _out_db,  # Output tax db
                         os.path.join(self.wdir, "tmp"),
-                        (*self.added_flags),
+                        (*added_flags),
                         "--threads", self.threads,
                     ]
                 )

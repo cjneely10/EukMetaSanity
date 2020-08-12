@@ -31,8 +31,8 @@ class EggNOGMapper(TaskList):
                 ]
             )
             os.replace(
-                os.path.join(self.wdir, self.record_id) + ".emapper.annotations",
-                os.path.join(self.wdir, self.record_id) + ".emapper"
+                os.path.join(self.wdir, self.record_id + ".emapper.annotations"),
+                os.path.join(self.wdir, self.record_id + ".emapper")
             )
 
     def __init__(self, *args, **kwargs):
