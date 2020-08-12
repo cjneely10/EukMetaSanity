@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 from pathlib import Path
+from typing import List
+
 from plumbum import local
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.manager.data import data_urls
@@ -40,6 +42,8 @@ def run(ap: ArgParse, out_dir: str):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     # Download each URL to folder
+    out = []
+    ids = []
     for _id, url in data_urls().items():
         # Download
         new_dir = os.path.join(out_dir, _id)
@@ -47,6 +51,8 @@ def run(ap: ArgParse, out_dir: str):
             os.makedirs(new_dir)
         _file = os.path.join(new_dir, os.path.basename(url.url))
         _out = os.path.join(new_dir, _id + "_db")
+        out.append(_out)
+        ids.append(_id)
         if not os.path.exists(_out) or ap.args.rewrite:
             _print_and_run(wget[url.url, "-O", _file])
             # Tar/gunzip
@@ -67,7 +73,6 @@ def run(ap: ArgParse, out_dir: str):
                     ]
                 )
                 # Remove downloaded file
-                os.remove(_file)
                 # Add taxonomy info from ncbi
                 _create_tax_db(_out, out_dir)
             elif url.type == "profile":
@@ -78,7 +83,8 @@ def run(ap: ArgParse, out_dir: str):
                 _print_and_run(
                     mmseqs["msa2profile", _msa_db, _out, "--match-mode", "1"]
                 )
-            if ap.args.build:
+            os.remove(_file)
+            if ap.args.build and url.type != "profile":
                 # Generate linear index
                 _print_and_run(
                     mmseqs[
@@ -102,23 +108,22 @@ def run(ap: ArgParse, out_dir: str):
                         "--remove-tmp-files",
                     ]
                 )
-        if ap.args.output:
-            _generate_config_files(_out, _id, ap.args.threads, ap.args.path)
+    if ap.args.output:
+        _generate_config_files(out, ids, ap.args.threads, ap.args.path)
 
 
-def _generate_config_files(_file_name: str, _replace_string: str, _threads: int, _outdir: str):
-    _file_name = str(Path(_file_name).resolve()).replace("/", "\/")
-    _replace_string = _replace_string.replace("/", "\/")
+def _generate_config_files(_file_names: List[str], _replace_strings: List[str], _threads: int, _outdir: str):
     _config_directory = os.path.join(os.path.dirname(__file__), "config")
     for _config_file in os.listdir(_config_directory):
         _new_file = os.path.join(_outdir, os.path.basename(_config_file))
         cp[os.path.join(_config_directory, _config_file), _new_file]()
-        _print_and_run(
-            sed[
-                "-i", "s/\/path\/to\/%s/%s/g" % (_replace_string, _file_name),
-                _new_file
-            ]
-        )
+        for _file_name, _replace_string in zip(_file_names, _replace_strings):
+            _print_and_run(
+                sed[
+                    "-i", "s/\/path\/to\/%s/%s/g" % (_replace_string, _file_name),
+                    _new_file
+                ]
+            )
 
 
 def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
@@ -134,6 +139,8 @@ def _create_tax_db(_out: str, out_dir: str):
     # Create mmseqs input file
     if "odb" in _out:
         _odb_tax_parse(_out, os.path.join(out_dir, "mmseqs.input"))
+    else:
+        return
     # Download tax info
     _print_and_run(
         wget["ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "-O", os.path.join(out_dir, "taxdump.tar.gz")]
