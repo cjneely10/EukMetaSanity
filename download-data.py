@@ -57,7 +57,7 @@ def run(ap: ArgParse, out_dir: str):
                 _print_and_run(gunzip[_file])
                 _file = os.path.splitext(_file)[0]
             # Generate MMseqs2 database
-            if ap.args.build:
+            if url.type == "FASTA":
                 # Generate database
                 _print_and_run(
                     mmseqs[
@@ -66,8 +66,19 @@ def run(ap: ArgParse, out_dir: str):
                         _out
                     ]
                 )
+                # Remove downloaded file
+                os.remove(_file)
                 # Add taxonomy info from ncbi
                 _create_tax_db(_out, out_dir)
+            elif url.type == "profile":
+                _msa_db = _out[:-3] + "_msa_db"
+                _print_and_run(
+                    mmseqs["convertmsa", _file, _msa_db]
+                )
+                _print_and_run(
+                    mmseqs["msa2profile", _msa_db, _out, "--match-mode", "1"]
+                )
+            if ap.args.build:
                 # Generate linear index
                 _print_and_run(
                     mmseqs[
@@ -110,7 +121,7 @@ def _generate_config_files(_file_name: str, _replace_string: str, _threads: int,
         )
 
 
-def _create_taxonomy_info(mmseqs_db_path: str, outfile: str):
+def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
     output_p = open(outfile, "w")
     mmseqs_input_fp = open(mmseqs_db_path + ".lookup", "r")
     for line in mmseqs_input_fp:
@@ -121,7 +132,8 @@ def _create_taxonomy_info(mmseqs_db_path: str, outfile: str):
 
 def _create_tax_db(_out: str, out_dir: str):
     # Create mmseqs input file
-    _create_taxonomy_info(_out, os.path.join(out_dir, "mmseqs.input"))
+    if "odb" in _out:
+        _odb_tax_parse(_out, os.path.join(out_dir, "mmseqs.input"))
     # Download tax info
     _print_and_run(
         wget["ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "-O", os.path.join(out_dir, "taxdump.tar.gz")]

@@ -7,7 +7,7 @@ Class to handle tracking all required datasets for each task
 
 """
 
-UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz"))
+UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz", "type"))
 
 
 def data_urls() -> Dict[str, UrlInfo]:
@@ -17,6 +17,14 @@ def data_urls() -> Dict[str, UrlInfo]:
             flags="",
             tar=False,
             gz=True,
+            type="FASTA",
+        ),
+        "rfam_db": UrlInfo(
+            url="ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.seed.gz",
+            flags="",
+            tar=False,
+            gz=False,
+            type="profile"
         )
     }
 
