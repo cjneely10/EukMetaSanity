@@ -73,6 +73,8 @@ Install [MetaEuk](https://github.com/soedinglab/metaeuk)
 ---
 #### Report
 
+`sqlite3` should be on your PATH in addition to the values in **Run**
+
 ##### Report step 1/2 (optional)
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2), and install any databases you wish to incorporate by following
 the [github page](https://github.com/soedinglab/mmseqs2/wiki#downloading-databases)
