@@ -118,7 +118,6 @@ def _generate_config_files(_file_names: List[str], _replace_strings: List[str], 
         cp[os.path.join(_config_directory, _config_file), _new_file]()
         for _file_name, _replace_string in zip(_file_names, _replace_strings):
             _file_name = str(Path(_file_name).resolve()).replace("/", "\/")
-            _replace_string = str(Path(_replace_string).resolve()).replace("/", "\/")
             _print_and_run(
                 sed[
                     "-i", "s/\/path\/to\/%s/%s/g" % (_replace_string, _file_name),
