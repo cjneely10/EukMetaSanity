@@ -166,4 +166,4 @@ if __name__ == "__main__":
     _cfg, _is_cont = _parse_args(_ap, _tm)
     _main(_ap, _cfg, _is_cont, _tm)
     for func in (logging.info, print):
-        func("\nEukMetaSanity pipeline complete!")
+        func("\nEukMetaSanity %s pipeline complete!" % _ap.args.command)

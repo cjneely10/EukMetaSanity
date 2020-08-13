@@ -249,11 +249,11 @@ class AbInitioIter(TaskList):
                 self.local[new_path][self.wdir]
             )
             # Move program to match required output name
-            if self.mode == 1:
-                os.replace(
-                    os.path.join(self.wdir, "genemark.gtf"),
-                    self.output[0]
-                )
+            self.log_and_run(
+                self.program_gffread[
+                    os.path.join(self.wdir, "genemark.gtf"), "-G",
+                ] > self.output[0]
+            )
 
         @staticmethod
         def update_cfg(in_path: str, replace_tuple: List[Tuple[str, str]], out_path: str):

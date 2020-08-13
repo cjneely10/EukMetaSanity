@@ -40,6 +40,15 @@ class MMseqsIter(TaskList):
                 )
             # Search through each database
             for db in self.data.split(","):
+                if "rfam" in db:
+                    _file_db = _file_db + "_nuc_db"
+                    self.log_and_run(
+                        self.program[
+                            "createdb",
+                            self.input[2],
+                            _file_db,
+                        ]
+                    )
                 search_prog = "search"
                 added_flags = self.added_flags
                 if os.path.exists(db + ".linidx"):

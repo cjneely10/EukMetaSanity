@@ -26,14 +26,28 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
     prot_list = []
     cds_ids = set()
     i = 1
-    for line in gff3_p:
-        if line.startswith("#"):
-            out_p.write(line)
+    line = next(gff3_p).split()
+    end = 1
+    at_end = False
+    while True:
+        if line[0].startswith("#"):
+            out_p.write("\t".join(line) + "\n")
+            line = next(gff3_p).split()
             continue
-        elif line.startswith(">"):
+        elif line[0].startswith(">"):
             break
-        line = line.split()
         if line[2] in ("gene", "transcript"):
+            _new_end = int(line[4])
+            _new_start = int(line[3])
+            if _new_start <= end:
+                line = next(gff3_p).split()
+                while line[2] not in ("gene", "transcript"):
+                    try:
+                        line = next(gff3_p).split()
+                    except StopIteration:
+                        break
+                continue
+            end = _new_end
             # Gather CDS sequence
             seq = StringIO()
             # Generate gene/mRNA ids
@@ -68,6 +82,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
                 try:
                     line = next(gff3_p).split()
                 except StopIteration:
+                    at_end = True
                     break
             # Ensure CDS id is unique
             while gene_id in cds_ids:
@@ -80,11 +95,11 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
             cds_ids.add(gene_id)
             # Create CDS record and save
             record = SeqRecord(
-                    id=gene_id,
-                    seq=Seq(seq.getvalue()),
-                    description="strand=%s" % strand,
-                    name="",
-                )
+                id=gene_id,
+                seq=Seq(seq.getvalue()),
+                description="strand=%s" % strand,
+                name="",
+            )
             cds_list.append(record)
             # Read to find longest ORF
             # Translate and return offset
@@ -109,8 +124,8 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
                 )))
                 j += 1
             i += 1
-        elif "repeats" in line[2].lower():
-            pass
+            if at_end:
+                break
 
     out_p.close()
     # Write CDS/protein info
