@@ -28,8 +28,11 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
     i = 1
     line = next(gff3_p).split()
     end = 1
+    _id = ""
     at_end = False
     while True:
+        if at_end:
+            break
         if line[0].startswith("#"):
             out_p.write("\t".join(line) + "\n")
             line = next(gff3_p).split()
@@ -37,17 +40,22 @@ def convert_final_gff3(gff3_file: str, fasta_file: str):
         elif line[0].startswith(">"):
             break
         if line[2] in ("gene", "transcript"):
+            _new_id = line[0]
             _new_end = int(line[4])
             _new_start = int(line[3])
-            if _new_start <= end:
+            if _new_start <= end and _id == _new_id:
                 line = next(gff3_p).split()
                 while line[2] not in ("gene", "transcript"):
                     try:
                         line = next(gff3_p).split()
                     except StopIteration:
+                        at_end = True
                         break
+                if at_end:
+                    break
                 continue
             end = _new_end
+            _id = _new_id
             # Gather CDS sequence
             seq = StringIO()
             # Generate gene/mRNA ids
