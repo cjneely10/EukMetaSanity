@@ -74,7 +74,7 @@ class EvidenceIter(TaskList):
             # Merge final results
             EvidenceIter.Evidence.merge(
                 self, [self.input[0], os.path.join(self.wdir, "metaeuk.gff3")],
-                self.input[2],
+                self.input[4],
                 os.path.join(self.wdir, self.record_id)
             )
             
@@ -90,16 +90,16 @@ class EvidenceIter(TaskList):
             # Convert to gff3 file
             task_object.log_and_run(
                 task_object.program_gffread[
-                    out_prefix + ".combined.gtf", "-G",
+                    out_prefix + ".combined.gtf", "-G", "--merge", "-Y"
                 ] > out_prefix + ".gff3"
             )
-            # Replace transcripts with gene identifier and write cds/aa sequences
-            task_object.log_and_run(
-                task_object.local["amend_gff3.py"][
-                    "-g", out_prefix + ".gff3",
-                    "-f", fasta_file,
-                ]
-            )
+            # # Replace transcripts with gene identifier and write cds/aa sequences
+            # task_object.log_and_run(
+            #     task_object.local["amend_gff3.py"][
+            #         "-g", out_prefix + ".gff3",
+            #         "-f", fasta_file,
+            #     ]
+            # )
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
