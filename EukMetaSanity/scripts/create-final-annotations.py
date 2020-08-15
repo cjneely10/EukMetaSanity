@@ -1,29 +1,27 @@
 #!/usr/bin/env python3
-import itertools
 import os
 import re
-from operator import itemgetter
-
+import itertools
 from Bio import SeqIO
-from io import StringIO
 from Bio.Seq import Seq
+from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
-from typing import Optional, Tuple, Generator, List, Callable, Dict
+from typing import Optional, Tuple, Generator, List, Dict
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 
 class Gff3Parser:
-    def __init__(self, gff3_file: str, priority: str = "metaeuk"):
+    def __init__(self, gff3_file: str, fasta_file: str, priority: str = "metaeuk"):
+        assert priority in dir(Gff3Parser)
         self.fp = open(gff3_file, "r")
         self.priority = getattr(Gff3Parser, priority, lambda _: _)
+        self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
+        self.count = 0
 
-    def next_gene(self) -> Generator[Dict[str, object], None, None]:
+    def next_gene(self) -> Generator[Tuple[Dict[str, object], Optional[SeqRecord], Optional[SeqRecord]], None, None]:
         _line: str
         line: List[str]
-        try:
-            line = next(self.fp).rstrip("\r\n").split("\t")
-        except StopIteration:
-            return
+        line = next(self.fp).rstrip("\r\n").split("\t")
         while True:
             if line[0][0] == "#":
                 line = next(self.fp).rstrip("\r\n").split("\t")
@@ -31,6 +29,7 @@ class Gff3Parser:
             elif line[0][0] == ">":
                 break
             if line[2] == "locus":
+                self.count += 1
                 # Putative gene
                 gene_data = {
                     "fasta-id": line[0],
@@ -54,14 +53,31 @@ class Gff3Parser:
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
                 gene_data["transcripts"] = self.priority(transcripts)
-                yield gene_data
+                if len(gene_data["transcripts"]) == 0:
+                    continue
+                record = SeqRecord(
+                    seq=Seq(
+                        "".join((
+                            str(self.fasta_dict[gene_data["fasta-id"]].seq[int(transcript[0]) - 1: int(transcript[1])])
+                            for transcript in gene_data["transcripts"]
+                        ))
+                    ),
+                    id="gene%s" % str(self.count),
+                    description="strand=%s" % gene_data["strand"],
+                    name="",
+                )
+                yield (
+                    self._gene_to_string(gene_data),
+                    record,
+                    find_orf(record),
+                )
 
     @staticmethod
     def metaeuk(line: List[List]) -> List[List]:
         return Gff3Parser.filter_specific(line, "metaeuk")
 
     @staticmethod
-    def ab_initio(line: List[List]) -> List[List]:
+    def abinitio(line: List[List]) -> List[List]:
         return Gff3Parser.filter_specific(line, "ab-initio")
 
     @staticmethod
@@ -76,38 +92,53 @@ class Gff3Parser:
         # Sort coordinates by start value
         ranges_in_coords = sorted(itertools.chain(*[l[-1] for l in line]), key=itemgetter(0))
         # Will group together matching sections into spans
-        # Return list of these spans at end
-        # Initialize current span and list to return
         spans_in_coords = [list(ranges_in_coords[0]), ]
         for coords in ranges_in_coords[1:]:
-            # The start value is within the farthest range of current span
-            # and the end value extends past the current span
+            # The start value is within the farthest range of current span and the end value extends past current
             if coords[0] <= spans_in_coords[-1][1] < coords[1]:
                 spans_in_coords[-1][1] = coords[1]
-            # The start value is past the range of the current span
-            # Append old span to list to return
-            # Reset current span to this new range
+            # The start value is past the range of the current span, append old span to list to return
             elif coords[0] > spans_in_coords[-1][1]:
                 spans_in_coords.append(list(coords))
         return spans_in_coords
 
-    def _gene_to_string(self) -> str:
+    @staticmethod
+    def create_cds(exon_list: List):
         pass
 
-    def __str__(self) -> str:
-        pass
-
-    def __repr__(self) -> str:
-        return self.__str__()
+    def _gene_to_string(self, gene_data: Dict) -> str:
+        return "".join((
+            "\t".join((
+                gene_data["fasta-id"],
+                gene_data["transcripts"][0][0],
+                "gene",
+                gene_data["start"],
+                gene_data["end"],
+                ".",
+                gene_data["strand"],
+                ".",
+                "ID=gene%s" % self.count)
+            ),
+            "\n",
+        ))
 
     def __iter__(self):
         return self.next_gene()
 
 
-def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str):
-    gff3 = Gff3Parser(gff3_file, filter_function)
-    for gene in gff3:
-        print(gene)
+def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_file: str):
+    gff3 = Gff3Parser(gff3_file, fasta_file, filter_function)
+    out_cds = []
+    out_prots = []
+    gff3_fp = open(out_file + ".gff3", "w")
+    for gene, cds, prot in gff3:
+        gff3_fp.write(gene)
+        if cds is not None:
+            out_cds.append(cds)
+        if prot is not None:
+            out_prots.append(prot)
+    SeqIO.write(out_cds, out_file + ".cds.fna", "fasta")
+    SeqIO.write(out_prots, out_file + ".faa", "fasta")
 
 
 def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
@@ -124,7 +155,8 @@ def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
         return SeqRecord(
             seq=Seq(str(longest[2]) + "*"),
             id=record.id,
-            description=record.description
+            description=record.description,
+            name="",
         ), longest[1]
     return None, 0
 
@@ -138,12 +170,16 @@ if __name__ == "__main__":
              {"help": ".tmp.nr.gff3 file", "required": True}),
             (("-f", "--fasta_file"),
              {"help": "FASTA file", "required": True}),
+            (("-o", "--out"),
+             {"help": "Output prefix, default is command name", "default": "command"}),
         ),
-        description="Convert .tmp.nr.gff3 to final .gff3 output"
+        description="GFF3 output final annotations"
     )
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file)
-    convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, ap.args.command)
+    if ap.args.out == "command":
+        ap.args.out = ap.args.command
+    convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, ap.args.command, ap.args.out)
 
 if __name__ == "__main__":
     pass
