@@ -71,46 +71,15 @@ class Gff3Parser:
                     description="strand=%s" % gene_data["strand"],
                     name="",
                 )
-                orf, offset = find_orf(record)
+                orf, offset = Gff3Parser.find_orf(record)
                 yield (
                     self._gene_to_string(gene_data, str(offset)),
                     record,
                     orf,
                 )
 
-    @staticmethod
-    def metaeuk(line: List[List]) -> List[List]:
-        return Gff3Parser.filter_specific(line, "metaeuk")
-
-    @staticmethod
-    def abinitio(line: List[List]) -> List[List]:
-        return Gff3Parser.filter_specific(line, "ab-initio")
-
-    @staticmethod
-    def filter_specific(line: List[List], name: str) -> List[List]:
-        for _l in line:
-            if _l[0] == name:
-                return _l
-        return []
-
-    @staticmethod
-    def merge(line: List[List]) -> List[List]:
-        # Sort coordinates by start value
-        ranges_in_coords = sorted(itertools.chain(*[_l[-1] for _l in line]), key=itemgetter(0))
-        # Will group together matching sections into spans
-        spans_in_coords = [list(ranges_in_coords[0]), ]
-        for coords in ranges_in_coords[1:]:
-            # The start value is within the farthest range of current span and the end value extends past current
-            if coords[0] <= spans_in_coords[-1][1] < coords[1]:
-                spans_in_coords[-1][1] = coords[1]
-            # The start value is past the range of the current span, append old span to list to return
-            elif coords[0] > spans_in_coords[-1][1]:
-                spans_in_coords.append(list(coords))
-        return spans_in_coords
-
-    @staticmethod
-    def create_cds(exon_list: List):
-        pass
+    def __iter__(self):
+        return self.next_gene()
 
     def _gene_to_string(self, gene_data: Dict, offset: str) -> str:
         gene_id = "gene%s" % str(self.count)
@@ -152,25 +121,56 @@ class Gff3Parser:
             )))
         return ss.getvalue()
 
-    def __iter__(self):
-        return self.next_gene()
+    @staticmethod
+    def metaeuk(line: List[List]) -> List[List]:
+        return Gff3Parser.filter_specific(line, "metaeuk")
 
+    @staticmethod
+    def abinitio(line: List[List]) -> List[List]:
+        return Gff3Parser.filter_specific(line, "ab-initio")
 
-def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
-    longest = (0,)
-    nuc = str(record.seq)
-    for m in re.finditer("ATG", nuc):
-        pro = Seq(nuc[m.start():]).translate(to_stop=True)
-        if len(pro) > longest[0]:
-            longest = (len(pro), m.start(), str(pro))
-    if longest[0] > 0:
-        return SeqRecord(
-            seq=Seq(str(longest[2]) + "*"),
-            id=record.id,
-            description=record.description,
-            name="",
-        ), longest[1]
-    return None, 0
+    @staticmethod
+    def filter_specific(line: List[List], name: str) -> List[List]:
+        for _l in line:
+            if _l[0] == name:
+                return _l
+        return []
+
+    @staticmethod
+    def merge(line: List[List]) -> List[List]:
+        # Sort coordinates by start value
+        ranges_in_coords = sorted(itertools.chain(*[_l[-1] for _l in line]), key=itemgetter(0))
+        # Will group together matching sections into spans
+        spans_in_coords = [list(ranges_in_coords[0]), ]
+        for coords in ranges_in_coords[1:]:
+            # The start value is within the farthest range of current span and the end value extends past current
+            if coords[0] <= spans_in_coords[-1][1] < coords[1]:
+                spans_in_coords[-1][1] = coords[1]
+            # The start value is past the range of the current span, append old span to list to return
+            elif coords[0] > spans_in_coords[-1][1]:
+                spans_in_coords.append(list(coords))
+        return spans_in_coords
+
+    @staticmethod
+    def create_cds(exon_list: List):
+        pass
+
+    @staticmethod
+    def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
+        longest = (0,)
+        nuc = str(record.seq)
+        for m in re.finditer("ATG", nuc):
+            pro = Seq(nuc[m.start():]).translate(to_stop=True)
+            if len(pro) > longest[0]:
+                longest = (len(pro), m.start(), str(pro))
+        if longest[0] > 0:
+            return SeqRecord(
+                seq=Seq(str(longest[2]) + "*"),
+                id=record.id,
+                description=record.description,
+                name="",
+            ), longest[1]
+        return None, 0
 
 
 def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_file: str):
