@@ -14,6 +14,9 @@ class EvidenceIter(TaskList):
     class Evidence(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            _merged_out = os.path.join(self.wdir, self.record_id + ".nr.gff3")
+            if os.path.exists(_merged_out):
+                os.remove(_merged_out)
             _out = {
                 "metaeuk": os.path.join(self.wdir, "metaeuk.gff3"),  # Combined results of ab initio + evidence
                 "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
@@ -75,11 +78,12 @@ class EvidenceIter(TaskList):
             EvidenceIter.Evidence.merge(
                 self, [self.input[0], os.path.join(self.wdir, "metaeuk.gff3")],
                 self.input[4],
-                os.path.join(self.wdir, self.record_id)
+                os.path.join(self.wdir, self.record_id),
+                self.merge_method,
             )
             
         @staticmethod
-        def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str):
+        def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str, merge_method: str):
             # Merge to non-redundant set
             task_object.log_and_run(
                 task_object.program_gffcompare[
@@ -96,7 +100,7 @@ class EvidenceIter(TaskList):
             # Replace transcripts with gene identifier and write cds/aa sequences
             task_object.log_and_run(
                 task_object.local["create-final-annotations.py"][
-                    "merge", "-f", fasta_file, "-g", out_prefix + ".gff3"
+                    merge_method, "-f", fasta_file, "-g", out_prefix + ".gff3"
                 ]
             )
 

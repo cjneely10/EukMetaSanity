@@ -20,6 +20,9 @@ class Gff3Parser:
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
         self.count = 0
 
+    def __iter__(self):
+        return self.next_gene()
+
     def next_gene(self) -> Generator[Tuple[str, Optional[SeqRecord], Optional[SeqRecord]], None, None]:
         _line: str
         line: List[str]
@@ -55,19 +58,8 @@ class Gff3Parser:
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
                 gene_data["transcripts"] = self.priority(transcripts)
-                seq = StringIO()
-                orig_seq = self.fasta_dict[gene_data["fasta-id"]]
-                if gene_data["strand"] == "-":
-                    orig_seq = orig_seq.reverse_complement()
-                orig_seq = str(orig_seq.seq)
-                for transcript in gene_data["transcripts"]:
-                    seq.write(orig_seq[int(transcript[0]) - 1: int(transcript[1])])
-                record = SeqRecord(
-                    seq=Seq(seq.getvalue()),
-                    id="gene%s" % str(self.count),
-                    description="strand=%s" % gene_data["strand"],
-                    name="",
-                )
+                # Create CDS and protein record
+                record = self.create_cds(gene_data)
                 orf, offset = Gff3Parser.find_orf(record)
                 yield (
                     self._gene_to_string(gene_data, str(offset)),
@@ -75,8 +67,20 @@ class Gff3Parser:
                     orf,
                 )
 
-    def __iter__(self):
-        return self.next_gene()
+    def create_cds(self, gene_data: Dict) -> SeqRecord:
+        seq = StringIO()
+        orig_seq = self.fasta_dict[gene_data["fasta-id"]]
+        if gene_data["strand"] == "-":
+            orig_seq = orig_seq.reverse_complement()
+        orig_seq = str(orig_seq.seq)
+        for transcript in gene_data["transcripts"]:
+            seq.write(orig_seq[int(transcript[0]) - 1: int(transcript[1])])
+        return SeqRecord(
+            seq=Seq(seq.getvalue()),
+            id="gene%s" % str(self.count),
+            description="strand=%s" % gene_data["strand"],
+            name="",
+        )
 
     def _gene_to_string(self, gene_data: Dict, offset: str) -> str:
         gene_id = "gene%s" % str(self.count)
@@ -85,15 +89,13 @@ class Gff3Parser:
             "\t".join((
                 gene_data["fasta-id"], self.version,
                 "gene", gene_data["start"], gene_data["end"],
-                ".", gene_data["strand"],
-                ".", "ID=%s" % gene_id
+                ".", gene_data["strand"], ".", "ID=%s" % gene_id
             )),
             "\n",
             "\t".join((
                 gene_data["fasta-id"], self.version,
                 "mRNA", gene_data["start"], gene_data["end"],
-                ".", gene_data["strand"],
-                ".", "ID=%s-mRNA;Parent=%s" % (gene_id, gene_id)
+                ".", gene_data["strand"], ".", "ID=%s-mRNA;Parent=%s" % (gene_id, gene_id)
             )),
             "\n",
         )))
@@ -101,18 +103,14 @@ class Gff3Parser:
             ss.write("".join((
                 "\t".join((
                     gene_data["fasta-id"], self.version,
-                    "exon", str(exon_tuple[0]),
-                    str(exon_tuple[1]),
-                    ".", gene_data["strand"],
-                    ".", "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
+                    "exon", str(exon_tuple[0]), str(exon_tuple[1]),
+                    ".", gene_data["strand"], ".", "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
                 )),
                 "\n",
                 "\t".join((
                     gene_data["fasta-id"], self.version,
-                    "CDS", str(exon_tuple[0]),
-                    str(exon_tuple[1]),
-                    ".", gene_data["strand"],
-                    offset, "ID=%s-cds;Parent=%s" % (gene_id, gene_id)
+                    "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
+                    ".", gene_data["strand"], offset, "ID=%s-cds;Parent=%s" % (gene_id, gene_id)
                 )),
                 "\n",
             )))
@@ -130,7 +128,7 @@ class Gff3Parser:
     def filter_specific(line: List[List], name: str) -> List[List]:
         for _l in line:
             if _l[0] == name:
-                return _l
+                return _l[-1]
         return []
 
     @staticmethod
@@ -147,10 +145,6 @@ class Gff3Parser:
             elif coords[0] > spans_in_coords[-1][1]:
                 spans_in_coords.append(list(coords))
         return spans_in_coords
-
-    @staticmethod
-    def create_cds(exon_list: List):
-        pass
 
     @staticmethod
     def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
@@ -174,14 +168,13 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
     gff3 = Gff3Parser(gff3_file, fasta_file, filter_function)
     out_cds = []
     out_prots = []
-    gff3_fp = open(out_file + ".nr.gff3", "w")
-    for gene, cds, prot in gff3:
-        gff3_fp.write(gene)
-        if cds is not None:
-            out_cds.append(cds)
-        if prot is not None:
-            out_prots.append(prot)
-    gff3_fp.close()
+    with open(out_file + ".nr.gff3", "w") as gff3_fp:
+        for gene, cds, prot in gff3:
+            gff3_fp.write(gene)
+            if cds is not None:
+                out_cds.append(cds)
+            if prot is not None:
+                out_prots.append(prot)
     SeqIO.write(out_cds, out_file + ".cds.fna", "fasta")
     SeqIO.write(out_prots, out_file + ".faa", "fasta")
 

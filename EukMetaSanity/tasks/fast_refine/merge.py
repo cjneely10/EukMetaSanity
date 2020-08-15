@@ -78,6 +78,7 @@ class MergeIter(TaskList):
                 [*gff3s, self.input[1]],
                 self.input[0],
                 os.path.join(self.wdir, self.record_id),
+
             )
             
     def __init__(self, *args, **kwargs):
