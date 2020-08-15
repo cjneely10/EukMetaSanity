@@ -101,9 +101,6 @@ def _parse_args(ap):
     # Confirm path existence
     assert os.path.exists(ap.args.data_file)
     assert os.path.exists(ap.args.fasta_file)
-    # Confirm valid mode and parsing source
-    assert ap.args.mode in ("query", "subject")
-    assert ap.args.source in globals().keys()
     # Convert numerics
     try:
         ap.args.evalue = Decimal(ap.args.evalue)
@@ -140,8 +137,6 @@ if __name__ == "__main__":
              {"help": "Minimum percent identity to retain, default 90.0", "default": "90.0"}),
             (("-c", "--coverage"),
              {"help": "Minimum coverage to retain, default 0.60", "default": "0.60"}),
-            (("-m", "--mode"),
-             {"help": "Map to subject/query, default subject", "default": "subject"}),
         ),
         description="Parse FASTA and BLAST results to GFF3 format"
     )
