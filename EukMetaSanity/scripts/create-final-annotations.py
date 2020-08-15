@@ -177,7 +177,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
     gff3 = Gff3Parser(gff3_file, fasta_file, filter_function)
     out_cds = []
     out_prots = []
-    gff3_fp = open(out_file + ".gff3", "w")
+    gff3_fp = open(out_file + ".nr.gff3", "w")
     for gene, cds, prot in gff3:
         gff3_fp.write(gene)
         if cds is not None:
