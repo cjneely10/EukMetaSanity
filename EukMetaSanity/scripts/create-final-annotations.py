@@ -4,6 +4,7 @@ import re
 import itertools
 from Bio import SeqIO
 from Bio.Seq import Seq
+from io import StringIO
 from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
 from typing import Optional, Tuple, Generator, List, Dict
@@ -66,10 +67,11 @@ class Gff3Parser:
                     description="strand=%s" % gene_data["strand"],
                     name="",
                 )
+                orf, offset = find_orf(record)
                 yield (
-                    self._gene_to_string(gene_data),
+                    self._gene_to_string(gene_data, str(offset)),
                     record,
-                    find_orf(record),
+                    orf,
                 )
 
     @staticmethod
@@ -106,8 +108,9 @@ class Gff3Parser:
     def create_cds(exon_list: List):
         pass
 
-    def _gene_to_string(self, gene_data: Dict) -> str:
-        return "".join((
+    def _gene_to_string(self, gene_data: Dict, offset: str) -> str:
+        gene_id = "gene%s" % str(self.count)
+        ss = StringIO("".join((
             "\t".join((
                 gene_data["fasta-id"],
                 gene_data["transcripts"][0][0],
@@ -117,10 +120,50 @@ class Gff3Parser:
                 ".",
                 gene_data["strand"],
                 ".",
-                "ID=gene%s" % self.count
+                "ID=%s" % gene_id
             )),
             "\n",
-        ))
+            "\t".join((
+                gene_data["fasta-id"],
+                gene_data["transcripts"][0][0],
+                "mRNA",
+                gene_data["start"],
+                gene_data["end"],
+                ".",
+                gene_data["strand"],
+                ".",
+                "ID=%s-mRNA" % gene_id
+            )),
+            "\n",
+        )))
+        for exon_tuple in gene_data["transcripts"]:
+            ss.write("".join((
+                "\t".join((
+                    gene_data["fasta-id"],
+                    gene_data["transcripts"][0][0],
+                    "exon",
+                    str(exon_tuple[0]),
+                    str(exon_tuple[1]),
+                    ".",
+                    gene_data["strand"],
+                    offset,
+                    "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
+                )),
+                "\n",
+                "\t".join((
+                    gene_data["fasta-id"],
+                    gene_data["transcripts"][0][0],
+                    "CDS",
+                    str(exon_tuple[0]),
+                    str(exon_tuple[1]),
+                    ".",
+                    gene_data["strand"],
+                    offset,
+                    "ID=%s-cds;Parent=%s" % (gene_id, gene_id)
+                )),
+                "\n",
+            )))
+        return ss.getvalue()
 
     def __iter__(self):
         return self.next_gene()
@@ -141,7 +184,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
     SeqIO.write(out_prots, out_file + ".faa", "fasta")
 
 
-def find_orf(record: SeqRecord) -> Optional[SeqRecord]:
+def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
     longest = (0,)
     if record.description[-1] == "+":
         nuc = str(record.seq)
@@ -157,8 +200,8 @@ def find_orf(record: SeqRecord) -> Optional[SeqRecord]:
             id=record.id,
             description=record.description,
             name="",
-        )
-    return None
+        ), longest[1]
+    return None, 0
 
 
 if __name__ == "__main__":
