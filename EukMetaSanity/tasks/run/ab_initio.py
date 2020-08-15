@@ -189,7 +189,9 @@ class AbInitioIter(TaskList):
                     line = line.split("\t")
                     if line[2] == "transcript":
                         out_fp.write("\t".join((
-                            *line[0:-1],
+                            line[0],
+                            "ab-initio",
+                            *line[2:-1],
                             "ID=gene%i\n" % i
                         )))
                         try:
@@ -198,7 +200,9 @@ class AbInitioIter(TaskList):
                             break
                         while line[2] != "transcript":
                             out_fp.write("\t".join((
-                                *line[0:-1],
+                                line[0],
+                                "ab-initio",
+                                *line[2:-1],
                                 "Parent=gene%i\n" % i
                             )))
                             try:
@@ -253,6 +257,12 @@ class AbInitioIter(TaskList):
                 self.program_gffread[
                     os.path.join(self.wdir, "genemark.gtf"), "-G",
                 ] > self.output[0]
+            )
+            self.log_and_run(
+                self.local["sed"][
+                    "-i", "s/GeneMark.hmm/ab-initio/g",
+                    self.output[0]
+                ]
             )
 
         @staticmethod
