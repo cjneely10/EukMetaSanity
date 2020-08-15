@@ -2,7 +2,6 @@
 import os
 from BCBio import GFF
 from Bio import SeqIO
-from decimal import Decimal
 from collections import namedtuple
 from collections import defaultdict
 from Bio.SeqRecord import SeqRecord

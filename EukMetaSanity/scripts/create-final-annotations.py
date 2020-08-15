@@ -55,9 +55,6 @@ class Gff3Parser:
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
                 gene_data["transcripts"] = self.priority(transcripts)
-                # print(gene_data)
-                # if len(gene_data["transcripts"]) == 0:
-                #     continue
                 seq = StringIO()
                 orig_seq = self.fasta_dict[gene_data["fasta-id"]]
                 if gene_data["strand"] == "-":
