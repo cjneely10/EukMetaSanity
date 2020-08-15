@@ -30,7 +30,7 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
         recs.append(
             Result(
                 loc_type="gene",
-                sstart=int(line[6]),
+                sstart=int(line[6]) - 1,
                 send=int(line[7]),
                 strand=strand,
                 score=line[3],
@@ -45,8 +45,8 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
                 recs.append(
                     Result(
                         loc_type=_type,
-                        sstart=int(start.split("[")[0]),
-                        send=int(end.split("[")[0]),
+                        sstart=int(start.split("[")[0]) - 1,
+                        send=int(end.split("[")[0]) - 1,
                         strand=strand,
                         score=".",
                     )
