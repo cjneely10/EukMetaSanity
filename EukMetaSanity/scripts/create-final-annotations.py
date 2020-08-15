@@ -141,7 +141,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
     SeqIO.write(out_prots, out_file + ".faa", "fasta")
 
 
-def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
+def find_orf(record: SeqRecord) -> Optional[SeqRecord]:
     longest = (0,)
     if record.description[-1] == "+":
         nuc = str(record.seq)
@@ -157,8 +157,8 @@ def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
             id=record.id,
             description=record.description,
             name="",
-        ), longest[1]
-    return None, 0
+        )
+    return None
 
 
 if __name__ == "__main__":
