@@ -65,7 +65,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
             SeqFeature(
                 FeatureLocation(features[0].sstart, features[0].send), type=features[0].loc_type,
                 strand=features[0].strand,
-                qualifiers={"score": features[0].score, "source": ap.args.source, "ID": "gene%i" % i}
+                qualifiers={"score": features[0].score, "source": "metaeuk", "ID": "gene%i" % i}
             )
         )
         # Remaining in list are features that describe the gene
@@ -75,7 +75,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
                 SeqFeature(
                     FeatureLocation(feature.sstart, feature.send), type=feature.loc_type,
                     strand=features[0].strand,
-                    qualifiers={"score": feature.score, "source": ap.args.source}
+                    qualifiers={"score": feature.score, "source": "metaeuk"}
                 )
             )
         i += 1
@@ -101,23 +101,13 @@ def _parse_args(ap):
     # Confirm path existence
     assert os.path.exists(ap.args.data_file)
     assert os.path.exists(ap.args.fasta_file)
-    # Convert numerics
-    try:
-        ap.args.evalue = Decimal(ap.args.evalue)
-        ap.args.pident = float(ap.args.pident)
-        ap.args.coverage = float(ap.args.coverage)
-        if ap.args.coverage > 1.0:
-            raise ValueError("Coverage must be less than 1.0")
-    except ValueError as e:
-        print(e)
-        exit(1)
 
 
 def _main(ap):
     # Store results data
     data = defaultdict(list)
     # Call parsing function - ensured to exist
-    globals()[ap.args.source](open(ap.args.data_file), data, ap)
+    metaeuk(open(ap.args.data_file), data, ap)
     # Write results
     GFF.write(_iter_gff(ap.args.fasta_file, data, ap), open(ap.args.output, "w"))
 
@@ -131,12 +121,6 @@ if __name__ == "__main__":
              {"help": "Either diamond blastx results, or output protein FASTA from MetaEuk workflow"}),
             (("-o", "--output"),
              {"help": "Output location, default stdout", "default": "/dev/stdout"}),
-            (("-e", "--evalue"),
-             {"help": "Max evalue to keep, default 1E-5", "default": "1E-5"}),
-            (("-p", "--pident"),
-             {"help": "Minimum percent identity to retain, default 90.0", "default": "90.0"}),
-            (("-c", "--coverage"),
-             {"help": "Minimum coverage to retain, default 0.60", "default": "0.60"}),
         ),
         description="Parse FASTA and BLAST results to GFF3 format"
     )
