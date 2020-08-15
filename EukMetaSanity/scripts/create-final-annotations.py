@@ -93,7 +93,7 @@ class Gff3Parser:
                 gene_data["fasta-id"], self.version,
                 "mRNA", gene_data["start"], gene_data["end"],
                 ".", gene_data["strand"],
-                ".", "ID=%s-mRNA" % gene_id
+                ".", "ID=%s-mRNA;Parent=%s" % (gene_id, gene_id)
             )),
             "\n",
         )))
