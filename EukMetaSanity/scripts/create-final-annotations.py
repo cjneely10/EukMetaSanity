@@ -7,8 +7,8 @@ from Bio.Seq import Seq
 from io import StringIO
 from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
-from typing import Optional, Tuple, Generator, List, Dict
 from EukMetaSanity.utils.arg_parse import ArgParse
+from typing import Optional, Tuple, Generator, List, Dict
 
 
 class Gff3Parser:
@@ -20,7 +20,7 @@ class Gff3Parser:
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
         self.count = 0
 
-    def next_gene(self) -> Generator[Tuple[Dict[str, object], Optional[SeqRecord], Optional[SeqRecord]], None, None]:
+    def next_gene(self) -> Generator[Tuple[str, Optional[SeqRecord], Optional[SeqRecord]], None, None]:
         _line: str
         line: List[str]
         line = next(self.fp).rstrip("\r\n").split("\t")
@@ -55,8 +55,9 @@ class Gff3Parser:
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
                 gene_data["transcripts"] = self.priority(transcripts)
-                if len(gene_data["transcripts"]) == 0:
-                    continue
+                # print(gene_data)
+                # if len(gene_data["transcripts"]) == 0:
+                #     continue
                 seq = StringIO()
                 orig_seq = self.fasta_dict[gene_data["fasta-id"]]
                 if gene_data["strand"] == "-":
@@ -95,7 +96,7 @@ class Gff3Parser:
     @staticmethod
     def merge(line: List[List]) -> List[List]:
         # Sort coordinates by start value
-        ranges_in_coords = sorted(itertools.chain(*[l[-1] for l in line]), key=itemgetter(0))
+        ranges_in_coords = sorted(itertools.chain(*[_l[-1] for _l in line]), key=itemgetter(0))
         # Will group together matching sections into spans
         spans_in_coords = [list(ranges_in_coords[0]), ]
         for coords in ranges_in_coords[1:]:
@@ -116,54 +117,36 @@ class Gff3Parser:
         ss = StringIO()
         ss.write("".join((
             "\t".join((
-                gene_data["fasta-id"],
-                self.version,
-                "gene",
-                gene_data["transcripts"][0][0],
-                gene_data["transcripts"][0][1],
-                ".",
-                gene_data["strand"],
-                ".",
-                "ID=%s" % gene_id
+                gene_data["fasta-id"], self.version,
+                "gene", gene_data["start"], gene_data["end"],
+                ".", gene_data["strand"],
+                ".", "ID=%s" % gene_id
             )),
             "\n",
             "\t".join((
-                gene_data["fasta-id"],
-                self.version,
-                "mRNA",
-                gene_data["transcripts"][0][0],
-                gene_data["transcripts"][0][1],
-                ".",
-                gene_data["strand"],
-                ".",
-                "ID=%s-mRNA" % gene_id
+                gene_data["fasta-id"], self.version,
+                "mRNA", gene_data["start"], gene_data["end"],
+                ".", gene_data["strand"],
+                ".", "ID=%s-mRNA" % gene_id
             )),
             "\n",
         )))
         for exon_tuple in gene_data["transcripts"]:
             ss.write("".join((
                 "\t".join((
-                    gene_data["fasta-id"],
-                    self.version,
-                    "exon",
-                    str(exon_tuple[0]),
+                    gene_data["fasta-id"], self.version,
+                    "exon", str(exon_tuple[0]),
                     str(exon_tuple[1]),
-                    ".",
-                    gene_data["strand"],
-                    ".",
-                    "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
+                    ".", gene_data["strand"],
+                    ".", "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
                 )),
                 "\n",
                 "\t".join((
-                    gene_data["fasta-id"],
-                    self.version,
-                    "CDS",
-                    str(exon_tuple[0]),
+                    gene_data["fasta-id"], self.version,
+                    "CDS", str(exon_tuple[0]),
                     str(exon_tuple[1]),
-                    ".",
-                    gene_data["strand"],
-                    offset,
-                    "ID=%s-cds;Parent=%s" % (gene_id, gene_id)
+                    ".", gene_data["strand"],
+                    offset, "ID=%s-cds;Parent=%s" % (gene_id, gene_id)
                 )),
                 "\n",
             )))
@@ -171,6 +154,23 @@ class Gff3Parser:
 
     def __iter__(self):
         return self.next_gene()
+
+
+def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
+    longest = (0,)
+    nuc = str(record.seq)
+    for m in re.finditer("ATG", nuc):
+        pro = Seq(nuc[m.start():]).translate(to_stop=True)
+        if len(pro) > longest[0]:
+            longest = (len(pro), m.start(), str(pro))
+    if longest[0] > 0:
+        return SeqRecord(
+            seq=Seq(str(longest[2]) + "*"),
+            id=record.id,
+            description=record.description,
+            name="",
+        ), longest[1]
+    return None, 0
 
 
 def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_file: str):
@@ -184,25 +184,9 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
             out_cds.append(cds)
         if prot is not None:
             out_prots.append(prot)
+    gff3_fp.close()
     SeqIO.write(out_cds, out_file + ".cds.fna", "fasta")
     SeqIO.write(out_prots, out_file + ".faa", "fasta")
-
-
-def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
-    longest = (0,)
-    nuc = str(record.seq)
-    for m in re.finditer("ATG", nuc):
-        pro = Seq(nuc)[m.start():].translate(to_stop=True)
-        if len(pro) > longest[0]:
-            longest = (len(pro), m.start(), str(pro))
-    if longest[0] > 0:
-        return SeqRecord(
-            seq=Seq(str(longest[2]) + "*"),
-            id=record.id,
-            description=record.description,
-            name="",
-        ), longest[1]
-    return None, 0
 
 
 if __name__ == "__main__":

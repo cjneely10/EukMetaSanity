@@ -3,8 +3,6 @@ import os
 from BCBio import GFF
 from Bio import SeqIO
 from decimal import Decimal
-from _io import TextIOWrapper
-from operator import itemgetter
 from collections import namedtuple
 from collections import defaultdict
 from Bio.SeqRecord import SeqRecord
@@ -13,62 +11,6 @@ from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 # Result as read in from DNA/contig side as subject
 Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand", "score"))
-
-
-# # Available parsing types
-def diamond(diamond_fp, data, ap):
-    # Ensure is passed file pointer
-    assert isinstance(data, defaultdict)
-    assert isinstance(diamond_fp, TextIOWrapper)
-    # Parse file
-    for line in diamond_fp:
-        line = line.rstrip("\r\n").split("\t")
-        assert len(line) == 12, "Diamond file is improperly formatted"
-        # Convert hit metrics
-        evalue = Decimal(line[10])
-        pident = float(line[2])
-        aligned_length = int(line[3])
-        sstart, send = int(line[8]), int(line[9])
-        qstart, qend = int(line[6]), int(line[7])
-        # Coverage based on mode
-        if ap.args.mode == "subject":
-            coverage = aligned_length / (send - sstart + 1)
-        else:
-            coverage = aligned_length / (qend - qstart + 1)
-        # Only valid results
-        if evalue <= ap.args.evalue and pident >= ap.args.pident and coverage >= ap.args.coverage:
-            # Per --outfmt 6 default
-            data[line[0]].append(
-                Result(
-                    loc_type="CDS",
-                    sstart=sstart,
-                    send=send,
-                    strand=0,
-                    score=".",
-                )
-            )
-
-
-def _parse_diamond(i, ap, feature_data, record, rec):
-    # Determine source and add score
-    qualifiers = {"source": ap.args.source, "score": ".", "ID": "gene%i" % i}
-    # Store gene/exon data
-    spans = _reduce_span([(feature.sstart, feature.send) for feature in feature_data.get(record.id, [])])
-    for span, feature in zip(spans, feature_data.get(record.id, [])):
-        rec.features.append(
-            SeqFeature(
-                FeatureLocation(span[0], span[1]), type="gene", strand=feature.strand, qualifiers=qualifiers
-            )
-        )
-        # Default retain codon and CDS information
-        rec.features[-1].sub_features = [
-            SeqFeature(
-                FeatureLocation(span[0], span[1]), type="CDS", strand=feature.strand,
-                qualifiers={"source": ap.args.source}
-            ),
-        ]
-    i += 1
-    return i
 
 
 def metaeuk(metaeuk_file_path, data, *args, **kwargs):
@@ -140,27 +82,6 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
     return i
 
 
-# # Helper functions
-def _reduce_span(coords_list):
-    # Sort coordinates by start value
-    ranges_in_coords = sorted(coords_list, key=itemgetter(0))
-    # Will group together matching sections into spans
-    # Return list of these spans at end
-    # Initialize current span and list to return
-    spans_in_coords = [list(ranges_in_coords[0]), ]
-    for coords in ranges_in_coords[1:]:
-        # The start value is within the farthest range of current span
-        # and the end value extends past the current span
-        if coords[0] <= spans_in_coords[-1][1] < coords[1]:
-            spans_in_coords[-1][1] = coords[1]
-        # The start value is past the range of the current span
-        # Append old span to list to return
-        # Reset current span to this new range
-        elif coords[0] > spans_in_coords[-1][1]:
-            spans_in_coords.append(list(coords))
-    return tuple(map(tuple, spans_in_coords))
-
-
 # # Write functions
 def _iter_gff(fasta_file, feature_data, ap):
     assert isinstance(feature_data, defaultdict)
@@ -171,7 +92,7 @@ def _iter_gff(fasta_file, feature_data, ap):
         rec = SeqRecord(id=record.id, seq=record.seq)
         feature_list = feature_data.get(record.id, [])
         if len(feature_list) > 0:
-            i = globals()["_parse_" + ap.args.source](i, ap, feature_data, record, rec)
+            i = _parse_metaeuk(i, ap, feature_data, record, rec)
         yield rec
 
 
@@ -221,8 +142,6 @@ if __name__ == "__main__":
              {"help": "Minimum coverage to retain, default 0.60", "default": "0.60"}),
             (("-m", "--mode"),
              {"help": "Map to subject/query, default subject", "default": "subject"}),
-            (("-s", "--source"),
-             {"help": "Source, select from diamond/metaeuk default metaeuk", "default": "metaeuk"}),
         ),
         description="Parse FASTA and BLAST results to GFF3 format"
     )
