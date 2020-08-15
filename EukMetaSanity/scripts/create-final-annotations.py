@@ -117,8 +117,8 @@ class Gff3Parser:
                 ".",
                 gene_data["strand"],
                 ".",
-                "ID=gene%s" % self.count)
-            ),
+                "ID=gene%s" % self.count
+            )),
             "\n",
         ))
 
