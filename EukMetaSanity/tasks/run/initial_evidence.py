@@ -93,13 +93,12 @@ class EvidenceIter(TaskList):
                     out_prefix + ".combined.gtf", "-G", "--merge", "-Y"
                 ] > out_prefix + ".gff3"
             )
-            # # Replace transcripts with gene identifier and write cds/aa sequences
-            # task_object.log_and_run(
-            #     task_object.local["amend_gff3.py"][
-            #         "-g", out_prefix + ".gff3",
-            #         "-f", fasta_file,
-            #     ]
-            # )
+            # Replace transcripts with gene identifier and write cds/aa sequences
+            task_object.log_and_run(
+                task_object.local["create-final-annotations.py"][
+                    "merge", "-f", fasta_file, "-g", out_prefix + ".gff3"
+                ]
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)

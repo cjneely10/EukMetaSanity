@@ -16,6 +16,7 @@ class Gff3Parser:
         assert priority in dir(Gff3Parser)
         self.fp = open(gff3_file, "r")
         self.priority = getattr(Gff3Parser, priority, lambda _: _)
+        self.version = priority
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
         self.count = 0
 
@@ -56,13 +57,15 @@ class Gff3Parser:
                 gene_data["transcripts"] = self.priority(transcripts)
                 if len(gene_data["transcripts"]) == 0:
                     continue
+                seq = StringIO()
+                orig_seq = self.fasta_dict[gene_data["fasta-id"]]
+                if gene_data["strand"] == "-":
+                    orig_seq = orig_seq.reverse_complement()
+                orig_seq = str(orig_seq.seq)
+                for transcript in gene_data["transcripts"]:
+                    seq.write(orig_seq[int(transcript[0]) - 1: int(transcript[1])])
                 record = SeqRecord(
-                    seq=Seq(
-                        "".join((
-                            str(self.fasta_dict[gene_data["fasta-id"]].seq[int(transcript[0]) - 1: int(transcript[1])])
-                            for transcript in gene_data["transcripts"]
-                        ))
-                    ),
+                    seq=Seq(seq.getvalue()),
                     id="gene%s" % str(self.count),
                     description="strand=%s" % gene_data["strand"],
                     name="",
@@ -110,13 +113,14 @@ class Gff3Parser:
 
     def _gene_to_string(self, gene_data: Dict, offset: str) -> str:
         gene_id = "gene%s" % str(self.count)
-        ss = StringIO("".join((
+        ss = StringIO()
+        ss.write("".join((
             "\t".join((
                 gene_data["fasta-id"],
-                gene_data["transcripts"][0][0],
+                self.version,
                 "gene",
-                gene_data["start"],
-                gene_data["end"],
+                gene_data["transcripts"][0][0],
+                gene_data["transcripts"][0][1],
                 ".",
                 gene_data["strand"],
                 ".",
@@ -125,10 +129,10 @@ class Gff3Parser:
             "\n",
             "\t".join((
                 gene_data["fasta-id"],
-                gene_data["transcripts"][0][0],
+                self.version,
                 "mRNA",
-                gene_data["start"],
-                gene_data["end"],
+                gene_data["transcripts"][0][0],
+                gene_data["transcripts"][0][1],
                 ".",
                 gene_data["strand"],
                 ".",
@@ -140,19 +144,19 @@ class Gff3Parser:
             ss.write("".join((
                 "\t".join((
                     gene_data["fasta-id"],
-                    gene_data["transcripts"][0][0],
+                    self.version,
                     "exon",
                     str(exon_tuple[0]),
                     str(exon_tuple[1]),
                     ".",
                     gene_data["strand"],
-                    offset,
+                    ".",
                     "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
                 )),
                 "\n",
                 "\t".join((
                     gene_data["fasta-id"],
-                    gene_data["transcripts"][0][0],
+                    self.version,
                     "CDS",
                     str(exon_tuple[0]),
                     str(exon_tuple[1]),
@@ -186,10 +190,7 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
 
 def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
     longest = (0,)
-    if record.description[-1] == "+":
-        nuc = str(record.seq)
-    else:
-        nuc = str(record.reverse_complement().seq)
+    nuc = str(record.seq)
     for m in re.finditer("ATG", nuc):
         pro = Seq(nuc)[m.start():].translate(to_stop=True)
         if len(pro) > longest[0]:
@@ -213,16 +214,12 @@ if __name__ == "__main__":
              {"help": ".tmp.nr.gff3 file", "required": True}),
             (("-f", "--fasta_file"),
              {"help": "FASTA file", "required": True}),
-            (("-o", "--out"),
-             {"help": "Output prefix, default is command name", "default": "command"}),
         ),
         description="GFF3 output final annotations"
     )
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file)
-    if ap.args.out == "command":
-        ap.args.out = ap.args.command
-    convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, ap.args.command, ap.args.out)
+    convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, ap.args.command, os.path.splitext(ap.args.gff3_file)[0])
 
 if __name__ == "__main__":
     pass
