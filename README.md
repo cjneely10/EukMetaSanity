@@ -67,6 +67,8 @@ optional arguments:
 #### Run
 Copy and edit the `run-config.ini` config file to fit your analysis needs.
 
+Ensure your input FASTA sequences do not have the pipe (`|`) character present.
+
 For a directory of MAGs:
 ```
 MAGs/
