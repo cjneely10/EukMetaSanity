@@ -192,7 +192,7 @@ if __name__ == "__main__":
         description="GFF3 output final annotations"
     )
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
-        assert os.path.exists(_file)
+        assert os.path.exists(_file), _file
     convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, ap.args.command, os.path.splitext(ap.args.gff3_file)[0])
 
 if __name__ == "__main__":
