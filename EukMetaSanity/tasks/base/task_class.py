@@ -162,7 +162,6 @@ class Task(ABC):
                     running.append(f)
             all([_f.wait() for _f in running])
 
-    @abstractmethod
     def run(self) -> None:
         # Check if task has completed based on provided output data
         completed = True

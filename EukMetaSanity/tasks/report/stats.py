@@ -16,9 +16,6 @@ class ReportStatsIter(TaskList):
                 os.path.join(self.wdir, self.record_id + ".db"),
                 os.path.join(self.wdir, self.record_id + ".summary"),
             ]
-        
-        def run(self):
-            super().run()
             
         @program_catch
         def run_1(self):

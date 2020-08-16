@@ -34,9 +34,6 @@ class EvidenceIter(TaskList):
                 *list(_out.values()),  # Regular list of values for final path checking
             ]
 
-        def run(self) -> None:
-            super().run()
-
         @program_catch
         def run_1(self):
             # Subset taxonomic database

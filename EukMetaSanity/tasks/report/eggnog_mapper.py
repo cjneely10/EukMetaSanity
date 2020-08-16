@@ -16,9 +16,6 @@ class EggNOGMapper(TaskList):
                 os.path.join(self.wdir, self.record_id + ".emapper")  # Results of mapper
             ]
 
-        def run(self):
-            super().run()
-
         @program_catch
         def run_1(self):
             self.log_and_run(

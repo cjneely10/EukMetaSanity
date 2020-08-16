@@ -45,8 +45,8 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
                 recs.append(
                     Result(
                         loc_type=_type,
-                        sstart=int(start.split("[")[0]) - 1,
-                        send=int(end.split("[")[0]) - 1,
+                        sstart=int(start.split("[")[1][:-1]),
+                        send=int(end.split("[")[1][:-1]),
                         strand=strand,
                         score=".",
                     )
@@ -62,7 +62,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
         # First value is gene
         rec.features.append(
             SeqFeature(
-                FeatureLocation(features[0].sstart, features[0].send), type=features[0].loc_type,
+                FeatureLocation(features[0].sstart - 1, features[0].send), type=features[0].loc_type,
                 strand=features[0].strand,
                 qualifiers={"score": features[0].score, "source": "metaeuk", "ID": "gene%i" % i}
             )
@@ -72,7 +72,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
         for feature in features[1:]:
             rec.features[-1].sub_features.append(
                 SeqFeature(
-                    FeatureLocation(feature.sstart, feature.send), type=feature.loc_type,
+                    FeatureLocation(feature.sstart - 1, feature.send), type=feature.loc_type,
                     strand=features[0].strand,
                     qualifiers={"score": feature.score, "source": "metaeuk"}
                 )

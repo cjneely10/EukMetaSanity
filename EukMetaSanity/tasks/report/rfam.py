@@ -11,9 +11,6 @@ class FindRNAIter(TaskList):
                 *self.input,
                 os.path.join(self.wdir, self.record_id + ".rfam"),
             ]
-        
-        def run(self):
-            super().run()
             
         @program_catch
         def run_1(self):

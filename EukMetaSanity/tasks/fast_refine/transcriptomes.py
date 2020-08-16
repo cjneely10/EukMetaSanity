@@ -20,9 +20,6 @@ class TranscriptomesIter(TaskList):
                 self.input[-1],  # aligned reads
                 out,  # List of data
             ]
-        
-        def run(self):
-            super().run()
             
         @program_catch
         def run_1(self):

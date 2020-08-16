@@ -27,9 +27,6 @@ class SummarizeIter(TaskList):
                         _data.update({_ext[1:]: _val})
                 self.output.append(_data)
 
-        def run(self):
-            super().run()
-
     def __init__(self, *args, **kwargs):
         super().__init__(SummarizeIter.Summarize, "summarize", *args, **kwargs)
 

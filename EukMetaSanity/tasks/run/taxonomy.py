@@ -20,9 +20,6 @@ class TaxonomyIter(TaskList):
                 os.path.join(self.wdir, "tax-report.txt")  # Tax file
             ]
 
-        def run(self) -> None:
-            super().run()
-
         @program_catch
         def run_1(self):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")

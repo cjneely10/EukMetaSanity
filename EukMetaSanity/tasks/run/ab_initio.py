@@ -34,9 +34,6 @@ class AbInitioIter(TaskList):
             ]
             self.rounds = int(self.rounds)
 
-        def run(self) -> None:
-            super().run()
-
         def run_1(self):
             # Call protocol method
             getattr(self, self.protocol)()

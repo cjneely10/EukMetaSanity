@@ -23,9 +23,6 @@ class MMseqsIter(TaskList):
                 ]
             ]
 
-        def run(self):
-            super().run()
-
         @program_catch
         def run_1(self):
             # Generate MMseqs database for proteins

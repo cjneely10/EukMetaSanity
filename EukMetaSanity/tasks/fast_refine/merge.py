@@ -18,9 +18,6 @@ class MergeIter(TaskList):
                 _out,  # Dictionary for accessing to write final summary
                 *list(_out.values()),  # Regular list of values for final path checking
             ]
-        
-        def run(self):
-            super().run()
             
         @program_catch
         def run_1(self):

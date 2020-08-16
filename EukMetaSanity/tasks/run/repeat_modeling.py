@@ -29,9 +29,6 @@ class RepeatsIter(TaskList):
                 os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")  # Mask results gff3
             ]
 
-        def run(self) -> None:
-            super().run()
-
         def run_1(self):
             # Call protocol method
             getattr(self, self.protocol)()
