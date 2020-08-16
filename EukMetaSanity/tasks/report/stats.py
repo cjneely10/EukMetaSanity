@@ -8,7 +8,7 @@ class ReportStatsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             for _f in (os.path.join(self.wdir, self.record_id + ".db"),
-                        os.path.join(self.wdir, self.record_id + ".summary")):
+                       os.path.join(self.wdir, self.record_id + ".summary")):
                 if os.path.exists(_f):
                     os.remove(_f)
             self.output = [
@@ -16,7 +16,7 @@ class ReportStatsIter(TaskList):
                 os.path.join(self.wdir, self.record_id + ".db"),
                 os.path.join(self.wdir, self.record_id + ".summary"),
             ]
-            
+
         @program_catch
         def run_1(self):
             # Determine the prefixes to assign to each file based on type
@@ -38,9 +38,11 @@ class ReportStatsIter(TaskList):
                     _out.append("%s=%s" % ("kegg", _file))
                 else:
                     _db_name = os.path.splitext(_file)[1][1:-3]
+                    if _db_name in ("", "g", "rfam_db"):
+                        continue
                     _out.append("%s=%s" % (_db_name, _file))
             return _out
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(ReportStatsIter.ReportStats, "stats", *args, **kwargs)
 

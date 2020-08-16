@@ -111,7 +111,7 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
     rows = {}
     for fasta_id in _fasta_id_iter(fasta_file):
         rows[fasta_id] = [fasta_id, *["0" for _ in range(len(table_col_ids))]]
-    i = 0
+    i = 1
     non_null = 0
     for annot_type, annot_path in annotations:
         if annot_type == "kegg":
@@ -126,14 +126,13 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
             rows[record_id][i] = record_annotation
         i += 1
     for vals in rows.values():
-        for val in vals:
+        for val in vals[1:]:
             if val != "0":
                 non_null += 1
                 break
-
-    query_place_string = ",".join(("?" for _ in range(len(table_col_ids))))
+    query_place_string = ",".join(("?" for _ in range(len(table_col_ids) + 1)))
     conn.executemany(
-        "INSERT INTO annotations VALUES (%s)" % query_place_string, [(key, *val) for key, val in rows.items()]
+        "INSERT INTO annotations VALUES (%s)" % query_place_string, [(*val, ) for val in rows.values()]
     )
     conn.commit()
     summarize(conn, out_prefix + ".summary", len(rows.keys()), non_null)
