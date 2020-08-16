@@ -138,7 +138,7 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
                 )
             )
         conn.commit()
-    summarize(conn, os.path.splitext(db_path)[0] + ".tsv")
+    summarize(conn, os.path.splitext(db_path)[0] + ".summary")
 
 
 if __name__ == "__main__":

@@ -99,18 +99,18 @@ class Gff3Parser:
             )),
             "\n",
         )))
-        for exon_tuple in gene_data["transcripts"]:
+        for j, exon_tuple in enumerate(gene_data["transcripts"], start=1):
             ss.write("".join((
                 "\t".join((
                     gene_data["fasta-id"], self.version,
                     "exon", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], ".", "ID=%s-exon;Parent=%s" % (gene_id, gene_id)
+                    ".", gene_data["strand"], ".", "ID=%s-exon%i;Parent=%s" % (gene_id, j, gene_id)
                 )),
                 "\n",
                 "\t".join((
                     gene_data["fasta-id"], self.version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], offset, "ID=%s-cds;Parent=%s" % (gene_id, gene_id)
+                    ".", gene_data["strand"], offset, "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
                 )),
                 "\n",
             )))
@@ -164,19 +164,19 @@ class Gff3Parser:
         return None, 0
 
 
-def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_file: str):
+def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_prefix: str):
     gff3 = Gff3Parser(gff3_file, fasta_file, filter_function)
     out_cds = []
     out_prots = []
-    with open(out_file + ".nr.gff3", "w") as gff3_fp:
+    with open(out_prefix + ".nr.gff3", "w") as gff3_fp:
         for gene, cds, prot in gff3:
             gff3_fp.write(gene)
             if cds is not None:
                 out_cds.append(cds)
             if prot is not None:
                 out_prots.append(prot)
-    SeqIO.write(out_cds, out_file + ".cds.fna", "fasta")
-    SeqIO.write(out_prots, out_file + ".faa", "fasta")
+    SeqIO.write(out_cds, out_prefix + ".cds.fna", "fasta")
+    SeqIO.write(out_prots, out_prefix + ".faa", "fasta")
 
 
 if __name__ == "__main__":
