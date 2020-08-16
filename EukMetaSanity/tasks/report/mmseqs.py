@@ -62,6 +62,8 @@ class MMseqsIter(TaskList):
                         if _v in added_flags:
                             del added_flags[added_flags.index(_v) + 1]
                             added_flags.remove(_v)
+                if "_nuc_db" in _file_db:
+                    _file_db = _file_db.replace("_nuc_db", "")
                 _out_db = _file_db[:-3] + "_%s-results_db" % os.path.basename(os.path.splitext(db)[0])
                 # Linear search
                 self.log_and_run(

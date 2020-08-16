@@ -117,6 +117,10 @@ class Data:
     def merge(self):
         pass
 
+    @added
+    def stats(self):
+        pass
+
 
 if __name__ == "__main__":
     pass

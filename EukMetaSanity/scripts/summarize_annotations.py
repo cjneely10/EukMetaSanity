@@ -15,27 +15,23 @@ def generate(db_path: str, columns: List[str]) -> sqlite3.Connection:
 
 
 # Display summary
-def summarize(conn: sqlite3.Connection, out_path: str):
+def summarize(conn: sqlite3.Connection, out_path: str, num_records: int, non_null: int):
+    cursor = conn.execute("SELECT * FROM annotations")
     fp = open(out_path, "w")
     # Write header
-    cursor = conn.execute("SELECT * FROM annotations")
+    fp.write("# Total: %s/%s\n" % (non_null, num_records))
     fp.write("".join((
         "\t".join([descr[0] for descr in cursor.description]),
         "\n"
     )))
-    found = 0
     for row in cursor:
-        for _r in row[1:]:
-            if _r != "0":
-                found += 1
-                break
         fp.write("".join((
             "\t".join(row),
             "\n",
         )))
     fp.close()
     conn.close()
-    print("Found: %i" % found)
+    print("Found: %i/%i" % (non_null, num_records))
 
 
 def _parse_args(_ap: ArgParse) -> List[Tuple[str, str]]:
@@ -64,6 +60,8 @@ def _kegg_iter(kegg_file: str) -> Generator[Tuple[str, str], str, None]:
     fp = open(kegg_file, "r")
     # Skip first 2 header lines
     all(next(fp) for _ in range(2))
+    line: str
+    _line: List
     for line in fp:
         # Only for KEGG verified hits
         if line[0] == "*":
@@ -98,10 +96,10 @@ def _fasta_id_iter(fasta_file: str) -> Generator[str, str, None]:
             yield line[1:].rstrip("\r\n").split(" ")[0]
 
 
-def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: Decimal):
+def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: Decimal, out_prefix: str):
     # Create database, or load existing
     table_col_ids = sorted([annotation[0] for annotation in annotations])
-    db_path = os.path.splitext(fasta_file)[0] + ".db"
+    db_path = out_prefix + ".db"
     if os.path.exists(db_path):
         os.remove(db_path)
     conn = generate(
@@ -110,18 +108,11 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
     )
     assert conn is not None
     # Insert blank row ids for values not already present
-    rows = []
+    rows = {}
     for fasta_id in _fasta_id_iter(fasta_file):
-        rows.append(
-            (
-                fasta_id,
-                *["0" for _ in range(len(table_col_ids))],
-            )
-        )
-    query_place_string = ",".join(("?" for _ in range(len(rows[0]))))
-    conn.executemany("INSERT INTO annotations VALUES (%s)" % query_place_string, rows)
-    conn.commit()
-    # Add data
+        rows[fasta_id] = [fasta_id, *["0" for _ in range(len(table_col_ids))]]
+    i = 0
+    non_null = 0
     for annot_type, annot_path in annotations:
         if annot_type == "kegg":
             data_iter = _kegg_iter(annot_path)
@@ -132,13 +123,20 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
         for record_id, record_annotation in data_iter:
             for val in ('"', "'"):
                 record_annotation = record_annotation.replace(val, "")
-            conn.execute(
-                "UPDATE annotations SET %s = '%s' WHERE gene_id = '%s'" % (
-                    annot_type, record_annotation, record_id
-                )
-            )
-        conn.commit()
-    summarize(conn, os.path.splitext(db_path)[0] + ".summary")
+            rows[record_id][i] = record_annotation
+        i += 1
+    for vals in rows.values():
+        for val in vals:
+            if val != "0":
+                non_null += 1
+                break
+
+    query_place_string = ",".join(("?" for _ in range(len(table_col_ids))))
+    conn.executemany(
+        "INSERT INTO annotations VALUES (%s)" % query_place_string, [(key, *val) for key, val in rows.items()]
+    )
+    conn.commit()
+    summarize(conn, out_prefix + ".summary", len(rows.keys()), non_null)
 
 
 if __name__ == "__main__":
@@ -152,6 +150,8 @@ if __name__ == "__main__":
              {"help": "Max evalue, default 1E-5", "default": "1E-5"}),
             (("-s", "--summarize"),
              {"help": "Summarize db as tsv to path"}),
+            (("-o", "--output"),
+             {"help": "Output prefix, default out", "default": "out"}),
         ),
         description="Add annotations to FASTA/gff3 file from various results files"
     )
@@ -163,4 +163,4 @@ if __name__ == "__main__":
 
     # Or build
     _annotations = _parse_args(ap)
-    annotate(ap.args.fasta_file, _annotations, ap.args.max_evalue)
+    annotate(ap.args.fasta_file, _annotations, ap.args.max_evalue, ap.args.output)
