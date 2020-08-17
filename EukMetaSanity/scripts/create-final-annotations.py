@@ -144,8 +144,13 @@ class Gff3Parser:
     @staticmethod
     def merge(line: List[List]) -> List[List]:
         # Sort coordinates by start value
-        ranges_in_coords = sorted(itertools.chain(*[_l[-1] for _l in line]), key=itemgetter(0))
-        ranges_in_coords = [(_v[0] + _v[2], _v[1], 0) for _v in ranges_in_coords]
+        ranges_in_coords = sorted(
+            [
+                (_v[0] + _v[2], _v[1], 0)
+                for _v in itertools.chain(*[_l[-1] for _l in line])
+            ],
+            key=itemgetter(0)
+        )
         # Will group together matching sections into spans
         spans_in_coords = [list(ranges_in_coords[0]), ]
         for coords in ranges_in_coords[1:]:
