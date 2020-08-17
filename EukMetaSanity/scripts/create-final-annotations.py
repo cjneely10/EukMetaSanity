@@ -53,9 +53,14 @@ class Gff3Parser:
                     # Add exon to current info
                     while line[2] not in ("transcript", "locus"):
                         if line[2] == "CDS":
-                            transcripts[-1][-1].append(
-                                (int(line[3]), int(line[4]), int(line[7]))  # exstart,exend,offset
-                            )
+                            if gene_data["strand"] == "+":
+                                transcripts[-1][-1].append(
+                                    (int(line[3]) + int(line[7]), int(line[4]), 0)  # exstart,exend,offset
+                                )
+                            else:
+                                transcripts[-1][-1].append(
+                                    (int(line[3]), int(line[4]) - int(line[7]), 0)  # exstart,exend,offset
+                                )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
                 gene_data["transcripts"] = self.priority(transcripts)
@@ -72,14 +77,8 @@ class Gff3Parser:
         seq = StringIO()
         orig_seq = self.fasta_dict[gene_data["fasta-id"]]
         orig_seq = str(orig_seq.seq)
-        start = 0
-        end = 0
         for transcript in gene_data["transcripts"]:
-            if gene_data["strand"] == "+":
-                start = int(transcript[2])
-            else:
-                end = int(transcript[2])
-            seq.write(orig_seq[int(transcript[0]) - 1 + start: int(transcript[1]) - end])
+            seq.write(orig_seq[int(transcript[0]) - 1: int(transcript[1])])
         seq = Seq(seq.getvalue())
         if gene_data["strand"] == "-":
             seq = seq.reverse_complement()
