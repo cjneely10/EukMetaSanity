@@ -54,7 +54,7 @@ class Gff3Parser:
                     while line[2] not in ("transcript", "locus"):
                         if line[2] == "CDS":
                             transcripts[-1][-1].append(
-                                (int(line[3]), int(line[4]), line[7])  # exstart,exend,offset
+                                (int(line[3]), int(line[4]), int(line[7]))  # exstart,exend,offset
                             )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
@@ -120,7 +120,7 @@ class Gff3Parser:
                 "\t".join((
                     gene_data["fasta-id"], self.version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], exon_tuple[2], "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
+                    ".", gene_data["strand"], str(exon_tuple[2]), "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
                 )),
                 "\n",
             )))
@@ -145,6 +145,7 @@ class Gff3Parser:
     def merge(line: List[List]) -> List[List]:
         # Sort coordinates by start value
         ranges_in_coords = sorted(itertools.chain(*[_l[-1] for _l in line]), key=itemgetter(0))
+        ranges_in_coords = [(_v[0] + _v[2], _v[1], 0) for _v in ranges_in_coords]
         # Will group together matching sections into spans
         spans_in_coords = [list(ranges_in_coords[0]), ]
         for coords in ranges_in_coords[1:]:
