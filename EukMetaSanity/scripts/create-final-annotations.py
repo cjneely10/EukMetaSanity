@@ -90,9 +90,11 @@ class Gff3Parser:
             name="",
         )
 
-    def _gene_to_string(self, gene_data: Dict) -> str:
+    def _gene_to_string(self, gene_data: Dict) -> Optional[str]:
         gene_id = "gene%s" % str(self.count)
         ss = StringIO()
+        if len(gene_data["transcripts"]) == 0:
+            return
         ss.write("".join((
             "\t".join((
                 gene_data["fasta-id"], self.version,
@@ -178,7 +180,8 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
     out_prots = []
     with open(out_prefix + ".nr.gff3", "w") as gff3_fp:
         for gene, cds, prot in gff3:
-            gff3_fp.write(gene)
+            if gene is not None:
+                gff3_fp.write(gene)
             if cds is not None:
                 out_cds.append(cds)
             if prot is not None:
