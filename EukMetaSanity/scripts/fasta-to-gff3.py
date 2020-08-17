@@ -30,14 +30,17 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
         recs.append(
             Result(
                 loc_type="gene",
-                sstart=int(line[6]) - 1,
+                sstart=int(line[6]),
                 send=int(line[7]),
                 strand=strand,
                 score=line[3],
             )
         )
         # Store exon/CDS info from rest of header at nested list loc
-        for coords in line[8:]:
+        all_coords = line[8:]
+        if strand == -1:
+            all_coords.reverse()
+        for coords in all_coords:
             start, end, length = coords.split(":")
             if strand < 0:
                 start, end = end, start
@@ -62,7 +65,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
         # First value is gene
         rec.features.append(
             SeqFeature(
-                FeatureLocation(features[0].sstart - 1, features[0].send), type=features[0].loc_type,
+                FeatureLocation(features[0].sstart, features[0].send), type=features[0].loc_type,
                 strand=features[0].strand,
                 qualifiers={"score": features[0].score, "source": "metaeuk", "ID": "gene%i" % i}
             )
@@ -72,7 +75,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
         for feature in features[1:]:
             rec.features[-1].sub_features.append(
                 SeqFeature(
-                    FeatureLocation(feature.sstart - 1, feature.send), type=feature.loc_type,
+                    FeatureLocation(feature.sstart, feature.send), type=feature.loc_type,
                     strand=features[0].strand,
                     qualifiers={"score": feature.score, "source": "metaeuk"}
                 )

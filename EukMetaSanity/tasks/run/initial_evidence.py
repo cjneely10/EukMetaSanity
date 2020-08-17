@@ -74,24 +74,17 @@ class EvidenceIter(TaskList):
             # Merge final results
             EvidenceIter.Evidence.merge(
                 self, [self.input[0], os.path.join(self.wdir, "metaeuk.gff3")],
-                self.input[4],
+                self.input[2],
                 os.path.join(self.wdir, self.record_id),
                 self.merge_method,
             )
             
         @staticmethod
         def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str, merge_method: str):
-            # Merge to non-redundant set
-            task_object.log_and_run(
-                task_object.program_gffcompare[
-                    (*input_list),
-                    "-D", "-S", "-C", "-o", out_prefix,
-                ]
-            )
             # Convert to gff3 file
             task_object.log_and_run(
                 task_object.program_gffread[
-                    out_prefix + ".combined.gtf", "-G", "--merge", "-Y"
+                    (*input_list), "-G", "--merge", "-Y"
                 ] > out_prefix + ".gff3"
             )
             # Replace transcripts with gene identifier and write cds/aa sequences

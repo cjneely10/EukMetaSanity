@@ -6,9 +6,9 @@ RUN apt-get update && \
     # Create user and give permissions
     groupadd -g 999 appuser && useradd -r -u 999 -g appuser appuser && \
     # Install apt dependencies
-    apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev zip python3-pip && \
+    apt-get -y install git gcc g++ parallel wget autoconf make python2.7 libbz2-dev zip && \
     # Create user directories
-    mkdir /home/appuser && cd /home/appuser && mkdir opt bin scripts data tmp && cd - && \
+    mkdir /home/appuser && cd /home/appuser && mkdir opt bin scripts data tmp wdir && cd - && \
     # Create .scripts file and source it
     touch /home/appuser/scripts/.scripts && \
     echo "source /home/appuser/scripts/.scripts" >> /home/appuser/.bashrc && \
@@ -22,7 +22,7 @@ COPY * /home/appuser/opt/EukMetaSanity/
 
 # Installation of dependencies and adding to PATH
 # EukMetaSanity install
-RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
+RUN cd /home/appuser/opt/EukMetaSanity && make all PIP=pip && cd - && \
     echo "export PATH=$(pwd)/EukMetaSanity/bin/:\$PATH" >> /home/appuser/scripts/.scripts && \
     echo "export PYTHONPATH=$(pwd)/EukMetaSanity/:\$PYTHONPATH" >> /home/appuser/scripts/.scripts && \
     ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py /home/appuser/bin/EukMetaSanity && \
@@ -119,7 +119,7 @@ RUN cd /home/appuser/opt/EukMetaSanity && make all && cd - && \
     chown -R appuser:appuser /home/appuser && chmod 777 /home/appuser/data && chmod 777 /home/appuser/tmp
 
 VOLUME ["/home/appuser/data", "/home/appuser/opt/repeatmodeler", "/home/appuser/opt/repeatmasker"]
-VOLUME ["/home/appuser/opt/gmes"]
+VOLUME ["/home/appuser/opt/gmes", "/home/appuser/opt/gmes"]
 # Change user
 USER appuser
 # Calls MetaSanity using the passed values from the config file

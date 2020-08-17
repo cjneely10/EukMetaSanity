@@ -47,22 +47,23 @@ class Gff3Parser:
                 while line[2] != "locus":
                     # Read in transcript info
                     transcripts.append(
-                        [line[1], line[3], line[4], []]  # First line is a transcript: ID,source,start,end
+                        [line[1], line[3], line[4], []]  # First line is a transcript: source,tstart,tend
                     )
                     line = next(self.fp).rstrip("\r\n").split("\t")
                     # Add exon to current info
                     while line[2] not in ("transcript", "locus"):
-                        transcripts[-1][-1].append(
-                            (line[3], line[4])
-                        )
+                        if line[2] == "CDS":
+                            transcripts[-1][-1].append(
+                                (int(line[3]), int(line[4]), line[7])  # exstart,exend,offset
+                            )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
                 gene_data["transcripts"] = self.priority(transcripts)
                 # Create CDS and protein record
                 record = self.create_cds(gene_data)
-                orf, offset = Gff3Parser.find_orf(record)
+                orf = Gff3Parser.find_orf(record)
                 yield (
-                    self._gene_to_string(gene_data, str(offset)),
+                    self._gene_to_string(gene_data),
                     record,
                     orf,
                 )
@@ -70,19 +71,26 @@ class Gff3Parser:
     def create_cds(self, gene_data: Dict) -> SeqRecord:
         seq = StringIO()
         orig_seq = self.fasta_dict[gene_data["fasta-id"]]
-        if gene_data["strand"] == "-":
-            orig_seq = orig_seq.reverse_complement()
         orig_seq = str(orig_seq.seq)
+        start = 0
+        end = 0
         for transcript in gene_data["transcripts"]:
-            seq.write(orig_seq[int(transcript[0]) - 1: int(transcript[1])])
+            if gene_data["strand"] == "+":
+                start = int(transcript[2])
+            else:
+                end = int(transcript[2])
+            seq.write(orig_seq[int(transcript[0]) - 1 + start: int(transcript[1]) - end])
+        seq = Seq(seq.getvalue())
+        if gene_data["strand"] == "-":
+            seq = seq.reverse_complement()
         return SeqRecord(
-            seq=Seq(seq.getvalue()),
+            seq=seq,
             id="gene%s" % str(self.count),
             description="strand=%s" % gene_data["strand"],
             name="",
         )
 
-    def _gene_to_string(self, gene_data: Dict, offset: str) -> str:
+    def _gene_to_string(self, gene_data: Dict) -> str:
         gene_id = "gene%s" % str(self.count)
         ss = StringIO()
         ss.write("".join((
@@ -110,7 +118,7 @@ class Gff3Parser:
                 "\t".join((
                     gene_data["fasta-id"], self.version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], offset, "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
+                    ".", gene_data["strand"], exon_tuple[2], "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
                 )),
                 "\n",
             )))
@@ -127,7 +135,7 @@ class Gff3Parser:
     @staticmethod
     def filter_specific(line: List[List], name: str) -> List[List]:
         for _l in line:
-            if _l[0] == name:
+            if _l[0] == name or len(_l[-1]) < 2:
                 return _l[-1]
         return []
 
@@ -147,7 +155,7 @@ class Gff3Parser:
         return spans_in_coords
 
     @staticmethod
-    def find_orf(record: SeqRecord) -> Tuple[Optional[SeqRecord], int]:
+    def find_orf(record: SeqRecord) -> Optional[SeqRecord]:
         longest = (0,)
         nuc = str(record.seq)
         for m in re.finditer("ATG", nuc):
@@ -160,8 +168,8 @@ class Gff3Parser:
                 id=record.id,
                 description=record.description,
                 name="",
-            ), longest[1]
-        return None, 0
+            )
+        return None
 
 
 def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_prefix: str):

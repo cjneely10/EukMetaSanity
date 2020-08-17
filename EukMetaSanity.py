@@ -135,8 +135,13 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
         task = task_list[i](*task.output())
     # Must call output on last task to generate final summary statistics
     task.run()
-    # Create summary softlinks using final Summarize task
+    # Create summary using final Summarize task
     task.summarize(os.path.join(ap.args.output, "results", ap.args.command), ap.args.command)
+
+
+def _docker_main(ap: ArgParse, cfg: ConfigManager, is_cont: bool, tm: TaskManager):
+    from plumbum import local
+    docker = local["docker"]
 
 
 if __name__ == "__main__":
