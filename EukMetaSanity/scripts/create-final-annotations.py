@@ -169,7 +169,7 @@ class Gff3Parser:
         for m in re.finditer("ATG", nuc):
             pro = Seq(nuc[m.start():]).translate(to_stop=True)
             if len(pro) > longest[0]:
-                longest = (len(pro), m.start(), str(pro))
+                longest = (len(pro), m.start(), pro)
         if longest[0] > 0:
             return SeqRecord(
                 seq=Seq(str(longest[2]) + "*"),
