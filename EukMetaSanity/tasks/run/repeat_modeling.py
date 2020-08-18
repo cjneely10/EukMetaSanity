@@ -95,7 +95,7 @@ class RepeatsIter(TaskList):
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
-            data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0]]
+            data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "species")[0]]
             if os.path.exists(_file):
                 data_files.append(_file)
             for _search in data_files:
@@ -150,7 +150,7 @@ class RepeatsIter(TaskList):
             self.log_and_run(
                 self.program_process_repeats[
                     # Input taxonomy from OrthoDB search
-                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], float(self.cutoff))[0],
+                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "species")[0],
                     "-maskSource", input_file,
                     final_out,
                 ]
