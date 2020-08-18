@@ -1,7 +1,7 @@
 import os
 import logging
+from abc import ABC
 from plumbum import local, BG
-from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data

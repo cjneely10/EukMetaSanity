@@ -15,7 +15,7 @@ class Gff3Parser:
     def __init__(self, gff3_file: str, fasta_file: str, priority: str = "metaeuk"):
         assert priority in dir(Gff3Parser)
         self.fp = open(gff3_file, "r")
-        self.priority = getattr(Gff3Parser, priority, lambda _: _)
+        self.priority = getattr(Gff3Parser, priority, lambda a, b: a)
         self.version = priority
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
         self.count = 0
@@ -58,7 +58,7 @@ class Gff3Parser:
                             )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
-                gene_data["transcripts"] = self.priority(transcripts)
+                gene_data["transcripts"] = self.priority(transcripts, gene_data["strand"])
                 # Create CDS and protein record
                 record = self.create_cds(gene_data)
                 orf = Gff3Parser.find_orf(record)
@@ -142,15 +142,24 @@ class Gff3Parser:
         return []
 
     @staticmethod
-    def merge(line: List[List], direction="+") -> List[List]:
+    def merge(line: List[List], direction) -> List[List]:
         # Sort coordinates by start value
-        ranges_in_coords = sorted(
-            [
-                (_v[0] + _v[2], _v[1], 0)
-                for _v in itertools.chain(*[_l[-1] for _l in line])
-            ],
-            key=itemgetter(0)
-        )
+        if direction == "+":
+            ranges_in_coords = sorted(
+                [
+                    (_v[0] + _v[2], _v[1], 0)
+                    for _v in itertools.chain(*[_l[-1] for _l in line])
+                ],
+                key=itemgetter(0)
+            )
+        else:
+            ranges_in_coords = sorted(
+                [
+                    (_v[0], _v[1] - _v[2] + 1, 0)
+                    for _v in itertools.chain(*[_l[-1] for _l in line])
+                ],
+                key=itemgetter(0)
+            )
         # Will group together matching sections into spans
         spans_in_coords = [list(ranges_in_coords[0]), ]
         for coords in ranges_in_coords[1:]:
