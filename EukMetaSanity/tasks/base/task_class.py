@@ -56,7 +56,6 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
-        self.skip = False
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -133,8 +132,10 @@ class Task(ABC):
     def results(self) -> List[object]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
+        if getattr(self, "skip", "False") != "False":
+            return self._input_path_list
         for _path in self._output_paths:
-            if self.skip == "False" and isinstance(_path, str) and not os.path.exists(_path):
+            if isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
                     touch(_path)
@@ -164,6 +165,8 @@ class Task(ABC):
 
     def run(self) -> None:
         # Check if task has completed based on provided output data
+        if getattr(self, "skip", "False") != "False":
+            return
         completed = True
         for _path in self._output_paths:
             if isinstance(_path, str) and not os.path.exists(_path):
@@ -233,7 +236,8 @@ class TaskList(ABC):
     def run(self):
         # Single
         logging.info(self._statement)
-        print(self._statement)
+        if getattr(self._tasks[0], "skip", "False") == "False":
+            print(self._statement)
         if self._mode == 0:
             for task in self._tasks:
                 task.run()

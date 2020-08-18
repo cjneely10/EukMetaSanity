@@ -127,11 +127,11 @@ class Gff3Parser:
         return ss.getvalue()
 
     @staticmethod
-    def metaeuk(line: List[List]) -> List[List]:
+    def metaeuk(line: List[List], *args) -> List[List]:
         return Gff3Parser.filter_specific(line, "metaeuk")
 
     @staticmethod
-    def abinitio(line: List[List]) -> List[List]:
+    def abinitio(line: List[List], *args) -> List[List]:
         return Gff3Parser.filter_specific(line, "ab-initio")
 
     @staticmethod
@@ -142,7 +142,7 @@ class Gff3Parser:
         return []
 
     @staticmethod
-    def merge(line: List[List]) -> List[List]:
+    def merge(line: List[List], direction="+") -> List[List]:
         # Sort coordinates by start value
         ranges_in_coords = sorted(
             [
@@ -172,7 +172,7 @@ class Gff3Parser:
                 longest = (len(pro), m.start(), pro)
         if longest[0] > 0:
             return SeqRecord(
-                seq=Seq(str(longest[2]) + "*"),
+                seq=longest[2],
                 id=record.id,
                 description=record.description,
                 name="",
