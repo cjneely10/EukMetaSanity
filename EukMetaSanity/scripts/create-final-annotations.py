@@ -58,9 +58,17 @@ class Gff3Parser:
                             )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
-                gene_data["transcripts"] = transcripts
+                gene_data["transcripts"] = [_t[-1] for _t in transcripts]
+                # gene_data["transcripts"] = self.priority(transcripts)
                 # Create CDS and protein record
                 # record = self.create_cds(gene_data)
+                # out = self.find_orf(record)
+                # if out is not None:
+                #     yield (
+                #         self._gene_to_string(gene_data, out[1]),
+                #         record,
+                #         out[0],
+                #     )
                 record, orf, offset = self.find_longest_orf(gene_data)
                 yield (
                     self._gene_to_string(gene_data, offset),
@@ -90,11 +98,12 @@ class Gff3Parser:
         max_offset: int = 0
         max_cds: Optional[SeqRecord] = None
         max_prot: Optional[SeqRecord] = None
-        for i, transcript in enumerate(gene_data["transcripts"]):
+        search_data = [*gene_data["transcripts"], self.priority(gene_data["transcripts"])]
+        for i, transcript in enumerate(search_data):
             seq = StringIO()
             orig_seq = self.fasta_dict[gene_data["fasta-id"]]
             orig_seq = str(orig_seq.seq)
-            for transcr in transcript[-1]:
+            for transcr in transcript:
                 seq.write(orig_seq[int(transcr[0]) - 1: int(transcr[1])])
             seq = Seq(seq.getvalue())
             if gene_data["strand"] == "-":
@@ -113,7 +122,7 @@ class Gff3Parser:
                     max_cds = cds
                     max_prot = out[0]
                     max_offset = out[1]
-        gene_data["transcripts"] = gene_data["transcripts"][max_idx][-1]
+        gene_data["transcripts"] = search_data[max_idx]
         return max_cds, max_prot, max_offset
 
     def _gene_to_string(self, gene_data: Dict, offset: int) -> Optional[str]:
@@ -168,12 +177,12 @@ class Gff3Parser:
         return []
 
     @staticmethod
-    def merge(line: List[List]) -> List[List]:
+    def merge(line: List[List]) -> List[Tuple]:
         # Sort coordinates by start value
         ranges_in_coords = sorted(
             [
                 (_v[0], _v[1])
-                for _v in itertools.chain(*[_l[-1] for _l in line])
+                for _v in itertools.chain(*line)
             ],
             key=itemgetter(0)
         )
@@ -186,7 +195,7 @@ class Gff3Parser:
             # The start value is past the range of the current span, append old span to list to return
             elif coords[0] > spans_in_coords[-1][1]:
                 spans_in_coords.append(list(coords))
-        return spans_in_coords
+        return [tuple(val) for val in spans_in_coords]
 
     @staticmethod
     def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, int]]:
@@ -209,8 +218,8 @@ class Gff3Parser:
         return None
 
 
-def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, out_prefix: str):
-    gff3 = Gff3Parser(gff3_file, fasta_file, filter_function)
+def convert_final_gff3(gff3_file: str, fasta_file: str, out_prefix: str):
+    gff3 = Gff3Parser(gff3_file, fasta_file, "merge")
     out_cds = []
     out_prots = []
     with open(out_prefix + ".nr.gff3", "w") as gff3_fp:
@@ -228,8 +237,6 @@ def convert_final_gff3(gff3_file: str, fasta_file: str, filter_function: str, ou
 if __name__ == "__main__":
     ap = ArgParse(
         (
-            (("command", ),
-             {"help": "Filter command, select from metaeuk/abinitio/merge"}),
             (("-g", "--gff3_file"),
              {"help": ".tmp.nr.gff3 file", "required": True}),
             (("-f", "--fasta_file"),
@@ -239,7 +246,7 @@ if __name__ == "__main__":
     )
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file
-    convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, ap.args.command, os.path.splitext(ap.args.gff3_file)[0])
+    convert_final_gff3(ap.args.gff3_file, ap.args.fasta_file, os.path.splitext(ap.args.gff3_file)[0])
 
 if __name__ == "__main__":
     pass
