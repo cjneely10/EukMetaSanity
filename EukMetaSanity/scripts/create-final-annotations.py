@@ -51,7 +51,7 @@ class Gff3Parser:
                     )
                     line = next(self.fp).rstrip("\r\n").split("\t")
                     # Add exon to current info
-                    while line[2] not in ("transcript", "locus"):
+                    while line[2] not in ("transcript", "locus", "gene"):
                         if line[2] == "CDS":
                             transcripts[-1][-1].append(
                                 (int(line[3]), int(line[4]))  # exstart,exend

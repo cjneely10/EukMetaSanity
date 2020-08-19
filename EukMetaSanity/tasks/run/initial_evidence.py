@@ -56,7 +56,7 @@ class EvidenceIter(TaskList):
                 self.log_and_run(
                     self.program_metaeuk[
                         "easy-predict",
-                        self.input[2],
+                        self.input[4],
                         subset_db_outpath,
                         _outfile,
                         os.path.join(self.wdir, "tmp"),

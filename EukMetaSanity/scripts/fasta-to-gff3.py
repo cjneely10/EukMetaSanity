@@ -9,7 +9,7 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 # Result as read in from DNA/contig side as subject
-Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand", "score"))
+Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand"))
 
 
 def metaeuk(metaeuk_file_path, data, *args, **kwargs):
@@ -33,7 +33,6 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
                 sstart=int(line[6]),
                 send=int(line[7]),
                 strand=strand,
-                score=line[3],
             )
         )
         # Store exon/CDS info from rest of header at nested list loc
@@ -51,7 +50,6 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
                         sstart=int(start.split("[")[1][:-1]),
                         send=int(end.split("[")[1][:-1]),
                         strand=strand,
-                        score=".",
                     )
                 )
         # Add nested list
@@ -67,7 +65,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
             SeqFeature(
                 FeatureLocation(features[0].sstart, features[0].send), type=features[0].loc_type,
                 strand=features[0].strand,
-                qualifiers={"score": features[0].score, "source": "metaeuk", "ID": "gene%i" % i}
+                qualifiers={"source": "metaeuk", "ID": "gene%i" % i}
             )
         )
         # Remaining in list are features that describe the gene
@@ -77,7 +75,7 @@ def _parse_metaeuk(i, ap, feature_data, record, rec):
                 SeqFeature(
                     FeatureLocation(feature.sstart, feature.send), type=feature.loc_type,
                     strand=features[0].strand,
-                    qualifiers={"score": feature.score, "source": "metaeuk"}
+                    qualifiers={"source": "metaeuk"}
                 )
             )
         i += 1
