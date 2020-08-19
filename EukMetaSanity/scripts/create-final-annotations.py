@@ -58,7 +58,7 @@ class Gff3Parser:
                             )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
-                # gene_data["transcripts"] = self.priority(transcripts)
+                gene_data["transcripts"] = transcripts
                 # Create CDS and protein record
                 # record = self.create_cds(gene_data)
                 record, orf, offset = self.find_longest_orf(gene_data)
@@ -85,15 +85,16 @@ class Gff3Parser:
         )
 
     def find_longest_orf(self, gene_data: Dict) -> Tuple[SeqRecord, SeqRecord, int]:
-        cds_list = []
-        prots = []
-        offsets = []
-        indices = []
+        max_idx: int = 0
+        max_len: int = 0
+        max_offset: int = 0
+        max_cds: Optional[SeqRecord] = None
+        max_prot: Optional[SeqRecord] = None
         for i, transcript in enumerate(gene_data["transcripts"]):
             seq = StringIO()
             orig_seq = self.fasta_dict[gene_data["fasta-id"]]
             orig_seq = str(orig_seq.seq)
-            for transcr in transcript:
+            for transcr in transcript[-1]:
                 seq.write(orig_seq[int(transcr[0]) - 1: int(transcr[1])])
             seq = Seq(seq.getvalue())
             if gene_data["strand"] == "-":
@@ -106,14 +107,14 @@ class Gff3Parser:
             )
             out = Gff3Parser.find_orf(cds)
             if out is not None:
-                indices.append(i)
-                cds_list.append(cds)
-                prots.append(out[0])
-                offsets.append(out[1])
-        max_prot = max(prots, key=lambda _orf: len(_orf.seq))
-        _max_idx = prots.index(max_prot)
-        gene_data["transcripts"] = gene_data["transcripts"][indices.index(_max_idx)]
-        return cds_list[_max_idx], max_prot, offsets[_max_idx]
+                if max_len < len(out[0].seq):
+                    max_idx = i
+                    max_len = len(out[0].seq)
+                    max_cds = cds
+                    max_prot = out[0]
+                    max_offset = out[1]
+        gene_data["transcripts"] = gene_data["transcripts"][max_idx][-1]
+        return max_cds, max_prot, max_offset
 
     def _gene_to_string(self, gene_data: Dict, offset: int) -> Optional[str]:
         gene_id = "gene%s" % str(self.count)
