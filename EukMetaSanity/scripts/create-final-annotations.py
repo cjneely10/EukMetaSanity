@@ -15,7 +15,7 @@ class Gff3Parser:
     def __init__(self, gff3_file: str, fasta_file: str, priority: str = "metaeuk"):
         assert priority in dir(Gff3Parser)
         self.fp = open(gff3_file, "r")
-        self.priority = getattr(Gff3Parser, priority, lambda a, b: a)
+        self.priority = getattr(Gff3Parser, priority, lambda a: a)
         self.version = priority
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
         self.count = 0
@@ -54,16 +54,16 @@ class Gff3Parser:
                     while line[2] not in ("transcript", "locus"):
                         if line[2] == "CDS":
                             transcripts[-1][-1].append(
-                                (int(line[3]), int(line[4]), int(line[7]))  # exstart,exend,offset
+                                (int(line[3]), int(line[4]))  # exstart,exend
                             )
                         line = next(self.fp).rstrip("\r\n").split("\t")
                 # Filter for specific transcripts
-                gene_data["transcripts"] = self.priority(transcripts, gene_data["strand"])
+                # gene_data["transcripts"] = self.priority(transcripts)
                 # Create CDS and protein record
-                record = self.create_cds(gene_data)
-                orf = Gff3Parser.find_orf(record)
+                # record = self.create_cds(gene_data)
+                record, orf, offset = self.find_longest_orf(gene_data)
                 yield (
-                    self._gene_to_string(gene_data),
+                    self._gene_to_string(gene_data, offset),
                     record,
                     orf,
                 )
@@ -72,14 +72,8 @@ class Gff3Parser:
         seq = StringIO()
         orig_seq = self.fasta_dict[gene_data["fasta-id"]]
         orig_seq = str(orig_seq.seq)
-        start = 0
-        end = 0
         for transcript in gene_data["transcripts"]:
-            if gene_data["strand"] == "+":
-                start = int(transcript[2])
-            else:
-                end = int(transcript[2])
-            seq.write(orig_seq[int(transcript[0]) - 1 + start: int(transcript[1]) - end])
+            seq.write(orig_seq[int(transcript[0]) - 1: int(transcript[1])])
         seq = Seq(seq.getvalue())
         if gene_data["strand"] == "-":
             seq = seq.reverse_complement()
@@ -90,7 +84,38 @@ class Gff3Parser:
             name="",
         )
 
-    def _gene_to_string(self, gene_data: Dict) -> Optional[str]:
+    def find_longest_orf(self, gene_data: Dict) -> Tuple[SeqRecord, SeqRecord, int]:
+        cds_list = []
+        prots = []
+        offsets = []
+        indices = []
+        for i, transcript in enumerate(gene_data["transcripts"]):
+            seq = StringIO()
+            orig_seq = self.fasta_dict[gene_data["fasta-id"]]
+            orig_seq = str(orig_seq.seq)
+            for transcr in transcript:
+                seq.write(orig_seq[int(transcr[0]) - 1: int(transcr[1])])
+            seq = Seq(seq.getvalue())
+            if gene_data["strand"] == "-":
+                seq = seq.reverse_complement()
+            cds = SeqRecord(
+                seq=seq,
+                id="gene%s" % str(self.count),
+                description="strand=%s" % gene_data["strand"],
+                name="",
+            )
+            out = Gff3Parser.find_orf(cds)
+            if out is not None:
+                indices.append(i)
+                cds_list.append(cds)
+                prots.append(out[0])
+                offsets.append(out[1])
+        max_prot = max(prots, key=lambda _orf: len(_orf.seq))
+        _max_idx = prots.index(max_prot)
+        gene_data["transcripts"] = gene_data["transcripts"][indices.index(_max_idx)]
+        return cds_list[_max_idx], max_prot, offsets[_max_idx]
+
+    def _gene_to_string(self, gene_data: Dict, offset: int) -> Optional[str]:
         gene_id = "gene%s" % str(self.count)
         ss = StringIO()
         if len(gene_data["transcripts"]) == 0:
@@ -120,18 +145,18 @@ class Gff3Parser:
                 "\t".join((
                     gene_data["fasta-id"], self.version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], str(exon_tuple[2]), "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
+                    ".", gene_data["strand"], str(offset), "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
                 )),
                 "\n",
             )))
         return ss.getvalue()
 
     @staticmethod
-    def metaeuk(line: List[List], *args) -> List[List]:
+    def metaeuk(line: List[List]) -> List[List]:
         return Gff3Parser.filter_specific(line, "metaeuk")
 
     @staticmethod
-    def abinitio(line: List[List], *args) -> List[List]:
+    def abinitio(line: List[List]) -> List[List]:
         return Gff3Parser.filter_specific(line, "ab-initio")
 
     @staticmethod
@@ -142,24 +167,15 @@ class Gff3Parser:
         return []
 
     @staticmethod
-    def merge(line: List[List], direction) -> List[List]:
+    def merge(line: List[List]) -> List[List]:
         # Sort coordinates by start value
-        if direction == "+":
-            ranges_in_coords = sorted(
-                [
-                    (_v[0] + _v[2], _v[1], 0)
-                    for _v in itertools.chain(*[_l[-1] for _l in line])
-                ],
-                key=itemgetter(0)
-            )
-        else:
-            ranges_in_coords = sorted(
-                [
-                    (_v[0], _v[1] - _v[2] + 1, 0)
-                    for _v in itertools.chain(*[_l[-1] for _l in line])
-                ],
-                key=itemgetter(0)
-            )
+        ranges_in_coords = sorted(
+            [
+                (_v[0], _v[1])
+                for _v in itertools.chain(*[_l[-1] for _l in line])
+            ],
+            key=itemgetter(0)
+        )
         # Will group together matching sections into spans
         spans_in_coords = [list(ranges_in_coords[0]), ]
         for coords in ranges_in_coords[1:]:
@@ -172,7 +188,7 @@ class Gff3Parser:
         return spans_in_coords
 
     @staticmethod
-    def find_orf(record: SeqRecord) -> Optional[SeqRecord]:
+    def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, int]]:
         longest = (0,)
         nuc = str(record.seq)
         for m in re.finditer("ATG", nuc):
@@ -180,11 +196,14 @@ class Gff3Parser:
             if len(pro) > longest[0]:
                 longest = (len(pro), m.start(), pro)
         if longest[0] > 0:
-            return SeqRecord(
-                seq=longest[2],
-                id=record.id,
-                description=record.description,
-                name="",
+            return (
+                SeqRecord(
+                    seq=longest[2],
+                    id=record.id,
+                    description=record.description,
+                    name="",
+                ),
+                longest[1] % 3
             )
         return None
 
