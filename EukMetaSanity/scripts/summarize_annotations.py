@@ -146,7 +146,7 @@ if __name__ == "__main__":
             (("-a", "--annotations"),
              {"help": "Annotation paths, in format type=file[ type2=file2]", "nargs": "+"}),
             (("-e", "--max_evalue"),
-             {"help": "Max evalue, default 1E-5", "default": "1E-5"}),
+             {"help": "Max evalue, default 0.001", "default": "0.001"}),
             (("-s", "--summarize"),
              {"help": "Summarize db as tsv to path"}),
             (("-o", "--output"),
