@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sqlite3
+from Bio import SeqIO
 from decimal import Decimal
 from typing import List, Tuple, Generator
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -90,10 +91,15 @@ def _mmseqs_iter(mmseqs_file: str, max_evalue: Decimal) -> Generator[Tuple[str, 
 
 
 def _fasta_id_iter(fasta_file: str) -> Generator[str, str, None]:
+    data = {}
+    for record in SeqIO.parse(fasta_file, "fasta"):
+        data[str(record.id)] = len(record.seq)
     fp = open(fasta_file, "r")
     for line in fp:
         if line[0] == '>':
-            yield line[1:].rstrip("\r\n").split(" ")[0]
+            _id = line[1:].rstrip("\r\n").split(" ")[0]
+            if data[_id] >= 30:
+                yield _id
 
 
 def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: Decimal, out_prefix: str):
@@ -111,6 +117,7 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
     rows = {}
     for fasta_id in _fasta_id_iter(fasta_file):
         rows[fasta_id] = [fasta_id, *["0" for _ in range(len(table_col_ids))]]
+    _ids = set(rows.keys())
     i = 1
     non_null = 0
     for annot_type, annot_path in annotations:
@@ -123,7 +130,8 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
         for record_id, record_annotation in data_iter:
             for val in ('"', "'"):
                 record_annotation = record_annotation.replace(val, "")
-            rows[record_id][i] = record_annotation
+            if record_id in _ids:
+                rows[record_id][i] = record_annotation
         i += 1
     for vals in rows.values():
         for val in vals[1:]:
@@ -154,12 +162,5 @@ if __name__ == "__main__":
         ),
         description="Add annotations to FASTA/gff3 file from various results files"
     )
-    # Summarize
-    if ap.args.summarize is not None:
-        assert os.path.exists(ap.args.summarize)
-        summarize(sqlite3.connect(ap.args.summarize), os.path.splitext(ap.args.summarize)[0] + ".tsv")
-        exit(0)
-
-    # Or build
     _annotations = _parse_args(ap)
     annotate(ap.args.fasta_file, _annotations, ap.args.max_evalue, ap.args.output)
