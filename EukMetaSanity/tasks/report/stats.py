@@ -25,7 +25,8 @@ class ReportStatsIter(TaskList):
                 self.local["summarize_annotations.py"][
                     "-f", self.input[0],
                     "-a", (*self.parse_input()),
-                    "-o", os.path.join(self.wdir, self.record_id)
+                    "-o", os.path.join(self.wdir, self.record_id),
+                    "-e", self.max_evalue,
                 ]
             )
 
