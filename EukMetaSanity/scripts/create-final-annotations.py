@@ -7,6 +7,7 @@ from Bio.Seq import Seq
 from io import StringIO
 from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
+from collections import defaultdict
 from EukMetaSanity.utils.arg_parse import ArgParse
 from typing import Optional, Tuple, Generator, List, Dict
 
@@ -54,11 +55,15 @@ class Gff3Parser:
                     while line[2] not in ("transcript", "locus", "gene"):
                         if line[2] == "CDS":
                             transcripts[-1][-1].append(
-                                (int(line[3]), int(line[4]))  # exstart,exend
+                                (int(line[3]), int(line[4]))  # source,exstart,exend
                             )
                         line = next(self.fp).rstrip("\r\n").split("\t")
+                # Merge based on name
+                data = defaultdict(list)
+                for transcript in transcripts:
+                    data[transcript[0]].extend(transcript[-1])
                 # Filter for specific transcripts
-                gene_data["transcripts"] = [_t[-1] for _t in transcripts]
+                gene_data["transcripts"] = [data[_t[0]] for _t in transcripts]
                 # gene_data["transcripts"] = self.priority(transcripts)
                 # Create CDS and protein record
                 # record = self.create_cds(gene_data)
