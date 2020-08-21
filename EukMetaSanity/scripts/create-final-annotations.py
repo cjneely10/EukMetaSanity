@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
-import re
 import itertools
+import regex as re
 from Bio import SeqIO
 from Bio.Seq import Seq
 from io import StringIO
@@ -64,16 +64,6 @@ class Gff3Parser:
                     data[transcript[0]].extend(transcript[-1])
                 # Filter for specific transcripts
                 gene_data["transcripts"] = [data[_t[0]] for _t in transcripts]
-                # gene_data["transcripts"] = self.priority(transcripts)
-                # Create CDS and protein record
-                # record = self.create_cds(gene_data)
-                # out = self.find_orf(record)
-                # if out is not None:
-                #     yield (
-                #         self._gene_to_string(gene_data, out[1]),
-                #         record,
-                #         out[0],
-                #     )
                 record, orf, offset = self.find_longest_orf(gene_data)
                 yield (
                     self._gene_to_string(gene_data, offset),
