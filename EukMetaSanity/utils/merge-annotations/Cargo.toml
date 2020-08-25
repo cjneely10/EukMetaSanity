@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 bio = "*"
+bio-types = "*"
 argparse = "0.2.2"
