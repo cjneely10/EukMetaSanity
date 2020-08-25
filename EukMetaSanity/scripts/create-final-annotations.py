@@ -196,7 +196,8 @@ class Gff3Parser:
     def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, int]]:
         longest = (0,)
         nuc = str(record.seq)
-        for m in re.finditer("ATG", nuc):
+        start_pos = re.compile("ATG")
+        for m in start_pos.finditer(nuc, overlapped=True):
             pro = Seq(nuc[m.start():]).translate(to_stop=True)
             if len(pro) > longest[0]:
                 longest = (len(pro), m.start(), pro)
