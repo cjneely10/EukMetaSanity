@@ -160,7 +160,7 @@ class GffMerge:
         if longest[0] > 0:
             return (
                 SeqRecord(
-                    seq=Seq(longest[2]).translate(stop_symbol=""),
+                    seq=Seq(longest[2]),
                     id=record.id,
                     description=record.description,
                     name="",
