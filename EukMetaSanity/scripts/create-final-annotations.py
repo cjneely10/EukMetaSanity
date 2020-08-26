@@ -137,7 +137,7 @@ class GffMerge:
                 id=gene_data["geneid"],
                 name="",
                 description="",
-                seq=Seq("".join(str(val.seq) for val in out_prots))
+                seq=Seq("".join(str(val.seq) for val in out_prots).replace("*M", ""))
             ),
             SeqRecord(
                 id=gene_data["geneid"],
@@ -160,7 +160,7 @@ class GffMerge:
         if longest[0] > 0:
             return (
                 SeqRecord(
-                    seq=Seq(longest[2]),
+                    seq=Seq(longest[2]).translate(),
                     id=record.id,
                     description=record.description,
                     name="",
