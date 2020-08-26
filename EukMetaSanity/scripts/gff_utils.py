@@ -13,11 +13,15 @@ from typing import List, Dict, Tuple, Generator, Optional
 
 class Gene:
     def __init__(self, ab_initio_data: List):
-        self._exons: List = ab_initio_data
+        self.exons: List = ab_initio_data
 
     def add_evidence(self, evidence_data: List):
-        out_exons = []
-        for ab_exon in self._exons:
+        if len(self.exons) == 0:
+            return
+        if len(evidence_data) == 0:
+            return
+        out_exons = [self.exons[0]]
+        for ab_exon in self.exons[1:]:
             is_found = False
             for exon in evidence_data:
                 if Gene.in_exon(exon, ab_exon):
@@ -33,12 +37,8 @@ class Gene:
                     break
             if not is_found:
                 out_exons.append(exon)
-        self._exons = out_exons
-        self._exons.sort(key=itemgetter(0))
-
-    @property
-    def exons(self) -> List:
-        return self._exons
+        self.exons = out_exons
+        self.exons.sort(key=itemgetter(0))
 
     # Returns if part of query coord overlaps target coord
     @staticmethod
@@ -70,8 +70,6 @@ class GffReader:
                 gene_data = {
                     "geneid": "gene%i" % self._count,
                     "fasta-id": line[0],
-                    "start": line[3],
-                    "end": line[4],
                     "strand": line[6],
                 }
                 transcripts = []
@@ -79,7 +77,7 @@ class GffReader:
                 while line[2] != "locus":
                     # Read in transcript info
                     transcripts.append(
-                        [line[1], line[3], line[4], []]  # First line is a transcript: source,tstart,tend
+                        [line[1], []]  # First line is a transcript: source,tstart,tend
                     )
                     line = next(self.fp).rstrip("\r\n").split("\t")
                     # Add exon to current info
@@ -93,6 +91,8 @@ class GffReader:
                 data = defaultdict(list)
                 for transcript in transcripts:
                     data[transcript[0]].extend(transcript[-1])
+                for transcript in data.keys():
+                    data[transcript].sort(key=itemgetter(0))
                 # Store in data and yield
                 gene_data["transcripts"] = data
                 yield gene_data
@@ -191,12 +191,14 @@ class GffWriter:
         for gene_dict, prot, cds, offsets in self.merger.merge():
             if gene_dict["fasta-id"] != current_id:
                 current_id = gene_dict["fasta-id"]
-                self.out_fp.write("# Begin region %s\n" % current_id)
+                self.out_fp.write("# Region %s\n" % current_id)
             gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
             if gene is not None:
                 self.out_fp.write(gene)
-            out_prots.append(prot)
-            out_cds.append(cds)
+            if len(prot.seq) > 0:
+                out_prots.append(prot)
+            if len(cds.seq) > 0:
+                out_cds.append(cds)
         SeqIO.write(out_prots, self.base + ".faa", "fasta")
         SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
 
@@ -210,13 +212,13 @@ class GffWriter:
         ss.write("".join((
             "\t".join((
                 gene_data["fasta-id"], version,
-                "gene", gene_data["start"], gene_data["end"],
+                "gene", str(gene_data["transcripts"][0][0]), str(gene_data["transcripts"][-1][1]),
                 ".", gene_data["strand"], ".", "ID=%s" % gene_id
             )),
             "\n",
             "\t".join((
                 gene_data["fasta-id"], version,
-                "mRNA", gene_data["start"], gene_data["end"],
+                "mRNA", str(gene_data["transcripts"][0][0]), str(gene_data["transcripts"][-1][1]),
                 ".", gene_data["strand"], ".", "ID=%s-mRNA;Parent=%s" % (gene_id, gene_id)
             )),
             "\n",
