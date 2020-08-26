@@ -152,11 +152,10 @@ class GffMerge:
     def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, SeqRecord, int]]:
         longest = (0,)
         nuc = str(record.seq)
-        start_pos = re.compile("ATG")
-        for m in start_pos.finditer(nuc, overlapped=True):
-            pro = Seq(nuc[m.start():]).translate(to_stop=True)
+        for i in range(3):
+            pro = Seq(nuc[i:]).translate(to_stop=True)
             if len(pro) > longest[0]:
-                longest = (len(pro), m.start(), pro, nuc[m.start():m.start() + len(pro) * 3 + 3])
+                longest = (len(pro), i, pro, nuc[i:i + len(pro) * 3 + 3])
         if longest[0] > 0:
             return (
                 SeqRecord(
