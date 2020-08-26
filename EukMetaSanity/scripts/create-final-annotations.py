@@ -153,9 +153,10 @@ class GffMerge:
         longest = (0,)
         nuc = str(record.seq)
         for i in range(3):
-            pro = Seq(nuc[i:]).translate(to_stop=True)
+            padded_seq = GffMerge.pad_seq(Seq(nuc[i:]))
+            pro = padded_seq.translate(to_stop=True)
             if len(pro) > longest[0]:
-                longest = (len(pro), i, pro, nuc[i:i + len(pro) * 3 + 3])
+                longest = (len(pro), i, pro, padded_seq)
         if longest[0] > 0:
             return (
                 SeqRecord(
@@ -165,7 +166,7 @@ class GffMerge:
                     name="",
                 ),
                 SeqRecord(
-                    seq=Seq(longest[3]),
+                    seq=longest[3],
                     id=record.id,
                     description=record.description,
                     name="",
@@ -173,6 +174,14 @@ class GffMerge:
                 longest[1] % 3
             )
         return None
+
+    @staticmethod
+    def pad_seq(sequence):
+        """ Pad sequence to multiple of 3 with N """
+
+        remainder = len(sequence) % 3
+
+        return sequence if remainder == 0 else sequence + Seq('N' * (3 - remainder))
 
 
 class GffWriter:
