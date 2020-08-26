@@ -17,20 +17,22 @@ class Gene:
         self._exons: List = ab_initio_data
 
     def add_evidence(self, evidence_data: List):
+        out_exons = []
         for ab_exon in self._exons:
             is_found = False
             for exon in evidence_data:
                 if Gene.in_exon(ab_exon, exon):
                     is_found = True
                     break
-            if not is_found:
-                del ab_exon
+            if is_found:
+                out_exons.append(ab_exon)
         to_add = []
         for exon in evidence_data:
-            for ab_exon in self._exons:
+            for ab_exon in out_exons:
                 if not Gene.in_exon(exon, ab_exon):
                     to_add.append(exon)
-        self._exons.extend(to_add)
+        out_exons.extend(to_add)
+        self._exons = out_exons
         self._exons.sort(key=itemgetter(0))
 
     @property
