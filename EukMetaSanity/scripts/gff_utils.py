@@ -21,7 +21,7 @@ class Gene:
         for ab_exon in self._exons:
             is_found = False
             for exon in evidence_data:
-                if Gene.in_exon(ab_exon, exon):
+                if Gene.in_exon(exon, ab_exon):
                     is_found = True
                     break
             if is_found:
@@ -42,8 +42,8 @@ class Gene:
     # Returns if part of query coord overlaps target coord
     @staticmethod
     def in_exon(query_coord: Tuple[int, int], target_coord: Tuple[int, int]):
-        return query_coord[0] <= target_coord[0] <= query_coord[1] or \
-               query_coord[0] <= target_coord[1] <= query_coord[1]
+        return ((query_coord[0] - target_coord[0]) / target_coord[0]) <= 0.20 or \
+                ((query_coord[1] - target_coord[1]) / target_coord[1]) <= 0.20
 
 
 class GffReader:
@@ -157,7 +157,7 @@ class GffMerge:
         for m in start_pos.finditer(nuc, overlapped=True):
             pro = Seq(nuc[m.start():]).translate(to_stop=True)
             if len(pro) > longest[0]:
-                longest = (len(pro), m.start(), pro, nuc[m.start():m.start()+len(pro)*3+3])
+                longest = (len(pro), m.start(), pro, nuc[m.start():m.start() + len(pro) * 3 + 3])
         if longest[0] > 0:
             return (
                 SeqRecord(
