@@ -157,17 +157,17 @@ class GffMerge:
         for m in start_pos.finditer(nuc, overlapped=True):
             pro = Seq(nuc[m.start():]).translate(to_stop=True)
             if len(pro) > longest[0]:
-                longest = (len(pro), m.start(), pro, nuc[m.start():m.start() + len(pro) * 3 + 3])
+                longest = (len(pro), m.start(), nuc[m.start():m.start() + len(pro) * 3 + 3])
         if longest[0] > 0:
             return (
                 SeqRecord(
-                    seq=longest[2],
+                    seq=Seq(longest[2]).translate(),
                     id=record.id,
                     description=record.description,
                     name="",
                 ),
                 SeqRecord(
-                    seq=longest[3],
+                    seq=longest[2],
                     id=record.id,
                     description=record.description,
                     name="",
