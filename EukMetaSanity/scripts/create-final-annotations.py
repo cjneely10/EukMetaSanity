@@ -21,7 +21,9 @@ class Gene:
         if len(evidence_data) == 0:
             return
         out_exons = [self.exons[0]]
-        for ab_exon in self.exons[1:]:
+        if len(self.exons) > 1:
+            out_exons.append(self.exons[-1])
+        for ab_exon in self.exons[1:-1]:
             is_found = False
             for exon in evidence_data:
                 if Gene.in_exon(exon, ab_exon):
@@ -62,40 +64,37 @@ class GffReader:
             if line[0][0] == "#":
                 line = next(self.fp).rstrip("\r\n").split("\t")
                 continue
-            elif line[0][0] == ">":
-                break
-            if line[2] == "locus":
-                self._count += 1
-                # Putative gene
-                gene_data = {
-                    "geneid": "gene%i" % self._count,
-                    "fasta-id": line[0],
-                    "strand": line[6],
-                }
-                transcripts = []
+            self._count += 1
+            # Putative gene
+            gene_data = {
+                "geneid": "gene%i" % self._count,
+                "fasta-id": line[0],
+                "strand": line[6],
+            }
+            transcripts = []
+            line = next(self.fp).rstrip("\r\n").split("\t")
+            while line[2] != "locus":
+                # Read in transcript info
+                transcripts.append(
+                    [line[1], []]  # First line is a transcript: source,tstart,tend
+                )
                 line = next(self.fp).rstrip("\r\n").split("\t")
-                while line[2] != "locus":
-                    # Read in transcript info
-                    transcripts.append(
-                        [line[1], []]  # First line is a transcript: source,tstart,tend
-                    )
+                # Add exon to current info
+                while line[2] not in ("transcript", "locus", "gene"):
+                    if line[2] == "CDS":
+                        transcripts[-1][-1].append(
+                            (int(line[3]), int(line[4]))  # exstart,exend,offset
+                        )
                     line = next(self.fp).rstrip("\r\n").split("\t")
-                    # Add exon to current info
-                    while line[2] not in ("transcript", "locus", "gene"):
-                        if line[2] == "CDS":
-                            transcripts[-1][-1].append(
-                                (int(line[3]), int(line[4]))  # exstart,exend,offset
-                            )
-                        line = next(self.fp).rstrip("\r\n").split("\t")
-                # Merge based on name
-                data = defaultdict(list)
-                for transcript in transcripts:
-                    data[transcript[0]].extend(transcript[-1])
-                for transcript in data.keys():
-                    data[transcript].sort(key=itemgetter(0))
-                # Store in data and yield
-                gene_data["transcripts"] = data
-                yield gene_data
+            # Merge based on name
+            data = defaultdict(list)
+            for transcript in transcripts:
+                data[transcript[0]].extend(transcript[-1])
+            for transcript in data.keys():
+                data[transcript].sort(key=itemgetter(0))
+            # Store in data and yield
+            gene_data["transcripts"] = data
+            yield gene_data
 
 
 class GffMerge:
@@ -161,7 +160,7 @@ class GffMerge:
         if longest[0] > 0:
             return (
                 SeqRecord(
-                    seq=Seq(longest[2]).translate(),
+                    seq=Seq(longest[2]).translate(stop_symbol=""),
                     id=record.id,
                     description=record.description,
                     name="",
