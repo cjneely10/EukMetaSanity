@@ -121,10 +121,7 @@ class GffMerge:
         for exon in gene_data["transcripts"]:
             seq = StringIO()
             seq.write(orig_seq[exon[0] - 1: exon[1]])
-            record = SeqRecord(
-                id="1",
-                seq=Seq(seq.getvalue()),
-            )
+            record = SeqRecord(seq=Seq(seq.getvalue()))
             if strand == "-":
                 record.reverse_complement()
             out = GffMerge.find_orf(record)
@@ -132,6 +129,8 @@ class GffMerge:
                 out_prots.append(out[0])
                 out_cds.append(out[1])
                 offsets.append(out[2])
+            else:
+                offsets.append(-1)
         return (
             SeqRecord(
                 id=gene_data["geneid"],
@@ -188,7 +187,6 @@ class GffWriter:
         out_cds: List[SeqRecord] = []
         current_id = ""
         for gene_dict, prot, cds, offsets in self.merger.merge():
-            print(gene_dict, offsets, len(gene_dict["transcripts"]), len(offsets))
             if gene_dict["fasta-id"] != current_id:
                 current_id = gene_dict["fasta-id"]
                 self.out_fp.write("# Begin region %s\n" % current_id)
