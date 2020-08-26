@@ -1,4 +1,5 @@
 import os
+import regex as re
 from Bio import SeqIO
 from io import StringIO
 from Bio.Seq import Seq
@@ -97,7 +98,7 @@ class GffMerge:
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
 
-    def merge(self):
+    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]]]:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
@@ -106,31 +107,92 @@ class GffMerge:
             gene.add_evidence(gene_data["transcripts"]["metaeuk"])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
-            yield (
-                gene_data,
-                *self.create_cds(gene_data)
-            )
+            yield (gene_data, *self.create_cds(gene_data))
 
-    def create_cds(self, gene_data: dict) -> Tuple[SeqRecord, SeqRecord]:
+    def create_cds(self, gene_data: dict) -> Tuple[SeqRecord, SeqRecord, List[int]]:
         orig_seq = self.fasta_dict[gene_data["fasta-id"]]
         strand = self.fasta_dict["strand"]
+        out_cds: List[SeqRecord] = []
+        out_prots: List[SeqRecord] = []
+        offsets: List[int] = []
         for exon in gene_data["transcripts"]:
             seq = StringIO()
             seq.write(orig_seq[exon[0] - 1: exon[0]])
+            record = SeqRecord(
+                id="1",
+                seq=seq.getvalue(),
+            )
+            if strand == "-":
+                record.reverse_complement()
+            out = GffMerge.find_orf(record)
+            if out is not None:
+                out_prots.append(out[0])
+                out_cds.append(out[1])
+        return (
+            SeqRecord(
+                id=self.fasta_dict["geneid"],
+                name="",
+                description="",
+                seq=Seq("".join(str(val.seq) for val in out_cds))
+            ),
+            SeqRecord(
+                id=self.fasta_dict["geneid"],
+                name="",
+                description="",
+                seq=Seq("".join(str(val.seq) for val in out_prots))
+            ),
+            offsets
+        )
+
+    @staticmethod
+    def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, SeqRecord, int]]:
+        longest = (0,)
+        nuc = str(record.seq)
+        start_pos = re.compile("ATG")
+        for m in start_pos.finditer(nuc, overlapped=True):
+            pro = Seq(nuc[m.start():]).translate(to_stop=True)
+            if len(pro) > longest[0]:
+                longest = (len(pro), m.start(), pro, nuc[m.start():m.start()+len(pro)*3+3])
+        if longest[0] > 0:
+            return (
+                SeqRecord(
+                    seq=longest[2],
+                    id=record.id,
+                    description=record.description,
+                    name="",
+                ),
+                SeqRecord(
+                    seq=longest[3],
+                    id=record.id,
+                    description=record.description,
+                    name="",
+                ),
+                longest[1] % 3
+            )
+        return None
 
 
 class GffWriter:
-    def __init__(self, in_gff3_path: str, out_gff3_path: str, fasta_file: str):
-        self.fasta_path = fasta_file
+    def __init__(self, in_gff3_path: str, fasta_file: str):
         self.in_fp = open(in_gff3_path, "r")
-        self.out_fp = open(out_gff3_path, "w")
+        self.base = os.path.basename(in_gff3_path)
+        self.out_fp = open(self.base + ".nr.gff3", "w")
         self.merger = GffMerge(in_gff3_path, fasta_file)
 
     def write(self):
-        pass
+        out_prots: List[SeqRecord] = []
+        out_cds: List[SeqRecord] = []
+        for gene_dict, prot, cds, offsets in self.merger.merge():
+            gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
+            if gene is not None:
+                self.out_fp.write(gene)
+            out_prots.append(prot)
+            out_cds.append(cds)
+        SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
+        SeqIO.write(out_prots, self.base + ".faa", "fasta")
 
     @staticmethod
-    def _gene_dict_to_string(gene_data: Dict):
+    def _gene_dict_to_string(gene_data: Dict, offsets: List[int]) -> Optional[str]:
         gene_id = gene_data["geneid"]
         version = "EukMS"
         ss = StringIO()
@@ -161,7 +223,7 @@ class GffWriter:
                 "\t".join((
                     gene_data["fasta-id"], version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], str(exon_tuple[2]), "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
+                    ".", gene_data["strand"], str(offsets[j - 1]), "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
                 )),
                 "\n",
             )))
@@ -169,4 +231,16 @@ class GffWriter:
 
 
 if __name__ == "__main__":
-    pass
+    ap = ArgParse(
+        (
+            (("-g", "--gff3_file"),
+             {"help": ".tmp.nr.gff3 file", "required": True}),
+            (("-f", "--fasta_file"),
+             {"help": "FASTA file", "required": True}),
+        ),
+        description="GFF3 output final annotations"
+    )
+    for _file in (ap.args.gff3_file, ap.args.fasta_file):
+        assert os.path.exists(_file), _file
+    writer = GffWriter(ap.args.gff3_file, ap.args.fasta_file)
+    writer.write()
