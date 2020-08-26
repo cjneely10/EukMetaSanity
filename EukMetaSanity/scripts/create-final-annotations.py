@@ -152,7 +152,7 @@ class GffMerge:
     def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, SeqRecord, int]]:
         longest = (0,)
         nuc = str(record.seq)
-        for i in range(3):
+        for i in range(len(nuc)):
             padded_seq = GffMerge.pad_seq(Seq(nuc[i:]))
             pro = padded_seq.translate(to_stop=True)
             if len(pro) > longest[0]:
@@ -177,10 +177,7 @@ class GffMerge:
 
     @staticmethod
     def pad_seq(sequence):
-        """ Pad sequence to multiple of 3 with N """
-
         remainder = len(sequence) % 3
-
         return sequence if remainder == 0 else sequence + Seq('N' * (3 - remainder))
 
 

@@ -28,6 +28,7 @@ class EvidenceIter(TaskList):
                 "mask_tbl": self.input[5],  # Summarized mask results
                 "mask_gff3": self.input[6],  # Mask gff3 file
                 "fna": self.input[2],  # Original fna file
+                "all_gff": os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined gff file
             }
             self.output = [
                 _out,  # Dictionary for accessing to write final summary
