@@ -137,13 +137,13 @@ class GffMerge:
                 id=gene_data["geneid"],
                 name="",
                 description="",
-                seq=Seq("".join(str(val.seq) for val in out_cds))
+                seq=Seq("".join(str(val.seq) for val in out_prots))
             ),
             SeqRecord(
                 id=gene_data["geneid"],
                 name="",
                 description="",
-                seq=Seq("".join(str(val.seq) for val in out_prots))
+                seq=Seq("".join(str(val.seq) for val in out_cds))
             ),
             offsets
         )
@@ -179,7 +179,7 @@ class GffMerge:
 class GffWriter:
     def __init__(self, in_gff3_path: str, fasta_file: str):
         self.in_fp = open(in_gff3_path, "r")
-        self.base = os.path.basename(in_gff3_path)
+        self.base = os.path.splitext(in_gff3_path)[0]
         self.out_fp = open(self.base + ".nr.gff3", "w")
         self.merger = GffMerge(in_gff3_path, fasta_file)
 
@@ -188,6 +188,7 @@ class GffWriter:
         out_cds: List[SeqRecord] = []
         current_id = ""
         for gene_dict, prot, cds, offsets in self.merger.merge():
+            print(gene_dict, offsets, len(gene_dict["transcripts"]), len(offsets))
             if gene_dict["fasta-id"] != current_id:
                 current_id = gene_dict["fasta-id"]
                 self.out_fp.write("# Begin region %s\n" % current_id)
@@ -196,8 +197,8 @@ class GffWriter:
                 self.out_fp.write(gene)
             out_prots.append(prot)
             out_cds.append(cds)
-        SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
         SeqIO.write(out_prots, self.base + ".faa", "fasta")
+        SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
 
     @staticmethod
     def _gene_dict_to_string(gene_data: Dict, offsets: List[int]) -> Optional[str]:
