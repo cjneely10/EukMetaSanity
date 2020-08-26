@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import os
-from operator import itemgetter
-
 import regex as re
 from Bio import SeqIO
 from io import StringIO
 from Bio.Seq import Seq
+from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -26,16 +25,14 @@ class Gene:
                     break
             if is_found:
                 out_exons.append(ab_exon)
-        to_add = []
         for exon in evidence_data:
-            is_found = True
+            is_found = False
             for ab_exon in out_exons:
-                if not Gene.in_exon(ab_exon, exon):
-                    is_found = False
+                if Gene.in_exon(ab_exon, exon):
+                    is_found = True
                     break
             if not is_found:
-                to_add.append(exon)
-        out_exons.extend(to_add)
+                out_exons.append(exon)
         self._exons = out_exons
         self._exons.sort(key=itemgetter(0))
 
@@ -46,14 +43,7 @@ class Gene:
     # Returns if part of query coord overlaps target coord
     @staticmethod
     def in_exon(query_coord: Tuple[int, int], target_coord: Tuple[int, int]):
-        # return ((query_coord[0] - target_coord[0]) / target_coord[0]) <= 0.20 or \
-        #         ((query_coord[1] - target_coord[1]) / target_coord[1]) <= 0.20
-        return (query_coord[0] <= target_coord[0] and query_coord[1] >= target_coord[1]) or \
-               (target_coord[0] <= query_coord[0] and target_coord[1] >= query_coord[1]) or \
-               (query_coord[0] <= target_coord[0] <= query_coord[1]) or \
-               (query_coord[0] <= target_coord[1] <= query_coord[1]) or \
-               (target_coord[0] <= query_coord[0] <= target_coord[1]) or \
-               (target_coord[0] <= query_coord[1] <= target_coord[1])
+        return len(set(range(*target_coord)).intersection(set(range(*query_coord)))) > 0
 
 
 class GffReader:
