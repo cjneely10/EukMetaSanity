@@ -20,17 +20,18 @@ class Gene:
             return
         if len(evidence_data) == 0:
             return
-        out_exons = [self.exons[0]]
-        if len(self.exons) > 1:
-            out_exons.append(self.exons[-1])
-        for ab_exon in self.exons[1:-1]:
-            is_found = False
-            for exon in evidence_data:
-                if Gene.in_exon(exon, ab_exon):
-                    is_found = True
-                    break
-            if is_found:
-                out_exons.append(ab_exon)
+        out_exons = self.exons
+        # out_exons = [self.exons[0]]
+        # if len(self.exons) > 1:
+        #     out_exons.append(self.exons[-1])
+        # for ab_exon in self.exons[1:-1]:
+        #     is_found = False
+        #     for exon in evidence_data:
+        #         if Gene.in_exon(exon, ab_exon):
+        #             is_found = True
+        #             break
+        #     if is_found:
+        #         out_exons.append(ab_exon)
         for exon in evidence_data:
             is_found = False
             for ab_exon in out_exons:
@@ -44,8 +45,8 @@ class Gene:
 
     # Returns if part of query coord overlaps target coord
     @staticmethod
-    def in_exon(query_coord: Tuple[int, int], target_coord: Tuple[int, int]):
-        return len(set(range(*target_coord)).intersection(set(range(*query_coord)))) > 0
+    def in_exon(query_coord: Tuple[int, int, int], target_coord: Tuple[int, int, int]):
+        return len(set(range(*target_coord[0:-1])).intersection(set(range(*query_coord[0:-1])))) > 0
 
 
 class GffReader:
@@ -83,7 +84,7 @@ class GffReader:
                 while line[2] not in ("transcript", "locus", "gene"):
                     if line[2] == "CDS":
                         transcripts[-1][-1].append(
-                            (int(line[3]), int(line[4]))  # exstart,exend,offset
+                            (int(line[3]), int(line[4]), int(line[7]))  # exstart,exend,offset
                         )
                     line = next(self.fp).rstrip("\r\n").split("\t")
             # Merge based on name
@@ -102,7 +103,7 @@ class GffMerge:
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
 
-    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
+    def merge(self) -> Generator[Dict, None, None]:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
@@ -111,7 +112,8 @@ class GffMerge:
             gene.add_evidence(gene_data["transcripts"]["metaeuk"])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
-            yield (gene_data, *self.create_cds(gene_data))
+            # yield (gene_data, *self.create_cds(gene_data))
+            yield gene_data
 
     def create_cds(self, gene_data: dict) -> Tuple[SeqRecord, SeqRecord, List[int]]:
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
@@ -119,13 +121,13 @@ class GffMerge:
         out_cds: List[SeqRecord] = []
         out_prots: List[SeqRecord] = []
         offsets: List[int] = []
-        for exon in gene_data["transcripts"]:
+        for i, exon in enumerate(gene_data["transcripts"]):
             seq = StringIO()
             seq.write(orig_seq[exon[0] - 1: exon[1]])
             record = SeqRecord(seq=Seq(seq.getvalue()))
             if strand == "-":
                 record.reverse_complement()
-            out = GffMerge.find_orf(record)
+            out = GffMerge.find_orf(record, i)
             if out is not None:
                 out_prots.append(out[0])
                 out_cds.append(out[1])
@@ -149,10 +151,10 @@ class GffMerge:
         )
 
     @staticmethod
-    def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, SeqRecord, int]]:
+    def find_orf(record: SeqRecord, i: int) -> Optional[Tuple[SeqRecord, SeqRecord, int]]:
         longest = (0,)
         nuc = str(record.seq)
-        for i in range(len(nuc)):
+        for i in range(3):
             padded_seq = GffMerge.pad_seq(Seq(nuc[i:]))
             pro = padded_seq.translate(to_stop=True)
             if len(pro) > longest[0]:
@@ -160,7 +162,7 @@ class GffMerge:
         if longest[0] > 0:
             return (
                 SeqRecord(
-                    seq=longest[2],
+                    seq=(longest[2] if i != 0 else longest[3].translate(has_cds=True)),
                     id=record.id,
                     description=record.description,
                     name="",
@@ -189,26 +191,28 @@ class GffWriter:
         self.merger = GffMerge(in_gff3_path, fasta_file)
 
     def write(self):
-        out_prots: List[SeqRecord] = []
-        out_cds: List[SeqRecord] = []
+        self.out_fp.write("# EukMetaSanity merged annotations\n")
+        # out_prots: List[SeqRecord] = []
+        # out_cds: List[SeqRecord] = []
         current_id = ""
-        for gene_dict, prot, cds, offsets in self.merger.merge():
+        for gene_dict in self.merger.merge():
             if gene_dict["fasta-id"] != current_id:
                 current_id = gene_dict["fasta-id"]
                 self.out_fp.write("# Region %s\n" % current_id)
-            gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
+            gene = GffWriter._gene_dict_to_string(gene_dict)
             if gene is not None:
                 self.out_fp.write(gene)
-            if len(prot.seq) > 0:
-                out_prots.append(prot)
-            if len(cds.seq) > 0:
-                out_cds.append(cds)
-        SeqIO.write(out_prots, self.base + ".faa", "fasta")
-        SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
+            # if len(prot.seq) > 0:
+            #     out_prots.append(prot)
+            # if len(cds.seq) > 0:
+            #     out_cds.append(cds)
+        # SeqIO.write(out_prots, self.base + ".faa", "fasta")
+        # SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
 
     @staticmethod
-    def _gene_dict_to_string(gene_data: Dict, offsets: List[int]) -> Optional[str]:
+    def _gene_dict_to_string(gene_data: Dict) -> Optional[str]:
         gene_id = gene_data["geneid"]
+        mrna_id = gene_id + "-mRNA"
         version = "EukMS"
         ss = StringIO()
         if len(gene_data["transcripts"]) == 0:
@@ -223,7 +227,7 @@ class GffWriter:
             "\t".join((
                 gene_data["fasta-id"], version,
                 "mRNA", str(gene_data["transcripts"][0][0]), str(gene_data["transcripts"][-1][1]),
-                ".", gene_data["strand"], ".", "ID=%s-mRNA;Parent=%s" % (gene_id, gene_id)
+                ".", gene_data["strand"], ".", "ID=%s-mRNA;Parent=%s" % (mrna_id, gene_id)
             )),
             "\n",
         )))
@@ -232,13 +236,13 @@ class GffWriter:
                 "\t".join((
                     gene_data["fasta-id"], version,
                     "exon", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], ".", "ID=%s-exon%i;Parent=%s" % (gene_id, j, gene_id)
+                    ".", gene_data["strand"], ".", "ID=%s-exon%i;Parent=%s" % (mrna_id, j, mrna_id)
                 )),
                 "\n",
                 "\t".join((
                     gene_data["fasta-id"], version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], str(offsets[j - 1]), "ID=%s-cds%i;Parent=%s" % (gene_id, j, gene_id)
+                    ".", gene_data["strand"], str(exon_tuple[2]), "ID=%s-cds%i;Parent=%s" % (mrna_id, j, mrna_id)
                 )),
                 "\n",
             )))

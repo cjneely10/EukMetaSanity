@@ -1,5 +1,10 @@
 import os
 from typing import List
+
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -28,7 +33,7 @@ class EvidenceIter(TaskList):
                 "mask_tbl": self.input[5],  # Summarized mask results
                 "mask_gff3": self.input[6],  # Mask gff3 file
                 "fna": self.input[2],  # Original fna file
-                "all_gff": os.path.join(self.wdir, self.record_id + ".gff3"),  # Combined gff file
+                "all_gff": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
             }
             self.output = [
                 _out,  # Dictionary for accessing to write final summary
@@ -85,14 +90,34 @@ class EvidenceIter(TaskList):
             task_object.log_and_run(
                 task_object.program_gffread[
                     (*input_list), "-G", "--merge", "-Y"
-                ] > out_prefix + ".gff3"
+                ] > out_prefix + ".all.gff3"
             )
             # Replace transcripts with gene identifier and write cds/aa sequences
             task_object.log_and_run(
                 task_object.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".gff3"
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3"
                 ]
             )
+            os.replace(
+                out_prefix + ".all.nr.gff3",
+                out_prefix + ".nr.gff3",
+            )
+            task_object.log_and_run(
+                task_object.program_bedtools[
+                    "getfasta", "-bed", out_prefix + ".nr.gff3", "-fi", fasta_file, "-s", "-fullHeader"
+                ] > out_prefix + ".cds.fna"
+            )
+            out_records = []
+            for record in SeqIO.parse(out_prefix + ".cds.fna", "fasta"):
+                out_records.append(
+                    SeqRecord(
+                        seq=record.seq.translate(),
+                        id=record.id,
+                        name=record.name,
+                        description=record.description
+                    )
+                )
+            SeqIO.write(out_records, out_prefix + ".faa", "fasta")
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
