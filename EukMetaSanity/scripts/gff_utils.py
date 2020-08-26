@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
 import os
+from operator import itemgetter
+
 import regex as re
 from Bio import SeqIO
 from io import StringIO
@@ -11,24 +14,24 @@ from typing import List, Dict, Tuple, Generator, Optional
 
 class Gene:
     def __init__(self, ab_initio_data: List):
-        self._exons: List = ab_initio_data[-1]
-        self.source, self.start, self.end = ab_initio_data[:-1]
+        self._exons: List = ab_initio_data
 
     def add_evidence(self, evidence_data: List):
         for ab_exon in self._exons:
             is_found = False
-            for exon in evidence_data[-1]:
+            for exon in evidence_data:
                 if Gene.in_exon(ab_exon, exon):
                     is_found = True
                     break
             if not is_found:
                 del ab_exon
         to_add = []
-        for exon in evidence_data[-1]:
+        for exon in evidence_data:
             for ab_exon in self._exons:
                 if not Gene.in_exon(exon, ab_exon):
                     to_add.append(exon)
         self._exons.extend(to_add)
+        self._exons.sort(key=itemgetter(0))
 
     @property
     def exons(self) -> List:
@@ -63,7 +66,7 @@ class GffReader:
                 self._count += 1
                 # Putative gene
                 gene_data = {
-                    "geneid": self._count,
+                    "geneid": "gene%i" % self._count,
                     "fasta-id": line[0],
                     "start": line[3],
                     "end": line[4],
@@ -98,7 +101,7 @@ class GffMerge:
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
 
-    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]]]:
+    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
@@ -110,17 +113,17 @@ class GffMerge:
             yield (gene_data, *self.create_cds(gene_data))
 
     def create_cds(self, gene_data: dict) -> Tuple[SeqRecord, SeqRecord, List[int]]:
-        orig_seq = self.fasta_dict[gene_data["fasta-id"]]
-        strand = self.fasta_dict["strand"]
+        orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
+        strand = gene_data["strand"]
         out_cds: List[SeqRecord] = []
         out_prots: List[SeqRecord] = []
         offsets: List[int] = []
         for exon in gene_data["transcripts"]:
             seq = StringIO()
-            seq.write(orig_seq[exon[0] - 1: exon[0]])
+            seq.write(orig_seq[exon[0] - 1: exon[1]])
             record = SeqRecord(
                 id="1",
-                seq=seq.getvalue(),
+                seq=Seq(seq.getvalue()),
             )
             if strand == "-":
                 record.reverse_complement()
@@ -128,15 +131,16 @@ class GffMerge:
             if out is not None:
                 out_prots.append(out[0])
                 out_cds.append(out[1])
+                offsets.append(out[2])
         return (
             SeqRecord(
-                id=self.fasta_dict["geneid"],
+                id=gene_data["geneid"],
                 name="",
                 description="",
                 seq=Seq("".join(str(val.seq) for val in out_cds))
             ),
             SeqRecord(
-                id=self.fasta_dict["geneid"],
+                id=gene_data["geneid"],
                 name="",
                 description="",
                 seq=Seq("".join(str(val.seq) for val in out_prots))
@@ -182,7 +186,11 @@ class GffWriter:
     def write(self):
         out_prots: List[SeqRecord] = []
         out_cds: List[SeqRecord] = []
+        current_id = ""
         for gene_dict, prot, cds, offsets in self.merger.merge():
+            if gene_dict["fasta-id"] != current_id:
+                current_id = gene_dict["fasta-id"]
+                self.out_fp.write("# Begin region %s\n" % current_id)
             gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
             if gene is not None:
                 self.out_fp.write(gene)
