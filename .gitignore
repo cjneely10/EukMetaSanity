@@ -4,5 +4,3 @@ bin/
 !EukMetaSanity/bin/
 __pycache__/
 .vscode/
-Cargo.lock
-target/
