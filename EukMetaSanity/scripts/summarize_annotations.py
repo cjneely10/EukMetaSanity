@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 import sqlite3
+from collections import defaultdict
+
 from Bio import SeqIO
 from decimal import Decimal
 from typing import List, Tuple, Generator
@@ -16,11 +18,12 @@ def generate(db_path: str, columns: List[str]) -> sqlite3.Connection:
 
 
 # Display summary
-def summarize(conn: sqlite3.Connection, out_path: str, num_records: int, non_null: int):
+def summarize(conn: sqlite3.Connection, out_path: str, non_null: defaultdict):
     cursor = conn.execute("SELECT * FROM annotations")
     fp = open(out_path, "w")
     # Write header
-    fp.write("# Total: %s/%s\n" % (non_null, num_records))
+    keys = sorted(list(non_null.keys()))
+    fp.write("# Total %s\n" % " ".join(("%s:%i" % (key, non_null[key]) for key in keys)))
     fp.write("".join((
         "\t".join([descr[0] for descr in cursor.description]),
         "\n"
@@ -32,7 +35,7 @@ def summarize(conn: sqlite3.Connection, out_path: str, num_records: int, non_nul
         )))
     fp.close()
     conn.close()
-    print("Found: %i/%i" % (non_null, num_records))
+    print("# Total %s\n" % " ".join(("%s:%i" % (key, non_null[key]) for key in keys)))
 
 
 def _parse_args(_ap: ArgParse) -> List[Tuple[str, str]]:
@@ -135,17 +138,20 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
                 rows[record_id][i] = record_annotation
         i += 1
     # Determine counts for number of annotations
+    counts = defaultdict(int)
     for vals in rows.values():
-        for val in vals[1:]:
+        count = 0
+        for i, val in enumerate(vals[1:]):
             if val != "0":
-                non_null += 1
-                break
+                count += 1
+        for i in range(count, -1, -1):
+            counts[i] += 1
     query_place_string = ",".join(("?" for _ in range(len(table_col_ids) + 1)))
     conn.executemany(
         "INSERT INTO annotations VALUES (%s)" % query_place_string, [(*val, ) for val in rows.values()]
     )
     conn.commit()
-    summarize(conn, out_prefix + ".summary", len(rows.keys()), non_null)
+    summarize(conn, out_prefix + ".summary", counts)
 
 
 if __name__ == "__main__":
