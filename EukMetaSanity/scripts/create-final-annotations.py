@@ -25,7 +25,7 @@ class Gene:
         # out_exons = [self.exons[0]]
         # if len(self.exons) > 1:
         #     out_exons.append(self.exons[-1])
-        if len(evidence_data) > 2:
+        if len(evidence_data) / len(self.exons) >= .60:
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
                 out_exons.append(self.exons[-1])
