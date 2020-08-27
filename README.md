@@ -93,7 +93,16 @@ out/
       |-- run-paths_summary.tsv
       |-- run/
           |-- mag1/
-              ..
+              |-- mag1.nr.gff3  # Final predictions
+              |-- mag1.cds.fna  # CDS sequences
+              |-- mag1.faa  # Protein sequences
+              |-- metaeuk.gff3  # Protein-based prediction
+              |-- mag1.gff3  # Ab initio based prediction
+              |-- mag1.all.gff3  # Merged/redundant prediction
+              |-- mag1.fna  # Original genome/MAG
+              |-- mag1-mask.fna  # Masked genome/MAG in FASTA format
+              |-- mask.final.gff3  # Masked genome/MAG in GFF3 format
+              |-- mask.final.tbl  # Masking statistics
           |-- mag2/
               .. 
 ```
@@ -153,7 +162,9 @@ out/
       |-- run-paths_summary.tsv
       |-- report/
           |-- mag1/
-              ..
+              |-- mag1.summary  # TSV-summary of all annotations
+              |-- mag1.db  # SQLite3 summary of all annotations
+              ... (based on annotation programs run)
           |-- mag2/
               ..
       |-- fast_refine/
