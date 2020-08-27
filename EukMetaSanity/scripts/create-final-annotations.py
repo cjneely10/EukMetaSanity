@@ -45,8 +45,8 @@ class Gene:
 
     # Returns if part of query coord overlaps target coord
     @staticmethod
-    def in_exon(query_coord: Tuple[int, int, int], target_coord: Tuple[int, int, int]):
-        return len(set(range(*target_coord[0:-1])).intersection(set(range(*query_coord[0:-1])))) > 0
+    def in_exon(query_coord: Tuple[int, int, int], target_coord: Tuple[int, int, int]) -> bool:
+        return len(set(range(*target_coord[:-1])).intersection(set(range(*query_coord[:-1])))) > 0
 
 
 class GffReader:
@@ -103,7 +103,7 @@ class GffMerge:
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
 
-    def merge(self) -> Generator[Dict, None, None]:
+    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
@@ -112,70 +112,92 @@ class GffMerge:
             gene.add_evidence(gene_data["transcripts"]["metaeuk"])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
-            # yield (gene_data, *self.create_cds(gene_data))
-            yield gene_data
+            yield (gene_data, *self.create_cds(gene_data))
 
-    def create_cds(self, gene_data: dict) -> Tuple[SeqRecord, SeqRecord, List[int]]:
+    def create_cds(self, gene_data: dict) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
         out_cds: List[SeqRecord] = []
-        out_prots: List[SeqRecord] = []
         offsets: List[int] = []
+        seq = StringIO()
         for i, exon in enumerate(gene_data["transcripts"]):
-            seq = StringIO()
-            seq.write(orig_seq[exon[0] - 1: exon[1]])
+            start, end = 0, 0
+            if strand == "-":
+                end = exon[2]
+            else:
+                start = exon[2]
+            dist = exon[1] - end - exon[0] - start + 1
+            if dist % 3 == 0:
+                dist = 3
+            if strand == "+":
+                seq.write(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * (3 - dist % 3))
+            else:
+                seq.write("N" * (3 - dist % 3) + orig_seq[exon[0] - 1 + start: exon[1] - end])
             record = SeqRecord(seq=Seq(seq.getvalue()))
             if strand == "-":
-                record.reverse_complement()
-            out = GffMerge.find_orf(record, i)
-            if out is not None:
-                out_prots.append(out[0])
-                out_cds.append(out[1])
-                offsets.append(out[2])
-            else:
-                offsets.append(-1)
+                record = record.reverse_complement()
+            out_cds.append(record)
+            offsets.append(exon[2])
+        # out = GffMerge.find_orf(record, exon[2])
+        # if out is not None:
+        #     out_prots.append(out[0])
+        #     out_cds.append(out[1])
+        #     offsets.append(out[2])
+        # else:
+        #     offsets.append(-1)
+        cds = Seq("".join(str(val.seq) for val in out_cds))
         return (
             SeqRecord(
                 id=gene_data["geneid"],
                 name="",
-                description="",
-                seq=Seq("".join(str(val.seq) for val in out_prots).replace("*M", ""))
+                description="strand=%s" % strand,
+                seq=Seq(str(cds.translate()).replace("X", ""))
             ),
             SeqRecord(
                 id=gene_data["geneid"],
                 name="",
-                description="",
-                seq=Seq("".join(str(val.seq) for val in out_cds))
+                description="strand=%s" % strand,
+                seq=cds
             ),
             offsets
         )
 
     @staticmethod
-    def find_orf(record: SeqRecord, i: int) -> Optional[Tuple[SeqRecord, SeqRecord, int]]:
-        longest = (0,)
+    def find_orf(record: SeqRecord, offset: int):
         nuc = str(record.seq)
-        for i in range(3):
-            padded_seq = GffMerge.pad_seq(Seq(nuc[i:]))
-            pro = padded_seq.translate(to_stop=True)
-            if len(pro) > longest[0]:
-                longest = (len(pro), i, pro, padded_seq)
-        if longest[0] > 0:
-            return (
-                SeqRecord(
-                    seq=(longest[2] if i != 0 else longest[3].translate(has_cds=True)),
-                    id=record.id,
-                    description=record.description,
-                    name="",
-                ),
-                SeqRecord(
-                    seq=longest[3],
-                    id=record.id,
-                    description=record.description,
-                    name="",
-                ),
-                longest[1] % 3
+        return (
+            SeqRecord(
+                seq=Seq(nuc[offset:]).translate(),
+                id=record.id,
+                description=record.description,
+                name=""
             )
-        return None
+        )
+
+    # @staticmethod
+    # def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, SeqRecord]]:
+    #     longest = (0,)
+    #     nuc = str(record.seq)
+    #     for m in re.finditer("ATG", nuc):
+    #         pro = Seq(nuc[m.start():]).translate(to_stop=True)
+    #         if len(pro) > longest[0]:
+    #             longest = (len(pro), pro, nuc[m.start():m.start() + len(pro) * 3 + 3])
+    #     if longest[0] > 0:
+    #         return (
+    #             SeqRecord(
+    #                 seq=longest[1],
+    #                 id=record.id,
+    #                 description=record.description,
+    #                 name="",
+    #             ),
+    #             SeqRecord(
+    #                 seq=Seq(longest[2]),
+    #                 id=record.id,
+    #                 description=record.description,
+    #                 name="",
+    #             )
+    #         )
+    #     return None
 
     @staticmethod
     def pad_seq(sequence):
@@ -192,25 +214,25 @@ class GffWriter:
 
     def write(self):
         self.out_fp.write("# EukMetaSanity merged annotations\n")
-        # out_prots: List[SeqRecord] = []
-        # out_cds: List[SeqRecord] = []
+        out_prots: List[SeqRecord] = []
+        out_cds: List[SeqRecord] = []
         current_id = ""
-        for gene_dict in self.merger.merge():
+        for gene_dict, prot, cds, offsets in self.merger.merge():
             if gene_dict["fasta-id"] != current_id:
                 current_id = gene_dict["fasta-id"]
                 self.out_fp.write("# Region %s\n" % current_id)
-            gene = GffWriter._gene_dict_to_string(gene_dict)
+            gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
             if gene is not None:
                 self.out_fp.write(gene)
-            # if len(prot.seq) > 0:
-            #     out_prots.append(prot)
-            # if len(cds.seq) > 0:
-            #     out_cds.append(cds)
-        # SeqIO.write(out_prots, self.base + ".faa", "fasta")
-        # SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
+            if prot and len(prot.seq) > 0:
+                out_prots.append(prot)
+            if cds and len(cds.seq) > 0:
+                out_cds.append(cds)
+        SeqIO.write(out_prots, self.base + ".faa", "fasta")
+        SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
 
     @staticmethod
-    def _gene_dict_to_string(gene_data: Dict) -> Optional[str]:
+    def _gene_dict_to_string(gene_data: Dict, offsets: List[int]) -> Optional[str]:
         gene_id = gene_data["geneid"]
         mrna_id = gene_id + "-mRNA"
         version = "EukMS"
@@ -242,7 +264,7 @@ class GffWriter:
                 "\t".join((
                     gene_data["fasta-id"], version,
                     "CDS", str(exon_tuple[0]), str(exon_tuple[1]),
-                    ".", gene_data["strand"], str(exon_tuple[2]), "ID=%s-cds%i;Parent=%s" % (mrna_id, j, mrna_id)
+                    ".", gene_data["strand"], str(offsets[j - 1]), "ID=%s-cds%i;Parent=%s" % (mrna_id, j, mrna_id)
                 )),
                 "\n",
             )))

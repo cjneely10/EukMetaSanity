@@ -1,10 +1,5 @@
 import os
 from typing import List
-
-from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -102,22 +97,14 @@ class EvidenceIter(TaskList):
                 out_prefix + ".all.nr.gff3",
                 out_prefix + ".nr.gff3",
             )
-            task_object.log_and_run(
-                task_object.program_bedtools[
-                    "getfasta", "-bed", out_prefix + ".nr.gff3", "-fi", fasta_file, "-s", "-fullHeader"
-                ] > out_prefix + ".cds.fna"
+            os.replace(
+                out_prefix + ".all.faa",
+                out_prefix + ".faa"
             )
-            out_records = []
-            for record in SeqIO.parse(out_prefix + ".cds.fna", "fasta"):
-                out_records.append(
-                    SeqRecord(
-                        seq=record.seq.translate(),
-                        id=record.id,
-                        name=record.name,
-                        description=record.description
-                    )
-                )
-            SeqIO.write(out_records, out_prefix + ".faa", "fasta")
+            os.replace(
+                out_prefix + ".all.cds.fna",
+                out_prefix + ".cds.fna"
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
