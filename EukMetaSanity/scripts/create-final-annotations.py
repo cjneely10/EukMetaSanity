@@ -3,6 +3,7 @@ import os
 from Bio import SeqIO
 from io import StringIO
 from Bio.Seq import Seq
+from datetime import datetime
 from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
@@ -154,16 +155,18 @@ class GffMerge:
             out_cds.append(record)
             offsets.append(exon[2])
         cds = Seq("".join(str(val.seq) for val in out_cds))
-        descr = "contig=%s strand=%s %s" % (
-            gene_data["fasta-id"],
-            strand,
-            "|".join(map(str, (
+        _stats = "|".join(map(str, (
                 gene.num_ab_initio,
                 gene.num_with_evidence,
                 gene.added_evidence,
                 len(gene.exons),
             )))
+        descr = "contig=%s strand=%s %s" % (
+            gene_data["fasta-id"],
+            strand,
+            _stats
         )
+        gene_data["stats"] = _stats
         return (
             SeqRecord(
                 id=gene_data["geneid"],
@@ -189,7 +192,7 @@ class GffWriter:
         self.merger = GffMerge(in_gff3_path, fasta_file)
 
     def write(self):
-        self.out_fp.write("# EukMetaSanity merged annotations\n")
+        self.out_fp.write("# EukMetaSanity annotations generated %s\n" % datetime.now().strftime("%Y/%m/%d %H:%M"))
         out_prots: List[SeqRecord] = []
         out_cds: List[SeqRecord] = []
         current_id = ""
@@ -219,7 +222,7 @@ class GffWriter:
             "\t".join((
                 gene_data["fasta-id"], version,
                 "gene", str(gene_data["transcripts"][0][0]), str(gene_data["transcripts"][-1][1]),
-                ".", gene_data["strand"], ".", "ID=%s" % gene_id
+                ".", gene_data["strand"], ".", "ID=%s;Scores=%s" % (gene_id, gene_data["stats"])
             )),
             "\n",
             "\t".join((
