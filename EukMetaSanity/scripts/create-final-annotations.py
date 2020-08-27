@@ -17,22 +17,28 @@ class Gene:
         self.strand = strand
 
     def add_evidence(self, evidence_data: List):
-        # if len(self.exons) == 0:
-        #     return
+        if len(self.exons) == 0:
+            return
         # if len(evidence_data) == 0:
         #     return
-        out_exons = self.exons
+
         # out_exons = [self.exons[0]]
         # if len(self.exons) > 1:
         #     out_exons.append(self.exons[-1])
-        # for ab_exon in self.exons[1:-1]:
-        #     is_found = False
-        #     for exon in evidence_data:
-        #         if Gene.in_exon(exon, ab_exon):
-        #             is_found = True
-        #             break
-        #     if is_found:
-        #         out_exons.append(ab_exon)
+        if len(evidence_data) > 2:
+            out_exons = [self.exons[0]]
+            if len(self.exons) > 1:
+                out_exons.append(self.exons[-1])
+            for ab_exon in self.exons[1:-1]:
+                is_found = False
+                for exon in evidence_data:
+                    if Gene.in_exon(exon, ab_exon):
+                        is_found = True
+                        break
+                if is_found:
+                    out_exons.append(ab_exon)
+        else:
+            out_exons = self.exons
         for exon in evidence_data:
             is_found = False
             for ab_exon in out_exons:
@@ -126,8 +132,8 @@ class GffMerge:
         strand = gene_data["strand"]
         out_cds: List[SeqRecord] = []
         offsets: List[int] = []
-        seq = StringIO()
-        for i, exon in enumerate(gene_data["transcripts"]):
+        for exon in gene_data["transcripts"]:
+            seq = StringIO()
             start, end = 0, 0
             if strand == "-":
                 end = exon[2]
@@ -135,11 +141,13 @@ class GffMerge:
                 start = exon[2]
             dist = exon[1] - end - exon[0] - start + 1
             if dist % 3 == 0:
-                dist = 3
-            if strand == "+":
-                seq.write(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * (3 - dist % 3))
+                dist = 0
             else:
-                seq.write("N" * (3 - dist % 3) + orig_seq[exon[0] - 1 + start: exon[1] - end])
+                dist = 3 - dist % 3
+            if strand == "+":
+                seq.write(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist)
+            else:
+                seq.write("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end])
             record = SeqRecord(seq=Seq(seq.getvalue()))
             if strand == "-":
                 record = record.reverse_complement()
@@ -168,48 +176,6 @@ class GffMerge:
             ),
             offsets
         )
-
-    @staticmethod
-    def find_orf(record: SeqRecord, offset: int):
-        nuc = str(record.seq)
-        return (
-            SeqRecord(
-                seq=Seq(nuc[offset:]).translate(),
-                id=record.id,
-                description=record.description,
-                name=""
-            )
-        )
-
-    # @staticmethod
-    # def find_orf(record: SeqRecord) -> Optional[Tuple[SeqRecord, SeqRecord]]:
-    #     longest = (0,)
-    #     nuc = str(record.seq)
-    #     for m in re.finditer("ATG", nuc):
-    #         pro = Seq(nuc[m.start():]).translate(to_stop=True)
-    #         if len(pro) > longest[0]:
-    #             longest = (len(pro), pro, nuc[m.start():m.start() + len(pro) * 3 + 3])
-    #     if longest[0] > 0:
-    #         return (
-    #             SeqRecord(
-    #                 seq=longest[1],
-    #                 id=record.id,
-    #                 description=record.description,
-    #                 name="",
-    #             ),
-    #             SeqRecord(
-    #                 seq=Seq(longest[2]),
-    #                 id=record.id,
-    #                 description=record.description,
-    #                 name="",
-    #             )
-    #         )
-    #     return None
-
-    @staticmethod
-    def pad_seq(sequence):
-        remainder = len(sequence) % 3
-        return sequence if remainder == 0 else sequence + Seq('N' * (3 - remainder))
 
 
 class GffWriter:
