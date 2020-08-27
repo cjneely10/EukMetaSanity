@@ -13,12 +13,17 @@ from typing import List, Dict, Tuple, Generator, Optional
 class Gene:
     def __init__(self, ab_initio_data: List, strand: str):
         self.exons: List = ab_initio_data
-        self.strand = strand
+        self.strand: str = strand
+        self.num_ab_initio: int = len(ab_initio_data)
+        self.trimmed_ab_initio: int = len(ab_initio_data)
+        self.num_with_evidence: int = 0
+        self.added_evidence: int = 0
 
     def add_evidence(self, evidence_data: List):
         if len(self.exons) == 0:
             return
         if len(evidence_data) / len(self.exons) >= .75:
+            count = 0
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
                 out_exons.append(self.exons[-1])
@@ -29,16 +34,20 @@ class Gene:
                         is_found = True
                         break
                 if is_found:
+                    count += 1
                     out_exons.append(ab_exon)
+            self.trimmed_ab_initio = count
         else:
             out_exons = self.exons
         for exon in evidence_data:
             is_found = False
             for ab_exon in out_exons:
                 if Gene.in_exon(ab_exon, exon):
+                    self.num_with_evidence += 1
                     is_found = True
                     break
             if not is_found:
+                self.added_evidence += 1
                 out_exons.append(exon)
         self.exons = out_exons
         if self.strand == "+":
@@ -118,9 +127,9 @@ class GffMerge:
             gene.add_evidence(gene_data["transcripts"]["metaeuk"])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
-            yield (gene_data, *self.create_cds(gene_data))
+            yield (gene_data, *self.create_cds(gene_data, gene))
 
-    def create_cds(self, gene_data: dict) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+    def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
         out_cds: List[SeqRecord] = []
@@ -145,17 +154,27 @@ class GffMerge:
             out_cds.append(record)
             offsets.append(exon[2])
         cds = Seq("".join(str(val.seq) for val in out_cds))
+        descr = "contig=%s strand=%s %s" % (
+            gene_data["fasta-id"],
+            strand,
+            "|".join(map(str, (
+                gene.num_ab_initio,
+                gene.num_with_evidence,
+                gene.added_evidence,
+                len(gene.exons),
+            )))
+        )
         return (
             SeqRecord(
                 id=gene_data["geneid"],
                 name="",
-                description="strand=%s" % strand,
+                description=descr,
                 seq=Seq(str(cds.translate()).replace("X", ""))
             ),
             SeqRecord(
                 id=gene_data["geneid"],
                 name="",
-                description="strand=%s" % strand,
+                description=descr,
                 seq=cds
             ),
             offsets

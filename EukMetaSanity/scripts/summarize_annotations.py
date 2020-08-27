@@ -19,11 +19,13 @@ def generate(db_path: str, columns: List[str]) -> sqlite3.Connection:
 
 # Display summary
 def summarize(conn: sqlite3.Connection, out_path: str, non_null: defaultdict):
+    # Write results from database to ensure that it was written correctly
     cursor = conn.execute("SELECT * FROM annotations")
     fp = open(out_path, "w")
     # Write header
     keys = sorted(list(non_null.keys()))
-    fp.write("# Total %s\n" % " ".join(("%s:%i" % (key, non_null[key]) for key in keys)))
+    out_str = "# Total %s\n" % " ".join(("%s:%i" % (key, non_null[key]) for key in keys))
+    fp.write(out_str)
     fp.write("".join((
         "\t".join([descr[0] for descr in cursor.description]),
         "\n"
@@ -35,7 +37,7 @@ def summarize(conn: sqlite3.Connection, out_path: str, non_null: defaultdict):
         )))
     fp.close()
     conn.close()
-    print("# Total %s\n" % " ".join(("%s:%i" % (key, non_null[key]) for key in keys)))
+    print(out_str)
 
 
 def _parse_args(_ap: ArgParse) -> List[Tuple[str, str]]:
