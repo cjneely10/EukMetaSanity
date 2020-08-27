@@ -24,10 +24,11 @@ class Gene:
         if len(self.exons) == 0:
             return
         if len(evidence_data) / len(self.exons) >= .75:
-            count = 0
+            count = 1
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
                 out_exons.append(self.exons[-1])
+                count += 1
             for ab_exon in self.exons[1:-1]:
                 is_found = False
                 for exon in evidence_data:
@@ -158,6 +159,7 @@ class GffMerge:
         _stats = "|".join(map(str, (
                 gene.num_ab_initio,
                 gene.num_with_evidence,
+                gene.trimmed_ab_initio,
                 gene.added_evidence,
                 len(gene.exons),
             )))
