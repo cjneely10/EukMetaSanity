@@ -256,11 +256,11 @@ if __name__ == "__main__":
     ap = ArgParse(
         (
             (("-g", "--gff3_file"),
-             {"help": ".tmp.nr.gff3 file", "required": True}),
+             {"help": ".all.gff3 file", "required": True}),
             (("-f", "--fasta_file"),
              {"help": "FASTA file", "required": True}),
         ),
-        description="GFF3 output final annotations"
+        description="GFF3 output final annotations as <prefix>.nr.gff3"
     )
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file

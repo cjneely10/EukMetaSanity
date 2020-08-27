@@ -73,6 +73,8 @@ class Task(ABC):
                 # Check for existence if a data value
                 elif _path.startswith("data"):
                     for _val in _value.split(","):
+                        if ":" in _val:
+                            _val = _val.split(":")[1]
                         assert os.path.exists(_val)
                 setattr(
                     self,
