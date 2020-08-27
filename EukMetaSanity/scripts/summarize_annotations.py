@@ -120,6 +120,7 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
     _ids = set(rows.keys())
     i = 1
     non_null = 0
+    # Build data based on passed files
     for annot_type, annot_path in annotations:
         if annot_type == "kegg":
             data_iter = _kegg_iter(annot_path)
@@ -133,6 +134,7 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
             if record_id in _ids:
                 rows[record_id][i] = record_annotation
         i += 1
+    # Determine counts for number of annotations
     for vals in rows.values():
         for val in vals[1:]:
             if val != "0":
