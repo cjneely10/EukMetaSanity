@@ -12,8 +12,9 @@ from typing import List, Dict, Tuple, Generator, Optional
 
 
 class Gene:
-    def __init__(self, ab_initio_data: List):
+    def __init__(self, ab_initio_data: List, strand: str):
         self.exons: List = ab_initio_data
+        self.strand = strand
 
     def add_evidence(self, evidence_data: List):
         # if len(self.exons) == 0:
@@ -41,7 +42,10 @@ class Gene:
             if not is_found:
                 out_exons.append(exon)
         self.exons = out_exons
-        self.exons.sort(key=itemgetter(0))
+        if self.strand == "+":
+            self.exons.sort(key=itemgetter(0))
+        else:
+            self.exons.sort(key=itemgetter(0), reverse=True)
 
     # Returns if part of query coord overlaps target coord
     @staticmethod
@@ -92,7 +96,10 @@ class GffReader:
             for transcript in transcripts:
                 data[transcript[0]].extend(transcript[-1])
             for transcript in data.keys():
-                data[transcript].sort(key=itemgetter(0))
+                if gene_data["strand"] == "+":
+                    data[transcript].sort(key=itemgetter(0))
+                else:
+                    data[transcript].sort(key=itemgetter(0), reverse=True)
             # Store in data and yield
             gene_data["transcripts"] = data
             yield gene_data
@@ -107,7 +114,7 @@ class GffMerge:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
-            gene = Gene(gene_data["transcripts"]["ab-initio"])
+            gene = Gene(gene_data["transcripts"]["ab-initio"], gene_data["strand"])
             # Keep exons with evidence, add exons missed by ab-initio
             gene.add_evidence(gene_data["transcripts"]["metaeuk"])
             gene_data["transcripts"] = gene.exons
