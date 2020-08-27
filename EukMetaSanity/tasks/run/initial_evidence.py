@@ -43,9 +43,9 @@ class EvidenceIter(TaskList):
             for db in self.data.split(","):
                 if db == "":
                     continue
-                is_profile = False
+                is_profile = []
                 if "p:" in db:
-                    is_profile = True
+                    is_profile.append("--slice-search")
                     db = db[2:]
                 db_prefix = prefix(db)
                 subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % db_prefix)
@@ -73,7 +73,7 @@ class EvidenceIter(TaskList):
                             os.path.join(self.wdir, "tmp"),
                             "--threads", self.threads,
                             (*self.added_flags),
-                            ("--slice-search" if is_profile else "")
+                            (*is_profile),
                         ]
                     )
                 # Convert to GFF3
