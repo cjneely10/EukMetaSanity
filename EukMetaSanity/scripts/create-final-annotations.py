@@ -16,10 +16,10 @@ class Gene:
         self.exons: List = ab_initio_data
 
     def add_evidence(self, evidence_data: List):
-        if len(self.exons) == 0:
-            return
-        if len(evidence_data) == 0:
-            return
+        # if len(self.exons) == 0:
+        #     return
+        # if len(evidence_data) == 0:
+        #     return
         out_exons = self.exons
         # out_exons = [self.exons[0]]
         # if len(self.exons) > 1:
@@ -249,7 +249,7 @@ class GffWriter:
             "\t".join((
                 gene_data["fasta-id"], version,
                 "mRNA", str(gene_data["transcripts"][0][0]), str(gene_data["transcripts"][-1][1]),
-                ".", gene_data["strand"], ".", "ID=%s-mRNA;Parent=%s" % (mrna_id, gene_id)
+                ".", gene_data["strand"], ".", "ID=%s;Parent=%s" % (mrna_id, gene_id)
             )),
             "\n",
         )))
