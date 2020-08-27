@@ -7,13 +7,15 @@ General functions
 """
 
 
-# Mimic touch command from linux
 def touch(_path: str):
+    """ Mimic touch command from linux
+    """
     open(_path, "w").close()
 
 
-# Get prefix of path - e.g. for /path/to/file_1.ext, return file_1
 def prefix(_path: str) -> str:
+    """ For path /path/to/file.txt return file
+    """
     return os.path.basename(os.path.splitext(_path)[0])
 
 

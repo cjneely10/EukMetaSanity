@@ -1,5 +1,6 @@
 import os
 from typing import List
+from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -38,43 +39,54 @@ class EvidenceIter(TaskList):
         @program_catch
         def run_1(self):
             # Subset taxonomic database
-            subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_db")
-            if not os.path.exists(subset_db_outpath):
+            out_results = []
+            for db in self.data.split(","):
+                if db == "":
+                    continue
+                db_prefix = prefix(db)
+                subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % db_prefix)
+                if not os.path.exists(subset_db_outpath):
+                    self.log_and_run(
+                        self.program_mmseqs[
+                            "filtertaxseqdb",
+                            db,
+                            subset_db_outpath,
+                            "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(
+                                self.input[3], 0, self.level,  # Allow for level override by user
+                            )[1],
+                            "--threads", self.threads,
+                        ]
+                    )
+                # Run metaeuk
+                _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
+                if not os.path.exists(_outfile + ".fas"):
+                    self.log_and_run(
+                        self.program_metaeuk[
+                            "easy-predict",
+                            self.input[4],
+                            subset_db_outpath,
+                            _outfile,
+                            os.path.join(self.wdir, "tmp"),
+                            "--threads", self.threads,
+                            # "--add-orf-stop",
+                            (*self.added_flags),
+                        ]
+                    )
+                # Convert to GFF3
                 self.log_and_run(
-                    self.program_mmseqs[
-                        "filtertaxseqdb",
-                        self.data,
-                        subset_db_outpath,
-                        "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(
-                            self.input[3], 0, self.level,  # Allow for level override by user
-                        )[1],
-                        "--threads", self.threads,
+                    self.local["fasta-to-gff3.py"][
+                        self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
                     ]
                 )
-            # Run metaeuk
-            _outfile = os.path.join(self.wdir, self.record_id)
-            if not os.path.exists(_outfile + ".fas"):
-                self.log_and_run(
-                    self.program_metaeuk[
-                        "easy-predict",
-                        self.input[4],
-                        subset_db_outpath,
-                        _outfile,
-                        os.path.join(self.wdir, "tmp"),
-                        "--threads", self.threads,
-                        # "--add-orf-stop",
-                        (*self.added_flags),
-                    ]
-                )
-            # Convert to GFF3
+                out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
             self.log_and_run(
-                self.local["fasta-to-gff3.py"][
-                    self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "metaeuk.gff3"),
-                ]
+                self.program_gffread[
+                    (*out_results), "-G", "--merge", "-Y"
+                ] > os.path.join(self.wdir, "metaeuk.gff3")
             )
             # Merge final results
             EvidenceIter.Evidence.merge(
-                self, [self.input[0], os.path.join(self.wdir, "metaeuk.gff3")],
+                self, [self.input[0], *out_results],
                 self.input[2],
                 os.path.join(self.wdir, self.record_id),
             )
