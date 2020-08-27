@@ -18,7 +18,7 @@ class Gene:
     def add_evidence(self, evidence_data: List):
         if len(self.exons) == 0:
             return
-        if len(evidence_data) / len(self.exons) >= .60:
+        if len(evidence_data) / len(self.exons) >= .75:
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
                 out_exons.append(self.exons[-1])
