@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import regex as re
 from Bio import SeqIO
 from io import StringIO
 from Bio.Seq import Seq
@@ -19,12 +18,6 @@ class Gene:
     def add_evidence(self, evidence_data: List):
         if len(self.exons) == 0:
             return
-        # if len(evidence_data) == 0:
-        #     return
-
-        # out_exons = [self.exons[0]]
-        # if len(self.exons) > 1:
-        #     out_exons.append(self.exons[-1])
         if len(evidence_data) / len(self.exons) >= .60:
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
@@ -133,7 +126,6 @@ class GffMerge:
         out_cds: List[SeqRecord] = []
         offsets: List[int] = []
         for exon in gene_data["transcripts"]:
-            seq = StringIO()
             start, end = 0, 0
             if strand == "-":
                 end = exon[2]
@@ -145,21 +137,13 @@ class GffMerge:
             else:
                 dist = 3 - dist % 3
             if strand == "+":
-                seq.write(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist)
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist))
             else:
-                seq.write("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end])
-            record = SeqRecord(seq=Seq(seq.getvalue()))
+                record = SeqRecord(seq=Seq("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end]))
             if strand == "-":
                 record = record.reverse_complement()
             out_cds.append(record)
             offsets.append(exon[2])
-        # out = GffMerge.find_orf(record, exon[2])
-        # if out is not None:
-        #     out_prots.append(out[0])
-        #     out_cds.append(out[1])
-        #     offsets.append(out[2])
-        # else:
-        #     offsets.append(-1)
         cds = Seq("".join(str(val.seq) for val in out_cds))
         return (
             SeqRecord(
