@@ -17,13 +17,17 @@ class Gene:
         self.strand: str = strand
         self.num_ab_initio: int = len(ab_initio_data)
         self.trimmed_ab_initio: int = len(ab_initio_data)
-        self.num_with_evidence: int = 0
         self.added_evidence: int = 0
 
     def add_evidence(self, evidence_data: List):
         if len(self.exons) == 0:
             return
-        if len(evidence_data) / len(self.exons) >= .75:
+        _len_ev, _len_ex = len(evidence_data), self.num_ab_initio
+        if _len_ev >= _len_ex:
+            _near = _len_ex / _len_ev
+        else:
+            _near = _len_ev / _len_ex
+        if _near >= .75:
             count = 1
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
@@ -45,9 +49,7 @@ class Gene:
             is_found = False
             for ab_exon in out_exons:
                 if Gene.in_exon(ab_exon, exon):
-                    self.num_with_evidence += 1
                     is_found = True
-                    break
             if not is_found:
                 self.added_evidence += 1
                 out_exons.append(exon)
@@ -156,12 +158,12 @@ class GffMerge:
             out_cds.append(record)
             offsets.append(exon[2])
         cds = Seq("".join(str(val.seq) for val in out_cds))
+        _prot_seq = Seq(str(cds.translate()).replace("X", ""))
         _stats = "|".join(map(str, (
-                gene.num_ab_initio,
-                gene.num_with_evidence,
                 gene.trimmed_ab_initio,
                 gene.added_evidence,
                 len(gene.exons),
+                len(_prot_seq),
             )))
         descr = "contig=%s strand=%s %s" % (
             gene_data["fasta-id"],
@@ -174,7 +176,7 @@ class GffMerge:
                 id=gene_data["geneid"],
                 name="",
                 description=descr,
-                seq=Seq(str(cds.translate()).replace("X", ""))
+                seq=_prot_seq
             ),
             SeqRecord(
                 id=gene_data["geneid"],
@@ -214,6 +216,7 @@ class GffWriter:
 
     @staticmethod
     def _gene_dict_to_string(gene_data: Dict, offsets: List[int]) -> Optional[str]:
+        gene_data["transcripts"].sort(key=itemgetter(0))
         gene_id = gene_data["geneid"]
         mrna_id = gene_id + "-mRNA"
         version = "EukMS"
