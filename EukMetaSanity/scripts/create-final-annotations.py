@@ -27,7 +27,7 @@ class Gene:
             _near = _len_ex / _len_ev
         else:
             _near = _len_ev / _len_ex
-        if _near >= .75:
+        if _near >= .7:
             count = 1
             out_exons = [self.exons[0]]
             if len(self.exons) > 1:
@@ -153,6 +153,7 @@ class GffMerge:
                 record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist))
             else:
                 record = SeqRecord(seq=Seq("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end]))
+            # record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end]))
             if strand == "-":
                 record = record.reverse_complement()
             out_cds.append(record)
@@ -160,6 +161,7 @@ class GffMerge:
         cds = Seq("".join(str(val.seq) for val in out_cds))
         _prot_seq = Seq(str(cds.translate()).replace("X", ""))
         _stats = "|".join(map(str, (
+                gene.num_ab_initio,
                 gene.trimmed_ab_initio,
                 gene.added_evidence,
                 len(gene.exons),

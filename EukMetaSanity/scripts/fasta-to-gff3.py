@@ -42,7 +42,7 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
         for coords in all_coords:
             start, end, length = coords.split(":")
             if strand < 0:
-                start, end = end, start
+                start, end = end + 1, start + 1
             for _type in ("CDS",):
                 recs.append(
                     Result(
@@ -52,6 +52,7 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
                         strand=strand,
                     )
                 )
+        recs.sort(key=lambda res: res.sstart)
         # Add nested list
         data[line[1]].append(recs)
 

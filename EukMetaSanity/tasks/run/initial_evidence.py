@@ -100,7 +100,7 @@ class EvidenceIter(TaskList):
             # Convert to gff3 file
             task_object.log_and_run(
                 task_object.program_gffread[
-                    (*input_list), "-G", "--merge", "-Y"
+                    (*input_list), "-G", "--merge", "-Y", "--ignore-locus",
                 ] > out_prefix + ".all.gff3"
             )
             # Replace transcripts with gene identifier and write cds/aa sequences
