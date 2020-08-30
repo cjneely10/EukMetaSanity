@@ -41,14 +41,16 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
             all_coords.reverse()
         for coords in all_coords:
             start, end, length = coords.split(":")
-            if strand < 0:
-                start, end = end + 1, start + 1
             for _type in ("CDS",):
+                start = int(start.split("[")[1][:-1])
+                end = int(end.split("[")[1][:-1])
+                if strand < 0:
+                    start, end = end + 1, start + 1
                 recs.append(
                     Result(
                         loc_type=_type,
-                        sstart=int(start.split("[")[1][:-1]),
-                        send=int(end.split("[")[1][:-1]),
+                        sstart=start,
+                        send=end,
                         strand=strand,
                     )
                 )

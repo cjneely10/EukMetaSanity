@@ -153,8 +153,6 @@ class GffMerge:
                 record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist))
             else:
                 record = SeqRecord(seq=Seq("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end]))
-            # record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end]))
-            if strand == "-":
                 record = record.reverse_complement()
             out_cds.append(record)
             offsets.append(exon[2])
