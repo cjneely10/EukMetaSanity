@@ -88,6 +88,9 @@ class EvidenceIter(TaskList):
                     (*out_results), "-G", "--merge", "-Y"
                 ] > os.path.join(self.wdir, "metaeuk.gff3")
             )
+            print(TaxonomyIter.Taxonomy.get_taxonomy(
+                self.input[3], 0, self.level,  # Allow for level override by user
+            ))
             # Merge final results
             EvidenceIter.Evidence.merge(
                 self, [self.input[0], *out_results],

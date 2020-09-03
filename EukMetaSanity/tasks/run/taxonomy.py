@@ -58,6 +58,9 @@ class TaxonomyIter(TaskList):
 
         @staticmethod
         def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> Tuple[str, int]:
+            tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
+            taxonomy = {key: None for key in tax_levels}
+            assert deepest_level in taxonomy.keys()
             assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
             _id: int = 2759
             try:
@@ -69,15 +72,12 @@ class TaxonomyIter(TaskList):
                     _score, _level, _tax_id, _assignment = float(line[0]), line[3], int(line[4]), line[5].lstrip(" ")
                     if _assignment in ("unclassified", "root"):
                         continue
-                    if _score >= cutoff:
-                        assignment = _assignment
-                        _id = _tax_id
-                    # if _level == "no rank":
-                    #     continue
-                    if _level == deepest_level or _score < cutoff:
-                        return assignment.lower(), _id
+                    if _score >= cutoff and taxonomy.get(_level, None) is None:
+                        taxonomy[_level] = (_assignment, _tax_id)
+                    if taxonomy.get(deepest_level, None) is not None:
+                        return taxonomy[deepest_level]
             except:
-                return assignment.lower(), _id
+                return taxonomy[deepest_level]
             return '"%s"' % assignment.lower(), _id
 
     def __init__(self, *args, **kwargs):
