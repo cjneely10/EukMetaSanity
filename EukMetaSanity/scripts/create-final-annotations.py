@@ -20,8 +20,8 @@ class Gene:
         self.added_evidence: int = 0
 
     def add_evidence(self, evidence_data: List):
-        if len(self.exons) == 0:
-            return
+        # if len(self.exons) == 0:
+        #     return
         _len_ev, _len_ex = len(evidence_data), self.num_ab_initio
         if _len_ev >= _len_ex:
             _near = _len_ex / _len_ev
@@ -30,16 +30,18 @@ class Gene:
         if _near >= .7:
             count = 1
             out_exons = [self.exons[0]]
+            end = len(self.exons)
             if len(self.exons) > 1:
                 out_exons.append(self.exons[-1])
                 count += 1
-            for ab_exon in self.exons[1:-1]:
+                end -= 1
+            for ab_exon in self.exons:
                 is_found = False
                 for exon in evidence_data:
                     if Gene.in_exon(exon, ab_exon):
                         is_found = True
                         break
-                if is_found:
+                if is_found and ab_exon not in out_exons:
                     count += 1
                     out_exons.append(ab_exon)
             self.trimmed_ab_initio = count
@@ -144,15 +146,15 @@ class GffMerge:
                 end = exon[2]
             else:
                 start = exon[2]
-            dist = exon[1] - end - exon[0] - start + 1
-            if dist % 3 == 0:
-                dist = 0
-            else:
-                dist = 3 - dist % 3
+            dist = (exon[1] - end - exon[0] - start + 1) % 3
+            # if dist % 3 == 0:
+            #     dist = 0
+            # else:
+            #     dist = 3 - dist % 3
             if strand == "+":
-                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist))
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end - dist]))
             else:
-                record = SeqRecord(seq=Seq("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end]))
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start + dist: exon[1] - end]))
                 record = record.reverse_complement()
             out_cds.append(record)
             offsets.append(exon[2])
