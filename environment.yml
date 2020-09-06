@@ -2,6 +2,7 @@ name: EukMS
 channels:
   - bioconda
   - conda-forge
+  - anaconda
 dependencies:
   - python=3.6
   - augustus
@@ -11,3 +12,9 @@ dependencies:
   - pip
   - repeatmodeler
   - repeatmasker
+  - sqlite=3.33
+  - sambamba
+  - bedtools
+  - hisat2
+  - braker2
+  - maker

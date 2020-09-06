@@ -6,15 +6,14 @@ cd EukMetaSanity
 conda env create -f environment.yml
 conda activate EukMS
 make all
-cd ..
-export PATH=$(pwd)/EukMetaSanity/bin/:$PATH
-export PYTHONPATH=$(pwd)/EukMetaSanity/:$PYTHONPATH
+export PATH=$(pwd)/bin/:$PATH
+export PYTHONPATH=$(pwd)/:$PYTHONPATH
 ```
 
 Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable
 
 ```
-ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
+ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
@@ -27,7 +26,7 @@ Add EukMetaSanity to your PATH and PYTHONPATH variables
 
 ### Installing dependencies
 
-All dependencies below are automatically installed when using the conda installation. If you wish to use GeneMark
+All dependencies below are automatically installed when using the conda installation.
 
 #### Run
 
