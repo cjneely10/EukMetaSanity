@@ -49,7 +49,7 @@ class Gene:
                         is_found = True
                         _exon = exon
                         break
-                if is_found and ab_exon not in out_exons:
+                if is_found:
                     count += 1
                     # Truncate exon to match evidence
                     if ab_exon in self.terminal_exons:
