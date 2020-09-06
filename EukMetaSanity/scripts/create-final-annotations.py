@@ -18,7 +18,7 @@ class Gene:
         self.num_ab_initio: int = len(ab_initio_data)
         self.trimmed_ab_initio: int = len(ab_initio_data)
         self.added_evidence: int = 0
-        self.terminal_exons = term_exons
+        self.terminal_exons = set(term_exons)
 
     def add_evidence(self, evidence_data: List):
         # if len(self.exons) == 0:
@@ -28,29 +28,37 @@ class Gene:
             _near = _len_ex / _len_ev
         else:
             _near = _len_ev / _len_ex
+        # Remove ab initio exons if well-resolved protein mapping
         if _near >= .7:
             count = 1
+            # Keep start exon
             out_exons = [self.exons[0]]
             end = len(self.exons)
+            # Keep end if one exists
             if len(self.exons) > 1:
                 out_exons.append(self.exons[-1])
                 count += 1
                 end -= 1
-            for ab_exon in self.exons:
+            # Search remaining for overlap
+            for ab_exon in self.exons[1:end]:
                 is_found = False
                 _exon = None
                 for exon in evidence_data:
+                    # An overlap is found
                     if Gene.in_exon(exon, ab_exon):
                         is_found = True
                         _exon = exon
                         break
                 if is_found and ab_exon not in out_exons:
                     count += 1
-                    if self.strand == "+":
-                        out_exons.append((ab_exon[0], _exon[1], _exon[2]))
+                    # Truncate exon to match evidence
+                    if ab_exon in self.terminal_exons:
+                        if self.strand == "+":
+                            out_exons.append((ab_exon[0], _exon[1], ab_exon[2]))
+                        else:
+                            out_exons.append((_exon[0], ab_exon[1], _exon[2]))
                     else:
-                        out_exons.append((_exon[0], ab_exon[1], _exon[2]))
-                    # out_exons.append(ab_exon)
+                        out_exons.append(ab_exon)
             self.trimmed_ab_initio = count
         else:
             out_exons = self.exons
@@ -114,14 +122,14 @@ class GffReader:
                     line = next(self.fp).rstrip("\r\n").split("\t")
             # Merge based on name
             data = defaultdict(list)
-            terminal_exons = defaultdict(list)
+            terminal_exons = []
             for transcript in transcripts:
                 data[transcript[0]].extend(transcript[-1])
-                if len(transcript[-1]) > 0:
+                if len(transcript[-1]) > 1:
                     if gene_data["strand"] == "+":
-                        terminal_exons[transcript[0]].extend(transcript[-1][-1])
+                        terminal_exons.append(transcript[-1][-1])
                     else:
-                        terminal_exons[transcript[0]].extend(transcript[-1][0])
+                        terminal_exons.append(transcript[-1][0])
             for transcript in data.keys():
                 if gene_data["strand"] == "+":
                     data[transcript].sort(key=itemgetter(0))
