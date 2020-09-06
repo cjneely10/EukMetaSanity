@@ -22,10 +22,8 @@ def metaeuk(metaeuk_file_path, data, *args, **kwargs):
         # Determine strand
         if line[2] == "+":
             strand = 1
-        elif line[2] == "-":
-            strand = -1
         else:
-            strand = 0
+            strand = -1
         # Add base record as first record in nested list
         recs.append(
             Result(
