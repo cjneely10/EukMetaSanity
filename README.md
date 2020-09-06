@@ -30,9 +30,6 @@ instructions
 
 ## Usage
 
-#### Note for Docker users
-Use the Docker CL API to call EukMetaSanity
-
 After running `download-data.py`, config files will be available in the database
 directory. These can be edited to fit your needs.
 

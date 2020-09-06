@@ -1,52 +1,33 @@
 # Installation
-**EukMetaSanity** is available as a Docker image and as a standalone installation.
 
-**Note for Docker users**: The EukMetaSanity output is quite large. Ensure that the default docker container size is
-large.
-
-## General requirements
-Regardless of installation, ensure that `python3` and `pip3` are installed on your system and on your PATH.
-Python version should be &ge; 3.6.
-
-## Docker installation
-**EukMetaSanity**'s Docker image is packaged with all (most) of required and optional dependencies listed below.
-
-Users who wish to substitute GeneMark for Augustus, or RepeatModeler/Masker for MMseqs2, must have these programs 
-installed on their system.
-
-Download the Docker image using the command:
-
-```
-docker pull cjneely10/eukmetasanity:v0.1.0
-```
-
-Follow the instructions below for installing required databases.
-
-
-## Standalone installation
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity
+conda env create -f environment.yml
+conda activate EukMS
 make all
 cd ..
-```
-
-Add EukMetaSanity to your PATH and PYTHONPATH variables
-
-```
-export PATH=/path/to/EukMetaSanity/bin/:$PATH
-export PYTHONPATH=/path/to/EukMetaSanity/:$PYTHONPATH
+export PATH=$(pwd)/EukMetaSanity/bin/:$PATH
+export PYTHONPATH=$(pwd)/EukMetaSanity/:$PYTHONPATH
 ```
 
 Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable
 
 ```
-ln -s /path/to/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
+ln -s $(pwd)/EukMetaSanity/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
+
+**EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
+
+Users who wish to use GeneMark must install it separately - see the Installing dependencies section below.
+
+Users who wish to use kofamscan or EggNOG-mapper can also follow the instructions below.
+
+Add EukMetaSanity to your PATH and PYTHONPATH variables
 
 ### Installing dependencies
 
-When selecting dependencies to download, please follow the instructions below:
+All dependencies below are automatically installed when using the conda installation. If you wish to use GeneMark
 
 #### Run
 

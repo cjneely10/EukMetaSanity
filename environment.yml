@@ -1,0 +1,13 @@
+name: EukMS
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.6
+  - augustus
+  - gffread
+  - gffcompare
+  - mmseqs2
+  - pip
+  - repeatmodeler
+  - repeatmasker
