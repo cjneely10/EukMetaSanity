@@ -125,7 +125,7 @@ class GffReader:
             terminal_exons = []
             for transcript in transcripts:
                 data[transcript[0]].extend(transcript[-1])
-                if len(transcript[-1]) > 1:
+                if transcript[0] == "ab-initio" and len(transcript[-1]) > 1:
                     if gene_data["strand"] == "+":
                         terminal_exons.append(transcript[-1][-1])
                     else:
@@ -172,11 +172,11 @@ class GffMerge:
             if dist % 3 == 0:
                 dist = 0
             else:
-                dist = 3 - dist % 3
+                dist = dist % 3
             if strand == "+":
-                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist))
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end - dist]))
             else:
-                record = SeqRecord(seq=Seq("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end]))
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start + dist: exon[1] - end]))
                 record = record.reverse_complement()
             out_cds.append(record)
             offsets.append(exon[2])
