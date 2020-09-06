@@ -119,6 +119,7 @@ class RepeatsIter(TaskList):
                         (*self.added_flags),
                         (*search),
                         "-dir", self.pm.get_dir(self.record_id, _dir),
+                        "-nolow",
                         input_file,
                     ]
                 )

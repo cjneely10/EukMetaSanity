@@ -168,16 +168,11 @@ class GffMerge:
                 end = exon[2]
             else:
                 start = exon[2]
-            dist = exon[1] - end - exon[0] - start + 1
-            if dist % 3 == 0:
-                dist = 0
-            else:
-                dist = dist % 3
+            dist = (exon[1] - end - exon[0] - start + 1) % 3
             if strand == "+":
                 record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end - dist]))
             else:
-                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start + dist: exon[1] - end]))
-                record = record.reverse_complement()
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start + dist: exon[1] - end])).reverse_complement()
             out_cds.append(record)
             offsets.append(exon[2])
         cds = Seq("".join(str(val.seq) for val in out_cds))
