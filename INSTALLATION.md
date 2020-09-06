@@ -1,11 +1,7 @@
 # Installation
 
 ```
-git clone https://github.com/cjneely10/EukMetaSanity.git
-cd EukMetaSanity
-conda env create -f environment.yml
-conda activate EukMS
-make all
+./install.sh
 export PATH=$(pwd)/bin/:$PATH
 export PYTHONPATH=$(pwd)/:$PYTHONPATH
 ```

@@ -5,16 +5,16 @@ channels:
   - anaconda
 dependencies:
   - python=3.6
-  - augustus
-  - gffread
-  - gffcompare
-  - mmseqs2
-  - pip
-  - repeatmodeler
-  - repeatmasker
+  - augustus=3.3.3
+  - gffread=0.12.1
+  - gffcompare=0.11.2
+  - mmseqs2=12.113e3
+  - pip=20.2.2
+  - repeatmodeler=2.0.1
+  - repeatmasker=4.0.9_p2
   - sqlite=3.33
-  - sambamba
-  - bedtools
-  - hisat2
-  - braker2
-  - maker
+  - sambamba=0.7.1
+  - bedtools=2.29.2
+  - hisat2=2.2.1
+  - braker2=2.1.2
+  - maker=2.31.10
