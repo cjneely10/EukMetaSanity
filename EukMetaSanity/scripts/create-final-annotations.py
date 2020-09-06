@@ -12,12 +12,13 @@ from typing import List, Dict, Tuple, Generator, Optional
 
 
 class Gene:
-    def __init__(self, ab_initio_data: List, strand: str):
+    def __init__(self, ab_initio_data: List, strand: str, term_exons: List):
         self.exons: List = ab_initio_data
         self.strand: str = strand
         self.num_ab_initio: int = len(ab_initio_data)
         self.trimmed_ab_initio: int = len(ab_initio_data)
         self.added_evidence: int = 0
+        self.terminal_exons = term_exons
 
     def add_evidence(self, evidence_data: List):
         # if len(self.exons) == 0:
@@ -37,13 +38,19 @@ class Gene:
                 end -= 1
             for ab_exon in self.exons:
                 is_found = False
+                _exon = None
                 for exon in evidence_data:
                     if Gene.in_exon(exon, ab_exon):
                         is_found = True
+                        _exon = exon
                         break
                 if is_found and ab_exon not in out_exons:
                     count += 1
-                    out_exons.append(ab_exon)
+                    if self.strand == "+":
+                        out_exons.append((ab_exon[0], _exon[1], _exon[2]))
+                    else:
+                        out_exons.append((_exon[0], ab_exon[1], _exon[2]))
+                    # out_exons.append(ab_exon)
             self.trimmed_ab_initio = count
         else:
             out_exons = self.exons
@@ -107,8 +114,14 @@ class GffReader:
                     line = next(self.fp).rstrip("\r\n").split("\t")
             # Merge based on name
             data = defaultdict(list)
+            terminal_exons = defaultdict(list)
             for transcript in transcripts:
                 data[transcript[0]].extend(transcript[-1])
+                if len(transcript[-1]) > 0:
+                    if gene_data["strand"] == "+":
+                        terminal_exons[transcript[0]].extend(transcript[-1][-1])
+                    else:
+                        terminal_exons[transcript[0]].extend(transcript[-1][0])
             for transcript in data.keys():
                 if gene_data["strand"] == "+":
                     data[transcript].sort(key=itemgetter(0))
@@ -116,6 +129,7 @@ class GffReader:
                     data[transcript].sort(key=itemgetter(0), reverse=True)
             # Store in data and yield
             gene_data["transcripts"] = data
+            gene_data["terminal_exons"] = terminal_exons
             yield gene_data
 
 
@@ -128,7 +142,7 @@ class GffMerge:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
-            gene = Gene(gene_data["transcripts"]["ab-initio"], gene_data["strand"])
+            gene = Gene(gene_data["transcripts"]["ab-initio"], gene_data["strand"], gene_data["terminal_exons"])
             # Keep exons with evidence, add exons missed by ab-initio
             gene.add_evidence(gene_data["transcripts"]["metaeuk"])
             gene_data["transcripts"] = gene.exons
