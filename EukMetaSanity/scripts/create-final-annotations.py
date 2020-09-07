@@ -186,12 +186,12 @@ class GffMerge:
         cds = Seq("".join(str(val.seq) for val in out_cds))
         _prot_seq = Seq(str(cds.translate()).replace("X", ""))
         _stats = "|".join(map(str, (
-                gene.num_ab_initio,
-                gene.trimmed_ab_initio,
-                gene.added_evidence,
-                len(gene.exons),
-                len(_prot_seq),
-            )))
+            gene.num_ab_initio,
+            gene.trimmed_ab_initio,
+            gene.added_evidence,
+            len(gene.exons),
+            len(_prot_seq),
+        )))
         descr = "contig=%s strand=%s %s" % (
             gene_data["fasta-id"],
             strand,
