@@ -16,4 +16,5 @@ dependencies:
   - sambamba=0.7.1
   - bedtools=2.29.2
   - hisat2=2.2.1
+  - gmap=2020.06.30
   - braker2=2.1.2
