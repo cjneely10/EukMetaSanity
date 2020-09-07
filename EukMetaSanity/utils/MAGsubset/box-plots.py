@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import os
-import glob
 import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
@@ -28,9 +26,14 @@ if __name__ == "__main__":
         a.extend(parse_bitscores(file))
     for file in ap.args.b_files:
         b.extend(parse_bitscores(file))
+    out = [a]
+    if len(b) > 0:
+        out.append(b)
 
-    fig = plt.figure(1, figsize=(9, 6))
+    fig = plt.figure()
     ax = fig.add_subplot(111)
     b = ax.boxplot(np.array([a, b]))
     print([item.get_ydata()[1] for item in b["whiskers"]])
+    print([item.get_ydata()[1] for item in b["boxes"]])
+    print([item.get_ydata()[1] for item in b["medians"]])
     plt.show()
