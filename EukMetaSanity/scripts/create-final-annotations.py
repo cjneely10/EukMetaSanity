@@ -21,8 +21,8 @@ class Gene:
         self.terminal_exons = set(term_exons)
 
     def add_evidence(self, evidence_data: List):
-        # if len(self.exons) == 0:
-        #     return
+        if len(self.exons) == 0:
+            return
         _len_ev, _len_ex = len(evidence_data), self.num_ab_initio
         if _len_ev >= _len_ex:
             _near = _len_ex / _len_ev
