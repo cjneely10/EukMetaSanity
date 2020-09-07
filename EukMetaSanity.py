@@ -139,11 +139,6 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
     task.summarize(os.path.join(ap.args.output, "results", ap.args.command), ap.args.command)
 
 
-def _docker_main(ap: ArgParse, cfg: ConfigManager, is_cont: bool, tm: TaskManager):
-    from plumbum import local
-    docker = local["docker"]
-
-
 if __name__ == "__main__":
     # Redirect dask nanny errors
     signal(SIGPIPE, SIG_DFL)
