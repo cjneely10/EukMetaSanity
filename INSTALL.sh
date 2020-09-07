@@ -1,6 +1,4 @@
 #!/bin/bash
-git clone https://github.com/cjneely10/EukMetaSanity.git
-cd EukMetaSanity || return
 conda env create -f environment.yml
 conda activate EukMS
 make all

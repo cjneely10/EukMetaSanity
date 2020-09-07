@@ -3,7 +3,8 @@
 Run the install script. Update your `PATH` and `PYTHONPATH` variables in your .bashrc file.
 
 ```
-./install.sh
+git clone https://github.com/cjneely10/EukMetaSanity.git
+cd EukMetaSanity && ./install.sh
 export PATH=$(pwd)/bin/:$PATH
 export PYTHONPATH=$(pwd)/:$PYTHONPATH
 ```
