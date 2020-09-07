@@ -1,5 +1,7 @@
 # Installation
 
+Run the install script. Update your `PATH` and `PYTHONPATH` variables in your .bashrc file.
+
 ```
 ./install.sh
 export PATH=$(pwd)/bin/:$PATH
@@ -13,22 +15,59 @@ ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
-
-Users who wish to use GeneMark must install it separately - see the Installing dependencies section below.
-
-Users who wish to use kofamscan or EggNOG-mapper can also follow the instructions below.
-
-Add EukMetaSanity to your PATH and PYTHONPATH variables
+Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
+[eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
+must install them separately.
 
 ### Installing dependencies
 
-All dependencies below are automatically installed when using the conda installation.
+`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat` should be on your PATH.
+
+### Installing required databases
+The `download-data.py` script is provided to download all required base data.
+
+```
+EukMetaSanity/download-data.py databases -t <threads> -m <split-memory-limit>
+
+usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
+                        [-t THREADS] [-m MAX_MEM]
+                        path
+
+Download required data and build MMseqs2 databases
+
+positional arguments:
+  path                  Download path
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b BUILD, --build BUILD
+                        Generate required MMseqs2 databases and linear indices, default True
+  -x INDEX, --index INDEX
+                        Generate search index (recommended, but takes a lot of space), default False
+  -o OUTPUT, --output OUTPUT
+                        Output default config files with included download paths, default True
+  -r REWRITE, --rewrite REWRITE
+                        Rewrite existing directory, default False
+  -t THREADS, --threads THREADS
+                        Number of threads to use in database generation, default 1
+  -m MAX_MEM, --max_mem MAX_MEM
+                        Split memory limit for database generation, default 8G
+```
+
+This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
+automatically generate for use when running **EukMetaSanity**.
+
+Your installation is complete! If you wish to download additional databases to use in the `Report` step, use the 
+`mmseqs database` command to pull them prior to running **EukMetaSanity**, and add their location to your 
+`report-config.ini` file in the `[mmseqs] DATA` section.
+
+## Non-Conda installation
+
+If you do not wish to use Conda, the list of all required dependencies is available below.
 
 #### Run
 
 Install [gffread](https://github.com/gpertea/gffread) AND [gffcompare](https://github.com/gpertea/gffcompare)
-
-`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat` should be on your PATH
 
 ##### Run step 1: Taxonomy identification
 Install [MMseqs2](https://github.com/soedinglab/MMseqs2)
@@ -79,35 +118,4 @@ Install [HISAT2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-
 Install [GMAP](http://research-pub.gene.com/gmap/)
 
 
-## Installing required databases
-```
-EukMetaSanity/download-data.py databases -t <threads> -m <split-memory-limit>
-```
 
-The `download-data.py` script is provided to download all required base data.
-
-```
-usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
-                        [-t THREADS] [-m MAX_MEM]
-                        path
-
-Download required data and build MMseqs2 databases
-
-positional arguments:
-  path                  Download path
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -b BUILD, --build BUILD
-                        Generate required MMseqs2 databases and linear indices, default True
-  -x INDEX, --index INDEX
-                        Generate search index (recommended, but takes a lot of space), default False
-  -o OUTPUT, --output OUTPUT
-                        Output default config files with included download paths, default True
-  -r REWRITE, --rewrite REWRITE
-                        Rewrite existing directory, default False
-  -t THREADS, --threads THREADS
-                        Number of threads to use in database generation, default 1
-  -m MAX_MEM, --max_mem MAX_MEM
-                        Split memory limit for database generation, default 8G
-```

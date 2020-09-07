@@ -31,7 +31,8 @@ instructions
 ## Usage
 
 After running `download-data.py`, config files will be available in the database
-directory. These can be edited to fit your needs.
+directory. These can be edited to fit your needs. Make sure that all `DATA` and `PATH` sections reference valid
+locations on your system.
 
 If the `download-data.py` script was not used, then the default config files will be available in this repo's 
 `config` directory.
@@ -184,5 +185,7 @@ It is implemented in Python 3 under the GNU General Public License v3.0.
 
 Also cite all dependencies that you used, as **EukMetaSanity** would not be possible were it not for the developers of 
 these programs.
+
+https://bioinformaticsworkbook.org/dataAnalysis/GenomeAnnotation/Intro_to_Braker2.html#gsc.tab=0
 
 
