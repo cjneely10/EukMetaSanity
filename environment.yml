@@ -17,4 +17,3 @@ dependencies:
   - bedtools=2.29.2
   - hisat2=2.2.1
   - braker2=2.1.2
-  - maker=2.31.10
