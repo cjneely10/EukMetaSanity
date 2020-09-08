@@ -21,6 +21,12 @@ Create a link to a directory on your PATH to make **EukMetaSanity** more easily 
 ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
+Finally, activate your conda environment.
+
+```
+conda activate EukMS
+```
+
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
@@ -64,7 +70,9 @@ optional arguments:
 This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
 automatically generate for use when running **EukMetaSanity**.
 
-Your installation is complete! If you wish to download additional databases to use in the `Report` step, use the 
+**Your installation is complete!**
+ 
+If you wish to download additional databases to use in the `Report` step, use the 
 `mmseqs database` command to pull them prior to running **EukMetaSanity**, and add their location to your 
 `report-config.ini` file in the `[mmseqs] DATA` section.
 

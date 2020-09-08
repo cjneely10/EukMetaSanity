@@ -1,5 +1,5 @@
-PYTHON = python3
-PIP = pip3
+PYTHON = python
+PIP = pip
 BASE = EukMetaSanity
 IN_SCRIPTS_PATH = scripts
 IN_BIN_PATH = bin
