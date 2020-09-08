@@ -180,7 +180,7 @@ class GffMerge:
             if strand == "-":
                 record = record.reverse_complement()
             out_cds.append(record)
-            offsets.append(start)
+            offsets.append(exon[2])
         if strand == "-":
             offsets.reverse()
         cds = Seq("".join(str(val.seq) for val in out_cds))

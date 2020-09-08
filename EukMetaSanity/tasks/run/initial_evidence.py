@@ -85,7 +85,7 @@ class EvidenceIter(TaskList):
                 out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
             self.log_and_run(
                 self.program_gffread[
-                    (*out_results), "-G", "--merge", "-Y"
+                    (*out_results), "-G", "--cluster-only",
                 ] > os.path.join(self.wdir, "metaeuk.gff3")
             )
             # Merge final results
@@ -100,7 +100,7 @@ class EvidenceIter(TaskList):
             # Convert to gff3 file
             task_object.log_and_run(
                 task_object.program_gffread[
-                    (*input_list), "-G", "--merge", "-Y", "--ignore-locus",
+                    (*input_list), "-G", "--merge",
                 ] > out_prefix + ".all.gff3"
             )
             # Replace transcripts with gene identifier and write cds/aa sequences
