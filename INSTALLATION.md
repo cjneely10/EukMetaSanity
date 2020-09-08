@@ -1,12 +1,18 @@
 # Installation
 
-Run the install script. Update your `PATH` and `PYTHONPATH` variables in your .bashrc file.
+Run the install script. This assumes you have conda&ge;4.8.3 installed, that you have conda activated, and that you are 
+in your `(base)` conda environment.
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
-cd EukMetaSanity && ./install.sh
-export PATH=$(pwd)/bin/:$PATH
-export PYTHONPATH=$(pwd)/:$PYTHONPATH
+cd EukMetaSanity && ./INSTALL.sh
+```
+
+Update your `PATH` and `PYTHONPATH` variables in your .bashrc file.
+
+```
+echo export PATH=$(pwd)/bin/:'$PATH' >> ~/.bashrc
+echo export PYTHONPATH=$(pwd)/:'$PYTHONPATH' >> ~/.bashrc
 ```
 
 Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable

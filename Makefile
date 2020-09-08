@@ -16,4 +16,8 @@ build:
 install:
 	$(PIP) install -r requirements.txt
 
+clean:
+	rm -r $(OUT_BIN_PATH)
+	pyclean .
+
 all: build install

@@ -25,8 +25,9 @@ Identify RNA (noncoding, tRNA, etc.) regions of the genome using Rfam.
 Search KEGG, EggNOG, and any MMseqs2 database for functional annotation of putative proteins.
 
 ## Installation
-See [INSTALLATION.md](https://github.com/cjneely10/EukMetaSanity/blob/master/INSTALLATION.md) for detailed installation
-instructions
+
+See <a href="https://github.com/cjneely10/EukMetaSanity/blob/master/INSTALLATION.md" target="_blank">INSTALLATION.md</a> 
+for detailed installation instructions.
 
 ## Usage
 
