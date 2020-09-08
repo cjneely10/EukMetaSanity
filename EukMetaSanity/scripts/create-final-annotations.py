@@ -56,7 +56,7 @@ class Gene:
                         if self.strand == "+":
                             out_exons.append((ab_exon[0], _exon[1], ab_exon[2]))
                         else:
-                            out_exons.append((_exon[0], ab_exon[1], _exon[2]))
+                            out_exons.append((_exon[0], ab_exon[1], ab_exon[2]))
                     else:
                         out_exons.append(ab_exon)
             self.trimmed_ab_initio = count
@@ -158,7 +158,7 @@ class GffMerge:
             yield (gene_data, *self.create_cds(gene_data, gene))
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
-        orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
+        orig_seq = self.fasta_dict[gene_data["fasta-id"]].seq
         strand = gene_data["strand"]
         out_cds: List[SeqRecord] = []
         offsets: List[int] = []
@@ -174,10 +174,9 @@ class GffMerge:
             else:
                 dist = 3 - dist % 3
             if strand == "+":
-                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + start: exon[1] - end] + "N" * dist))
+                record = SeqRecord(seq=orig_seq[exon[0] - 1 + start: exon[1] - end] + Seq("N" * dist))
             else:
-                record = SeqRecord(seq=Seq("N" * dist + orig_seq[exon[0] - 1 + start: exon[1] - end]))
-            if strand == "-":
+                record = SeqRecord(seq=Seq("N" * dist) + orig_seq[exon[0] - 1 + start: exon[1] - end])
                 record = record.reverse_complement()
             out_cds.append(record)
             offsets.append(exon[2])
