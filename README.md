@@ -13,11 +13,11 @@ Identify putative taxonomy using the OrthoDB and MMseqs2 and annotate repeated r
 the genome with either MMseqs2 or RepeatModeler/RepeatMasker. 
 
 Generate *ab initio* structural predictions of coding regions of the genome using either Augustus or GeneMark.
-Add protein evidence using MetaEuk.
+Refine predictions with protein evidence using MetaEuk.
 
 ### Fast refine
 Map RNA-seq (using HISAT2) and assembled transcriptome (using GMAP) evidence from closely related organisms (same 
-organism or species) to the genome to add additional evidence.
+organism or species) to the genome to add additional evidence using BRAKER2. 
 
 ### Report
 Identify RNA (noncoding, tRNA, etc.) regions of the genome using Rfam.
@@ -163,7 +163,7 @@ out/
           |-- mag1/
               |-- mag1.summary  # TSV-summary of all annotations
               |-- mag1.db  # SQLite3 summary of all annotations
-              ... (based on annotation programs run)
+              ... (results based on annotation programs run)
           |-- mag2/
               ..
       |-- fast_refine/
