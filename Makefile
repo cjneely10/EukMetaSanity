@@ -5,7 +5,7 @@ IN_SCRIPTS_PATH = scripts
 IN_BIN_PATH = bin
 OUT_BIN_PATH = bin
 
-.PHONY : build install all
+.PHONY : build install all clean
 
 build:
 	$(PYTHON) -m compileall . > /dev/null
@@ -13,7 +13,7 @@ build:
 	ln -srf $(BASE)/$(IN_SCRIPTS_PATH)/*.py $(OUT_BIN_PATH)/
 	ln -srf $(BASE)/$(IN_SCRIPTS_PATH)/*.sh $(OUT_BIN_PATH)/
 
-install:
+install: build
 	$(PIP) install -r requirements.txt
 
 clean:

@@ -78,7 +78,7 @@ class RepeatsIter(TaskList):
                     "-database", _name,
                 ] & BG
             passed_args = eval(str(cmd)[8:-11])
-            print(" ".join(passed_args))
+            print("  " + " ".join(passed_args))
             cmd.wait()
             return self.input[0], str(cmd.proc._proc.pid)
 
@@ -86,22 +86,22 @@ class RepeatsIter(TaskList):
         def _mask(self, input_file: str, pid: str):
             # Perform on de novo results
             # Perform step on each file passed by user
+            import sys
             data_files = []
             _added_dirs = []
-            print(1)
+            print(os.getcwd())
+            print(os.listdir(os.getcwd()))
+            print(pid)
             _file = os.path.join(
                 [_file for _file in os.listdir(os.getcwd()) if pid in _file and "RM" in _file][0],
                 "consensi.fa.classified"
             )
-            print(2)
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
-            print(3)
             data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0]]
             if os.path.exists(_file):
                 data_files.append(_file)
-            print(4)
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
                 if _search[:2] == "RM":
@@ -110,7 +110,6 @@ class RepeatsIter(TaskList):
                 else:
                     search = ("-species", _search)
                     _dir = "repeats_" + _search.replace(" ", "_")
-                print(5)
                 # Do not repeat if step is already present
                 if os.path.exists(os.path.join(os.path.dirname(self.wdir), _dir)):
                     continue
