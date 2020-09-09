@@ -89,9 +89,6 @@ class RepeatsIter(TaskList):
             import sys
             data_files = []
             _added_dirs = []
-            print(os.getcwd())
-            print(os.listdir(os.getcwd()))
-            print(pid)
             _file = os.path.join(
                 [_file for _file in os.listdir(os.getcwd()) if pid in _file and "RM" in _file][0],
                 "consensi.fa.classified"
