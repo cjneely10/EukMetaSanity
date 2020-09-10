@@ -1,7 +1,5 @@
 # Installation
 
-### Installing dependencies
-
 `awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda` should be on your PATH.
 
 Ensure you have `conda`&ge;4.8.3 installed, that you have conda activated, and that you are in your `(base)` conda 
@@ -34,6 +32,9 @@ ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately.
+
+*(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set and writable prior to running if you are using this ab 
+initio predictor)*
 
 ### Installing required databases
 The `download-data.py` script is provided to download all required base data. Run the script to download the 
