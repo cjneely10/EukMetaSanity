@@ -59,7 +59,7 @@ class RepeatsIter(TaskList):
         # Complete masking using RepeatModeler/Masker
         def full(self):
             self.simple()
-            self._mask(*self._model())
+            self._mask(self._model())
 
         @program_catch
         def _model(self):
@@ -71,8 +71,8 @@ class RepeatsIter(TaskList):
                     self.input[0],
                 ]
             )
-            new_path = os.path.join(self.wdir, "run_gmes.sh")
-            self.log_and_run(self.local["cp"][self.local["which"]["run_gmes.sh"]().rstrip("\r\n"), self.wdir])
+            new_path = os.path.join(self.wdir, "run.sh")
+            self.log_and_run(self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir])
             self.log_and_run(
                 self.local["sed"][
                     "-i", "s/%s/%s/g" % (
