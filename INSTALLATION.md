@@ -37,6 +37,8 @@ must install them separately.
 initio predictor)*
 
 ### Installing required databases
+**RepeatMasker** can incorporate additional DFam updates. Install these if you wish to use them.
+
 The `download-data.py` script is provided to download all required base data. Run the script to download the 
 required databases:
 

@@ -3,7 +3,7 @@ import shutil
 from plumbum import BG
 from typing import List
 from pathlib import Path
-from EukMetaSanity.tasks.utils.helpers import prefix
+from EukMetaSanity.tasks.utils.helpers import prefix, touch
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
@@ -156,17 +156,20 @@ class RepeatsIter(TaskList):
                     final_out,
                 ]
             )
-            # Rename output file
-            os.replace(
-                input_file + ".masked",
-                os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
-            )
-            # Output the repeats file as a gff3 file
-            self.log_and_run(
-                self.program_rmouttogff3[
-                    os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
-                ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")
-            )
+            if os.path.exists(input_file + ".masked"):
+                # Rename output file
+                os.replace(
+                    input_file + ".masked",
+                    os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
+                )
+                # Output the repeats file as a gff3 file
+                self.log_and_run(
+                    self.program_rmouttogff3[
+                        os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
+                    ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")
+                )
+            else:
+                touch(os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)
