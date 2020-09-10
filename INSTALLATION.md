@@ -43,7 +43,11 @@ in your conda installation directory if you wish to use them.
 cd /path/to/miniconda/envs/EukMS/share/RepeatMasker/Libraries/
 wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
 gunzip Dfam.h5.gz
+cd .. && perl ./configure
 ```
+
+The configure script should ask you to confirm the location of your installation, as well as to select your search 
+engine. Select 2 for `RMBlast`, and provide the path as `/path/to/miniconda3/envs/EukMS/bin/` when requested.
 
 The `download-data.py` script is provided to download all other required base data. Run the script to download the 
 required databases:
