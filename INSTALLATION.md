@@ -24,12 +24,6 @@ Create a link to a directory on your PATH to make **EukMetaSanity** more easily 
 ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
-Finally, activate your conda environment.
-
-```
-conda activate EukMS
-```
-
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
