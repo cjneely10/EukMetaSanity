@@ -14,7 +14,7 @@ build:
 	ln -srf $(BASE)/$(IN_SCRIPTS_PATH)/*.sh $(OUT_BIN_PATH)/
 
 install: build
-	$(PIP) install -r requirements.txt
+	$(PYTHON) -m pip install -r requirements.txt
 
 clean:
 	rm -r $(OUT_BIN_PATH)
