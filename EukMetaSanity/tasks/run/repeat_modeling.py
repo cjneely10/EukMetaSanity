@@ -87,18 +87,7 @@ class RepeatsIter(TaskList):
                 ]
             )
             # Run script
-            self.log_and_run(
-                self.local[new_path][self.wdir]
-            )
-            # # Run RepeatModeler
-            # cmd = self.program_modeler[
-            #         "-pa", str(int(self.threads) // 4 or 1),
-            #         (*self.added_flags),
-            #         "-database", _name,
-            #     ] & BG
-            # passed_args = eval(str(cmd)[8:-11])
-            # print("  " + " ".join(passed_args))
-            # cmd.wait()
+            self.log_and_run(self.local[new_path][self.wdir])
             return self.input[0]
 
         @program_catch

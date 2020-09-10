@@ -246,9 +246,7 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Run script
-            self.log_and_run(
-                self.local[new_path][self.wdir]
-            )
+            self.log_and_run(self.local[new_path][self.wdir])
             # Move program to match required output name
             self.log_and_run(
                 self.program_gffread[
