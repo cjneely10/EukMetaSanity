@@ -16,8 +16,8 @@ python -m compileall . > /dev/null
 Update your `PATH` and `PYTHONPATH` variables in your .bashrc file.
 
 ```
-echo export PATH=$(pwd)/bin/:'$PATH' >> ~/.bashrc
-echo export PYTHONPATH=$(pwd)/:'$PYTHONPATH' >> ~/.bashrc
+echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
+echo export PYTHONPATH="$(pwd)"/:'$PYTHONPATH' >> ~/.bashrc
 ```
 
 You may need to restart your shell for these changes to take effect.
