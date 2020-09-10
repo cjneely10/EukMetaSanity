@@ -9,7 +9,6 @@ environment. Then, run the following commands:
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
 conda activate EukMS
-pip install -r requirements.txt
 python -m compileall . > /dev/null
 ```
 

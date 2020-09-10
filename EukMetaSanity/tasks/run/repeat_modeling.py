@@ -1,6 +1,6 @@
 import os
+import glob
 import shutil
-from plumbum import BG
 from typing import List
 from pathlib import Path
 from EukMetaSanity.tasks.utils.helpers import prefix, touch
@@ -71,27 +71,43 @@ class RepeatsIter(TaskList):
                     self.input[0],
                 ]
             )
-            # Run RepeatModeler
-            cmd = self.program_modeler[
-                    "-pa", str(int(self.threads) // 4 or 1),
-                    (*self.added_flags),
-                    "-database", _name,
-                ] & BG
-            passed_args = eval(str(cmd)[8:-11])
-            print("  " + " ".join(passed_args))
-            cmd.wait()
-            return self.input[0], str(cmd.proc._proc.pid)
+            new_path = os.path.join(self.wdir, "run_gmes.sh")
+            self.log_and_run(self.local["cp"][self.local["which"]["run_gmes.sh"]().rstrip("\r\n"), self.wdir])
+            self.log_and_run(
+                self.local["sed"][
+                    "-i", "s/%s/%s/g" % (
+                        "CMD",
+                        " ".join((
+                            str(self.program_modeler).replace("/", "\/"),
+                            "-pa", str(int(self.threads) // 4 or 1),
+                            (*self.added_flags),
+                            "-database", _name.replace("/", "\/"),
+                        ))
+                    ), new_path
+                ]
+            )
+            # Run script
+            self.log_and_run(
+                self.local[new_path][self.wdir]
+            )
+            # # Run RepeatModeler
+            # cmd = self.program_modeler[
+            #         "-pa", str(int(self.threads) // 4 or 1),
+            #         (*self.added_flags),
+            #         "-database", _name,
+            #     ] & BG
+            # passed_args = eval(str(cmd)[8:-11])
+            # print("  " + " ".join(passed_args))
+            # cmd.wait()
+            return self.input[0]
 
         @program_catch
-        def _mask(self, input_file: str, pid: str):
+        def _mask(self, input_file: str):
             # Perform on de novo results
             # Perform step on each file passed by user
             data_files = []
             _added_dirs = []
-            _file = os.path.join(
-                [_file for _file in os.listdir(os.getcwd()) if pid in _file or str(int(pid) + 2) in _file][0],
-                "consensi.fa.classified"
-            )
+            _file = glob.glob(os.path.join(self.wdir, "*", "consensi.fa.classified"))[0]
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
