@@ -47,32 +47,10 @@ download-data.py -t <threads> -m <max-mem> data
 This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
 automatically generate for use when running **EukMetaSanity**.
 
-General usage:
+You can speed up `mmseqs` searches by generating pre-computed indices. This can take a lot of space to store.
 
 ```
-usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
-                        [-t THREADS] [-m MAX_MEM]
-                        path
-
-Download required data and build MMseqs2 databases
-
-positional arguments:
-  path                  Download path
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -b BUILD, --build BUILD
-                        Generate required MMseqs2 databases and linear indices, default True
-  -x INDEX, --index INDEX
-                        Generate search index (recommended, but takes a lot of space), default False
-  -o OUTPUT, --output OUTPUT
-                        Output default config files with included download paths, default True
-  -r REWRITE, --rewrite REWRITE
-                        Rewrite existing directory, default False
-  -t THREADS, --threads THREADS
-                        Number of threads to use in database generation, default 1
-  -m MAX_MEM, --max_mem MAX_MEM
-                        Split memory limit for database generation, default 8G
+download-data.py -t <threads> -m <max-mem> -x data
 ```
 
 **Your installation is complete!**
