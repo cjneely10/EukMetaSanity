@@ -1,5 +1,9 @@
 # Installation
 
+### Installing dependencies
+
+`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda` should be on your PATH.
+
 Ensure you have `conda`&ge;4.8.3 installed, that you have conda activated, and that you are in your `(base)` conda 
 environment. Then, run the following commands:
 
@@ -29,16 +33,20 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately.
 
-### Installing dependencies
-
-`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat` should be on your PATH.
-
 ### Installing required databases
-The `download-data.py` script is provided to download all required base data.
+The `download-data.py` script is provided to download all required base data. Run the script to download the 
+required databases:
 
 ```
-EukMetaSanity/download-data.py databases -t <threads> -m <split-memory-limit>
+download-data.py -t <threads> -m <max-mem> data
+```
 
+This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
+automatically generate for use when running **EukMetaSanity**.
+
+General usage:
+
+```
 usage: download-data.py [-h] [-b BUILD] [-x INDEX] [-o OUTPUT] [-r REWRITE]
                         [-t THREADS] [-m MAX_MEM]
                         path
@@ -63,9 +71,6 @@ optional arguments:
   -m MAX_MEM, --max_mem MAX_MEM
                         Split memory limit for database generation, default 8G
 ```
-
-This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate for use when running **EukMetaSanity**.
 
 **Your installation is complete!**
  
