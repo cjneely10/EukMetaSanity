@@ -79,6 +79,12 @@ class RepeatsIter(TaskList):
                 ] & BG
             passed_args = eval(str(cmd)[8:-11])
             print("  " + " ".join(passed_args))
+            from time import sleep
+            sleep(3)
+            print(os.path.join(
+                [_file for _file in os.listdir(os.getcwd()) if str(cmd.proc._proc.pid) in _file and "RM" in _file][0],
+                "consensi.fa.classified"
+            ))
             cmd.wait()
             return self.input[0], str(cmd.proc._proc.pid)
 
@@ -86,7 +92,6 @@ class RepeatsIter(TaskList):
         def _mask(self, input_file: str, pid: str):
             # Perform on de novo results
             # Perform step on each file passed by user
-            import sys
             data_files = []
             _added_dirs = []
             _file = os.path.join(
