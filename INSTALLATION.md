@@ -45,7 +45,7 @@ wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
 gunzip Dfam.h5.gz
 ```
 
-The `download-data.py` script is provided to download all required base data. Run the script to download the 
+The `download-data.py` script is provided to download all other required base data. Run the script to download the 
 required databases:
 
 ```
