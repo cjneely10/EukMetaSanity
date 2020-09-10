@@ -1,7 +1,7 @@
 # Installation
 
-Run the install script. This assumes you have conda&ge;4.8.3 installed, that you have conda activated, and that you are 
-in your `(base)` conda environment.
+Ensure you have `conda`&ge;4.8.3 installed, that you have conda activated, and that you are in your `(base)` conda 
+environment. Then, run the following commands:
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
