@@ -18,3 +18,7 @@ dependencies:
   - hisat2=2.2.1
   - gmap=2020.06.30
   - braker2=2.1.2
+  - bcbio-gff=0.6.6
+  - biopython=1.76
+  - plumbum=1.6.6
+  - dask[distributed]=2.10.1
