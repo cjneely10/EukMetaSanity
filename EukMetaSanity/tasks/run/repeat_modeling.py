@@ -96,13 +96,13 @@ class RepeatsIter(TaskList):
             # Perform step on each file passed by user
             data_files = []
             _added_dirs = []
-            _file = glob.glob(os.path.join(self.wdir, "*", "consensi.fa.classified"))[0]
+            _file = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
             data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0]]
-            if os.path.exists(_file):
-                data_files.append(_file)
+            if len(_file) > 0 and os.path.exists(_file[0]):
+                data_files.append(_file[0])
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
                 if _search[:2] == "RM":
