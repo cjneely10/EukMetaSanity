@@ -36,7 +36,14 @@ must install them separately.
 initio predictor)*
 
 ### Installing required databases
-**RepeatMasker** can incorporate additional DFam updates. Install these if you wish to use them.
+**RepeatMasker** can incorporate additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
+in your conda installation directory if you wish to use them.
+
+```
+cd /path/to/miniconda/envs/EukMS/share/RepeatMasker/Libraries/
+wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
+gunzip Dfam.h5.gz
+```
 
 The `download-data.py` script is provided to download all required base data. Run the script to download the 
 required databases:
