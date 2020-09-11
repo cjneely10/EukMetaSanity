@@ -49,7 +49,7 @@ class TaskManager:
         }
         self._input_type = {
             "report": ["prot", "nr_gff3", "fna"],
-            "refine": ["fna", "nr_gff3"],
+            "refine": ["mask", "prot", "tax"],
         }
 
     @property

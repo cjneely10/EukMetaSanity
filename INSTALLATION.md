@@ -28,7 +28,9 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 must install them separately.
 
 *(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set and writable prior to running if you are using this ab 
-initio predictor instead of GeneMark)*
+initio predictor)*
+
+*(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor)*
 
 ### Installing required databases
 **RepeatMasker** can incorporate additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
