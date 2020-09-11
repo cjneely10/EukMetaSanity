@@ -200,6 +200,4 @@ It is implemented in Python 3 under the GNU General Public License v3.0.
 Also cite all dependencies that you used, as **EukMetaSanity** would not be possible were it not for the developers of 
 these programs.
 
-https://bioinformaticsworkbook.org/dataAnalysis/GenomeAnnotation/Intro_to_Braker2.html#gsc.tab=0
-
-
+(citation list upcoming)
