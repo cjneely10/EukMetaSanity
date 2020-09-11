@@ -9,23 +9,18 @@ environment. Then, run the following commands:
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
 conda activate EukMS
-python -m compileall . > /dev/null
 ```
 
-Update your `PATH` and `PYTHONPATH` variables in your .bashrc file.
+Update your `PATH` and `PYTHONPATH` variables in your .bashrc file. Create a link to a directory on your PATH to make 
+**EukMetaSanity** more easily callable
 
 ```
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
 echo export PYTHONPATH="$(pwd)"/:'$PYTHONPATH' >> ~/.bashrc
+ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
 You may need to restart your shell for these changes to take effect.
-
-Create a link to a directory on your PATH to make **EukMetaSanity** more easily callable
-
-```
-ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
-```
 
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
@@ -37,7 +32,8 @@ initio predictor instead of GeneMark)*
 
 ### Installing required databases
 **RepeatMasker** can incorporate additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
-in your conda installation directory if you wish to use them.
+in your conda installation directory if you wish to use them. Make sure your `EukMS` conda environment is still active 
+prior to updating.
 
 ```
 cd /path/to/miniconda/envs/EukMS/share/RepeatMasker/Libraries/
@@ -47,7 +43,8 @@ cd .. && perl ./configure
 ```
 
 The configure script should ask you to confirm the location of your installation, as well as to select your search 
-engine. Select 2 for `RMBlast`, and provide the path as `/path/to/miniconda3/envs/EukMS/bin/` when requested.
+engine. Select 2 for `RMBlast`, and provide the path as `/path/to/miniconda3/envs/EukMS/bin/` when requested 
+(substituting for the proper path on your system).
 
 The `download-data.py` script is provided to download all other required base data. Run the script to download the 
 required databases:
@@ -57,13 +54,9 @@ download-data.py -t <threads> -m <max-mem> data
 ```
 
 This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate for use when running **EukMetaSanity**.
+automatically generate for use when running **EukMetaSanity**. You can speed up `mmseqs` searches by generating 
+pre-computed indices with the `-x` flag. This can take a lot of space to store.
 
-You can speed up `mmseqs` searches by generating pre-computed indices. This can take a lot of space to store.
-
-```
-download-data.py -t <threads> -m <max-mem> -x data
-```
 
 **Your installation is complete!**
  
