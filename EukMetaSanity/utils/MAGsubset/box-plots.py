@@ -21,17 +21,17 @@ if __name__ == "__main__":
     )
 
     a = []
-    b = []
+    _b = []
     for file in ap.args.a_files:
         a.extend(parse_bitscores(file))
     for file in ap.args.b_files:
-        b.extend(parse_bitscores(file))
+        _b.extend(parse_bitscores(file))
     out = [a]
-    if len(b) > 0:
-        out.append(b)
+    if len(_b) > 0:
+        out.append(_b)
 
     fig = plt.figure()
-    b = plt.boxplot(np.array([a, b]))
+    b = plt.boxplot(np.array([a, _b]))
     print([item.get_ydata()[1] for item in b["whiskers"]])
     print([item.get_ydata() for item in b["boxes"]])
     print([item.get_ydata()[1] for item in b["medians"]])
