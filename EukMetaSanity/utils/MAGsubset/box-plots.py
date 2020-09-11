@@ -31,9 +31,10 @@ if __name__ == "__main__":
         out.append(b)
 
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-    b = ax.boxplot(np.array([a, b]))
+    b = plt.boxplot(np.array([a, b]))
     print([item.get_ydata()[1] for item in b["whiskers"]])
-    print([item.get_ydata()[1] for item in b["boxes"]])
+    print([item.get_ydata() for item in b["boxes"]])
     print([item.get_ydata()[1] for item in b["medians"]])
+    plt.xticks([0, 1, 2], ["", "GeneMark", "+MetaEuk"])
+    plt.ylabel("Bitscore")
     plt.show()
