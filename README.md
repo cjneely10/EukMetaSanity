@@ -48,7 +48,7 @@ usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
 Run EukMetaSanity pipeline
 
 positional arguments:
-  command               Select from run/report/refine/fast_refine
+  command               Select from run/report/refine
 
 optional arguments:
   -h, --help            show this help message and exit
