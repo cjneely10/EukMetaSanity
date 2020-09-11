@@ -10,8 +10,13 @@ class BrakerIter(TaskList):
             super().__init__(*args, **kwargs)
             out = {
                 "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),
+                "cds": os.path.join(self.wdir, self.record_id + ".cds.fna"),
+                "prot": os.path.join(self.wdir, self.record_id + ".faa"),
             }
-            self.output = [self.input, "1"]
+            self.output = [
+                *out,  # Paths
+                out,  # List of data
+            ]
             
         @program_catch
         def run_1(self):
