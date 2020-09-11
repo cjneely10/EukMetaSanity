@@ -9,7 +9,7 @@ class BrakerIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             out = {
-                "nr_gff3": None,
+                "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),
             }
             self.output = [self.input, "1"]
             
@@ -53,13 +53,20 @@ class BrakerIter(TaskList):
                         "--genome=%s" % self.input[0],
                         (*bams),
                         "--prot_seq=%s" % _fasta_output,
-                        "--gff3",
                         "--workingdir=%s" % self.wdir,
                         (*_tax),
                         "--species=%s" % self.record_id,
                         (*self.added_flags),
                         "--prg=exonerate",
                     ]
+                )
+                # Output CDS and prot fasta
+                self.log_and_run(
+                    self.program_gffread[
+                        os.path.join(self.wdir, "braker.gtf"), "-G", "-g", self.input[2],
+                        "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
+                        "-y", os.path.join(self.wdir, self.record_id + ".faa")
+                    ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
                 )
             
     def __init__(self, *args, **kwargs):
