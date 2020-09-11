@@ -51,6 +51,14 @@ class BrakerIter(TaskList):
                         _fasta_output,
                     ]
                 )
+                _added = []
+                if "--skipGeneMark-ES" in self.added_flags:
+                    # Output CDS and prot fasta
+                    _gtf = os.path.join(self.wdir, self.record_id + ".gtf")
+                    self.log_and_run(
+                        self.program_gffread[self.input[3]] > _gtf
+                    )
+                    _added = ["--geneMarkGtf=%s" % _gtf]
                 self.log_and_run(
                     self.program_braker[
                         "--useexisting",
@@ -63,6 +71,7 @@ class BrakerIter(TaskList):
                         "--species=%s" % self.record_id,
                         (*self.added_flags),
                         "--prg=exonerate",
+                        (*_added)
                     ]
                 )
                 # Output CDS and prot fasta
