@@ -125,7 +125,7 @@ of transcriptomes.
 Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 
 ```
-EukMetaSanity -f out/run-paths_summary.tsv -c refine-config.ini fast_refine
+EukMetaSanity -f out/run-paths_summary.tsv -c refine-config.ini refine
 ```
 
 This will update the directory structure:
