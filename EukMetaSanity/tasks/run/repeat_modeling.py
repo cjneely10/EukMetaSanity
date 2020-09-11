@@ -126,9 +126,6 @@ class RepeatsIter(TaskList):
                         input_file,
                     ]
                 )
-                # Move output file
-                if os.path.exists(_search):
-                    shutil.move(os.path.dirname(_search), os.path.join(self.wdir))
             # Combine repeat results and process
             self._parse_output(_added_dirs, input_file)
 
