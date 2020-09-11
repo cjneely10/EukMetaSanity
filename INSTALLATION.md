@@ -30,7 +30,8 @@ must install them separately.
 *(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set and writable prior to running if you are using this ab 
 initio predictor)*
 
-*(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor)*
+*(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
+may need to run their accessory script `change_path_in_perl_scripts.pl`)*
 
 ### Installing RepeatMasker libraries and scripts
 **RepeatMasker** can incorporate additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
