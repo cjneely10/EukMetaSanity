@@ -30,6 +30,7 @@ class BrakerIter(TaskList):
                     "--workingdir=%s" % self.wdir,
                     (*_tax),
                     "--species=%s" % self.record_id,
+                    (*self.added_flags),
                 ]
             )
             
