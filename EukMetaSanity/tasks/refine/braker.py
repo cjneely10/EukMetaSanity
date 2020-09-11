@@ -11,10 +11,7 @@ class BrakerIter(TaskList):
             out = {
                 "nr_gff3": None,
             }
-            self.output = [
-                out,
-                *list(out.values()),
-            ]
+            self.output = self.input
         
         def run(self):
             super().run()
