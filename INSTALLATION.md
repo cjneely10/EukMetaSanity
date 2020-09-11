@@ -85,7 +85,10 @@ Optionally download [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) 
 Choose from [Augustus](https://github.com/Gaius-Augustus/Augustus) or (optionally)
 [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi)
 
-*(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set and writable prior to running)*
+*(Ensure that AUGUSTUS_CONFIG_PATH environmental variable is set and writable prior to running if you are using this ab 
+initio predictor)*
+
+*(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor)*
 
 ##### Run step 4: Initial protein evidence
 Install [MetaEuk](https://github.com/soedinglab/metaeuk)
@@ -111,16 +114,19 @@ Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its requi
 Install [Rfam/Infernal](https://docs.rfam.org/en/latest/genome-annotation.html) and its required databases
 
 ---
-#### Fast refine
+#### Refine
 
 Install [sambamba](https://lomereiter.github.io/sambamba/docs/sambamba-sort.html) AND
 [BEDtools](https://github.com/arq5x/bedtools2/releases/tag/v2.29.2)
 
-##### Fast refine step 1: Incorporate RNAseq data (optional)
+##### Refine step 1: Incorporate RNAseq data (optional)
 Install [HISAT2](https://ccb.jhu.edu/software/hisat2/manual.shtml#building-from-source)
 
-##### Fast refine step 2: Incorporate trancriptomic data (optional)
+##### Refine step 2: Incorporate trancriptomic data (optional)
 Install [GMAP](http://research-pub.gene.com/gmap/)
+
+##### Refine step 3: Run BRAKER2
+Install [BRAKER](https://github.com/Gaius-Augustus/BRAKER#installation)
 
 
 

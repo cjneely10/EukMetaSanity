@@ -135,9 +135,9 @@ out/
   |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
   |-- results/
-      |-- fast_refine-paths_summary.tsv
+      |-- refine-paths_summary.tsv
       |-- run-paths_summary.tsv
-      |-- fast_refine/
+      |-- refine/
           |-- mag1/
               ..
           |-- mag2/
@@ -170,7 +170,7 @@ out/
   |-- run-eukmetasanity.log
   |-- results/
       |-- report-paths_summary.tsv
-      |-- fast_refine-paths_summary.tsv
+      |-- refine-paths_summary.tsv
       |-- run-paths_summary.tsv
       |-- report/
           |-- mag1/
@@ -179,7 +179,7 @@ out/
               ... (results based on annotation programs run)
           |-- mag2/
               ..
-      |-- fast_refine/
+      |-- refine/
           |-- mag1/
               ..
           |-- mag2/
