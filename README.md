@@ -110,7 +110,7 @@ out/
 
 #### Refine (optional)
 Copy and edit the `refine-config.ini` config file to fit your analysis needs. Pay close attention to the input format
-for RNA-seq and transcriptomes:
+for RNA-seq and transcriptomes that is required by the config file:
 
 ```
 # Paths to RNA-seq should be contained in a file with the format (excluding spaces around tab):
