@@ -32,9 +32,9 @@ initio predictor)*
 
 *(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor)*
 
-### Installing required databases
+### Installing RepeatMasker libraries and scripts
 **RepeatMasker** can incorporate additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
-in your conda installation directory if you wish to use them. Make sure your `EukMS` conda environment is still active 
+in your conda installation directory. Make sure your `EukMS` conda environment is still active 
 prior to updating.
 
 ```
@@ -48,10 +48,19 @@ The configure script should ask you to confirm the location of your installation
 engine. Select 2 for `RMBlast`, and provide the path as `/path/to/miniconda3/envs/EukMS/bin/` when requested 
 (substituting for the proper path on your system).
 
+Finally, due to a small bug in the conda `RepeatMasker` conda environment, run the following command:
+
+```
+cp util/rmOutToGFF3.pl ./
+```
+
+### Installing required databases
+
 **The `download-data.py` script** is provided to download all other required base data. Run the script to download the 
 required databases:
 
 ```
+cd /path/to/EukMetaSanity
 download-data.py -t <threads> -m <max-mem> data
 ```
 
