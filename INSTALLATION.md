@@ -58,7 +58,8 @@ cp util/rmOutToGFF3.pl ./
 ### Installing required databases
 
 **The `download-data.py` script** is provided to download all other required base data. Run the script to download the 
-required databases:
+required databases, and include the `-x` flag if you wish to generate pre-computed search indices (results in a speed 
+up on search time, but takes a lot of storage space):
 
 ```
 cd /path/to/EukMetaSanity
@@ -66,8 +67,7 @@ cd /path/to/EukMetaSanity
 ```
 
 This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate for use when running **EukMetaSanity**. You can speed up `mmseqs` searches by generating 
-pre-computed indices with the `-x` flag. This can take a lot of space to store.
+automatically generate for use when running **EukMetaSanity**. 
 
 
 **Your installation is complete!**
