@@ -80,8 +80,7 @@ class RepeatsIter(TaskList):
                         " ".join((
                             str(self.program_modeler).replace("/", "\/"),
                             "-pa", str(int(self.threads) // 4 or 1),
-                            (*self.added_flags),
-                            "-database", _name.replace("/", "\/"),
+                            "-engine", "ncbi", "-database", _name.replace("/", "\/"),
                         ))
                     ), new_path
                 ]
@@ -124,7 +123,6 @@ class RepeatsIter(TaskList):
                         (*self.added_flags),
                         (*search),
                         "-dir", self.pm.get_dir(self.record_id, _dir),
-                        "-nolow",
                         input_file,
                     ]
                 )
