@@ -5,8 +5,8 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 
 boilerplate = """import os
-from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity.tasks.utils.helpers import prefix, touch
 
 
 class {0}Iter(TaskList):

@@ -114,7 +114,7 @@ class Data:
         pass
 
     @added
-    def merge(self):
+    def braker(self):
         pass
 
     @added

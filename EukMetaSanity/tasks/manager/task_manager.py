@@ -12,10 +12,10 @@ from EukMetaSanity.tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 from EukMetaSanity.tasks.report.stats import ReportStatsIter
-# Fast_refine imports
-from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
-from EukMetaSanity.tasks.fast_refine.transcriptomes import TranscriptomesIter
-from EukMetaSanity.tasks.fast_refine.merge import MergeIter
+# Refine imports
+from EukMetaSanity.tasks.refine.rnaseq import RnaSeqIter
+from EukMetaSanity.tasks.refine.braker import BrakerIter
+from EukMetaSanity.tasks.refine.transcriptomes import TranscriptomesIter
 
 """
 Class handles ordering of tasks to complete
@@ -40,16 +40,16 @@ class TaskManager:
                 ReportStatsIter,
                 SummarizeIter,
             ],
-            "fast_refine": [
+            "refine": [
                 RnaSeqIter,
                 TranscriptomesIter,
-                MergeIter,
+                BrakerIter,
                 SummarizeIter,
             ],
         }
         self._input_type = {
             "report": ["prot", "nr_gff3", "fna"],
-            "fast_refine": ["fna", "nr_gff3"],
+            "refine": ["fna", "nr_gff3"],
         }
 
     @property

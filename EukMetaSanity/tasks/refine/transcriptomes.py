@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from typing import List, Optional
-from EukMetaSanity.tasks.fast_refine.rnaseq import RnaSeqIter
+from EukMetaSanity.tasks.refine.rnaseq import RnaSeqIter
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 

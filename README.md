@@ -107,19 +107,19 @@ out/
 ```
 
 #### Fast refine (optional)
-Copy and edit the `fast_refine-config.ini` config file to fit your analysis needs.
+Copy and edit the `refine-config.ini` config file to fit your analysis needs.
 
 Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 
 ```
-EukMetaSanity -f out/run-paths_summary.tsv -c fast_refine-config.ini fast_refine
+EukMetaSanity -f out/run-paths_summary.tsv -c refine-config.ini fast_refine
 ```
 
 This will update the directory structure:
 ```
 out/
   |-- wdir/
-  |-- fast_refine-eukmetasanity.log
+  |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
   |-- results/
       |-- fast_refine-paths_summary.tsv
@@ -146,14 +146,14 @@ Annotate gene models using the command:
 EukMetaSanity -f out/{}-paths_summary.tsv -c report-config.ini report
 ```
 
-Replacing `{}` with either `run` or `fast_refine` (if this step was completed).
+Replacing `{}` with either `run` or `refine` (if this step was completed).
 
 This will update the directory structure:
 ```
 out/
   |-- wdir/
   |-- report-eukmetasanity.log
-  |-- fast_refine-eukmetasanity.log
+  |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
   |-- results/
       |-- report-paths_summary.tsv
