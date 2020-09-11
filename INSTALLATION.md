@@ -12,7 +12,7 @@ conda activate EukMS
 ```
 
 Update your `PATH` and `PYTHONPATH` variables in your .bashrc file. Create a link to a directory on your PATH to make 
-**EukMetaSanity** more easily callable
+**EukMetaSanity** more easily callable:
 
 ```
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
