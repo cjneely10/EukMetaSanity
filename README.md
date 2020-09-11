@@ -114,9 +114,9 @@ for RNA-seq and transcriptomes that is required by the config file:
 
 ```
 # Paths to RNA-seq should be contained in a file with the format (excluding spaces around tab):
-# file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
 # Transcriptomes should be contained in a file with the format (excluding spaces around tab):
-# file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
 ``` 
 
 The listed paired-end or single-end reads will be mapped to the file that begins with `file-basename`, as will the list 
