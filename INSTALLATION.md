@@ -46,7 +46,7 @@ The configure script should ask you to confirm the location of your installation
 engine. Select 2 for `RMBlast`, and provide the path as `/path/to/miniconda3/envs/EukMS/bin/` when requested 
 (substituting for the proper path on your system).
 
-The `download-data.py` script is provided to download all other required base data. Run the script to download the 
+**The `download-data.py` script** is provided to download all other required base data. Run the script to download the 
 required databases:
 
 ```
