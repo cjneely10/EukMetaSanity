@@ -45,21 +45,22 @@ class BrakerIter(TaskList):
                 bams = ["--bam=%s" % (",".join((*self.input[-1], *self.input[-2])))]
             else:
                 bams = []
-            self.log_and_run(
-                self.program_braker[
-                    "--useexisting",
-                    "--cores=%s" % str(self.threads),
-                    "--genome=%s" % self.input[0],
-                    (*bams),
-                    "--prot_seq=%s" % _fasta_output,
-                    "--gff3",
-                    "--workingdir=%s" % self.wdir,
-                    (*_tax),
-                    "--species=%s" % self.record_id,
-                    (*self.added_flags),
-                    "--prg=exonerate",
-                ]
-            )
+            if len(bams) > 0:
+                self.log_and_run(
+                    self.program_braker[
+                        "--useexisting",
+                        "--cores=%s" % str(self.threads),
+                        "--genome=%s" % self.input[0],
+                        (*bams),
+                        "--prot_seq=%s" % _fasta_output,
+                        "--gff3",
+                        "--workingdir=%s" % self.wdir,
+                        (*_tax),
+                        "--species=%s" % self.record_id,
+                        (*self.added_flags),
+                        "--prg=exonerate",
+                    ]
+                )
             
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)
