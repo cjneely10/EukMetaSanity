@@ -17,7 +17,7 @@ the genome with either MMseqs2 or RepeatModeler/RepeatMasker.
 Generate *ab initio* structural predictions of coding regions of the genome using either Augustus or GeneMark.
 Refine predictions with protein evidence using MetaEuk.
 
-### Fast refine
+### Refine
 Map RNA-seq (using HISAT2) and assembled transcriptome (using GMAP) evidence from closely related organisms (same 
 organism or species) to the genome to add additional evidence using BRAKER2. 
 
@@ -108,8 +108,19 @@ out/
               .. 
 ```
 
-#### Fast refine (optional)
-Copy and edit the `refine-config.ini` config file to fit your analysis needs.
+#### Refine (optional)
+Copy and edit the `refine-config.ini` config file to fit your analysis needs. Pay close attention to the input format
+for RNA-seq and transcriptomes:
+
+```
+# Paths to RNA-seq should be contained in a file with the format (excluding spaces around tab):
+# file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+# Transcriptomes should be contained in a file with the format (excluding spaces around tab):
+# file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+``` 
+
+The listed paired-end or single-end reads will be mapped to the file that begins with `file-basename`, as will the list 
+of transcriptomes.
 
 Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 

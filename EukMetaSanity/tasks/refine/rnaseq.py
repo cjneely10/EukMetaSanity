@@ -39,13 +39,16 @@ class RnaSeqIter(TaskList):
                 )
                 for pair in read_pairs:
                     out_prefix = os.path.join(self.wdir, prefix(pair[0]))
+                    if len(pair) > 1:
+                        _parse_args = ["-1", pair[0], "-2", pair[1]]
+                    else:
+                        _parse_args = ["-U", pair[0]]
                     # Align
                     self.log_and_run(
                         self.program_hisat2[
                             "-p", self.threads,
                             "-x", genome_prefix,
-                            "-1", pair[0],
-                            "-2", pair[1],
+                            (*_parse_args),
                             "-S", out_prefix + ".sam",
                             (*self.added_flags),
                         ]
