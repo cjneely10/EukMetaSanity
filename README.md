@@ -8,6 +8,8 @@ experience can easily extend the **EukMetaSanity** code base to add to or create
 
 This software suite is broken up into several sub-programs
 
+![](assets/eukmetasanity_pipeline.png)
+
 ### Run
 Identify putative taxonomy using the OrthoDB and MMseqs2 and annotate repeated regions of
 the genome with either MMseqs2 or RepeatModeler/RepeatMasker. 
