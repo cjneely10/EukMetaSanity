@@ -105,7 +105,7 @@ class RepeatsIter(TaskList):
                 data_files.append(_file[0])
             for _search in data_files:
                 # Parse for if as file or a RepeatMasker library
-                if _search[:2] == "RM":
+                if "RM" in _search:
                     search = ("-lib", str(Path(_search).resolve()))
                     _dir = "repeats_" + prefix(_search)
                 else:
