@@ -11,7 +11,7 @@ class BrakerIter(TaskList):
             out = {
                 "nr_gff3": None,
             }
-            self.output = self.input
+            self.output = [self.input, "1"]
             
         @program_catch
         def run_1(self):
@@ -38,18 +38,26 @@ class BrakerIter(TaskList):
                     _fasta_output,
                 ]
             )
+            bams = ""
+            if len(self.input) > 2:
+                bams = (",".join((*self.input[-1], *self.input[-2])))
+            if bams != "":
+                bams = ["--bam=%s" % (",".join((*self.input[-1], *self.input[-2])))]
+            else:
+                bams = []
             self.log_and_run(
                 self.program_braker[
                     "--useexisting",
                     "--cores=%s" % str(self.threads),
                     "--genome=%s" % self.input[0],
-                    "--bam=%s" % (",".join((*self.input[-1], *self.input[-2]))),
+                    (*bams),
                     "--prot_seq=%s" % _fasta_output,
                     "--gff3",
                     "--workingdir=%s" % self.wdir,
                     (*_tax),
                     "--species=%s" % self.record_id,
                     (*self.added_flags),
+                    "--prg=exonerate",
                 ]
             )
             
