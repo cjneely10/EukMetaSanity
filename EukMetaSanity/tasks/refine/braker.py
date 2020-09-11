@@ -12,9 +12,6 @@ class BrakerIter(TaskList):
                 "nr_gff3": None,
             }
             self.output = self.input
-        
-        def run(self):
-            super().run()
             
         @program_catch
         def run_1(self):
@@ -29,7 +26,10 @@ class BrakerIter(TaskList):
                     "--genome=%s" % self.input[0],
                     "--bam=%s" % (",".join((*self.input[-1], *self.input[-2]))),
                     "--prot_seq=%s" % self.input[1],
+                    "--gff3",
+                    "--workingdir=%s" % self.wdir,
                     (*_tax),
+                    "--species=%s" % self.record_id,
                 ]
             )
             

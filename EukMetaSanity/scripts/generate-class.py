@@ -13,9 +13,6 @@ class {0}Iter(TaskList):
     class {0}(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-        
-        def run(self):
-            super().run()
             
         @program_catch
         def run_1(self):
