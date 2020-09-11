@@ -15,29 +15,6 @@ class BrakerIter(TaskList):
             
         @program_catch
         def run_1(self):
-            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[1], 0, self.level)
-            _tax = []
-            if "fungi" in tax[0]:
-                _tax = ["--fungus"]
-            subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data))
-            _fasta_output = os.path.join(self.wdir, self.record_id + ".faa")
-            self.log_and_run(
-                self.program_mmseqs[
-                    "filtertaxseqdb",
-                    self.data,
-                    subset_db_outpath,
-                    "--taxon-list", tax[1],
-                    "--threads", self.threads,
-                ]
-            )
-            # Output as FASTA file
-            self.log_and_run(
-                self.program_mmseqs[
-                    "convert2fasta",
-                    subset_db_outpath,
-                    _fasta_output,
-                ]
-            )
             bams = ""
             if len(self.input) > 2:
                 bams = (",".join((*self.input[-1], *self.input[-2])))
@@ -46,6 +23,29 @@ class BrakerIter(TaskList):
             else:
                 bams = []
             if len(bams) > 0:
+                tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[1], 0, self.level)
+                _tax = []
+                if "fungi" in tax[0]:
+                    _tax = ["--fungus"]
+                subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data))
+                _fasta_output = os.path.join(self.wdir, self.record_id + ".faa")
+                self.log_and_run(
+                    self.program_mmseqs[
+                        "filtertaxseqdb",
+                        self.data,
+                        subset_db_outpath,
+                        "--taxon-list", tax[1],
+                        "--threads", self.threads,
+                    ]
+                )
+                # Output as FASTA file
+                self.log_and_run(
+                    self.program_mmseqs[
+                        "convert2fasta",
+                        subset_db_outpath,
+                        _fasta_output,
+                    ]
+                )
                 self.log_and_run(
                     self.program_braker[
                         "--useexisting",
