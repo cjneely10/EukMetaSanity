@@ -52,6 +52,14 @@ Finally, due to a small bug in the conda `RepeatMasker` conda environment, run t
 cp util/rmOutToGFF3.pl ./
 ```
 
+### Fixing AUGUSTUS bug
+The conda version of AUGUSTUS is missing one needed element:
+
+```
+cd /path/to/miniconda/envs/EukMS/bin
+sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
+```
+
 ### Installing required databases
 
 **The `download-data.py` script** is provided to download all other required base data. Run the script to download the 

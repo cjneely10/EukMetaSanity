@@ -61,7 +61,6 @@ class BrakerIter(TaskList):
                     _added = ["--geneMarkGtf=%s" % _gtf]
                 self.log_and_run(
                     self.program_braker[
-                        "--useexisting",
                         "--cores=%s" % str(self.threads),
                         "--genome=%s" % self.input[0],
                         (*bams),
