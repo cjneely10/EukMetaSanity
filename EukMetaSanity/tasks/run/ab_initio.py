@@ -267,8 +267,8 @@ class AbInitioIter(TaskList):
                         " ".join((
                             str(self.program_gmes).replace("/", "\/"),
                             "--sequence", self.input[0].replace("/", "\/"),
-                            "--EP", os.path.join(self.wdir, "prothint.gff"),
-                            "--evidence", os.path.join(self.wdir, "evidence.gff"),
+                            "--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
+                            "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/"),
                             "--cores", self.threads, (*self.added_flags),
                             ("--fungus" if "fungi" == tax[0] else "")
                         ))
