@@ -255,7 +255,8 @@ class AbInitioIter(TaskList):
                 self.program_prothint[
                     self.input[0],
                     _fasta_output,
-                    "--workdir", self.wdir
+                    "--workdir", self.wdir,
+                    "--threads", self.threads,
                 ]
             )
             # Edit in proper locations
