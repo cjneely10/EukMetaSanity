@@ -56,7 +56,7 @@ class RnaSeqIter(TaskList):
                     )
                     self.log_and_run(
                         self.local["awk"][
-                            """'{print $1"\\tRNA_seq_junction\\tintron\\t"$2"\\t"$3"\\t500\\t"$4"\\t.\\t."}'""",
+                            "{print $1\"\\tRNA_seq_junction\\tintron\\t\"$2\"\\t\"$3\"\\t500\\t\"$4\"\\t.\\t.\"}",
                             out_prefix + ".splicesites"
                         ] > out_prefix + ".hints.gff"
                     )

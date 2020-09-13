@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Tuple, List
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids
+from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids, prefix
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
 """
@@ -230,7 +230,34 @@ class AbInitioIter(TaskList):
             # Copy runner script
             new_path = os.path.join(self.wdir, "run.sh")
             self.log_and_run(self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir])
-            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], 0, "kingdom")[0]
+            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], 0, "kingdom")
+            subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data))
+            _fasta_output = os.path.join(self.wdir, self.record_id + ".faa")
+            self.log_and_run(
+                self.program_mmseqs[
+                    "filtertaxseqdb",
+                    self.data,
+                    subset_db_outpath,
+                    "--taxon-list", tax[1],
+                    "--threads", self.threads,
+                ]
+            )
+            # Output as FASTA file
+            self.log_and_run(
+                self.program_mmseqs[
+                    "convert2fasta",
+                    subset_db_outpath,
+                    _fasta_output,
+                ]
+            )
+            # Run prothint
+            self.log_and_run(
+                self.program_prothint[
+                    self.input[0],
+                    _fasta_output,
+                    "--workdir", self.wdir
+                ]
+            )
             # Edit in proper locations
             self.log_and_run(
                 self.local["sed"][
@@ -239,8 +266,10 @@ class AbInitioIter(TaskList):
                         " ".join((
                             str(self.program_gmes).replace("/", "\/"),
                             "--sequence", self.input[0].replace("/", "\/"),
-                            "--ES", "--cores", self.threads, (*self.added_flags),
-                            ("--fungus" if "fungi" in tax else "")
+                            "--EP", os.path.join(self.wdir, "prothint.gff"),
+                            "--evidence", os.path.join(self.wdir, "evidence.gff"),
+                            "--cores", self.threads, (*self.added_flags),
+                            ("--fungus" if "fungi" == tax[0] else "")
                         ))
                     ), new_path
                 ]
