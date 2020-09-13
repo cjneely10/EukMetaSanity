@@ -230,7 +230,7 @@ class AbInitioIter(TaskList):
             # Copy runner script
             new_path = os.path.join(self.wdir, "run.sh")
             self.log_and_run(self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir])
-            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], 0, "kingdom")
+            tax = TaxonomyIter.Taxonomy.get_taxonomy(self.input[3], 0, "species")
             subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data))
             _fasta_output = os.path.join(self.wdir, self.record_id + ".faa")
             self.log_and_run(
