@@ -8,6 +8,8 @@ class MergeIter(TaskList):
     class Merge(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            if os.path.exists(os.path.join(self.wdir, self.record_id) + ".nr.gff3"):
+                os.remove(os.path.join(self.wdir, self.record_id) + ".nr.gff3")
             _out = {
                 "nr_gff3": os.path.join(self.wdir, self.record_id) + ".nr.gff3",
                 "fna": self.input[0],
@@ -72,7 +74,7 @@ class MergeIter(TaskList):
             # Merge all results
             EvidenceIter.Evidence.merge(
                 self,
-                [*gff3s, self.input[1]],
+                [*gff3s, self.input[3], self.input[4]],
                 self.input[0],
                 os.path.join(self.wdir, self.record_id),
 

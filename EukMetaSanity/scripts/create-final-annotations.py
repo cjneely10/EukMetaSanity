@@ -152,7 +152,9 @@ class GffMerge:
             # Generate initial exon structure
             gene = Gene(gene_data["transcripts"]["ab-initio"], gene_data["strand"], gene_data["terminal_exons"])
             # Keep exons with evidence, add exons missed by ab-initio
-            gene.add_evidence(gene_data["transcripts"]["metaeuk"])
+            for val in gene_data["transcripts"].keys():
+                if val != "ab-initio":
+                    gene.add_evidence(gene_data["transcripts"][val])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
             yield (gene_data, *self.create_cds(gene_data, gene))

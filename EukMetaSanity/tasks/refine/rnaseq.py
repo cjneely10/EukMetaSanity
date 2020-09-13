@@ -50,8 +50,15 @@ class RnaSeqIter(TaskList):
                             "-x", genome_prefix,
                             (*_parse_args),
                             "-S", out_prefix + ".sam",
+                            "--novel-splicesite-outfile", out_prefix + ".splicesites",
                             (*self.added_flags),
                         ]
+                    )
+                    self.log_and_run(
+                        self.local["awk"][
+                            """'{print $1"\\tRNA_seq_junction\\tintron\\t"$2"\\t"$3"\\t500\\t"$4"\\t.\\t."}'""",
+                            out_prefix + ".splicesites"
+                        ] > out_prefix + ".hints.gff"
                     )
                     # Run sambamba
                     RnaSeqIter.RnaSeq.sambamba(self, out_prefix)

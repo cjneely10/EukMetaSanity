@@ -114,10 +114,6 @@ class Data:
         pass
 
     @added
-    def braker(self):
-        pass
-
-    @added
     def stats(self):
         pass
 

@@ -14,7 +14,6 @@ from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 from EukMetaSanity.tasks.report.stats import ReportStatsIter
 # Refine imports
 from EukMetaSanity.tasks.refine.rnaseq import RnaSeqIter
-from EukMetaSanity.tasks.refine.braker import BrakerIter
 from EukMetaSanity.tasks.refine.transcriptomes import TranscriptomesIter
 
 """
@@ -43,13 +42,12 @@ class TaskManager:
             "refine": [
                 RnaSeqIter,
                 TranscriptomesIter,
-                BrakerIter,
                 SummarizeIter,
             ],
         }
         self._input_type = {
             "report": ["prot", "nr_gff3", "fna"],
-            "refine": ["mask", "tax", "fna", "abinitio"],
+            "refine": ["mask", "tax", "fna", "abinitio", "metaeuk"],
         }
 
     @property
