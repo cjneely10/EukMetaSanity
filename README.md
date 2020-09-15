@@ -108,6 +108,15 @@ out/
               .. 
 ```
 
+### Note on running:
+**EukMetaSanity** will not re-run already completed steps within a given pipeline. If you would like to re-do a particular
+portion of the pipeline, simply delete its directories in the project structure. For example, to redo the `taxonomy` step
+of the `run` pipeline for all MAGs, run the following command to delete all existing data:
+
+```
+rm -r out/wdir/*/taxonomy
+```
+
 #### Refine (optional)
 Copy and edit the `refine-config.ini` config file to fit your analysis needs. Pay close attention to the input format
 for RNA-seq and transcriptomes that is required by the config file:

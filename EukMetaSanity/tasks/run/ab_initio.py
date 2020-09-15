@@ -281,7 +281,8 @@ class AbInitioIter(TaskList):
             self.log_and_run(
                 self.program_gffread[
                     os.path.join(self.wdir, "genemark.gtf"), "-G",
-                ] > self.output[0]
+                    "-o", self.output[0]
+                ]
             )
             self.log_and_run(
                 self.local["sed"][

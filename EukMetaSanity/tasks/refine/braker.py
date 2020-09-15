@@ -18,7 +18,7 @@ class BrakerIter(TaskList):
                 *out,  # Paths
                 out,  # List of data
             ]
-            
+
         @program_catch
         def run_1(self):
             bams = ""
@@ -35,23 +35,24 @@ class BrakerIter(TaskList):
                     _tax = ["--fungus"]
                 subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data))
                 _fasta_output = os.path.join(self.wdir, self.record_id + ".faa")
-                self.log_and_run(
-                    self.program_mmseqs[
-                        "filtertaxseqdb",
-                        self.data,
-                        subset_db_outpath,
-                        "--taxon-list", tax[1],
-                        "--threads", self.threads,
-                    ]
-                )
-                # Output as FASTA file
-                self.log_and_run(
-                    self.program_mmseqs[
-                        "convert2fasta",
-                        subset_db_outpath,
-                        _fasta_output,
-                    ]
-                )
+                if not os.path.exists(_fasta_output):
+                    self.log_and_run(
+                        self.program_mmseqs[
+                            "filtertaxseqdb",
+                            self.data,
+                            subset_db_outpath,
+                            "--taxon-list", tax[1],
+                            "--threads", self.threads,
+                        ]
+                    )
+                    # Output as FASTA file
+                    self.log_and_run(
+                        self.program_mmseqs[
+                            "convert2fasta",
+                            subset_db_outpath,
+                            _fasta_output,
+                        ]
+                    )
                 _added = []
                 if "--skipGeneMark-ES" in self.added_flags:
                     # Output CDS and prot fasta
@@ -60,31 +61,37 @@ class BrakerIter(TaskList):
                         self.program_gffread[self.input[3]] > _gtf
                     )
                     _added = ["--geneMarkGtf=%s" % _gtf]
-                self.log_and_run(
-                    self.program_braker[
-                        "--cores=%s" % str(self.threads),
-                        "--genome=%s" % self.input[0],
-                        (*bams),
-                        "--prot_seq=%s" % _fasta_output,
-                        "--workingdir=%s" % self.wdir,
-                        (*_tax),
-                        "--species=%s" % self.record_id,
-                        (*self.added_flags),
-                        "--prg=exonerate",
-                        (*_added)
-                    ]
-                )
+                if not os.path.exists(os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf")) or \
+                        not os.path.exists(os.path.join(self.wdir, "augustus.hints.gtf")):
+                    self.log_and_run(
+                        self.program_braker[
+                            "--cores=%s" % str(self.threads),
+                            "--genome=%s" % self.input[0],
+                            (*bams),
+                            "--prot_seq=%s" % _fasta_output,
+                            "--workingdir=%s" % self.wdir,
+                            (*_tax),
+                            "--species=%s" % self.record_id,
+                            (*self.added_flags),
+                            "--prg=exonerate",
+                            (*_added)
+                        ]
+                    )
                 self.log_and_run(
                     self.program_gffread[
                         os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
                         os.path.join(self.wdir, "augustus.hints.gtf"),
-                        "--merge",
-                        "-G", "-g", self.input[2],
-                        "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
-                        "-y", os.path.join(self.wdir, self.record_id + ".faa")
-                    ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
+                        "--merge", "-G",
+                        "-o", os.path.join(self.wdir, self.record_id + ".gff3")
+                    ]
                 )
-            
+                EvidenceIter.Evidence.merge(
+                    self,
+                    [os.path.join(self.wdir, self.record_id + ".gff3")],
+                    self.input[2],
+                    os.path.join(self.wdir, self.record_id)
+                )
+
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)
 
