@@ -33,10 +33,11 @@ may need to run their accessory script `change_path_in_perl_scripts.pl /path/to/
 ### Installing RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
 in your conda installation directory. Make sure your `EukMS` conda environment is still active 
-prior to updating.
+prior to updating. Here, we assume that you have used `miniconda`, and that it is located in your home directory.
+You will want to adjust the path for the following commands according to your system: 
 
 ```
-cd /path/to/miniconda/envs/EukMS/share/RepeatMasker/Libraries/
+cd ~/miniconda/envs/EukMS/share/RepeatMasker/Libraries/
 wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
 gunzip Dfam.h5.gz && cd ..
 perl ./configure
@@ -124,9 +125,6 @@ Install [kofamscan](https://www.genome.jp/tools/kofamkoala/) and its required da
 
 ##### Report step 4 (optional)
 Install [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper) and its required databases
-
-##### Report step 5 (optional)
-Install [Rfam/Infernal](https://docs.rfam.org/en/latest/genome-annotation.html) and its required databases
 
 ---
 #### Refine

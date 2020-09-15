@@ -67,6 +67,7 @@ class Gene:
             for ab_exon in out_exons:
                 if Gene.in_exon(ab_exon, exon):
                     is_found = True
+                    break
             if not is_found:
                 self.added_evidence += 1
                 out_exons.append(exon)

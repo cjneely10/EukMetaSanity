@@ -14,6 +14,7 @@ from EukMetaSanity.tasks.report.eggnog_mapper import EggNOGMapper
 from EukMetaSanity.tasks.report.stats import ReportStatsIter
 # Refine imports
 from EukMetaSanity.tasks.refine.rnaseq import RnaSeqIter
+from EukMetaSanity.tasks.refine.braker import BrakerIter
 from EukMetaSanity.tasks.refine.transcriptomes import TranscriptomesIter
 
 """
@@ -42,6 +43,7 @@ class TaskManager:
             "refine": [
                 RnaSeqIter,
                 TranscriptomesIter,
+                BrakerIter,
                 SummarizeIter,
             ],
         }
