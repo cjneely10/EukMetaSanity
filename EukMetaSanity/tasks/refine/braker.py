@@ -2,6 +2,7 @@ import os
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 
 
 class BrakerIter(TaskList):
@@ -73,10 +74,12 @@ class BrakerIter(TaskList):
                         (*_added)
                     ]
                 )
-                # Output CDS and prot fasta
                 self.log_and_run(
                     self.program_gffread[
-                        os.path.join(self.wdir, "braker.gtf"), "-G", "-g", self.input[2],
+                        os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
+                        os.path.join(self.wdir, "augustus.hints.gtf"),
+                        "--merge",
+                        "-G", "-g", self.input[2],
                         "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
                         "-y", os.path.join(self.wdir, self.record_id + ".faa")
                     ] > os.path.join(self.wdir, self.record_id + ".nr.gff3")
