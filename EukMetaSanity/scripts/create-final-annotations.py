@@ -126,7 +126,7 @@ class GffReader:
             terminal_exons = []
             for transcript in transcripts:
                 data[transcript[0]].extend(transcript[-1])
-                if transcript[0] == "ab-initio" and len(transcript[-1]) > 1:
+                if transcript[0] == "ab-initio" or transcript[0] == "GeneMark.hmm" and len(transcript[-1]) > 1:
                     if gene_data["strand"] == "+":
                         terminal_exons.append(transcript[-1][-1])
                     else:

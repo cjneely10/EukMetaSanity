@@ -9,17 +9,28 @@ class BrakerIter(TaskList):
     class Braker(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            out = {
-                "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),
-                "cds": os.path.join(self.wdir, self.record_id + ".cds.fna"),
-                "prot": os.path.join(self.wdir, self.record_id + ".faa"),
-                "gm": os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
-                "aug": os.path.join(self.wdir, "augustus.hints.gtf"),
-            }
-            self.output = [
-                *out,  # Paths
-                out,  # List of data
-            ]
+            bams = ""
+            if len(self.input) > 2:
+                bams = (",".join((*self.input[-1], *self.input[-2])))
+            if bams != "":
+                bams = ["--bam=%s" % (",".join((*self.input[-1], *self.input[-2])))]
+            else:
+                bams = []
+            _record_id = self.record_id.replace("-mask", "")
+            if len(bams) > 0:
+                out = {
+                    # "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),
+                    "cds": os.path.join(self.wdir, _record_id + ".cds.fna"),
+                    "prot": os.path.join(self.wdir, _record_id + ".faa"),
+                    "gm": os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
+                    "aug": os.path.join(self.wdir, "augustus.hints.gtf"),
+                }
+                self.output = [
+                    out,  # Paths
+                    *list(out.values()),  # List of data
+                ]
+            else:
+                self.output = []
 
         @program_catch
         def run_1(self):
@@ -79,21 +90,25 @@ class BrakerIter(TaskList):
                             (*_added)
                         ]
                     )
+                _record_id = self.record_id.replace("-mask", "")
                 # Merge final results
                 self.log_and_run(
                     self.program_gffread[
                         os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
                         os.path.join(self.wdir, "augustus.hints.gtf"),
                         "--merge", "-G",
-                        "-o", os.path.join(self.wdir, self.record_id + ".gff3")
+                        "-o", os.path.join(self.wdir, _record_id + ".gff3"),
+                        "-g", self.input[2],
+                        "-x", os.path.join(self.wdir, _record_id + ".cds.fna"),
+                        "-y", os.path.join(self.wdir, _record_id + ".faa"),
                     ]
                 )
-                EvidenceIter.Evidence.merge(
-                    self,
-                    [os.path.join(self.wdir, self.record_id + ".gff3")],
-                    self.input[2],
-                    os.path.join(self.wdir, self.record_id)
-                )
+                # EvidenceIter.Evidence.merge(
+                #     self,
+                #     [os.path.join(self.wdir, self.record_id + ".gff3")],
+                #     self.input[2],
+                #     os.path.join(self.wdir, self.record_id)
+                # )
 
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)
