@@ -13,6 +13,8 @@ class BrakerIter(TaskList):
                 "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),
                 "cds": os.path.join(self.wdir, self.record_id + ".cds.fna"),
                 "prot": os.path.join(self.wdir, self.record_id + ".faa"),
+                "gm": os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
+                "aug": os.path.join(self.wdir, "augustus.hints.gtf"),
             }
             self.output = [
                 *out,  # Paths
@@ -77,6 +79,7 @@ class BrakerIter(TaskList):
                             (*_added)
                         ]
                     )
+                # Merge final results
                 self.log_and_run(
                     self.program_gffread[
                         os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),

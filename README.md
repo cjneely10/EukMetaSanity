@@ -148,7 +148,11 @@ out/
       |-- run-paths_summary.tsv
       |-- refine/
           |-- mag1/
-              ..
+              |-- mag1.nr.gff3  # Final predictions
+              |-- mag1.cds.fna  # CDS sequences
+              |-- mag1.faa  # Protein sequences
+              |-- augustus.hints.gtf  # Augustus predictions
+              |-- genemark.gtf  # GeneMark predictions
           |-- mag2/
               ..
       |-- run/
