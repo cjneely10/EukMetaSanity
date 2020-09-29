@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import shutil
 from typing import List
 from pathlib import Path
 from plumbum import local
@@ -46,13 +47,15 @@ def run(ap: ArgParse, out_dir: str):
     for _id, url in data_urls().items():
         # Download
         new_dir = os.path.join(out_dir, _id)
+        if ap.args.rewrite and os.path.exists(new_dir):
+            shutil.rmtree(new_dir)
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         _file = os.path.join(new_dir, os.path.basename(url.url))
         _out = os.path.join(new_dir, _id + "_db")
         out.append(_out)
         ids.append(_id)
-        if not os.path.exists(_out) or ap.args.rewrite:
+        if not os.path.exists(_out):
             _print_and_run(wget[url.url, "-O", _file])
             # Tar/gunzip
             if url.tar:
@@ -181,7 +184,7 @@ if __name__ == "__main__":
             (("-t", "--threads"),
              {"help": "Number of threads to use in database generation, default 1", "default": "1"}),
             (("-m", "--max_mem"),
-             {"help": "Split memory limit for database generation, default 8G", "default": "8G"}),
+             {"help": "Set max memory per split. E.g. 800B, 5K, 10M, 1G; default 8G", "default": "8G"}),
         ),
         description="Download required data and build MMseqs2 databases"
     )
