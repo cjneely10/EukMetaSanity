@@ -2,6 +2,7 @@ import os
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 
 
 class BrakerIter(TaskList):
@@ -17,11 +18,11 @@ class BrakerIter(TaskList):
                 bams = []
             _record_id = self.record_id.replace("-mask", "")
             if len(bams) > 0:
+                if os.path.exists(os.path.join(self.wdir, _record_id + ".gff3")):
+                    os.remove(os.path.join(self.wdir, _record_id + ".gff3"))
                 out = {
                     "cds": os.path.join(self.wdir, _record_id + ".cds.fna"),
                     "prot": os.path.join(self.wdir, _record_id + ".faa"),
-                    "gm": os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
-                    "aug": os.path.join(self.wdir, "augustus.hints.gtf"),
                     "nr_gff3": os.path.join(self.wdir, _record_id + ".gff3"),
                     "fna": self.input[2],
                 }
@@ -91,18 +92,32 @@ class BrakerIter(TaskList):
                         ]
                     )
                 _record_id = self.record_id.replace("-mask", "")
-                # Merge final results
-                self.log_and_run(
-                    self.program_gffread[
-                        os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
-                        os.path.join(self.wdir, "augustus.hints.gtf"),
-                        "--merge", "-G", "-S",
-                        "-o", os.path.join(self.wdir, _record_id + ".gff3"),
-                        "-g", self.input[2],
-                        "-x", os.path.join(self.wdir, _record_id + ".cds.fna"),
-                        "-y", os.path.join(self.wdir, _record_id + ".faa"),
+                _files = [
+                    os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
+                    os.path.join(self.wdir, "augustus.hints.gtf"),
+                ]
+                _out = os.path.join(self.wdir, "braker.gtf")
+                if "--gff3" in self.added_flags:
+                    _files = [
+                        os.path.join(self.wdir, "GeneMark-ET", "genemark.gff3"),
+                        os.path.join(self.wdir, "augustus.hints.gff3"),
                     ]
-                )
+                    _out = os.path.join(self.wdir, "braker.gff3"),
+                # Merge final results if final output failed
+                if not os.path.exists(_out):
+                    self.log_and_run(
+                        self.program_gffread[
+                            (*_files),
+                            "--merge", "-G", "-S",
+                            "-o", os.path.join(self.wdir, _record_id + ".gff3"),
+                            "-g", self.input[2],
+                            "-x", os.path.join(self.wdir, _record_id + ".cds.fna"),
+                            "-y", os.path.join(self.wdir, _record_id + ".faa"),
+                        ]
+                    )
+                # Else just keep
+                else:
+                    self.output.append(_out)
 
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)

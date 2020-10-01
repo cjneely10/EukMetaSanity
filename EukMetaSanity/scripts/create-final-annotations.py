@@ -111,7 +111,7 @@ class GffReader:
             while line[2] != "locus":
                 # Read in transcript info
                 transcripts.append(
-                    [line[1], []]  # First line is a transcript: source,tstart,tend
+                    [line[1].replace("GeneMark.hmm", "ab-initio"), []]  # First line is a transcript: source,tstart,tend
                 )
                 line = next(self.fp).rstrip("\r\n").split("\t")
                 # Add exon to current info
@@ -126,7 +126,7 @@ class GffReader:
             terminal_exons = []
             for transcript in transcripts:
                 data[transcript[0]].extend(transcript[-1])
-                if transcript[0] == "ab-initio" or transcript[0] == "GeneMark.hmm" and len(transcript[-1]) > 1:
+                if transcript[0] == "ab-initio" and len(transcript[-1]) > 1:
                     if gene_data["strand"] == "+":
                         terminal_exons.append(transcript[-1][-1])
                     else:
