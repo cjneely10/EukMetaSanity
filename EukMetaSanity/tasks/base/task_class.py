@@ -280,7 +280,7 @@ class TaskList(ABC):
             # Copy results to results dir for easier access
             for _file in _files:
                 # Write info to file
-                if isinstance(_file, dict):
+                if isinstance(_file, dict) and len(_file.keys()) > 0:
                     _sorted_keys = sorted(list(_file.keys()))
                     # Header
                     _paths_output_file.write("".join(("\t".join(["ID"] + _sorted_keys), "\n")))

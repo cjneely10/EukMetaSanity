@@ -2,7 +2,6 @@ import os
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
-from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
 
 
 class BrakerIter(TaskList):
@@ -19,11 +18,12 @@ class BrakerIter(TaskList):
             _record_id = self.record_id.replace("-mask", "")
             if len(bams) > 0:
                 out = {
-                    # "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),
                     "cds": os.path.join(self.wdir, _record_id + ".cds.fna"),
                     "prot": os.path.join(self.wdir, _record_id + ".faa"),
                     "gm": os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
                     "aug": os.path.join(self.wdir, "augustus.hints.gtf"),
+                    "nr_gff3": os.path.join(self.wdir, _record_id + ".gff3"),
+                    "fna": self.input[2],
                 }
                 self.output = [
                     out,  # Paths

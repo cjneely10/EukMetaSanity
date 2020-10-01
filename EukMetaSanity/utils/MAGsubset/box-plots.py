@@ -6,7 +6,14 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 
 def parse_bitscores(infile: str) -> List[float]:
-    return [float(line.rstrip("\r\n").split()[-1]) for line in open(infile, "r")]
+    values = []
+    _id = ""
+    for _line in open(infile, "r"):
+        line = _line.rstrip("\r\n").split()
+        if line[0] != _id:
+            values.append(float(line[-1]))
+            _id = line[0]
+    return values
 
 
 if __name__ == "__main__":
@@ -37,4 +44,5 @@ if __name__ == "__main__":
     print([item.get_ydata()[1] for item in b["medians"]])
     plt.xticks([0, 1, 2], ["", "GeneMark", "+MetaEuk"])
     plt.ylabel("Bitscore")
+    plt.yscale("log")
     plt.show()
