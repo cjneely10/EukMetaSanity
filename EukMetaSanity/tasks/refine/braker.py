@@ -96,19 +96,13 @@ class BrakerIter(TaskList):
                     self.program_gffread[
                         os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf"),
                         os.path.join(self.wdir, "augustus.hints.gtf"),
-                        "--merge", "-G",
+                        "--merge", "-G", "-S",
                         "-o", os.path.join(self.wdir, _record_id + ".gff3"),
                         "-g", self.input[2],
                         "-x", os.path.join(self.wdir, _record_id + ".cds.fna"),
                         "-y", os.path.join(self.wdir, _record_id + ".faa"),
                     ]
                 )
-                # EvidenceIter.Evidence.merge(
-                #     self,
-                #     [os.path.join(self.wdir, self.record_id + ".gff3")],
-                #     self.input[2],
-                #     os.path.join(self.wdir, self.record_id)
-                # )
 
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)
