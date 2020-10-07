@@ -99,7 +99,7 @@ def run(ap: ArgParse, out_dir: str):
                     ]
                 )
             # Create MMseqs2 index file
-            if ap.args.index:
+            if ap.args.index and url.type != "profile":
                 _print_and_run(
                     mmseqs[
                         "createindex",
