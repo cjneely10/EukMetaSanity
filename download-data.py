@@ -140,7 +140,7 @@ def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
 
 def _create_tax_db(_out: str, out_dir: str):
     # Create mmseqs input file
-    if "odb" in _out:
+    if "ortho" in _out:
         _odb_tax_parse(_out, os.path.join(out_dir, "mmseqs.input"))
     else:
         return

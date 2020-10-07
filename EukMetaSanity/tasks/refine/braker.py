@@ -117,7 +117,7 @@ class BrakerIter(TaskList):
                     )
                 # Else just keep
                 else:
-                    self.output.append(_out)
+                    self.output[0]["braker"] = _out
 
     def __init__(self, *args, **kwargs):
         super().__init__(BrakerIter.Braker, "braker", *args, **kwargs)
