@@ -2,6 +2,7 @@ import os
 import logging
 from abc import ABC
 from plumbum import local, BG
+from dask_jobqueue import SLURMCluster
 from dask.distributed import Client, wait
 from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data
@@ -246,7 +247,16 @@ class TaskList(ABC):
         # Threaded
         else:
             futures = []
-            client = Client(n_workers=self._workers, threads_per_worker=1)
+            if bool(self.cfg.config("SLURM", "use_cluster")):
+                cluster = SLURMCluster(
+                    queue=self.cfg.config("SLURM", "queue"),
+                    project=self.cfg.config("SLURM", "project"),
+                    cores=int(self.cfg.config("SLURM", "cores")),
+                    memory=self.cfg.config("SLURM", "memory"),
+                )
+                client = Client(cluster)
+            else:
+                client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
                 futures.append(client.submit(_task.run))
