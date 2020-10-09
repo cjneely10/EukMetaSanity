@@ -111,8 +111,8 @@ class EvidenceIter(TaskList):
             ]()
             # Replace transcripts with gene identifier and write cds/aa sequences
             task_object.log_and_run(
-                task_object.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3"
+                task_object.local["merge_regions"][
+                    out_prefix + ".all.gff3", fasta_file, "-o", out_prefix
                 ]
             )
             os.replace(

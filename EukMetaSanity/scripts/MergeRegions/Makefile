@@ -14,6 +14,8 @@ all: $(BUILD_DIR)/.dirstamp $(BIN_DIR)/.dirstamp \
 		$(BUILD_DIR)/argparse.o
 	@echo All libraries built!
 
+argparse: $(BUILD_DIR)/argparse.o
+
 tests: all $(BIN_DIR)/hash_test $(BIN_DIR)/argparse_test
 	@echo All tests built!
 
