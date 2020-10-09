@@ -10,7 +10,8 @@ ln -srf EukMetaSanity/scripts/*.py bin/
 ln -srf EukMetaSanity/scripts/*.sh bin/
 CURR_DIR=$(pwd)
 cd EukMetaSanity/scripts/MergeRegions || return
-make argparse && cd MergeRegions || return
-make
+make argparse INSPATH="$(pwd)"
+cd MergeRegions || return
+make INSPATH="$(pwd)"
 cd "$(CURR_DIR)" || return
 ln -srf EukMetaSanity/scripts/MergeRegions/bin/merge_regions bin/
