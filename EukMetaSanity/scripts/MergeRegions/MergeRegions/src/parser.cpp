@@ -27,7 +27,7 @@ void GffParser::write(const std::string& output_file) const {
     std::fstream fasta_p;
     std::fstream prot_p;
     std::vector<std::tuple<std::string, std::vector<char>>> fasta_list;
-    gff3_p.open(output_file + ".gff3", std::fstream::out);
+    gff3_p.open(output_file + ".nr.gff3", std::fstream::out);
     fasta_p.open(output_file + ".cds.fna", std::fstream::out);
     prot_p.open(output_file + ".faa", std::fstream::out);
 
