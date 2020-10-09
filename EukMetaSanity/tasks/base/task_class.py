@@ -247,13 +247,14 @@ class TaskList(ABC):
         # Threaded
         else:
             futures = []
-            if bool(self.cfg.config("SLURM", "use_cluster")):
+            if bool(self.cfg.config.get("SLURM", "use_cluster")):
                 cluster = SLURMCluster(
-                    queue=self.cfg.config("SLURM", "queue"),
-                    project=self.cfg.config("SLURM", "project"),
-                    cores=int(self.cfg.config("SLURM", "cores")),
-                    memory=self.cfg.config("SLURM", "memory"),
+                    queue=self.cfg.config.get("SLURM", "queue"),
+                    project=self.cfg.config.get("SLURM", "project"),
+                    cores=int(self.cfg.config.get("SLURM", "cores")),
+                    memory=self.cfg.config.get("SLURM", "memory"),
                 )
+                cluster.scale(jobs=int(self.cfg.config.get("SLURM", "jobs")))
                 client = Client(cluster)
             else:
                 client = Client(n_workers=self._workers, threads_per_worker=1)
