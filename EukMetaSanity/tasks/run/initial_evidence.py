@@ -105,6 +105,10 @@ class EvidenceIter(TaskList):
                     "-o", out_prefix + ".all.gff3"
                 ]
             )
+            task_object.local["sed"][
+                "-i", '/gffcl/d',
+                out_prefix + ".all.gff3"
+            ]()
             # Replace transcripts with gene identifier and write cds/aa sequences
             task_object.log_and_run(
                 task_object.local["create-final-annotations.py"][
