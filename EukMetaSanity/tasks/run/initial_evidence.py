@@ -95,7 +95,7 @@ class EvidenceIter(TaskList):
                 self.input[2],
                 os.path.join(self.wdir, self.record_id),
             )
-            
+
         @staticmethod
         def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str):
             # Convert to gff3 file
@@ -105,15 +105,23 @@ class EvidenceIter(TaskList):
                     "-o", out_prefix + ".all.gff3"
                 ]
             )
-            task_object.local["sed"][
-                "-i", '/gffcl/d',
-                out_prefix + ".all.gff3"
-            ]()
             # Replace transcripts with gene identifier and write cds/aa sequences
             task_object.log_and_run(
-                task_object.local["merge_regions"][
-                    out_prefix + ".all.gff3", fasta_file, "-o", out_prefix
+                task_object.local["create-final-annotations.py"][
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3"
                 ]
+            )
+            os.replace(
+                out_prefix + ".all.nr.gff3",
+                out_prefix + ".nr.gff3",
+            )
+            os.replace(
+                out_prefix + ".all.faa",
+                out_prefix + ".faa"
+            )
+            os.replace(
+                out_prefix + ".all.cds.fna",
+                out_prefix + ".cds.fna"
             )
 
     def __init__(self, *args, **kwargs):

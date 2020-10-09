@@ -44,10 +44,8 @@ void Gene::insert(const Record& record) {
             switch (_strand) {
                 case 1:
                     region.end = record.end < it->end ? it->end : record.end;
-                    // region.start = region.start > it->start ? it->start : record.start;
                     break;
                 case -1:
-                    // region.end = record.end > it->end ? it->end : record.end;
                     region.start = region.start < it->start ? it->start : record.start;
                     break;
                 default:
