@@ -115,18 +115,6 @@ class EvidenceIter(TaskList):
                     out_prefix + ".all.gff3", fasta_file, "-o", out_prefix
                 ]
             )
-            os.replace(
-                out_prefix + ".all.nr.gff3",
-                out_prefix + ".nr.gff3",
-            )
-            os.replace(
-                out_prefix + ".all.faa",
-                out_prefix + ".faa"
-            )
-            os.replace(
-                out_prefix + ".all.cds.fna",
-                out_prefix + ".cds.fna"
-            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
