@@ -15,4 +15,4 @@ make argparse INSPATH="$LIB_DIR"
 cd MergeRegions || return
 make INSPATH="$LIB_DIR"
 cd "$CURR_DIR" || return
-ln -srf EukMetaSanity/scripts/MergeRegions/bin/merge_regions bin/
+ln -srf EukMetaSanity/scripts/MergeRegions/MergeRegions/bin/merge_regions bin/
