@@ -25,7 +25,8 @@ std::vector<Region> Gene::get(const size_t& min_val) const {
         if (it->_count >= min_val) tmp.push_back(*it);
         ++it;
     }
-    std::sort(tmp.begin(), tmp.end());
+    std::sort(tmp.begin(), tmp.end(), std::less<Region>());
+    std::reverse(tmp.begin(), tmp.end());
     return tmp;
 }
 
@@ -44,9 +45,11 @@ void Gene::insert(const Record& record) {
             switch (_strand) {
                 case 1:
                     region.end = record.end < it->end ? it->end : record.end;
+                    region.start = record.start < it->start ? record.start : it->start;
                     break;
                 case -1:
-                    region.start = region.start < it->start ? it->start : record.start;
+                    region.start = record.start < it->start ? it->start : record.start;
+                    region.end = record.end < it->end ? record.end : it->end;
                     break;
                 default:
                     break;
@@ -54,13 +57,10 @@ void Gene::insert(const Record& record) {
             region._count = it->_count + 1;
             regions.erase(it);
             regions.insert(region);
-            if (region.start < min_pos) min_pos = region.start;
-            if (region.end > max_pos) max_pos = region.end;
-            return;
-        } else {
-            it->_count = it->_count + 1;
-            (--it)->_count += 1;
-        }
+            if (region.start < min_pos) min_pos = it->start;
+            if (region.end > max_pos) max_pos = it->end;
+        } else it->_count = it->_count + 1;
+        return;
     }
     if (region.start < min_pos) min_pos = region.start;
     if (region.end > max_pos) max_pos = region.end;
@@ -86,15 +86,17 @@ RegionSet::reverse_iterator Gene::rend() { return regions.rend(); }
 std::ostream& operator<<(std::ostream& o, const Gene& rhs) {
     std::vector<Region> tmp = rhs.get(1);
     std::vector<Region>::iterator it = tmp.begin();
+    o << "gene" << rhs.id() << " " << rhs.strand() << std::endl;
     size_t end = it->end;
     while (it != tmp.end()) {
         // o << *it << " ";
         o << *it;
         ++it;
-        size_t bigger = it->start > end ? it->start : end;
-        size_t smaller = it->start < end ? it->start : end;
-        if (it != tmp.end())
+        if (it != tmp.end()) {
+            size_t bigger = it->start > end ? it->start : end;
+            size_t smaller = it->start < end ? it->start : end;
             for (size_t i = 0; i < log10(bigger - smaller); i++) o << '-';
+        }
         end = it->end;
     }
     return o;

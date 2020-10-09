@@ -19,12 +19,13 @@ int main(int argc, char* argv[]) {
             cout << gene << endl;
             size_t sz = gene.size();
             gene.set_merge(MergeType::CONFIRM);
-            gene.insert(Record(1000, 12000, 1, 1));
+            gene.insert(Record(2500, 12000, 1, 1));
+            cout << gene << endl;
             size_t sz2 = gene.size();
             gene.set_merge(MergeType::EXTEND);
             gene.insert(Record(15000, 17000, 1, 1));
-            size_t sz3 = gene.size();
             cout << gene << endl;
+            size_t sz3 = gene.size();
             return NTest::expect(sz == sz2 && sz3 - 1 == sz);
         }
     );

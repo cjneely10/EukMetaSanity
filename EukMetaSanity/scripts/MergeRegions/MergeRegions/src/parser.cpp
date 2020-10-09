@@ -91,7 +91,7 @@ void GffParser::parse_gff3(std::istream& fp, const MergeType& mt) {
                 // Add regions to gene
                 while (!GffParser::at_gene_start(_type)) {
                     std::getline(fp, line);
-                    if (fp.eof()) return;
+                    if (fp.eof()) break;
                     std::stringstream ss;
                     ss << line;
                     ss >> id >> source >> _type >> start >> end >> ee >> strand >> offset;
@@ -107,6 +107,7 @@ void GffParser::parse_gff3(std::istream& fp, const MergeType& mt) {
                 // Combine together data
                 if (loc != contig.end()) {
                     gene += *loc;
+                    contig.erase(loc);
                 }
                 // Set in position
                 contig.insert(gene);
