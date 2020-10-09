@@ -72,5 +72,25 @@ int main(int argc, char* argv[]) {
             return NTest::expect(gene.size() == 3);
         }
     );
+    test.make_test(
+        "Test merging",
+        [&test](){
+            // Initial gene
+            ssize_t id = 0;
+            Gene gene(++id, 1, MergeType::EXTEND);
+            // Exon 1
+            gene.insert(Record(100, 500, 1, 1));
+            // Exon 2
+            gene.insert(Record(1000, 5000, 1, 1));
+            cout << gene << endl;
+            // Switch to confirmation
+            gene.set_merge(MergeType::CONFIRM);
+            // Single long mapped protein
+            gene.insert(Record(100, 5000, 1, 1));
+            auto result = gene.get(2);
+            for (auto g: result) cout << g << endl;
+            return true;
+        }
+    );
     test.test();
 }
