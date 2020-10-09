@@ -247,7 +247,7 @@ class TaskList(ABC):
         # Threaded
         else:
             futures = []
-            if bool(self.cfg.config.get("SLURM", "use_cluster")):
+            if self.cfg.config.get("SLURM", "use_cluster") != "False":
                 cluster = SLURMCluster(
                     queue=self.cfg.config.get("SLURM", "queue"),
                     project=self.cfg.config.get("SLURM", "project"),
