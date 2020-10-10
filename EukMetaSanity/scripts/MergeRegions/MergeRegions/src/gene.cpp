@@ -26,7 +26,7 @@ std::vector<Region> Gene::get(const size_t& min_val) const {
         ++it;
     }
     std::sort(tmp.begin(), tmp.end(), std::less<Region>());
-    std::reverse(tmp.begin(), tmp.end());
+    // std::reverse(tmp.begin(), tmp.end());
     std::vector<Region> out;
     tmp.begin()->is_terminal = true;
     tmp.rbegin()->is_terminal = true;
@@ -39,7 +39,7 @@ std::vector<Region> Gene::get(const size_t& min_val) const {
 }
 
 void Gene::insert(const Record& record) {
-    if (_strand != record.strand) return;
+    // if (_strand != record.strand) return;
     // Create Region object
     Region region = Region(record.start, record.end, record.strand, record.offset);
     // Search for existing record
