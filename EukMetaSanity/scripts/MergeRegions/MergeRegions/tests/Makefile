@@ -1,4 +1,4 @@
-INSPATH = /home/kmarvos/lib
+INSPATH = ../../
 CC = g++
 CPP_FLAGS = -O3 -g --std=c++17 -Wall -I$(INSPATH)
 COMPILE = $(CC) $(CPP_FLAGS)

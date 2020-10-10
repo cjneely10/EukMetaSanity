@@ -46,7 +46,5 @@ struct Region {
     }
     // Define in terms of what is `not` part of the region
     bool operator<(const Region& rhs) const { return rhs.end < start; }
-    // Define in terms of what is `not` part of the region
-    bool operator>(const Region& rhs) const { return rhs.start < end; }
 };
 #endif

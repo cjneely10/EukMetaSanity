@@ -1,4 +1,4 @@
-INSPATH = /home/kmarvos/lib
+INSPATH = .
 CC = g++
 CPP_FLAGS = -O3 -g --std=c++17 -Wall -I$(INSPATH)
 COMPILE = $(CC) $(CPP_FLAGS)
@@ -8,13 +8,12 @@ SRC_DIR = src
 LIB_DIR = lib
 TEST_DIR = test
 
-all: $(BUILD_DIR)/.dirstamp $(BIN_DIR)/.dirstamp \
-		$(BUILD_DIR)/ntest.o \
-		$(BUILD_DIR)/hashtable.o \
-		$(BUILD_DIR)/argparse.o
+all: $(BUILD_DIR)/.dirstamp $(BIN_DIR)/.dirstamp argparse ntest
 	@echo All libraries built!
 
-argparse: $(BUILD_DIR)/argparse.o
+argparse: $(BUILD_DIR)/.dirstamp $(BIN_DIR)/.dirstamp $(BUILD_DIR)/argparse.o
+
+ntest: $(BUILD_DIR)/.dirstamp $(BIN_DIR)/.dirstamp $(BUILD_DIR)/ntest.o
 
 tests: all $(BIN_DIR)/hash_test $(BIN_DIR)/argparse_test
 	@echo All tests built!
