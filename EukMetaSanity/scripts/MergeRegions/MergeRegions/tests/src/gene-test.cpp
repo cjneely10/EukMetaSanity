@@ -78,16 +78,22 @@ int main(int argc, char* argv[]) {
             // Initial gene
             ssize_t id = 0;
             Gene gene(++id, 1, MergeType::EXTEND);
+            // Exon 0
+            gene.insert(Record(9, 40, 1, 1));
+            gene.insert(Record(50, 80, 1, 1));
             // Exon 1
             gene.insert(Record(100, 500, 1, 1));
             // Exon 2
             gene.insert(Record(1000, 5000, 1, 1));
+            // Exon 3
+            gene.insert(Record(7000, 100000, 1, 1));
             cout << gene << endl;
             // Switch to confirmation
             gene.set_merge(MergeType::CONFIRM);
-            // Single long mapped protein
+            // Single long mapped protein over Exon1/2
             gene.insert(Record(100, 5000, 1, 1));
             auto result = gene.get(2);
+            // Should only output first two regions
             for (auto g: result) cout << g << endl;
             return true;
         }

@@ -60,14 +60,12 @@ void Gene::insert(const Record& record) {
             if (region.start < min_pos) min_pos = it->start;
             if (region.end > max_pos) max_pos = it->end;
         } else {
-            RegionSet::iterator matched_regions = std::find_if(
-                regions.begin(), regions.end(), [&it](const Region& b){
-                    return b.end < it->start || b.start < it->end;
-                }
-            );
+            RegionSet::iterator matched_regions = it;
             while (matched_regions != regions.end()) {
-                matched_regions->_count = matched_regions->_count + 1;
-                ++matched_regions;
+                if (std::max(matched_regions->start, region.start) <= std::min(region.end, matched_regions->end)) {
+                    matched_regions->_count += 1;
+                    ++matched_regions;
+                } else break;
             }
         }
         return;

@@ -125,6 +125,7 @@ void GffParser::write_gff3(std::fstream& fp, FastaList& fasta_list, const FastaM
         const std::set<Gene>& contigs = iter->second;
         std::set<Gene>::const_reverse_iterator genes = contigs.crbegin();
         FastaMap::const_iterator record = fmap.find(iter->first);
+        if (record == fmap.end()) throw FileException("Sequence id not found in FASTA file " + iter->first);
         fp << "# Begin region " << iter->first << std::endl;
         while (genes != contigs.crend()) {
             // Write gene info

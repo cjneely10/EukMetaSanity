@@ -66,6 +66,7 @@ class Gene {
             }
             return *this;
         }
+        // Gene& operator()(const MergeType& min_val) { set_merge(min_val); }
     private:
         size_t _id;  // Internal id storage
         ssize_t _strand;  // +/-

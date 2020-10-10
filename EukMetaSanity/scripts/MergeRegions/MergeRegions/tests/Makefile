@@ -15,11 +15,11 @@ pre:
 
 run: all run-parser-test run-gene-test
 
-run-parser-test: all $(BIN_DIR)/parser-test
+run-parser-test: clean all $(BIN_DIR)/parser-test
 	@echo Running Parser test
 	$(BIN_DIR)/parser-test /home/kmarvos/Data/TestData/MergeRegions/hyp-prots.faa /home/kmarvos/Data/TestData/MergeRegions/spo.gff3
 
-run-gene-test: all $(BIN_DIR)/gene-test
+run-gene-test: clean all $(BIN_DIR)/gene-test
 	@echo Running Genome test
 	$(BIN_DIR)/gene-test
 
