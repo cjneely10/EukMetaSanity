@@ -32,8 +32,8 @@ class ConfigManager:
     THREADS = "THREADS"
     # # Protocols for running a choice of a program
     PROTOCOL = "PROTOCOL"
-    # # Used for repeating step multiple times
-    # ROUNDS = "ROUNDS"
+    # # slurm identifiers
+    USE_CLUSTER = "USE_CLUSTER"
 
     def __init__(self, config_path):
         self._config = Config()
@@ -53,7 +53,8 @@ class ConfigManager:
     def _validate_data(key, inner_dict):
         for possible_key in (ConfigManager.DATA,):
             _path = inner_dict.get(possible_key, None)
-            if _path is not None and not all([os.path.exists(Path(_p).resolve()) for _p in _path.split(",") if ":" not in _p]):
+            if _path is not None and not all(
+                    [os.path.exists(Path(_p).resolve()) for _p in _path.split(",") if ":" not in _p]):
                 raise InvalidPathError("Invalid path %s for %s %s" % (_path, key, possible_key))
 
     # Gather user-passed flags for analysis
@@ -74,6 +75,10 @@ class ConfigManager:
                 out.append(key)
                 out.append(self.config[_dict_name][key])
         return out
+
+    def get_slurm_flagged_arguments(self):
+        return {key: val for key, val in self.config["SLURM"].items()
+                if key not in {ConfigManager.USE_CLUSTER, "jobs", "cores"}}
 
 
 if __name__ == "__main__":

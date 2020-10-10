@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         }
     );
     test.make_test(
-        "Test merging",
+        "Confirm with single long region",
         [&test](){
             // Initial gene
             ssize_t id = 0;

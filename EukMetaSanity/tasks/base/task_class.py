@@ -217,6 +217,7 @@ class TaskList(ABC):
         ]
         # Store workers
         self._workers = workers
+        self._threads = int(cfg.config.get(name, ConfigManager.THREADS))
         # Store ConfigManager object
         self._cfg = cfg
         # Store PathManager object
@@ -247,14 +248,9 @@ class TaskList(ABC):
         # Threaded
         else:
             futures = []
-            if self.cfg.config.get("SLURM", "use_cluster") != "False":
-                cluster = SLURMCluster(
-                    queue=self.cfg.config.get("SLURM", "queue"),
-                    project=self.cfg.config.get("SLURM", "project"),
-                    cores=int(self.cfg.config.get("SLURM", "cores")),
-                    memory=self.cfg.config.get("SLURM", "memory"),
-                )
-                cluster.scale(jobs=int(self.cfg.config.get("SLURM", "jobs")))
+            if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
+                cluster = SLURMCluster(cores=int(self._threads), **self.cfg.get_slurm_flagged_arguments())
+                cluster.scale(jobs=int(self._workers))
                 client = Client(cluster)
             else:
                 client = Client(n_workers=self._workers, threads_per_worker=1)

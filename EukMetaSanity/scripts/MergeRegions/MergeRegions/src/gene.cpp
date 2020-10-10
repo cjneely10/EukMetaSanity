@@ -59,7 +59,12 @@ void Gene::insert(const Record& record) {
             regions.insert(region);
             if (region.start < min_pos) min_pos = it->start;
             if (region.end > max_pos) max_pos = it->end;
-        } else it->_count = it->_count + 1;
+        } else {
+            while (it != regions.end()) {
+                it = it->find(region);
+                it->_count = it->_count + 1;
+            }
+        }
         return;
     }
     if (region.start < min_pos) min_pos = region.start;
