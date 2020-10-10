@@ -54,14 +54,18 @@ void Gene::insert(const Record& record) {
                 default:
                     break;
             }
+            // Update region and re-insert
             region._count = it->_count + 1;
             regions.erase(it);
             regions.insert(region);
+            // Track start/end boundaries
             if (region.start < min_pos) min_pos = it->start;
             if (region.end > max_pos) max_pos = it->end;
         } else {
+            // Update all overlapping regions starting at find spot
             RegionSet::iterator matched_regions = it;
             while (matched_regions != regions.end()) {
+                // For ovelapping regions
                 if (std::max(matched_regions->start, region.start) <= std::min(region.end, matched_regions->end)) {
                     matched_regions->_count += 1;
                     ++matched_regions;
