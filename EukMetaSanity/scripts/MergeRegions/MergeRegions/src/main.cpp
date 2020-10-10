@@ -45,6 +45,14 @@ int main(int argc, char* argv[]) {
             file_exists
         );
         ap.refer(
+            evidence_file, 
+            {"gff3-file2"}, 
+            "Evidence GFF3 file path", 
+            ArgParse::Type::DEFAULT, 
+            true, 
+            file_exists
+        );
+        ap.refer(
             fasta_file, 
             {"fasta-file"}, 
             "FASTA file path", 
@@ -56,6 +64,7 @@ int main(int argc, char* argv[]) {
     }
     try {
         GffParser gff(gff3_file, fasta_file, MergeType::EXTEND);
+        gff.read_into(evidence_file, MergeType::CONFIRM);
         gff.write(output_prefix);
     } catch( runtime_error& e) {
         cout << e.what() << endl;
