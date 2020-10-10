@@ -22,12 +22,20 @@ std::vector<Region> Gene::get(const size_t& min_val) const {
     std::vector<Region> tmp;
     RegionSet::const_iterator it = regions.cbegin();
     while (it != regions.cend()) {
-        if (it->_count >= min_val) tmp.push_back(*it);
+        tmp.push_back(*it);
         ++it;
     }
     std::sort(tmp.begin(), tmp.end(), std::less<Region>());
     std::reverse(tmp.begin(), tmp.end());
-    return tmp;
+    std::vector<Region> out;
+    tmp.begin()->is_terminal = true;
+    tmp.rbegin()->is_terminal = true;
+    std::vector<Region>::const_iterator tt = tmp.cbegin();
+    while (tt != tmp.cend()) {
+        if (tt->is_terminal || tt->_count >= min_val) out.push_back(*tt);
+        ++tt;
+    }
+    return out;
 }
 
 void Gene::insert(const Record& record) {

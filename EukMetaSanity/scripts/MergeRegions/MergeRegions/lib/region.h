@@ -17,7 +17,8 @@ enum Strand {
 
 struct Region {
     Region(const size_t& s, const size_t& e, const ssize_t& st, const size_t& off, const size_t& ct = 1)
-        : start(s)
+        : is_terminal(false)
+        , start(s)
         , end(e)
         , strand(st == 1 ? Strand::POS : Strand::NEG)
         , offset(off)
@@ -26,6 +27,7 @@ struct Region {
                 std::string("Invalid region formed from " + s) + std::string(" to " + e)
             );
         }
+    bool is_terminal;  // Mark as first/last exon
     size_t start;  // 0-based coordinate of start
     size_t end;  // 0-based coordinate of end
     Strand strand;  // Strand
