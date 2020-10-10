@@ -78,7 +78,13 @@ class ConfigManager:
 
     def get_slurm_flagged_arguments(self):
         return {key: val for key, val in self.config["SLURM"].items()
-                if key not in {ConfigManager.USE_CLUSTER, "jobs", "cores"}}
+                if key not in {ConfigManager.USE_CLUSTER, "jobs", "cores", "FLAGS"}}
+
+    def get_FLAGS(self, _dict_name):
+        return [val for val in [def_key.lstrip(" ").rstrip(" ")
+                                for def_key in
+                                self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
+                                if def_key != ""]]
 
 
 if __name__ == "__main__":

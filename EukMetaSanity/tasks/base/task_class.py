@@ -249,7 +249,11 @@ class TaskList(ABC):
         else:
             futures = []
             if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-                cluster = SLURMCluster(cores=int(self._threads), **self.cfg.get_slurm_flagged_arguments())
+                cluster = SLURMCluster(
+                    cores=int(self._threads),
+                    job_extra=self.cfg.get_FLAGS("SLURM"),
+                    **self.cfg.get_slurm_flagged_arguments()
+                )
                 cluster.scale(jobs=int(self._workers))
                 client = Client(cluster)
             else:
