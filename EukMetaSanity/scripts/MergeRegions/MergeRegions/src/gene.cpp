@@ -39,7 +39,6 @@ std::vector<Region> Gene::get(const size_t& min_val) const {
 }
 
 void Gene::insert(const Record& record) {
-    // if (_strand != record.strand) return;
     // Create Region object
     Region region = Region(record.start, record.end, record.strand, record.offset);
     // Search for existing record
