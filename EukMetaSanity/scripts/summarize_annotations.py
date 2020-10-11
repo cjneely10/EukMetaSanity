@@ -11,6 +11,7 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 def generate(db_path: str, columns: List[str]) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
     # Create table
     conn.execute("""CREATE TABLE annotations (gene_id, %s)""" % ", ".join(columns))
     conn.commit()
@@ -32,7 +33,7 @@ def summarize(conn: sqlite3.Connection, out_path: str, non_null: defaultdict):
     )))
     for row in cursor:
         fp.write("".join((
-            "\t".join(row),
+            "\t".join([row[descr[0]] for descr in cursor.description]),
             "\n",
         )))
     fp.close()
@@ -124,9 +125,8 @@ def annotate(fasta_file: str, annotations: List[Tuple[str, str]], max_evalue: De
         rows[fasta_id] = [fasta_id, *["0" for _ in range(len(table_col_ids))]]
     _ids = set(rows.keys())
     i = 1
-    non_null = 0
     # Build data based on passed files
-    for annot_type, annot_path in annotations:
+    for annot_type, annot_path in sorted(annotations, key=lambda v: v[0]):
         if annot_type == "kegg":
             data_iter = _kegg_iter(annot_path)
         elif annot_type == "eggnog":

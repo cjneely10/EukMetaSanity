@@ -66,8 +66,14 @@ class RecordSet:
     @staticmethod
     def load_annotation_summary_file(annot_path: str):
         out = defaultdict(dict)
-        for line in open(annot_path, "r"):
-            pass
+        R = open(annot_path, "r")
+        # Skip top counts
+        next(R)
+        # Parse first line for identifiers
+        idx = next(R).rstrip("\r\n").split("\t")[1:]
+        for line in R:
+            line = line.rstrip("\r\n").split("\t")
+            out[line[0]] = {idx[i]: line[i + 1] for i in range(len(idx))}
 
 
 # Validate provided paths
@@ -99,7 +105,7 @@ if __name__ == "__main__":
     )
     validate(ap)
     output_file = os.path.join(os.path.splitext(Path(ap.args.rbh_file).resolve())[0], ".cmp.tsv")
-    mag_data = RecordSet(
-        ap.args.rbh_file
-    )
+    mag_data = RecordSet(ap.args.rbh_file)
+    mag_data.generate(ap.args.fasta_file)
+    mag_data.write(output_file)
 
