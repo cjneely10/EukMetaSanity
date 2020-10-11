@@ -12,12 +12,13 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 @dataclass
 class Record:
     size: int  #
-    annotation: str = ""
-    annotated: bool = False
+    annotated: bool = False  #
     euk_ms_match: str = ""  #
     in_eukms_repeat: bool = False  #
     euk_ms_match_score: float = 0.0  #
     exons: list = field(default_factory=list)  #
+    annotation: dict = field(default_factory=dict)  #
+    euk_ms_annotation: dict = field(default_factory=dict)  #
 
     def __eq__(self, other):
         return self.annotation == other.annotation
@@ -36,7 +37,7 @@ class RecordSet:
         self._gene_regions = RecordSet.load_regions(annotation_gff3)
 
     # Primary logic
-    def generate(self, fasta_file: str):
+    def generate(self, fasta_file: str, eukms_annotation_file: str):
         # # Insert base record information
         # id and size
         for record in SeqIO.parse(fasta_file, "fasta"):
@@ -59,7 +60,17 @@ class RecordSet:
                     if RecordSet.overlap(exon, repeat_region):
                         self._data[_id].in_eukms_repeat = True
                         break
-        #
+        # Store annotation
+        for _id in self._data.keys():
+            annotation = self._annotations[_id]
+            if annotation != dict({}):
+                self._data[_id].annotation = annotation
+        # Compare to EukMS annotation
+        eukms_annotations = RecordSet.load_annotation_summary_file(eukms_annotation_file)
+        for _id in self._data.keys():
+            annotation = eukms_annotations[self._data[_id].euk_ms_match]
+            if annotation != dict({}):
+                self._data[_id].euk_ms_annotation = annotation
         return -1
 
     @property
@@ -98,6 +109,7 @@ class RecordSet:
         idx = next(R).rstrip("\r\n").split("\t")[1:]
         for line in R:
             line = line.rstrip("\r\n").split("\t")
+            # Store as dict
             out[line[0]] = {idx[i]: line[i + 1] for i in range(len(idx))}
         return out
 
@@ -105,8 +117,10 @@ class RecordSet:
     def load_regions(repeats_gff3: str, filter_id: str = ""):
         out = defaultdict(set)
         # Store as dict of contig id to set of tuple ranges of repeated regions
-        for line in open(repeats_gff3, "fasta"):
-            if line[0] != "#":
+        for line in open(repeats_gff3, "r"):
+            if len(line) > 0 and line[0] != "#":
+                if line[0] == '>':
+                    break
                 line = line.rstrip("\r\n").split("\t", maxsplit=5)
                 if line[2] == filter_id or filter_id == "":
                     out[line[0]].add((int(line[3]), int(line[4])))
@@ -118,7 +132,6 @@ def validate(_ap: ArgParse):
     for _file in (
             _ap.args.rbh_file,
             _ap.args.fasta_file,
-            _ap.args.annotation_summary_file,
             _ap.args.repeats_gff3_file,
             _ap.args.file_a,
             _ap.args.file_b,
@@ -134,19 +147,17 @@ if __name__ == "__main__":
         (
             (("rbh_file",), {"help": "Path to mmseqs rbh output file"}),
             (("fasta_file",), {"help": "Path to amino acid FASTA file"}),
-            (("annotation_summary_file",), {"help": "Path to .summary output file"}),
             (("repeats_gff3_file",), {"help": "Path to repeats .gff3 file"}),
-            (("-a", "--file_a"), {"help": "Path to file matching ids in first column of rbh_file"}),
-            (("-b", "--file_b"), {"help": "Path to file matching ids in second column of rbh_file"}),
+            (("-a", "--file_a"), {"help": "Path to .summary file matching ids in first column of rbh_file (GM file)"}),
+            (("-b", "--file_b"), {"help": "Path to .summary file matching ids in second column of rbh_file (EukMS file)"}),
             (("-g", "--gff3_file"), {"help": "Original (old) gff3 annotation file"}),
         ),
         description="Summarize amino acids between old and new comparisons"
     )
     validate(ap)
     output_file = os.path.join(os.path.splitext(Path(ap.args.rbh_file).resolve())[0], ".cmp.tsv")
-    mag_data = RecordSet(
-        ap.args.rbh_file, ap.args.annotation_summary_file, ap.args.repeats_gff3_file, ap.args.gff3_file
-    )
-    mag_data.generate(ap.args.fasta_file)
-    mag_data.write(output_file)
+    mag_data = RecordSet(ap.args.rbh_file, ap.args.file_a, ap.args.repeats_gff3_file, ap.args.gff3_file)
+    mag_data.generate(ap.args.fasta_file, ap.args.file_b)
+    print(mag_data.data)
+    # mag_data.write(output_file)
 
