@@ -91,10 +91,10 @@ int main(int argc, char* argv[]) {
             cout << gene << endl;
             // Switch to confirmation
             gene.set_merge(MergeType::CONFIRM);
-            // Single long mapped protein over Exon3
-            gene.insert(Record(1000, 5000, 1, 1));
+            // Single long mapped protein over Exon2/3
+            gene.insert(Record(150, 5000, 1, 1));
             auto result = gene.get(2);
-            // Should output Exon1,3,4
+            // Should output Exon 0,3,4
             for (auto g: result) cout << g << endl;
             return true;
         }
