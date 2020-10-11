@@ -21,4 +21,4 @@ dependencies:
   - plumbum=1.6.6
   - dask[distributed]=2.10.1
   - dask-jobqueue=0.7.1
-  - perl-mce
+  - perl-mce=1.837
