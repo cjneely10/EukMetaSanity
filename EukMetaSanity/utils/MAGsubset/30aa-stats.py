@@ -34,7 +34,7 @@ class RecordSet:
         self._rbh = RecordSet.load_rbh_dict(rbh_path)
         self._annotations = RecordSet.load_annotation_summary_file(annot_path)
         self._repeats = RecordSet.load_regions(repeats_gff3)
-        self._gene_regions = RecordSet.load_regions(annotation_gff3)
+        self._gene_regions = RecordSet.load_regions(annotation_gff3, "gene")
 
     # Primary logic
     def generate(self, fasta_file: str, eukms_annotation_file: str):
@@ -45,6 +45,7 @@ class RecordSet:
             # Location on contig
             for location_tuple in self._gene_regions.get(record.id, []):
                 self._data[record.id].exons.append(location_tuple)
+            # print(self._data[record.id].exons)
         # # Update matches to EukMS calls
         # EukMS max RBH match
         for _id, annotation_dict in self._rbh.items():
@@ -54,28 +55,36 @@ class RecordSet:
                     self._data[_id].euk_ms_match_score = match_val
                     self._data[_id].euk_ms_match = match
         # In a EukMS repeat
-        for _id in self._data.keys():
-            for exon in self._data[_id].exons:
-                for repeat_region in self._rbh[_id]:
-                    if RecordSet.overlap(exon, repeat_region):
-                        self._data[_id].in_eukms_repeat = True
-                        break
+        for contig_id, repeat_regions in self._repeats.items():
+            for _id in self._data.keys():
+                if contig_id in _id:
+                    for exon in self._data[_id].exons:
+                        for repeat_region in repeat_regions:
+                            if RecordSet.overlap(exon, repeat_region):
+                                self._data[_id].in_eukms_repeat = True
+                                break
         # Store annotation
         for _id in self._data.keys():
             annotation = self._annotations[_id]
             if annotation != dict({}):
                 self._data[_id].annotation = annotation
+                self._data[_id].annotated = True
         # Compare to EukMS annotation
         eukms_annotations = RecordSet.load_annotation_summary_file(eukms_annotation_file)
         for _id in self._data.keys():
             annotation = eukms_annotations[self._data[_id].euk_ms_match]
             if annotation != dict({}):
                 self._data[_id].euk_ms_annotation = annotation
-        return -1
+
+    # def write(self, output_path: str):
+    #     W = open(output_file, "w")
+    #     for _id
+    #
+    #     W.close()
 
     @property
     def data(self):
-        return self._data
+        return self._data.values()
 
     def _insert(self, key: str, val: Record):
         self._data[key] = val
@@ -110,7 +119,9 @@ class RecordSet:
         for line in R:
             line = line.rstrip("\r\n").split("\t")
             # Store as dict
-            out[line[0]] = {idx[i]: line[i + 1] for i in range(len(idx))}
+            to_add = {idx[i]: line[i + 1] for i in range(len(idx))}
+            if to_add != {idx[i]: '0' for i in range(len(idx))}:
+                out[line[0]] = to_add
         return out
 
     @staticmethod
@@ -121,9 +132,11 @@ class RecordSet:
             if len(line) > 0 and line[0] != "#":
                 if line[0] == '>':
                     break
-                line = line.rstrip("\r\n").split("\t", maxsplit=5)
-                if line[2] == filter_id or filter_id == "":
+                line = line.rstrip("\r\n").split("\t")
+                if filter_id == "":
                     out[line[0]].add((int(line[3]), int(line[4])))
+                elif line[2] == filter_id:
+                    out[line[-1].replace("ID=", "").split(";")[0]].add((int(line[3]), int(line[4])))
         return out
 
 
@@ -158,6 +171,8 @@ if __name__ == "__main__":
     output_file = os.path.join(os.path.splitext(Path(ap.args.rbh_file).resolve())[0], ".cmp.tsv")
     mag_data = RecordSet(ap.args.rbh_file, ap.args.file_a, ap.args.repeats_gff3_file, ap.args.gff3_file)
     mag_data.generate(ap.args.fasta_file, ap.args.file_b)
-    print(mag_data.data)
+    for record in mag_data.data:
+        if record.in_eukms_repeat:
+            print(record)
     # mag_data.write(output_file)
 

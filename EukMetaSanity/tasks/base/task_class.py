@@ -250,9 +250,10 @@ class TaskList(ABC):
             futures = []
             if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
                 cluster = SLURMCluster(
-                    cores=int(self._threads),
-                    job_extra=self.cfg.get_FLAGS("SLURM"),
-                    **self.cfg.get_slurm_flagged_arguments()
+                    cores=int(self._threads),  # Total number of cores per job
+                    job_extra=self.cfg.get_FLAGS("SLURM"),  # srun-specific arguments
+                    processes=1,  #
+                    **self.cfg.get_slurm_flagged_arguments()  # dask-API arguments
                 )
                 cluster.scale(jobs=int(self._workers))
                 client = Client(cluster)
