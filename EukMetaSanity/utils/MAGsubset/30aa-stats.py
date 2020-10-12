@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import os
 from Bio import SeqIO
-from pathlib import Path
-from typing import Dict, Tuple
+from typing import Tuple
 from collections import defaultdict
 from dataclasses import dataclass, field
 from EukMetaSanity.utils.arg_parse import ArgParse
@@ -12,31 +11,30 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 @dataclass
 class Record:
     size: int
-    annotated: bool = False  #
     euk_ms_match: str = ""  #
     comparison_to_eukms: int = 0  #
     in_eukms_repeat: bool = False  #
     euk_ms_match_score: float = 0.0  #
     exons: list = field(default_factory=list)  #
-    annotation: list = field(default_factory=list)  #
-    euk_ms_annotation: list = field(default_factory=list)  #
+    annotation: dict = field(default_factory=dict)  #
+    euk_ms_annotation: dict = field(default_factory=dict)  #
 
-    def compare(self, ):
+    def compare(self):
         # Having "more" as defined by having any annotation versus having none
         pre_has_more = 0
         post_has_more = 0
-        for value in self.annotation:
-            for eukms_value in self.euk_ms_annotation:
-                if value == "0" and eukms_value != "0":
-                    post_has_more += 1
-                elif value != "0" and eukms_value == "0":
-                    pre_has_more += 1
-        if pre_has_more > post_has_more:
-            self.comparison_to_eukms = -1
-        elif pre_has_more == post_has_more:
-            self.comparison_to_eukms = 0
-        else:
+        for key, value in self.annotation.items():
+            if value != "0":
+                pre_has_more += 1
+        for key, value in self.euk_ms_annotation.items():
+            if value != "0":
+                post_has_more += 1
+        if post_has_more > pre_has_more:
             self.comparison_to_eukms = 1
+        elif post_has_more < pre_has_more:
+            self.comparison_to_eukms = -1
+        else:
+            self.comparison_to_eukms = 0
 
 
 class RecordSet:
@@ -77,24 +75,27 @@ class RecordSet:
                                 break
         # Store annotation
         for _id in self._data.keys():
-            annotation = self._annotations[_id]
-            if annotation != dict({}):
-                self._data[_id].annotation = list(annotation.values())
-                self._data[_id].annotated = True
+            self._data[_id].annotation = self._annotations[_id]
         # Compare to EukMS annotation
         eukms_annotations = RecordSet.load_annotation_summary_file(eukms_annotation_file)
         for _id in self._data.keys():
-            annotation = eukms_annotations[self._data[_id].euk_ms_match]
-            if annotation != dict({}):
-                self._data[_id].euk_ms_annotation = list(annotation.values())
-                self._data[_id].compare()
+            self._data[_id].euk_ms_annotation = eukms_annotations[self._data[_id].euk_ms_match]
+            self._data[_id].compare()
 
     def write(self, output_path: str):
-        pass
-        # W = open(output_file, "w")
-        # for _id
-        #
-        # W.close()
+        W = open(output_path, "w")
+        for _id, record in self.data:
+            W.write("".join(["\t".join(list(map(str, (
+                _id,
+                record.size,
+                list(record.annotation.values()),
+                record.euk_ms_match,
+                record.euk_ms_match_score,
+                list(record.euk_ms_annotation.values()),
+                record.comparison_to_eukms,
+                record.in_eukms_repeat,
+            )))), "\n"]))
+        W.close()
 
     @property
     def data(self):
@@ -129,7 +130,7 @@ class RecordSet:
             # Store as dict
             to_add = {idx[i]: line[i + 1] for i in range(len(idx))}
             if to_add != {idx[i]: '0' for i in range(len(idx))}:
-                out[line[0]] = to_add
+                out[line[0].replace("-mRNA-1", "")] = to_add
         return out
 
     @staticmethod
@@ -178,7 +179,6 @@ if __name__ == "__main__":
         description="Summarize amino acids between old and new comparisons"
     )
     validate(ap)
-    output_file = os.path.join(os.path.splitext(Path(ap.args.rbh_file).resolve())[0], ".cmp.tsv")
     mag_data = RecordSet(ap.args.rbh_file, ap.args.file_a, ap.args.repeats_gff3_file, ap.args.gff3_file)
     mag_data.generate(ap.args.fasta_file, ap.args.file_b)
-    mag_data.write(output_file)
+    mag_data.write(os.path.basename(os.path.splitext(ap.args.fasta_file)[0]) + ".cmp.tsv")
