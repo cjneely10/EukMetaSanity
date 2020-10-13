@@ -252,7 +252,7 @@ class TaskList(ABC):
                 cluster = SLURMCluster(
                     cores=1,  # Total number of cores per job
                     job_extra=self.cfg.get_FLAGS("SLURM"),  # srun-specific arguments
-                    processes=int(self._threads),  #
+                    processes=1,  #
                     **self.cfg.get_slurm_flagged_arguments()  # dask-API arguments
                 )
                 cluster.scale(jobs=int(self._workers))

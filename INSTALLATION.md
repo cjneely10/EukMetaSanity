@@ -28,7 +28,7 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 must install them separately.
 
 *(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
-may need to run their accessory script `change_path_in_perl_scripts.pl /path/to/miniconda3/envs/EukMS/bin/perl`)*
+may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`)*
 
 ### Installing RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
