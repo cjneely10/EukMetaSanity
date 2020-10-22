@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
             auto result = gene.get(2);
             // Should output Exon 0,3,4
             for (auto g: result) cout << g << endl;
-            return true;
+            return result.size() == 4;
         }
     );
     test.test();

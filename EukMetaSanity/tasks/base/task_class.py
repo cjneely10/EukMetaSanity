@@ -248,20 +248,20 @@ class TaskList(ABC):
         # Threaded
         else:
             futures = []
-            if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-                cluster = SLURMCluster(
-                    cores=self._threads,  # Total number of cores per job
-                    job_extra=self.cfg.get_FLAGS("SLURM"),  # srun-specific arguments
-                    processes=1,  #
-                    **self.cfg.get_slurm_flagged_arguments()  # dask-API arguments
-                )
-                cluster.scale(jobs=int(self._workers))
-                print(cluster.job_script())
-                client = Client(cluster)
-                # import socket
-                # client.run_on_scheduler(socket.gethostname)
-            else:
-                client = Client(n_workers=self._workers, threads_per_worker=1)
+            # if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
+            #     cluster = SLURMCluster(
+            #         cores=self._threads,  # Total number of cores per job
+            #         job_extra=self.cfg.get_FLAGS("SLURM"),  # srun-specific arguments
+            #         processes=1,  #
+            #         **self.cfg.get_slurm_flagged_arguments()  # dask-API arguments
+            #     )
+            #     cluster.scale(jobs=int(self._workers))
+            #     print(cluster.job_script())
+            #     client = Client(cluster)
+            #     # import socket
+            #     # client.run_on_scheduler(socket.gethostname)
+            # else:
+            client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
                 futures.append(client.submit(_task.run))
