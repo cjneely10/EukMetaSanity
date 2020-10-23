@@ -22,6 +22,8 @@ ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 
 You may need to restart your shell for these changes to take effect.
 
+## Installing dependencies
+
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
@@ -44,7 +46,7 @@ perl ./configure
 ```
 
 The configure script should ask you to confirm the location of your installation, as well as to select your search 
-engine. Select 2 for `RMBlast`, and provide the path as `/path/to/miniconda3/envs/EukMS/bin/` when requested 
+engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS/bin/` when requested 
 (substituting for the proper path on your system).
 
 Finally, due to a small bug in the conda `RepeatMasker` conda environment, run the following command:
@@ -76,7 +78,7 @@ This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. 
 automatically generate for use when running **EukMetaSanity**. 
 
 
-**Your installation is complete!**
+## **Your installation is complete!**
  
 If you wish to download additional databases to use in the `Report` step, use the 
 `mmseqs database` command to pull them prior to running **EukMetaSanity**, and add their location to your 

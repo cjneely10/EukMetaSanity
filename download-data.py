@@ -110,8 +110,7 @@ def run(ap: ArgParse, out_dir: str):
                         "--remove-tmp-files",
                     ]
                 )
-    if ap.args.output:
-        _generate_config_files(out, ids, ap.args.threads, ap.args.path)
+    _generate_config_files(out, ids, ap.args.threads, ap.args.path)
 
 
 def _generate_config_files(_file_names: List[str], _replace_strings: List[str], _threads: int, _outdir: str):
@@ -176,9 +175,6 @@ if __name__ == "__main__":
             (("-x", "--index"),
              {"help": "Generate search index (recommended, but takes a lot of space), default False",
               "default": False, "action": "store_true"}),
-            (("-o", "--output"),
-             {"help": "Output default config files with included download paths, default True", "default": True,
-              "action": "store_false"}),
             (("-r", "--rewrite"),
              {"help": "Rewrite existing directory, default False", "default": False, "action": "store_true"}),
             (("-t", "--threads"),
