@@ -35,7 +35,7 @@ class RepeatsIter(TaskList):
 
         # Simple repeat masking using mmseqs
         @program_catch
-        def simple(self):
+        def mmseqs(self):
             # Generate the masked sequence
             self.log_and_run(
                 self.program_mmseqs[
@@ -56,13 +56,20 @@ class RepeatsIter(TaskList):
             )
             return _fasta_output
 
+        # Mask only with tax-matches
+        def simple(self):
+            self.mmseqs()
+            self._mask(self.input[0])
+
         # Complete masking using RepeatModeler/Masker
         def full(self):
-            self.simple()
+            self.mmseqs()
             self._mask(self._model())
 
         @program_catch
         def _model(self):
+            if len(glob.glob(os.path.join(self.wdir, "RM*"))) > 0:
+                return self.input[0]
             # Build database
             _name = os.path.join(self.wdir, self.record_id)
             self.log_and_run(
@@ -110,9 +117,6 @@ class RepeatsIter(TaskList):
                 else:
                     search = ("-species", _search)
                     _dir = "repeats_" + _search.replace(" ", "_")
-                # Do not repeat if step is already present
-                if os.path.exists(os.path.join(os.path.dirname(self.wdir), _dir)):
-                    continue
                 # Create contained directory
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
@@ -169,7 +173,12 @@ class RepeatsIter(TaskList):
                     ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")
                 )
             else:
+                shutil.copy(
+                    input_file,
+                    os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
+                )
                 touch(os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3"))
+                touch(os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.tbl"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatsIter.Repeats, "repeats", *args, **kwargs)
