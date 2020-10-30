@@ -137,11 +137,11 @@ void GffParser::write_gff3(std::fstream& fp, FastaList& fasta_list, const FastaM
             }
             char str = genes->strand() == 1 ? '+' : '-';
             fp << iter->first << '\t' << "EukMS" << '\t' << "gene" << '\t';
-            fp << tmp.rbegin()->start + 1 << '\t' << tmp.begin()->end << '\t';
+            fp << tmp.begin()->start + 1 << '\t' << tmp.rbegin()->end << '\t';
             fp << ".\t" << str << "\t.\tID=gene" << ++i << std::endl;
-            std::vector<Region>::const_reverse_iterator reg = tmp.crbegin();
+            std::vector<Region>::const_iterator reg = tmp.cbegin();
             size_t count = 0;
-            while (reg != tmp.crend()) {
+            while (reg != tmp.cend()) {
                 size_t ss = 0;
                 size_t ee = 0;
                 if (reg->strand == 1) ss += reg->offset;

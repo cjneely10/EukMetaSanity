@@ -66,6 +66,7 @@ class TaxonomyIter(TaskList):
             try:
                 # Get first line
                 _tax_results_file = open(tax_results_file, "r")
+                _level = ""
                 while True:
                     line = next(_tax_results_file).rstrip("\r\n").split("\t")
                     # Parse line for assignment
@@ -74,10 +75,15 @@ class TaxonomyIter(TaskList):
                         continue
                     if _score >= cutoff and taxonomy.get(_level, None) is None:
                         taxonomy[_level] = (_assignment, _tax_id)
-                    if taxonomy.get(deepest_level, None) is not None:
-                        return taxonomy[deepest_level]
-            except:
+            except StopIteration:
+                pass
+            # Found requested level
+            if taxonomy.get(deepest_level, None) is not None:
                 return taxonomy[deepest_level]
+            # Return deepest level with matching cutoff
+            for i in range(len(tax_levels) - 1, -1, -1):
+                if taxonomy[tax_levels[i]] is not None:
+                    return taxonomy[tax_levels[i]]
             return '"%s"' % assignment.lower(), _id
 
     def __init__(self, *args, **kwargs):

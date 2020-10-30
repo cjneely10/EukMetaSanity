@@ -134,7 +134,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
         task.run(ap.args.tcp)
         task = task_list[i](*task.output())
     # Must call output on last task to generate final summary statistics
-    task.run()
+    task.run(ap.args.tcp)
     # Create summary using final Summarize task
     task.summarize(os.path.join(ap.args.output, "results", ap.args.command), ap.args.command)
 
