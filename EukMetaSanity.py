@@ -131,7 +131,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
     task = task_list[0](cfg, input_files, pm, input_prefixes, ap.args.debug)
     for i in range(1, len(task_list)):
         # Run task
-        task.run()
+        task.run(ap.args.tcp)
         task = task_list[i](*task.output())
     # Must call output on last task to generate final summary statistics
     task.run()
@@ -160,6 +160,8 @@ if __name__ == "__main__":
             (("-d", "--debug"),
              {"help": "Developer mode: display all commands on single thread, default False", "default": False,
               "action": "store_true"}),
+            (("-p", "--tcp"),
+             {"help": "Provide specific TCP port/address to which Dask should connect (SLURM)", "default": "None"}),
         ),
         description="Run EukMetaSanity pipeline"
     )
