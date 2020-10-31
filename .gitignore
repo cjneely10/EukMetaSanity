@@ -5,3 +5,5 @@ bin/
 __pycache__/
 .vscode/
 HashTable/
+EukMetaSanity/scripts/MergeRegions/argparse.h
+EukMetaSanity/scripts/MergeRegions/ntest.h

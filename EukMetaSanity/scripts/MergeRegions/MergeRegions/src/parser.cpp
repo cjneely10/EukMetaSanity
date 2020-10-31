@@ -168,11 +168,13 @@ void GffParser::write_gff3(std::fstream& fp, FastaList& fasta_list, const FastaM
                     gene_string.push_back(cds.at(_i));
                 }
             }
+            // Reverse complement if needed
             if (genes->strand() == -1) {
                 std::reverse(gene_string.begin(), gene_string.end());
                 for (size_t _i = 0; _i < gene_string.size(); _i++) 
                     complement(gene_string.at(_i));
             }
+            // Set ID unique identifier and add
             std::string __id("gene");
             std::string num_string = std::to_string(i);
             for (size_t ns = 0; ns < num_string.size(); ns++) __id.push_back(num_string.at(ns));

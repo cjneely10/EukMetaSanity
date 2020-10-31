@@ -237,7 +237,7 @@ class TaskList(ABC):
     def tasks(self):
         return self._tasks
 
-    def run(self, tcp: str):
+    def run(self):
         # Single
         logging.info(self._statement)
         if getattr(self._tasks[0], "skip", "False") == "False":
@@ -249,17 +249,13 @@ class TaskList(ABC):
         else:
             futures = []
             if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-                _tcp = {}
-                if tcp != "None":
-                    _tcp = {"protocol": tcp}
                 cluster = SLURMCluster(
                     cores=self._threads,  # Total number of cores per job
                     job_extra=self.cfg.get_FLAGS("SLURM"),  # srun-specific arguments
                     processes=1,  #
-                    **_tcp,
                     **self.cfg.get_slurm_flagged_arguments()  # dask-API arguments
                 )
-                cluster.scale(jobs=int(self._workers))
+                cluster.scale(jobs=len(self._tasks))
                 client = Client(cluster)
             else:
                 client = Client(n_workers=self._workers, threads_per_worker=1)
