@@ -1,23 +1,24 @@
+#include "parser.h"
+
+#include <algorithm>
+#include <iostream>
 #include <tuple>
 #include <utility>
-#include <iostream>
-#include <algorithm>
-#include "parser.h"
 
 inline void complement(char& cds) {
     switch (cds) {
-        case 'T':
-            cds = 'A';
-            break;
-        case 'A':
-            cds = 'T';
-            break;
-        case 'C':
-            cds = 'G';
-            break;
-        default:
-            cds = 'C';
-            break;
+    case 'T':
+        cds = 'A';
+        break;
+    case 'A':
+        cds = 'T';
+        break;
+    case 'C':
+        cds = 'G';
+        break;
+    default:
+        cds = 'C';
+        break;
     }
 }
 
@@ -70,7 +71,8 @@ void GffParser::parse_gff3(std::istream& fp, const MergeType& mt) {
             if (GffParser::at_gene_start(_type)) {
                 // Get next line
                 std::getline(fp, line);
-                if (fp.eof()) return;
+                if (fp.eof())
+                    return;
                 std::stringstream ss;
                 ss << line;
                 ss >> id >> source >> _type >> start >> end >> ee >> strand >> offset;
@@ -91,14 +93,16 @@ void GffParser::parse_gff3(std::istream& fp, const MergeType& mt) {
                 // Add regions to gene
                 while (!GffParser::at_gene_start(_type)) {
                     std::getline(fp, line);
-                    if (fp.eof()) break;
+                    if (fp.eof())
+                        break;
                     std::stringstream ss;
                     ss << line;
                     ss >> id >> source >> _type >> start >> end >> ee >> strand >> offset;
-                    if (GffParser::at_gene_start(_type)) break;
+                    if (GffParser::at_gene_start(_type))
+                        break;
                     if (_type == "CDS") {
                         // Line's record
-                        Record record(start - 1, end, offset, GffParser::to_strand(strand));   
+                        Record record(start - 1, end, offset, GffParser::to_strand(strand));
                         gene.insert(record);
                     }
                 }
@@ -111,8 +115,10 @@ void GffParser::parse_gff3(std::istream& fp, const MergeType& mt) {
                 }
                 // Set in position
                 contig.insert(gene);
-            } else std::getline(fp, line);
-        } else std::getline(fp, line);
+            } else
+                std::getline(fp, line);
+        } else
+            std::getline(fp, line);
     }
 }
 
@@ -125,7 +131,8 @@ void GffParser::write_gff3(std::fstream& fp, FastaList& fasta_list, const FastaM
         const std::set<Gene>& contigs = iter->second;
         std::set<Gene>::const_reverse_iterator genes = contigs.crbegin();
         FastaMap::const_iterator record = fmap.find(iter->first);
-        if (record == fmap.end()) throw FileException("Sequence id not found in FASTA file " + iter->first);
+        if (record == fmap.end())
+            throw FileException("Sequence id not found in FASTA file " + iter->first);
         fp << "# Begin region " << iter->first << std::endl;
         while (genes != contigs.crend()) {
             // Write gene info
@@ -144,8 +151,10 @@ void GffParser::write_gff3(std::fstream& fp, FastaList& fasta_list, const FastaM
             while (reg != tmp.cend()) {
                 size_t ss = 0;
                 size_t ee = 0;
-                if (reg->strand == 1) ss += reg->offset;
-                else ee += reg->offset;
+                if (reg->strand == 1)
+                    ss += reg->offset;
+                else
+                    ee += reg->offset;
                 // Write regions in gene
                 fp << iter->first << '\t' << "EukMS" << '\t' << "CDS" << '\t';
                 fp << reg->start + 1 << '\t' << reg->end << '\t';
@@ -171,13 +180,14 @@ void GffParser::write_gff3(std::fstream& fp, FastaList& fasta_list, const FastaM
             // Reverse complement if needed
             if (genes->strand() == -1) {
                 std::reverse(gene_string.begin(), gene_string.end());
-                for (size_t _i = 0; _i < gene_string.size(); _i++) 
+                for (size_t _i = 0; _i < gene_string.size(); _i++)
                     complement(gene_string.at(_i));
             }
             // Set ID unique identifier and add
             std::string __id("gene");
             std::string num_string = std::to_string(i);
-            for (size_t ns = 0; ns < num_string.size(); ns++) __id.push_back(num_string.at(ns));
+            for (size_t ns = 0; ns < num_string.size(); ns++)
+                __id.push_back(num_string.at(ns));
             __id += " strand";
             __id += str;
             fasta_list.push_back(std::make_tuple(__id, gene_string));
@@ -194,7 +204,8 @@ void GffParser::write_fasta(std::fstream& fp, const FastaList& fasta_list) const
         const std::vector<char>& rec = std::get<1>(*record);
         size_t i;
         for (i = 0; i < rec.size(); i++) {
-            if (i > 0 && i % 80 == 0) fp << std::endl;
+            if (i > 0 && i % 80 == 0)
+                fp << std::endl;
             fp << rec.at(i);
         }
         fp << std::endl;
@@ -209,8 +220,10 @@ void GffParser::write_protein(std::fstream& fp, const FastaList& fasta_list, con
         const std::vector<char>& rec = std::get<1>(*record);
         size_t i;
         for (i = 0; i < rec.size(); i += 3) {
-            if (i + 2 >= rec.size()) break;
-            if (i > 0 && i % 80 == 0) fp << std::endl;
+            if (i + 2 >= rec.size())
+                break;
+            if (i > 0 && i % 80 == 0)
+                fp << std::endl;
             std::string val;
             val.push_back(toupper(rec.at(i)));
             val.push_back(toupper(rec.at(i + 1)));
@@ -223,29 +236,19 @@ void GffParser::write_protein(std::fstream& fp, const FastaList& fasta_list, con
 }
 
 TranslationTable GffParser::load_translation_table() {
-    return {
-        {"TTT", 'F'}, {"TTC", 'F'}, {"TTA", 'T'}, {"TTG", 'L'},
-        {"TCT", 'S'}, {"TCC", 'S'}, {"TCA", 'S'}, {"TCG", 'S'},
-        {"TAT", 'Y'}, {"TAC", 'Y'}, {"TAA", '*'}, {"TAG", '*'},
-        {"TGT", 'C'}, {"TGC", 'C'}, {"TGA", '*'}, {"TGG", 'W'},
-        {"CTT", 'L'}, {"CTC", 'L'}, {"CTA", 'L'}, {"CTG", 'L'},
-        {"CCT", 'P'}, {"CCC", 'P'}, {"CCA", 'P'}, {"CCG", 'P'},
-        {"CAT", 'H'}, {"CAC", 'H'}, {"CAA", 'Q'}, {"CAG", 'Q'},
-        {"CGT", 'R'}, {"CGC", 'R'}, {"CGA", 'R'}, {"CGG", 'R'},
-        {"ATT", 'I'}, {"ATC", 'I'}, {"ATA", 'I'}, {"ATG", 'M'},
-        {"ACT", 'T'}, {"ACC", 'T'}, {"ACA", 'T'}, {"ACG", 'T'},
-        {"AAT", 'N'}, {"AAC", 'N'}, {"AAA", 'K'}, {"AAG", 'K'},
-        {"AGT", 'S'}, {"AGC", 'S'}, {"AGA", 'R'}, {"AGG", 'R'},
-        {"GTT", 'V'}, {"GTC", 'V'}, {"GTA", 'V'}, {"GTG", 'V'},
-        {"GCT", 'A'}, {"GCC", 'A'}, {"GCA", 'A'}, {"GCG", 'A'},
-        {"GAT", 'D'}, {"GAC", 'D'}, {"GAA", 'E'}, {"GAG", 'E'},
-        {"GGT", 'G'}, {"GGC", 'G'}, {"GGA", 'G'}, {"GGG", 'G'}
-    };
+    return {{"TTT", 'F'}, {"TTC", 'F'}, {"TTA", 'T'}, {"TTG", 'L'}, {"TCT", 'S'}, {"TCC", 'S'}, {"TCA", 'S'},
+            {"TCG", 'S'}, {"TAT", 'Y'}, {"TAC", 'Y'}, {"TAA", '*'}, {"TAG", '*'}, {"TGT", 'C'}, {"TGC", 'C'},
+            {"TGA", '*'}, {"TGG", 'W'}, {"CTT", 'L'}, {"CTC", 'L'}, {"CTA", 'L'}, {"CTG", 'L'}, {"CCT", 'P'},
+            {"CCC", 'P'}, {"CCA", 'P'}, {"CCG", 'P'}, {"CAT", 'H'}, {"CAC", 'H'}, {"CAA", 'Q'}, {"CAG", 'Q'},
+            {"CGT", 'R'}, {"CGC", 'R'}, {"CGA", 'R'}, {"CGG", 'R'}, {"ATT", 'I'}, {"ATC", 'I'}, {"ATA", 'I'},
+            {"ATG", 'M'}, {"ACT", 'T'}, {"ACC", 'T'}, {"ACA", 'T'}, {"ACG", 'T'}, {"AAT", 'N'}, {"AAC", 'N'},
+            {"AAA", 'K'}, {"AAG", 'K'}, {"AGT", 'S'}, {"AGC", 'S'}, {"AGA", 'R'}, {"AGG", 'R'}, {"GTT", 'V'},
+            {"GTC", 'V'}, {"GTA", 'V'}, {"GTG", 'V'}, {"GCT", 'A'}, {"GCC", 'A'}, {"GCA", 'A'}, {"GCG", 'A'},
+            {"GAT", 'D'}, {"GAC", 'D'}, {"GAA", 'E'}, {"GAG", 'E'}, {"GGT", 'G'}, {"GGC", 'G'}, {"GGA", 'G'},
+            {"GGG", 'G'}};
 }
 
-bool GffParser::at_gene_start(const std::string type) {
-    return type == "gene" || type == "transcript";
-}
+bool GffParser::at_gene_start(const std::string type) { return type == "gene" || type == "transcript"; }
 
 ssize_t GffParser::to_strand(const char& strand) {
     return strand == '+' ? 1 : (strand == '-' ? -1 : throw StrandComparisonException("Invalid strand provided"));
@@ -253,7 +256,7 @@ ssize_t GffParser::to_strand(const char& strand) {
 
 FastaMap GffParser::load_fasta_file(const std::string& f) {
     std::fstream fs;
-    std::unordered_map<std::string, std::vector<char>> out;    
+    std::unordered_map<std::string, std::vector<char>> out;
     std::unordered_map<std::string, std::vector<char>>::iterator it;
     fs.open(f, std::fstream::in);
     if (!fs.is_open()) {
@@ -272,10 +275,12 @@ FastaMap GffParser::load_fasta_file(const std::string& f) {
             std::getline(fs, line);
             // Store sequence
             while (line.size() > 0 && line.at(0) != '>') {
-                for (auto c: line) it->second.push_back(c);
+                for (auto c : line)
+                    it->second.push_back(c);
                 std::getline(fs, line);
             }
-        } else std::getline(fs, line);
+        } else
+            std::getline(fs, line);
     }
     return out;
 }
