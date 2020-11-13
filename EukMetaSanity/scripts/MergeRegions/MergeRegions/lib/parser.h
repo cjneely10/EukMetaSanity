@@ -36,7 +36,7 @@ protected:
     // Convert regions to fasta and write
     void write_fasta(std::fstream& fp, const FastaList& fasta_list) const;
     void write_protein(std::fstream& fp, const FastaList& fasta_list, const TranslationTable& tmap) const;
-    static FastaMap load_fasta_file(const std::string& f);
+    static const FastaMap load_fasta_file(const std::string& f);
 
 private:
     std::string _fasta_file;
@@ -44,7 +44,7 @@ private:
     static bool at_gene_start(const std::string type);
     // Convert char strand to internal strand identifier
     static ssize_t to_strand(const char& strand);
-    static TranslationTable load_translation_table();
+    static const TranslationTable load_translation_table();
 };
 
 #endif

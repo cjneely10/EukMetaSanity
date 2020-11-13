@@ -235,7 +235,7 @@ void GffParser::write_protein(std::fstream& fp, const FastaList& fasta_list, con
     }
 }
 
-TranslationTable GffParser::load_translation_table() {
+const TranslationTable GffParser::load_translation_table() {
     return {{"TTT", 'F'}, {"TTC", 'F'}, {"TTA", 'T'}, {"TTG", 'L'}, {"TCT", 'S'}, {"TCC", 'S'}, {"TCA", 'S'},
             {"TCG", 'S'}, {"TAT", 'Y'}, {"TAC", 'Y'}, {"TAA", '*'}, {"TAG", '*'}, {"TGT", 'C'}, {"TGC", 'C'},
             {"TGA", '*'}, {"TGG", 'W'}, {"CTT", 'L'}, {"CTC", 'L'}, {"CTA", 'L'}, {"CTG", 'L'}, {"CCT", 'P'},
@@ -254,7 +254,7 @@ ssize_t GffParser::to_strand(const char& strand) {
     return strand == '+' ? 1 : (strand == '-' ? -1 : throw StrandComparisonException("Invalid strand provided"));
 }
 
-FastaMap GffParser::load_fasta_file(const std::string& f) {
+const FastaMap GffParser::load_fasta_file(const std::string& f) {
     std::fstream fs;
     std::unordered_map<std::string, std::vector<char>> out;
     std::unordered_map<std::string, std::vector<char>>::iterator it;

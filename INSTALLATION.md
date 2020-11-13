@@ -34,9 +34,10 @@ may need to run their accessory script `perl change_path_in_perl_scripts.pl "/us
 
 ### Installing RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
-in your conda installation directory. Make sure your `EukMS` conda environment is still active 
-prior to updating. Here, we assume that you have used `miniconda`, and that it is located in your home directory.
-You will want to adjust the path for the following commands according to your system: 
+in your conda installation directory. We recommend installing all updated repeat library files. 
+Make sure your `EukMS` conda environment is still active prior to updating. Here, we assume that you have used 
+`miniconda`, and that it is located in your home directory. You will want to adjust the path for the following commands 
+according to your system: 
 
 ```
 cd ~/miniconda/envs/EukMS/share/RepeatMasker/Libraries/

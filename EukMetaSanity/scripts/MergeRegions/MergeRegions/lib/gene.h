@@ -22,6 +22,7 @@ public:
     const size_t& id() const { return _id; }               // ID of gene
     const ssize_t& strand() const { return _strand; }      // Strand
     size_t size() const { return regions.size(); }         // Number of regions stored
+    bool empty() const { return size() == 0; }             // Size of container
     DnaString cds(const DnaString& dna) const;             // Get CDS string
     DnaString protein(const DnaString& dna) const;         // Get protein string
     size_t range() const;                                  // End_end - Start_start
@@ -41,18 +42,12 @@ public:
 
     // Stream operations
     friend std::ostream& operator<<(std::ostream& o, const Gene& rhs);
+    friend std::ostream& operator<<(std::ostream& o, const std::vector<Region>& rhs);
     // Comparison to order genes in contig - normal order based on position/strand
     bool operator<(const Gene& gene) { return gene.range_end() < range_start(); }
     // Friend comparisons
     friend bool operator<(const Gene& gene, const Gene& gene2) { return gene2.range_end() < gene.range_start(); }
-    Gene& operator+=(const Gene& gene) {
-        std::set<Region>::const_iterator it = gene.regions.cbegin();
-        while (it != gene.regions.cend()) {
-            regions.insert(*it);
-            ++it;
-        }
-        return *this;
-    }
+    Gene& operator+=(const Gene& gene);
     // Gene& operator()(const MergeType& min_val) { set_merge(min_val); }
 private:
     size_t _id;            // Internal id storage

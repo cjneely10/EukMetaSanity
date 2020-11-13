@@ -3,6 +3,7 @@
 
 #include "exceptions.h"
 #include <string>
+#include <iostream>
 
 /* Record is line of GFF3 file */
 

@@ -31,9 +31,10 @@ std::vector<Region> Gene::get(const size_t& min_val) const {
     }
     std::sort(tmp.begin(), tmp.end(), std::less<Region>());
     std::reverse(tmp.begin(), tmp.end());
-    std::vector<Region> out;
     tmp.begin()->is_terminal = true;
     tmp.rbegin()->is_terminal = true;
+
+    std::vector<Region> out;
     std::vector<Region>::const_iterator tt = tmp.cbegin();
     while (tt != tmp.cend()) {
         if (tt->is_terminal || tt->_count >= min_val)
@@ -55,17 +56,9 @@ void Gene::insert(const Record& record) {
     else {
         if (merge_type == MergeType::EXTEND) {
             // Extend forward within given direction
-            switch (_strand) {
-            case 1:
+            if (region.offset == it->offset) {
                 region.end = record.end < it->end ? it->end : record.end;
                 region.start = record.start < it->start ? record.start : it->start;
-                break;
-            case -1:
-                region.start = record.start < it->start ? it->start : record.start;
-                region.end = record.end < it->end ? record.end : it->end;
-                break;
-            default:
-                break;
             }
             // Update region and re-insert
             region._count = it->_count + 1;
@@ -111,6 +104,15 @@ RegionSet::iterator Gene::end() { return regions.end(); }
 
 RegionSet::reverse_iterator Gene::rend() { return regions.rend(); }
 
+Gene& Gene::operator+=(const Gene& gene) {
+    std::set<Region>::const_iterator it = gene.regions.cbegin();
+    while (it != gene.regions.cend()) {
+        regions.insert(*it);
+        ++it;
+    }
+    return *this;
+}
+
 //// Friend functions
 
 std::ostream& operator<<(std::ostream& o, const Gene& rhs) {
@@ -130,5 +132,11 @@ std::ostream& operator<<(std::ostream& o, const Gene& rhs) {
         }
         end = it->end;
     }
+    return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const std::vector<Region>& rhs) {
+
+
     return o;
 }
