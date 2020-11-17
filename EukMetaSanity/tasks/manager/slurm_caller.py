@@ -43,9 +43,6 @@ class SLURMCaller:
     def __repr__(self):
         return self.__str__()
 
-    def kill_process(self):
-        self.local["scancel"][self.job_id]()
-
     # Run script written
     def launch_script(self):
         log_line = str(self.local["sbatch"][self.script]()).split()
@@ -96,9 +93,5 @@ class SLURMCaller:
     # Call will run script using sbatch and periodically check for when to stop running
     def __call__(self, *args, **kwargs):
         self.launch_script()
-        try:
-            while self.is_running():
-                sleep(60)  # Wait 1 minute in between checking if still running
-        except KeyboardInterrupt:
-            # Kill launched processes
-            self.kill_process()
+        while self.is_running():
+            sleep(60)  # Wait 1 minute in between checking if still running
