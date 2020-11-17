@@ -43,6 +43,12 @@ class SLURMCaller:
     def __repr__(self):
         return self.__str__()
 
+    def __del__(self):
+        self.kill_process()
+
+    def kill_process(self):
+        self.local["scancel"][self.job_id]()
+
     # Run script written
     def launch_script(self):
         log_line = str(self.local["sbatch"][self.script]()).split()
