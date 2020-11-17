@@ -10,6 +10,8 @@ Welcome to EukMetaSanity's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. automodule:: EukMetaSanity.tasks.manager.slurm_caller
+
 
 
 Indices and tables

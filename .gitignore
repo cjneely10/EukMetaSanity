@@ -7,3 +7,4 @@ __pycache__/
 HashTable/
 EukMetaSanity/scripts/MergeRegions/argparse.h
 EukMetaSanity/scripts/MergeRegions/ntest.h
+sphinx_build
