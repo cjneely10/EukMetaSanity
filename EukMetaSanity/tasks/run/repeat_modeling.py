@@ -79,19 +79,17 @@ class RepeatsIter(TaskList):
                 ]
             )
             new_path = os.path.join(self.wdir, "run.sh")
-            self.log_and_run(self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir])
-            self.log_and_run(
-                self.local["sed"][
-                    "-i", "s/%s/%s/g" % (
-                        "CMD",
-                        " ".join((
-                            str(self.program_modeler).replace("/", "\/"),
-                            "-pa", str(int(self.threads) // 4 or 1),
-                            "-engine", "ncbi", "-database", _name.replace("/", "\/"),
-                        ))
-                    ), new_path
-                ]
-            )
+            self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir]()
+            self.local["sed"][
+                "-i", "s/%s/%s/g" % (
+                    "CMD",
+                    " ".join((
+                        str(self.program_modeler).replace("/", "\/"),
+                        "-pa", str(int(self.threads) // 4 or 1),
+                        "-engine", "ncbi", "-database", _name.replace("/", "\/"),
+                    ))
+                ), new_path
+            ]()
             # Run script
             self.log_and_run(self.local[new_path][self.wdir])
             return self.input[0]
@@ -141,14 +139,14 @@ class RepeatsIter(TaskList):
             _basename = os.path.basename(input_file)
             # Unzip results
             all([
-                self.log_and_run(self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))])
+                self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))]()
                 for rep_dir in repeats_dirs
                 if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat.gz"))))
             ])
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
             all([
-                self.log_and_run(self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)
+                (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
                 for rep_dir in repeats_dirs
             ])
             # Run ProcessRepeats

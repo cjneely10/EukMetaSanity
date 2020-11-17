@@ -260,21 +260,19 @@ class AbInitioIter(TaskList):
                 ]
             )
             # Edit in proper locations
-            self.log_and_run(
-                self.local["sed"][
-                    "-i", "s/%s/%s/g" % (
-                        "CMD",
-                        " ".join((
-                            str(self.program_gmes).replace("/", "\/"),
-                            "--sequence", self.input[0].replace("/", "\/"),
-                            "--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
-                            "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/"),
-                            "--cores", self.threads, (*self.added_flags),
-                            ("--fungus" if "fungi" == tax[0] else "")
-                        ))
-                    ), new_path
-                ]
-            )
+            self.local["sed"][
+                "-i", "s/%s/%s/g" % (
+                    "CMD",
+                    " ".join((
+                        str(self.program_gmes).replace("/", "\/"),
+                        "--sequence", self.input[0].replace("/", "\/"),
+                        "--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
+                        "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/"),
+                        "--cores", self.threads, (*self.added_flags),
+                        ("--fungus" if "fungi" == tax[0] else "")
+                    ))
+                ), new_path
+            ]()
             # Run script
             self.log_and_run(self.local[new_path][self.wdir])
             # Move program to match required output name
@@ -284,12 +282,10 @@ class AbInitioIter(TaskList):
                     "-o", self.output[0]
                 ]
             )
-            self.log_and_run(
-                self.local["sed"][
-                    "-i", "s/GeneMark.hmm/ab-initio/g",
-                    self.output[0]
-                ]
-            )
+            self.local["sed"][
+                "-i", "s/GeneMark.hmm/ab-initio/g",
+                self.output[0]
+            ]()
 
         @staticmethod
         def update_cfg(in_path: str, replace_tuple: List[Tuple[str, str]], out_path: str):
