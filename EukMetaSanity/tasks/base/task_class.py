@@ -151,7 +151,7 @@ class Task(ABC):
         print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-            cmd = SLURMCaller(cmd)
+            cmd = SLURMCaller(self.wdir, cmd, self.config, self.local, self.cfg.get_slurm_flagged_arguments())
         # Run command directly
         logging.info(str(cmd))
         if self.mode == 1:
