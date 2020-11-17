@@ -76,8 +76,8 @@ bool NTest::compare(T a, T b, bool _throw, bool exp, bool show) {
     if (_true != exp) {
         if (show) {
             std::cerr << YELLOW;
-            std::cerr << "Expected: " << b << std::endl;
-            std::cerr << "Actual: " << a;
+            std::cerr << "Expected: " << std::boolalpha << b << std::endl;
+            std::cerr << "Actual: " << std::boolalpha << a;
             std::cerr << RESET << std::endl;
         }
         if (_throw)

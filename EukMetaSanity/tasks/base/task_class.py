@@ -1,7 +1,6 @@
 import os
 import logging
 from abc import ABC
-from dask_jobqueue import SLURMCluster
 from plumbum import local, BG
 from dask.distributed import Client, wait
 from typing import Dict, List, Tuple, Callable
@@ -11,6 +10,7 @@ from EukMetaSanity.utils.path_manager import PathManager
 from EukMetaSanity.utils.config_manager import ConfigManager
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
+from EukMetaSanity.tasks.manager.slurm_caller import SLURMCaller
 
 """
 Task: Class that manages and handles working directory to complete an operation
@@ -149,6 +149,10 @@ class Task(ABC):
     # Function logs and runs dask command
     def log_and_run(self, cmd: LocalCommand):
         print("  " + str(cmd))
+        # Write command to slurm script file and run
+        if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
+            cmd = SLURMCaller(cmd)
+        # Run command directly
         logging.info(str(cmd))
         if self.mode == 1:
             logging.info(cmd())
@@ -248,17 +252,7 @@ class TaskList(ABC):
         # Threaded
         else:
             futures = []
-            if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-                cluster = SLURMCluster(
-                    cores=self._threads,  # Total number of cores per job
-                    job_extra=self.cfg.get_FLAGS("SLURM"),  # srun-specific arguments
-                    processes=1,  #
-                    **self.cfg.get_slurm_flagged_arguments()  # dask-API arguments
-                )
-                cluster.scale(jobs=len(self._tasks))
-                client = Client(cluster)
-            else:
-                client = Client(n_workers=self._workers, threads_per_worker=1)
+            client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
                 futures.append(client.submit(_task.run))
