@@ -38,7 +38,7 @@ class SLURMCaller:
         self.generate_script()
 
     def __str__(self):
-        return open(os.path.join(self.wdir, SLURMCaller.OUTPUT_SCRIPTS)).read()
+        return open(self.script, "r").read()
 
     def __repr__(self):
         return self.__str__()
