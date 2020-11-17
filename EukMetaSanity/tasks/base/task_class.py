@@ -151,7 +151,7 @@ class Task(ABC):
         print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-            if ConfigManager.MEMORY not in self.cfg.config.get("SLURM") or ConfigManager.TIME not in self.cfg.config.get("SLURM"):
+            if ConfigManager.MEMORY not in self.config.keys() or ConfigManager.TIME not in self.config.keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
             cmd = SLURMCaller(
                 self.cfg.config["SLURM"]["user-id"],

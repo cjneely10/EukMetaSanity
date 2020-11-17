@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import List, Tuple
 from configparser import RawConfigParser
 
 """
@@ -80,13 +81,13 @@ class ConfigManager:
                 out.append(self.config[_dict_name][key])
         return out
 
-    def get_slurm_flagged_arguments(self):
-        return {key: val for key, val in self.config["SLURM"].items()
+    def get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
+        return [(key, val) for key, val in self.config["SLURM"].items()
                 # if key not in {ConfigManager.USE_CLUSTER, "FLAGS"}}
-                if key not in {ConfigManager.USE_CLUSTER, "--nodes", "--ntasks", "--mem", "user-id"}}
+                if key not in {ConfigManager.USE_CLUSTER, "--nodes", "--ntasks", "--mem", "user-id"}]
 
     def get_slurm_userid(self):
-        if "user-id" not in self.config["SLURM"]:
+        if "user-id" not in self.config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]
 

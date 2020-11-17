@@ -1,6 +1,6 @@
 import os
 from time import sleep
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from plumbum.machines.local import LocalCommand, LocalMachine
 
 
@@ -10,7 +10,7 @@ class SLURMCaller:
     FAILED_ID = "failed-job-id"
 
     def __init__(self, user_id: str, wdir: str, threads: str, cmd: LocalCommand, config_data: Dict[str, str],
-                 _local: LocalMachine, slurm_flags: List[str]):
+                 _local: LocalMachine, slurm_flags: List[Tuple[str, str]]):
         """
 
         :param user_id: User id for running slurm job
@@ -43,6 +43,9 @@ class SLURMCaller:
     def __repr__(self):
         return self.__str__()
 
+    def kill_process(self):
+        self.local["scancel"][self.job_id]()
+
     # Run script written
     def launch_script(self):
         log_line = str(self.local["sbatch"][self.script]()).split()
@@ -52,7 +55,7 @@ class SLURMCaller:
 
     # Call squeue using user id and check if created job id is present
     def is_running(self) -> bool:
-        return self.running and self.job_id in str(self.local["squeue"]["-u", self.user_id]).rstrip("\r\n")
+        return self.running and self.job_id in str(self.local["squeue"]["-u", self.user_id]())
 
     # Parse output from sbatch to see if job id was adequately created
     def has_launched(self, log_line: str) -> bool:
@@ -80,7 +83,7 @@ class SLURMCaller:
         fp.write(SLURMCaller.create_header_line("--time", self.config["TIME"]))
         # Write additional header lines passed in by user
         for added_arg in self.added_flags:
-            fp.write(SLURMCaller.create_header_line(*added_arg.split("=")))
+            fp.write(SLURMCaller.create_header_line(*added_arg))
         fp.write("\n")
         # Write command to run
         fp.write("".join((str(self.cmd), "\n")))
@@ -93,5 +96,9 @@ class SLURMCaller:
     # Call will run script using sbatch and periodically check for when to stop running
     def __call__(self, *args, **kwargs):
         self.launch_script()
-        while self.is_running():
-            sleep(600)  # Wait 10 minutes in between checking if still running
+        try:
+            while self.is_running():
+                sleep(60)  # Wait 1 minute in between checking if still running
+        except KeyboardInterrupt:
+            # Kill launched processes
+            self.kill_process()
