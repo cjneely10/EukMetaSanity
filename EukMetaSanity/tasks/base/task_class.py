@@ -7,10 +7,10 @@ from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.utils.path_manager import PathManager
-from EukMetaSanity.utils.config_manager import ConfigManager
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
 from EukMetaSanity.tasks.manager.slurm_caller import SLURMCaller
+from EukMetaSanity.utils.config_manager import ConfigManager, MissingDataError
 
 """
 Task: Class that manages and handles working directory to complete an operation
@@ -151,7 +151,17 @@ class Task(ABC):
         print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-            cmd = SLURMCaller(self.wdir, cmd, self.config, self.local, self.cfg.get_slurm_flagged_arguments())
+            if ConfigManager.MEMORY not in self.cfg.config.get("SLURM") or ConfigManager.TIME not in self.cfg.config.get("SLURM"):
+                raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
+            cmd = SLURMCaller(
+                self.cfg.config["SLURM"]["user-id"],
+                self.wdir,
+                str(self._threads_pw),
+                cmd,
+                self.config,
+                self.local,
+                self.cfg.get_slurm_flagged_arguments()
+            )
         # Run command directly
         logging.info(str(cmd))
         if self.mode == 1:

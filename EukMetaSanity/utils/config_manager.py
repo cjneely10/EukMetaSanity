@@ -30,6 +30,10 @@ class ConfigManager:
     WORKERS = "WORKERS"
     # Threads per worker
     THREADS = "THREADS"
+    # Memory assigned per worker
+    MEMORY = "MEMORY"
+    # Time allotted for job
+    TIME = "TIME"
     # # Protocols for running a choice of a program
     PROTOCOL = "PROTOCOL"
     # # slurm identifiers
@@ -79,7 +83,12 @@ class ConfigManager:
     def get_slurm_flagged_arguments(self):
         return {key: val for key, val in self.config["SLURM"].items()
                 # if key not in {ConfigManager.USE_CLUSTER, "FLAGS"}}
-                if key not in {ConfigManager.USE_CLUSTER, "jobs", "cores", "FLAGS"}}
+                if key not in {ConfigManager.USE_CLUSTER, "--nodes", "--ntasks", "--mem", "user-id"}}
+
+    def get_slurm_userid(self):
+        if "user-id" not in self.config["SLURM"]:
+            raise MissingDataError("SLURM section missing required user data")
+        return self.config["SLURM"]["user-id"]
 
     def get_FLAGS(self, _dict_name):
         return [val for val in [def_key.lstrip(" ").rstrip(" ")
