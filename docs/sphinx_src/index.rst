@@ -1,5 +1,5 @@
 .. EukMetaSanity documentation master file, created by
-   sphinx-quickstart on Mon Nov 16 21:00:19 2020.
+   sphinx-quickstart on Mon Nov 16 21:38:02 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -10,7 +10,9 @@ Welcome to EukMetaSanity's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: EukMetaSanity.tasks.manager.slurm_caller
+SlurmCaller
+===========
+.. autoclass:: EukMetaSanity.tasks.manager.slurm_caller.SLURMCaller
 
 
 
