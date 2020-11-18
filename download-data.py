@@ -114,7 +114,7 @@ def run(ap: ArgParse, out_dir: str):
 
 
 def _generate_config_files(_file_names: List[str], _replace_strings: List[str], _threads: int, _outdir: str):
-    _config_directory = os.path.join(os.path.dirname(__file__), "config")
+    _config_directory = os.path.join(os.path.dirname(__file__), "EukMetaSanity/config")
     for _config_file in os.listdir(_config_directory):
         _new_file = os.path.join(_outdir, os.path.basename(_config_file))
         cp[os.path.join(_config_directory, _config_file), _new_file]()
