@@ -30,7 +30,8 @@ class TaxonomyIter(TaskList):
                     "createdb",
                     self.input[0],  # Input FASTA file
                     seq_db,  # Output FASTA sequence db
-                ]
+                ],
+                "10:00"
             )
             # Run taxonomy search
             self.log_and_run(
@@ -53,7 +54,8 @@ class TaxonomyIter(TaskList):
                     self.data,  # Input OrthoDB
                     tax_db,  # Input tax db
                     tax_report
-                ]
+                ],
+                "30:00"
             )
 
         @staticmethod

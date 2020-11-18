@@ -3,10 +3,10 @@ import logging
 from abc import ABC
 from plumbum import local, BG
 from dask.distributed import Client, wait
-from typing import Dict, List, Tuple, Callable
 from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.utils.path_manager import PathManager
+from typing import Dict, List, Tuple, Callable, Optional
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
 from EukMetaSanity.tasks.manager.slurm_caller import SLURMCaller
@@ -147,11 +147,11 @@ class Task(ABC):
         return self._output_paths
 
     # Function logs and runs dask command
-    def log_and_run(self, cmd: LocalCommand):
+    def log_and_run(self, cmd: LocalCommand, time_override: Optional[str] = None):
         print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
-            if ConfigManager.MEMORY not in self.config.keys() or ConfigManager.TIME not in self.config.keys():
+            if ConfigManager.MEMORY not in self.config.keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
             cmd = SLURMCaller(
                 self.cfg.config["SLURM"]["user-id"],
@@ -160,7 +160,8 @@ class Task(ABC):
                 cmd,
                 self.config,
                 self.local,
-                self.cfg.get_slurm_flagged_arguments()
+                self.cfg.get_slurm_flagged_arguments(),
+                time_override
             )
         # Run command directly
         logging.info(str(cmd))

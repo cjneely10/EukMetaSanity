@@ -43,7 +43,8 @@ class RepeatsIter(TaskList):
                     self.input[1],
                     os.path.join(self.wdir, self.record_id),
                     "--threads", self.threads,
-                ]
+                ],
+                "10:00"
             )
             _fasta_output = os.path.join(self.wdir, "".join((self.record_id, "-mask_db")))
             # Output as FASTA file
@@ -52,7 +53,8 @@ class RepeatsIter(TaskList):
                     "convert2fasta",
                     os.path.join(self.wdir, self.record_id),
                     _fasta_output,
-                ]
+                ],
+                "10:00"
             )
             return _fasta_output
 
@@ -76,7 +78,8 @@ class RepeatsIter(TaskList):
                 self.program_builddatabase[
                     "-name", _name,
                     self.input[0],
-                ]
+                ],
+                "10:00"
             )
             new_path = os.path.join(self.wdir, "run.sh")
             self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir]()
@@ -165,11 +168,9 @@ class RepeatsIter(TaskList):
                     os.path.join(self.wdir, "".join((self.record_id, "-mask.fna")))
                 )
                 # Output the repeats file as a gff3 file
-                self.log_and_run(
-                    self.program_rmouttogff3[
+                (self.program_rmouttogff3[
                         os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
-                    ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3")
-                )
+                    ] > os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3"))()
             else:
                 shutil.copy(
                     input_file,

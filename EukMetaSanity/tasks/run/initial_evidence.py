@@ -59,7 +59,8 @@ class EvidenceIter(TaskList):
                                 self.input[3], 0, self.level,  # Allow for level override by user
                             )[1],
                             "--threads", self.threads,
-                        ]
+                        ],
+                        "30:00"
                     )
                 # Run metaeuk
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
@@ -77,18 +78,14 @@ class EvidenceIter(TaskList):
                         ]
                     )
                 # Convert to GFF3
-                self.log_and_run(
-                    self.local["fasta-to-gff3.py"][
-                        self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
-                    ]
-                )
+                self.local["fasta-to-gff3.py"][
+                    self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
+                ]()
                 out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
-            self.log_and_run(
-                self.program_gffread[
-                    (*out_results), "-G", "--cluster-only",
-                    "-o", os.path.join(self.wdir, "metaeuk.gff3")
-                ]
-            )
+            self.program_gffread[
+                (*out_results), "-G", "--cluster-only",
+                "-o", os.path.join(self.wdir, "metaeuk.gff3")
+            ]()
             # Merge final results
             EvidenceIter.Evidence.merge(
                 self, [self.input[0], *out_results],
@@ -99,18 +96,14 @@ class EvidenceIter(TaskList):
         @staticmethod
         def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str):
             # Convert to gff3 file
-            task_object.log_and_run(
-                task_object.program_gffread[
-                    (*input_list), "-G", "--merge",
-                    "-o", out_prefix + ".all.gff3"
-                ]
-            )
+            task_object.program_gffread[
+                (*input_list), "-G", "--merge",
+                "-o", out_prefix + ".all.gff3"
+            ]()
             # Replace transcripts with gene identifier and write cds/aa sequences
-            task_object.log_and_run(
-                task_object.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3"
-                ]
-            )
+            task_object.local["create-final-annotations.py"][
+                "-f", fasta_file, "-g", out_prefix + ".all.gff3"
+            ]()
             os.replace(
                 out_prefix + ".all.nr.gff3",
                 out_prefix + ".nr.gff3",
