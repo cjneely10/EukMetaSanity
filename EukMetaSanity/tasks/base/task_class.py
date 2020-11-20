@@ -313,12 +313,10 @@ class TaskList(ABC):
                 # Generate link of path, or create copy as requested
                 elif isinstance(_file, str):
                     if os.path.exists(_file):
-                        _task.log_and_run(
-                            _task.program[
-                                (*_task.added_flags),
-                                _file, _sub_out,
-                            ]
-                        )
+                        _task.program[
+                            (*_task.added_flags),
+                            _file, _sub_out,
+                        ]()
         _paths_output_file.close()
 
 
