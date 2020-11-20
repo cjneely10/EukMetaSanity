@@ -247,7 +247,6 @@ class AbInitioIter(TaskList):
                 subset_db_outpath,
                 _fasta_output,
             ]()
-            self.local["rm"][subset_db_outpath + "*"]()
             # Run prothint
             self.log_and_run(
                 self.program_prothint[
@@ -257,7 +256,6 @@ class AbInitioIter(TaskList):
                     "--threads", self.threads,
                 ]
             )
-            self.local["rm"][_fasta_output]()
             # Edit in proper locations
             self.local["sed"][
                 "-i", "s/%s/%s/g" % (
