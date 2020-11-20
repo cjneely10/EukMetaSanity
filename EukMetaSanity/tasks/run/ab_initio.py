@@ -247,6 +247,7 @@ class AbInitioIter(TaskList):
                 subset_db_outpath,
                 _fasta_output,
             ]()
+            self.local["rm"][subset_db_outpath + "*"]()
             # Run prothint
             self.log_and_run(
                 self.program_prothint[
@@ -256,6 +257,7 @@ class AbInitioIter(TaskList):
                     "--threads", self.threads,
                 ]
             )
+            self.local["rm"][_fasta_output]()
             # Edit in proper locations
             self.local["sed"][
                 "-i", "s/%s/%s/g" % (
@@ -265,7 +267,7 @@ class AbInitioIter(TaskList):
                         "--sequence", self.input[0].replace("/", "\/"),
                         "--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
                         "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/"),
-                        "--cores", self.threads, (*[v for v in self.added_flags if v != "--split-memory-limit"]),
+                        "--cores", self.threads, (*self.added_flags),
                         ("--fungus" if "fungi" == tax[0] else "")
                     ))
                 ), new_path
