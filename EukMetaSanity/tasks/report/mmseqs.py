@@ -33,7 +33,8 @@ class MMseqsIter(TaskList):
                         "createdb",
                         self.input[0],
                         _file_db,
-                    ]
+                    ],
+                    "20:00"
                 )
             # Search through each database
             for db in self.data.split(","):
@@ -44,7 +45,8 @@ class MMseqsIter(TaskList):
                             "createdb",
                             self.input[2],
                             _file_db,
-                        ]
+                        ],
+                        "20:00"
                     )
                 search_prog = "search"
                 added_flags = self.added_flags
@@ -83,7 +85,8 @@ class MMseqsIter(TaskList):
                         _out_db,  # Input tax db
                         _out_db[:-3] + ".%s-m8" % os.path.basename(os.path.splitext(db)[0]),  # Output results file
                         "--threads", self.threads,
-                    ]
+                    ],
+                    "2:00:00"
                 )
 
     def __init__(self, *args, **kwargs):

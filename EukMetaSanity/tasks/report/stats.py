@@ -21,14 +21,12 @@ class ReportStatsIter(TaskList):
         def run_1(self):
             # Determine the prefixes to assign to each file based on type
             # Run summary script
-            self.log_and_run(
-                self.local["summarize_annotations.py"][
-                    "-f", self.input[0],
-                    "-a", (*self.parse_input()),
-                    "-o", os.path.join(self.wdir, self.record_id),
-                    "-e", self.max_evalue,
-                ]
-            )
+            self.local["summarize_annotations.py"][
+                "-f", self.input[0],
+                "-a", (*self.parse_input()),
+                "-o", os.path.join(self.wdir, self.record_id),
+                "-e", self.max_evalue,
+            ]()
 
         def parse_input(self) -> List[str]:
             _out = []

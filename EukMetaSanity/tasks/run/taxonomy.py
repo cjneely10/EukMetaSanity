@@ -25,14 +25,11 @@ class TaxonomyIter(TaskList):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             seq_db = self.output[1]
             # Create sequence database
-            self.log_and_run(
-                self.program[
-                    "createdb",
-                    self.input[0],  # Input FASTA file
-                    seq_db,  # Output FASTA sequence db
-                ],
-                "10:00"
-            )
+            self.program[
+                "createdb",
+                self.input[0],  # Input FASTA file
+                seq_db,  # Output FASTA sequence db
+            ]()
             # Run taxonomy search
             self.log_and_run(
                 self.program[
@@ -48,15 +45,12 @@ class TaxonomyIter(TaskList):
             # Tax report path
             tax_report = os.path.join(self.wdir, "tax-report.txt")
             # Output results
-            self.log_and_run(
-                self.program[
-                    "taxonomyreport",
-                    self.data,  # Input OrthoDB
-                    tax_db,  # Input tax db
-                    tax_report
-                ],
-                "30:00"
-            )
+            self.program[
+                "taxonomyreport",
+                self.data,  # Input OrthoDB
+                tax_db,  # Input tax db
+                tax_report
+            ]()
 
         @staticmethod
         def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> Tuple[str, int]:

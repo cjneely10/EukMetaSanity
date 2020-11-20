@@ -27,12 +27,10 @@ class FindRNAIter(TaskList):
                 ] > os.path.join(self.wdir, self.record_id + ".cmscan")
             )
             # Save non-overlapping hits
-            self.log_and_run(
-                self.local["grep"][
+            (self.local["grep"][
                     "-v", " = ",
                     os.path.join(self.wdir, self.record_id + ".all.tblout")
-                ] > os.path.join(self.wdir, self.record_id + ".rfam")
-            )
+                ] > os.path.join(self.wdir, self.record_id + ".rfam"))()
 
         @staticmethod
         def calculate_z(fasta_file: str) -> float:

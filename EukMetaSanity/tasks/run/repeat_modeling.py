@@ -48,14 +48,11 @@ class RepeatsIter(TaskList):
             )
             _fasta_output = os.path.join(self.wdir, "".join((self.record_id, "-mask_db")))
             # Output as FASTA file
-            self.log_and_run(
-                self.program_mmseqs[
-                    "convert2fasta",
-                    os.path.join(self.wdir, self.record_id),
-                    _fasta_output,
-                ],
-                "10:00"
-            )
+            self.program_mmseqs[
+                "convert2fasta",
+                os.path.join(self.wdir, self.record_id),
+                _fasta_output,
+            ]()
             return _fasta_output
 
         # Mask only with tax-matches
@@ -74,13 +71,10 @@ class RepeatsIter(TaskList):
                 return self.input[0]
             # Build database
             _name = os.path.join(self.wdir, self.record_id)
-            self.log_and_run(
-                self.program_builddatabase[
-                    "-name", _name,
-                    self.input[0],
-                ],
-                "10:00"
-            )
+            self.program_builddatabase[
+                "-name", _name,
+                self.input[0],
+            ]()
             new_path = os.path.join(self.wdir, "run.sh")
             self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir]()
             self.local["sed"][
@@ -150,17 +144,15 @@ class RepeatsIter(TaskList):
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
             all([
                 (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
-                for rep_dir in repeats_dirs
+                for rep_dir in repeats_dirs if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat"))))
             ])
             # Run ProcessRepeats
-            self.log_and_run(
-                self.program_process_repeats[
-                    # Input taxonomy from OrthoDB search
-                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
-                    "-maskSource", input_file,
-                    final_out,
-                ]
-            )
+            self.program_process_repeats[
+                # Input taxonomy from OrthoDB search
+                "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
+                "-maskSource", input_file,
+                final_out,
+            ]()
             if os.path.exists(input_file + ".masked"):
                 # Rename output file
                 os.replace(

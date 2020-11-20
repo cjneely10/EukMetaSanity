@@ -105,7 +105,10 @@ class AbInitioIter(TaskList):
                         self.data,  # Input augustus-db
                         tax_db,  # Output tax db
                         os.path.join(self.wdir, "tmp"),
-                        (*self.added_flags),
+                        "-c", "0.6",
+                        "--cov-mode", "0",
+                        "-e", "0.01",
+                        "--remove-tmp-files",
                         "--threads", self.threads,
                     ]
                 )
@@ -119,7 +122,8 @@ class AbInitioIter(TaskList):
                         tax_db + ".m8",  # Output results file
                         "--threads", self.threads,
                         "--format-output", "query,target,pident,taxid,taxname,taxlineage",
-                    ]
+                    ],
+                    "2:00:00"
                 )
             # Return optimal taxonomy
             augustus_ids_dict = augustus_taxon_ids()
@@ -143,30 +147,24 @@ class AbInitioIter(TaskList):
                 shutil.rmtree(config_dir)
             # Parse to genbank
             out_gb = os.path.join(self.wdir, AbInitioIter.AbInitio._out_path(_file, ".%i.gb" % _round))
-            self.log_and_run(
-                self.local["gff2gbSmallDNA.pl"][
-                    out_gff,
-                    _file,
-                    "1000",
-                    out_gb
-                ]
-            )
+            self.local["gff2gbSmallDNA.pl"][
+                out_gff,
+                _file,
+                "1000",
+                out_gb
+            ]()
 
             species_config_prefix = self.record_id + str(_round)
             # Write new species config file
-            self.log_and_run(
-                self.program_new_species_pl[
-                    "--species=%s" % species_config_prefix,
-                    out_gb
-                ]
-            )
+            self.program_new_species_pl[
+                "--species=%s" % species_config_prefix,
+                out_gb
+            ]()
             # Run training
-            self.log_and_run(
-                self.program_etraining[
-                    "--species=%s" % species_config_prefix,
-                    out_gb
-                ]
-            )
+            self.program_etraining[
+                "--species=%s" % species_config_prefix,
+                out_gb
+            ]()
             return out_gff
 
         @staticmethod
@@ -240,16 +238,15 @@ class AbInitioIter(TaskList):
                     subset_db_outpath,
                     "--taxon-list", tax[1],
                     "--threads", self.threads,
-                ]
+                ],
+                "1:00:00"
             )
             # Output as FASTA file
-            self.log_and_run(
-                self.program_mmseqs[
-                    "convert2fasta",
-                    subset_db_outpath,
-                    _fasta_output,
-                ]
-            )
+            self.program_mmseqs[
+                "convert2fasta",
+                subset_db_outpath,
+                _fasta_output,
+            ]()
             # Run prothint
             self.log_and_run(
                 self.program_prothint[
@@ -268,7 +265,7 @@ class AbInitioIter(TaskList):
                         "--sequence", self.input[0].replace("/", "\/"),
                         "--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
                         "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/"),
-                        "--cores", self.threads, (*self.added_flags),
+                        "--cores", self.threads, (*[v for v in self.added_flags if v != "--split-memory-limit"]),
                         ("--fungus" if "fungi" == tax[0] else "")
                     ))
                 ), new_path
@@ -276,12 +273,10 @@ class AbInitioIter(TaskList):
             # Run script
             self.log_and_run(self.local[new_path][self.wdir])
             # Move program to match required output name
-            self.log_and_run(
-                self.program_gffread[
-                    os.path.join(self.wdir, "genemark.gtf"), "-G",
-                    "-o", self.output[0]
-                ]
-            )
+            self.program_gffread[
+                os.path.join(self.wdir, "genemark.gtf"), "-G",
+                "-o", self.output[0]
+            ]()
             self.local["sed"][
                 "-i", "s/GeneMark.hmm/ab-initio/g",
                 self.output[0]
