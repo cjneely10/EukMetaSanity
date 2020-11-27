@@ -27,3 +27,4 @@ dependencies:
   - perl-logger-simple=2.0
   - perl-parallel-forkmanager=2.02
   - perl-threaded=5.26.0
+  - networkx=2.2

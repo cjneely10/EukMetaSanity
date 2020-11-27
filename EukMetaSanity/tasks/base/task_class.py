@@ -8,8 +8,8 @@ from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.utils.path_manager import PathManager
 from typing import Dict, List, Tuple, Callable, Optional
 from plumbum.commands.processes import ProcessExecutionError
+from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from plumbum.machines.local import LocalCommand, LocalMachine
-from EukMetaSanity.tasks.manager.slurm_caller import SLURMCaller
 from EukMetaSanity.utils.config_manager import ConfigManager, MissingDataError
 
 """
