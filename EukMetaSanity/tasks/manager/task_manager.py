@@ -1,7 +1,9 @@
 from typing import Dict, List, Type
-from EukMetaSanity.tasks.base.task_class import TaskList
+
 # General imports
+from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.summarize import SummarizeIter
+from EukMetaSanity.tasks.base.dependency_graph import DependencyGraph
 # Run imports
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.run.ab_initio import AbInitioIter
@@ -25,7 +27,7 @@ Class handles ordering of tasks to complete
 
 class TaskManager:
     def __init__(self):
-        self._programs = {
+        self.programs: Dict[str, List[Type[TaskList]]] = {
             "run": [
                 TaxonomyIter,
                 RepeatsIter,
@@ -52,9 +54,8 @@ class TaskManager:
             "refine": ["mask", "tax", "fna", "abinitio", "metaeuk"],
         }
 
-    @property
-    def programs(self) -> Dict[str, List[Type[TaskList]]]:
-        return self._programs
+    def sorted_programs(self, prog_name: str):
+        return DependencyGraph(self.programs[prog_name]).sorted_tasks()
 
     @property
     def input_type(self):

@@ -87,7 +87,7 @@ def _parse_args(ap: ArgParse, tm: TaskManager) -> Tuple[ConfigManager, bool]:
     if ap.args.fasta_directory[-3:] == "tsv":
         is_continued = True
     # Ensure command is valid
-    assert ap.args.command in tm.programs
+    assert ap.args.command in tm.programs.keys()
     if ap.args.debug is True:
         ap.args.debug = 0
     else:
@@ -127,7 +127,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager)
 
     # # Begin task list
     # Generate first task from list
-    task_list = tm.programs[ap.args.command]
+    task_list = tm.sorted_programs(ap.args.command)
     task = task_list[0](cfg, input_files, pm, input_prefixes, ap.args.debug)
     for i in range(1, len(task_list)):
         # Run task

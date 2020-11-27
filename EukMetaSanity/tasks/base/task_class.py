@@ -36,8 +36,8 @@ class OutputResultsFileError(FileNotFoundError):
 class Task(ABC):
     def __init__(self, input_path_list: List[str], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int):
-        # Store passed input flag:input_path dict
         self._name = db_name
+        # Store passed input flag:input_path dict
         self._input_path_list = input_path_list
         # Instantiate output dict variable
         self._output_paths: List[object] = []
@@ -108,10 +108,6 @@ class Task(ABC):
         return self._input_path_list
 
     @property
-    def mode(self) -> int:
-        return self._mode
-
-    @property
     def record_id(self) -> str:
         return self._record_id
 
@@ -165,7 +161,7 @@ class Task(ABC):
             )
         # Run command directly
         logging.info(str(cmd))
-        if self.mode == 1:
+        if self._mode == 1:
             logging.info(cmd())
 
     def batch(self, cmds: List[LocalCommand]):
@@ -176,7 +172,7 @@ class Task(ABC):
                     break
                 print("  " + str(cmds[j]))
                 logging.info(str(cmds[j]))
-                if self.mode == 1:
+                if self._mode == 1:
                     f = cmds[j] & BG
                     running.append(f)
             all([_f.wait() for _f in running])
@@ -213,7 +209,7 @@ class TaskList(ABC):
                  record_ids: List[str], mode: int):
         # Call data function for pertinent info
         dt = Data(cfg, name)
-        name, _, statement = getattr(dt, dt.name)()
+        self.name, _, statement = getattr(dt, dt.name)()
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement
@@ -239,18 +235,16 @@ class TaskList(ABC):
         self._pm = pm
         # Single(0) or Threaded(1) mode
         self._mode = mode
+        # Empty list of dependencies to meet as base
+        self._requires: List[str] = []
 
     @property
-    def cfg(self):
-        return self._cfg
+    def requires(self) -> List[str]:
+        return self._requires
 
-    @property
-    def pm(self):
-        return self._pm
-
-    @property
-    def tasks(self):
-        return self._tasks
+    @requires.setter
+    def requires(self, v: List[str]):
+        self._requires = v
 
     def run(self):
         # Single
@@ -273,9 +267,9 @@ class TaskList(ABC):
     def output(self) -> Tuple[ConfigManager, List[List[object]], PathManager, List[str], int]:
         # Run task list
         return (
-            self.cfg,
+            self._cfg,
             [task.results() for task in self._tasks],  # Output files using required Data object
-            self.pm,
+            self._pm,
             [task.record_id for task in self._tasks],
             self._mode,
         )
@@ -289,7 +283,7 @@ class TaskList(ABC):
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s-paths_summary.tsv" % _name), "w")
-        for _files, _file_prefix, _task in zip(_output_files_list, _files_prefixes, self.tasks):
+        for _files, _file_prefix, _task in zip(_output_files_list, _files_prefixes, self._tasks):
             # Create subdirectory
             _sub_out = os.path.join(_final_output_dir, _file_prefix)
             if not os.path.exists(_sub_out):
