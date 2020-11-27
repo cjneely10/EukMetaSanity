@@ -1,10 +1,9 @@
 import os
 from typing import List, Dict, Optional, Type
-from EukMetaSanity.tasks.base.task_class import TaskList
-from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
+from EukMetaSanity.utils.path_manager import PathManager
 from EukMetaSanity.utils.config_manager import ConfigManager
 from EukMetaSanity.tasks.base.dependency_graph import DependencyGraph
-from EukMetaSanity.utils.path_manager import PathManager
+from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 
 class TaskManager:

@@ -19,7 +19,8 @@ class {0}Iter(TaskList):
             pass
             
     def __init__(self, *args, **kwargs):
-        super().__init__({0}Iter.{0}, "{1}", [], 
+        super().__init__({0}Iter.{0}, "{1}", 
+                         [], 
                          *args, **kwargs)
 
 
