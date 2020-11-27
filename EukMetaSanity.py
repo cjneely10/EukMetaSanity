@@ -8,18 +8,13 @@ from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.utils.path_manager import PathManager
 from EukMetaSanity.utils.config_manager import ConfigManager
-from EukMetaSanity.tasks.manager.task_manager import TaskManager
+from EukMetaSanity.tasks.base.task_manager import TaskManager
+from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 """
 EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 """
-
-
-# # Helper functions
-# File prefix
-def _prefix(_file: str) -> str:
-    return os.path.basename(os.path.splitext(_file)[0])
 
 
 # Logging initialize
@@ -76,8 +71,41 @@ def _get_list_of_files(summary_file: str, file_types: List[str]) -> List[List[st
         return out
 
 
+# # Driver logic
+def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineManager):
+    # Generate primary path manager
+    pm = PathManager(ap.args.output)
+    # Begin logging
+    _initialize_logging(ap)
+    # Gather list of files to analyze
+    if is_continued:
+        # Gather from existing data
+        for f in (logging.info, print):
+            f("Getting files from last run...")
+        input_files = _get_list_of_files(
+            ap.args.fasta_directory,
+            tpm.input_type[ap.args.command],
+        )
+        input_prefixes = [os.path.basename(os.path.splitext(_file[0])[0]) for _file in input_files]
+    else:
+        for f in (logging.info, print):
+            f("Creating working directory")
+            f("Simplifying FASTA sequences")
+        # Simplify FASTA files into working directory
+        pm.add_dirs("MAGS")
+        input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
+        # List of prefixes for tracking each file's progress
+        input_prefixes = [os.path.basename(os.path.splitext(_file)[0]) for _file in input_files]
+        # Create base dir for each file to analyze
+        all([pm.add_dirs(_file) for _file in input_prefixes])
+
+    # # Begin task list
+    tm = TaskManager(tpm, cfg, pm, input_files, input_prefixes, ap.args.debug, ap.args.command)
+    tm.run(ap.args.output)
+
+
 # Parse user arguments
-def _parse_args(ap: ArgParse, tm: TaskManager) -> Tuple[ConfigManager, bool]:
+def _parse_args(ap: ArgParse, tm: PipelineManager) -> Tuple[ConfigManager, bool]:
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
     is_continued = False
@@ -97,53 +125,11 @@ def _parse_args(ap: ArgParse, tm: TaskManager) -> Tuple[ConfigManager, bool]:
     return ConfigManager(ap.args.config_file), is_continued
 
 
-# # Driver logic
-def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tm: TaskManager):
-    # Generate primary path manager
-    pm = PathManager(ap.args.output)
-    # Begin logging
-    _initialize_logging(ap)
-    # Gather list of files to analyze
-    if is_continued:
-        # Gather from existing data
-        for f in (logging.info, print):
-            f("Getting files from last run...")
-        input_files = _get_list_of_files(
-            ap.args.fasta_directory,
-            tm.input_type[ap.args.command],
-        )
-        input_prefixes = [_prefix(_file[0]) for _file in input_files]
-    else:
-        for f in (logging.info, print):
-            f("Creating working directory")
-            f("Simplifying FASTA sequences")
-        # Simplify FASTA files into working directory
-        pm.add_dirs("MAGS")
-        input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
-        # List of prefixes for tracking each file's progress
-        input_prefixes = [_prefix(_file) for _file in input_files]
-        # Create base dir for each file to analyze
-        all([pm.add_dirs(_file) for _file in input_prefixes])
-
-    # # Begin task list
-    # Generate first task from list
-    task_list = tm.sorted_programs(ap.args.command)
-    task = task_list[0](cfg, input_files, pm, input_prefixes, ap.args.debug)
-    for i in range(1, len(task_list)):
-        # Run task
-        task.run()
-        task = task_list[i](*task.output())
-    # Must call output on last task to generate final summary statistics
-    task.run()
-    # Create summary using final Summarize task
-    task.summarize(os.path.join(ap.args.output, "results", ap.args.command), ap.args.command)
-
-
 if __name__ == "__main__":
     # Redirect dask nanny errors
     signal(SIGPIPE, SIG_DFL)
     DEFAULT_EXTS = ".fna/.fasta/.fa"
-    _tm = TaskManager()
+    _tm = PipelineManager()
     _ap = ArgParse(
         (
             (("command",),

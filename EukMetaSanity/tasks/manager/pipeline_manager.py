@@ -1,5 +1,4 @@
 from typing import Dict, List, Type
-
 # General imports
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.summarize import SummarizeIter
@@ -25,7 +24,7 @@ Class handles ordering of tasks to complete
 """
 
 
-class TaskManager:
+class PipelineManager:
     def __init__(self):
         self.programs: Dict[str, List[Type[TaskList]]] = {
             "run": [
@@ -53,9 +52,6 @@ class TaskManager:
             "report": ["prot", "nr_gff3", "fna"],
             "refine": ["mask", "tax", "fna", "abinitio", "metaeuk"],
         }
-
-    def sorted_programs(self, prog_name: str):
-        return DependencyGraph(self.programs[prog_name]).sorted_tasks()
 
     @property
     def input_type(self):

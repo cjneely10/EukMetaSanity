@@ -19,7 +19,8 @@ class {0}Iter(TaskList):
             pass
             
     def __init__(self, *args, **kwargs):
-        super().__init__({0}Iter.{0}, "{1}", *args, **kwargs)
+        super().__init__({0}Iter.{0}, "{1}", [], 
+                         *args, **kwargs)
 
 
 if __name__ == "__main_":
@@ -36,7 +37,7 @@ def create_file(file_path: str, name: str, cfg_name: str):
 if __name__ == "__main__":
     ap = ArgParse(
         (
-            (("name",),
+            (("class_name",),
              {"help": "Name of class to create"}),
             (("config_name",),
              {"help": "Matching config file section name"}),
@@ -45,4 +46,4 @@ if __name__ == "__main__":
         ),
         description="Create new EukMetaSanity class"
     )
-    create_file(ap.args.path, ap.args.name, ap.args.config_name)
+    create_file(ap.args.path, ap.args.class_name, ap.args.config_name)

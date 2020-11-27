@@ -34,11 +34,11 @@ class OutputResultsFileError(FileNotFoundError):
 
 
 class Task(ABC):
-    def __init__(self, input_path_list: List[str], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_data: Dict[str, List[object]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int):
         self._name = db_name
         # Store passed input flag:input_path dict
-        self._input_path_list = input_path_list
+        self._input_data = input_data
         # Instantiate output dict variable
         self._output_paths: List[object] = []
         # Store threads and workers
@@ -57,6 +57,7 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
+        self.is_skip = getattr(self, "skip", "False") != "False"
         super().__init__()
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
@@ -104,8 +105,8 @@ class Task(ABC):
         self._output_paths = v
 
     @property
-    def input(self) -> List[str]:
-        return self._input_path_list
+    def input(self) -> Dict[str, List[object]]:
+        return self._input_data
 
     @property
     def record_id(self) -> str:
@@ -131,14 +132,12 @@ class Task(ABC):
     def results(self) -> List[object]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
-        if getattr(self, "skip", "False") != "False":
-            return self._input_path_list
         for _path in self._output_paths:
             if isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
                     touch(_path)
-                else:
+                elif not self.is_skip:
                     raise OutputResultsFileError(_path)
         return self._output_paths
 
@@ -179,7 +178,7 @@ class Task(ABC):
 
     def run(self) -> None:
         # Check if task has completed based on provided output data
-        if getattr(self, "skip", "False") != "False":
+        if self.is_skip:
             return
         completed = True
         for _path in self._output_paths:
@@ -205,11 +204,13 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, new_task: type, name: str, cfg: ConfigManager, input_paths: List[List[str]], pm: PathManager,
-                 record_ids: List[str], mode: int):
+    def __init__(self, new_task: type, name: str, requires_list: List[str], cfg: ConfigManager,
+                 input_paths: List[List[str]], pm: PathManager, record_ids: List[str], mode: int):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         self.name, _, statement = getattr(dt, dt.name)()
+        # Empty list of dependencies to meet as base
+        self.requires: List[str] = requires_list
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement
@@ -235,16 +236,6 @@ class TaskList(ABC):
         self._pm = pm
         # Single(0) or Threaded(1) mode
         self._mode = mode
-        # Empty list of dependencies to meet as base
-        self._requires: List[str] = []
-
-    @property
-    def requires(self) -> List[str]:
-        return self._requires
-
-    @requires.setter
-    def requires(self, v: List[str]):
-        self._requires = v
 
     def run(self):
         # Single
