@@ -281,6 +281,11 @@ class AbInitioIter(TaskList):
                 "-i", "s/GeneMark.hmm/ab-initio/g",
                 self.output[0]
             ]()
+            self.local["rm"][_fasta_output]()
+            for file in os.listdir(self.wdir):
+                file = os.path.join(self.wdir, file)
+                if subset_db_outpath in file:
+                    self.local["rm"][file]()
 
         @staticmethod
         def update_cfg(in_path: str, replace_tuple: List[Tuple[str, str]], out_path: str):
