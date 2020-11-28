@@ -8,12 +8,12 @@ class MMSeqsCreateDBIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "db": os.getcwd()
+                "db": os.path.join(self.wdir, prefix(str(self.input["root"]["fna"])) + "_db")
             }
 
         @program_catch
         def run(self):
-            self.local["mmseqs"]["createdb"][self.input["root"]["fna"], prefix(str(self.input["root"]["fna"]))]()
+            self.local["mmseqs"]["createdb"][self.input["root"]["fna"], self.output["db"]]()
 
     def __init__(self, *args, **kwargs):
         super().__init__(MMSeqsCreateDBIter.MMSeqsCreateDB, "createdb", [],
