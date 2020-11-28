@@ -206,7 +206,7 @@ class Task(ABC):
 
 class TaskList(ABC):
     def __init__(self, new_task: type, name: str, requires_list: List[str], cfg: ConfigManager,
-                 input_paths: List[List[str]], pm: PathManager, record_ids: List[str], mode: int):
+                 input_paths: List[Dict[str, Dict[str, object]]], pm: PathManager, record_ids: List[str], mode: int):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         self.name, _, statement = getattr(dt, dt.name)()
@@ -219,7 +219,7 @@ class TaskList(ABC):
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
-                (input_path if isinstance(input_path, list) else [input_path]),
+                input_path,
                 cfg,
                 pm,
                 record_id,

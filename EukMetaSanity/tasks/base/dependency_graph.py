@@ -1,5 +1,5 @@
 import networkx as nx
-from typing import List
+from typing import List, Type
 from EukMetaSanity.tasks.base.task_class import TaskList
 
 """
@@ -30,6 +30,6 @@ class DependencyGraph:
             for dependency in task_list.requires:
                 self.graph.add_edge(dependency, task_list.name)
 
-    def sorted_tasks(self):
+    def sorted_tasks(self) -> List[Type[TaskList]]:
         sorted_nodes = list(nx.topological_sort(self.graph))
         return [sorted_nodes[name] for name in sorted_nodes]
