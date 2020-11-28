@@ -2,7 +2,6 @@ from typing import Dict, List, Type
 # General imports
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.summarize import SummarizeIter
-from EukMetaSanity.tasks.base.dependency_graph import DependencyGraph
 # Run imports
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.run.ab_initio import AbInitioIter

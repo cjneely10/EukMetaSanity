@@ -18,7 +18,7 @@ class {0}Iter(TaskList):
             }
             
         @program_catch
-        def run_1(self):
+        def run(self):
             pass
             
     def __init__(self, *args, **kwargs):

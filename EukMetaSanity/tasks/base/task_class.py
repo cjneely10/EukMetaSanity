@@ -1,7 +1,7 @@
 import os
 import logging
-from abc import ABC
 from plumbum import local, BG
+from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
 from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.tasks.utils.helpers import touch
@@ -60,6 +60,10 @@ class Task(ABC):
         # Check if task is set to be skipped in config file
         self.is_skip = getattr(self, "skip", "False") != "False"
         super().__init__()
+
+    @abstractmethod
+    def run(self):
+        pass
 
     def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
         for _path, _value in cfg.config[db_name].items():
@@ -177,7 +181,7 @@ class Task(ABC):
                     running.append(f)
             all([_f.wait() for _f in running])
 
-    def run(self) -> None:
+    def _run(self) -> None:
         # Check if task has completed based on provided output data
         if self.is_skip:
             return
@@ -193,15 +197,7 @@ class Task(ABC):
             logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
             logging.info("%s  Running %s" % (self.record_id, self.name))
-            # Gather all functions of the form run_1, run_2, etc.
-            runnables = sorted(
-                [func for func in dir(self) if func.startswith("run_")],
-                key=lambda _f: int(_f.split("_")[1]),
-            )
-            # Run each function in series
-            for func in runnables:
-                if func.startswith("run_"):
-                    getattr(self, func)()
+            self.run()
 
 
 class TaskList(ABC):
@@ -245,14 +241,14 @@ class TaskList(ABC):
             print(self._statement)
         if self._mode == 0:
             for task in self._tasks:
-                task.run()
+                task._run()
         # Threaded
         else:
             futures = []
             client = Client(n_workers=self._workers, threads_per_worker=1)
             # Run each future
             for _task in self._tasks:
-                futures.append(client.submit(_task.run))
+                futures.append(client.submit(_task._run))
             wait(futures)
             client.close()
 

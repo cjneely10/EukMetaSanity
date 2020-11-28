@@ -27,12 +27,3 @@ class TaskManager:
                 task.input.update({req_str: self.dep_graph.idx[req_str].output})
             task.run()
         task.summarize(os.path.join(output_dir, "results", self.command), self.command)
-        # task = self.task_list[0](self.cfg, self.input_files[0], self.pm, self.input_prefixes[1], self.debug)
-        # for i in range(1, len(self.task_list)):
-        #     # Run task
-        #     task.run()
-        #     task = self.task_list[i](*task.output())
-        # # Must call output on last task to generate final summary statistics
-        # task.run()
-        # # Create summary using final Summarize task
-        # task.summarize(os.path.join(output_dir, "results", self.command), self.command)

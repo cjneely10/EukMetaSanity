@@ -9,7 +9,7 @@ class MMSeqsSearchDBIter(TaskList):
             super().__init__(*args, **kwargs)
             
         @program_catch
-        def run_1(self):
+        def run(self):
             self.local["mmseqs"]["easy-search"][
                 self.input["createdb"]["db"]
             ]()
