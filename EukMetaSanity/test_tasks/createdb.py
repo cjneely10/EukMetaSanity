@@ -13,7 +13,7 @@ class MMSeqsCreateDBIter(TaskList):
 
         @program_catch
         def run_1(self):
-            pass
+            self.local["mmseqs"]["createdb"][self.input["root"]["fna"], prefix(str(self.input["root"]["fna"]))]()
 
     def __init__(self, *args, **kwargs):
         super().__init__(MMSeqsCreateDBIter.MMSeqsCreateDB, "createdb", [],

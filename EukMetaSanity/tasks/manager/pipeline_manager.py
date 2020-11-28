@@ -17,6 +17,9 @@ from EukMetaSanity.tasks.report.stats import ReportStatsIter
 from EukMetaSanity.tasks.refine.rnaseq import RnaSeqIter
 from EukMetaSanity.tasks.refine.braker import BrakerIter
 from EukMetaSanity.tasks.refine.transcriptomes import TranscriptomesIter
+# Test imports
+from EukMetaSanity.test_tasks.createdb import MMSeqsCreateDBIter
+from EukMetaSanity.test_tasks.searchdb import MMSeqsSearchDBIter
 
 """
 Class handles ordering of tasks to complete
@@ -46,6 +49,10 @@ class PipelineManager:
                 TranscriptomesIter,
                 BrakerIter,
                 SummarizeIter,
+            ],
+            "test": [
+                MMSeqsCreateDBIter,
+                MMSeqsSearchDBIter,
             ],
         }
         self._input_type = {

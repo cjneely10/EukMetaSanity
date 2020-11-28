@@ -3,8 +3,8 @@ import os
 import logging
 from Bio import SeqIO
 from pathlib import Path
-from typing import Generator, List, Tuple
 from signal import signal, SIGPIPE, SIG_DFL
+from typing import Generator, List, Tuple, Dict
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.utils.path_manager import PathManager
 from EukMetaSanity.utils.config_manager import ConfigManager
@@ -53,22 +53,24 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str, file_types: List[str]) -> List[List[str]]:
+def _get_list_of_files(summary_file: str, file_types: List[str]) -> Tuple[List[str], List[Dict[str, str]]]:
     file_fp = open(summary_file, "r")
     out = []
+    prefixes = []
     try:
         while True:
-            inner = []
+            inner = {}
             head = next(file_fp).rstrip("\r\n").split()
             line = next(file_fp).rstrip("\r\n").split()
+            prefixes.append(line[0])
             for file_type in file_types:
                 _col_idx = head.index(file_type)
                 _path = str(Path(line[_col_idx]).resolve())
                 assert os.path.exists(_path)
-                inner.append(_path)
+                inner.update({file_type: _path})
             out.append(inner)
     except StopIteration:
-        return out
+        return prefixes, out
 
 
 # # Driver logic
@@ -82,11 +84,10 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineMan
         # Gather from existing data
         for f in (logging.info, print):
             f("Getting files from last run...")
-        input_files = _get_list_of_files(
+        input_prefixes, input_files = _get_list_of_files(
             ap.args.fasta_directory,
             tpm.input_type[ap.args.command],
         )
-        input_prefixes = [os.path.basename(os.path.splitext(_file[0])[0]) for _file in input_files]
     else:
         for f in (logging.info, print):
             f("Creating working directory")
@@ -96,6 +97,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineMan
         input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
         # List of prefixes for tracking each file's progress
         input_prefixes = [os.path.basename(os.path.splitext(_file)[0]) for _file in input_files]
+        input_files = [{"root": {"fna": input_file}} for input_file in input_files]
         # Create base dir for each file to analyze
         all([pm.add_dirs(_file) for _file in input_prefixes])
 
