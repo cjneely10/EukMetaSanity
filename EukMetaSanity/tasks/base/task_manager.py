@@ -10,7 +10,7 @@ class TaskManager:
     def __init__(self, pm: PipelineManager, cfg: ConfigManager, pam: PathManager,
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
-        self.task_list = self.dep_graph.sorted_tasks().sort(reverse=True)
+        self.task_list = self.dep_graph.sorted_tasks()
         self.pm = pam
         self.cfg = cfg
         self.debug = debug
@@ -19,11 +19,12 @@ class TaskManager:
         self.input_prefixes = input_prefixes
 
     def run(self, output_dir: str):
-        task = self.task_list.pop()(self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
+        task = self.task_list[0](self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
         task.run()
-        while len(self.task_list) > 0:
-            task = self.task_list.pop()(self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
+        i = 1
+        while i < len(self.task_list):
+            task = self.task_list[i](self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
             for req_str in task.requires:
-                task.input.update({req_str: self.dep_graph.idx[req_str].output})
+                task.update({req_str: self.dep_graph.idx[req_str].output})
             task.run()
         task.summarize(os.path.join(output_dir, "results", self.command), self.command)

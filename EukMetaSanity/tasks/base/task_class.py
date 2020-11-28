@@ -252,21 +252,22 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def output(self) -> Tuple[ConfigManager, List[Dict[str, object]], PathManager, List[str], int]:
+    def update(self, to_add):
+        for task in self._tasks:
+            task.input.update(to_add)
+
+    def output(self) -> Tuple[List[Dict[str, object]], List[str]]:
         return (
-            self._cfg,
             [task.results() for task in self._tasks],
-            self._pm,
             [task.record_id for task in self._tasks],
-            self._mode,
         )
 
     # Write summary file of results
     def summarize(self, _final_output_dir: str, _name: str):
         # Create softlinks (or copies) of final output files to output directory
         _output = self.output()
-        _output_files_list = _output[1]
-        _files_prefixes = _output[3]
+        _output_files_list = _output[0]
+        _files_prefixes = _output[1]
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s-paths_summary.tsv" % _name), "w")
