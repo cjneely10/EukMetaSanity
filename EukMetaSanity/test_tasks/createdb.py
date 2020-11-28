@@ -8,7 +8,7 @@ class MMSeqsCreateDBIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "db": os.path.join(self.wdir, prefix(str(self.input["root"]["fna"])) + "_db")
+                "db": os.path.join(self.wdir, self.record_id + "_db")
             }
 
         @program_catch
