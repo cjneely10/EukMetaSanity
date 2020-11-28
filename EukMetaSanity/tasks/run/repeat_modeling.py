@@ -122,8 +122,8 @@ class RepeatsIter(TaskList):
                         "CMD",
                         " ".join((
                             str(self.program_masker).replace("/", "\/"),
-                            "-pa", str(int(self.threads)), (*self.added_flags),
-                            (*search),
+                            "-pa", str(int(self.threads)),
+                            (*self.added_flags), (*search),
                             "-dir", self.pm.get_dir(self.record_id, _dir).replace("/", "\/"),
                             input_file.replace("/", "\/"),
                         ))
