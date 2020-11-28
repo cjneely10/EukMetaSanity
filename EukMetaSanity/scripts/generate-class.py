@@ -10,6 +10,9 @@ from EukMetaSanity.tasks.utils.helpers import prefix, touch
 
 
 class {0}Iter(TaskList):
+    name = "{1}"
+    requires = []
+    
     class {0}(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -22,9 +25,7 @@ class {0}Iter(TaskList):
             pass
             
     def __init__(self, *args, **kwargs):
-        super().__init__({0}Iter.{0}, "{1}", 
-                         [], 
-                         *args, **kwargs)
+        super().__init__({0}Iter.{0}, {0}Iter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":

@@ -201,13 +201,11 @@ class Task(ABC):
 
 
 class TaskList(ABC):
-    def __init__(self, new_task: type, name: str, requires_list: List[str], cfg: ConfigManager,
+    def __init__(self, new_task: type, name: str, cfg: ConfigManager,
                  input_paths: List[Dict[str, Dict[str, object]]], pm: PathManager, record_ids: List[str], mode: int):
         # Call data function for pertinent info
         dt = Data(cfg, name)
         self.name, _, statement = getattr(dt, dt.name)()
-        # Empty list of dependencies to meet as base
-        self.requires: List[str] = requires_list
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement

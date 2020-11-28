@@ -4,6 +4,9 @@ from EukMetaSanity.tasks.utils.helpers import prefix, touch
 
 
 class MMSeqsCreateDBIter(TaskList):
+    name = "createdb"
+    requires = []
+
     class MMSeqsCreateDB(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -16,8 +19,7 @@ class MMSeqsCreateDBIter(TaskList):
             self.local["mmseqs"]["createdb"][self.input["root"]["fna"], self.output["db"]]()
 
     def __init__(self, *args, **kwargs):
-        super().__init__(MMSeqsCreateDBIter.MMSeqsCreateDB, "createdb", [],
-                         *args, **kwargs)
+        super().__init__(MMSeqsCreateDBIter.MMSeqsCreateDB, MMSeqsCreateDBIter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":

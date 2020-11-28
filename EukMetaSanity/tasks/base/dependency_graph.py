@@ -32,4 +32,5 @@ class DependencyGraph:
 
     def sorted_tasks(self) -> List[Type[TaskList]]:
         sorted_nodes = list(nx.topological_sort(self.graph))
-        return [sorted_nodes[name] for name in sorted_nodes]
+        sorted_nodes.remove("root")
+        return [self.idx[name] for name in sorted_nodes]

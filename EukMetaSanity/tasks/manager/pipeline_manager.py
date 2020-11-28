@@ -50,8 +50,8 @@ class PipelineManager:
                 SummarizeIter,
             ],
             "test": [
-                MMSeqsCreateDBIter,
                 MMSeqsSearchDBIter,
+                MMSeqsCreateDBIter,
             ],
         }
         self._input_type = {

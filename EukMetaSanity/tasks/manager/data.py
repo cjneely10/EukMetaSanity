@@ -102,6 +102,14 @@ class Data:
     def stats(self):
         pass
 
+    @added
+    def searchdb(self):
+        pass
+
+    @added
+    def createdb(self):
+        pass
+
 
 def data_urls() -> Dict[str, UrlInfo]:
     return {
