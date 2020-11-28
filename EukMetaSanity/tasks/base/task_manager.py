@@ -27,4 +27,9 @@ class TaskManager:
             for req_str in task.requires:
                 task.update({req_str: self.dep_graph.idx[req_str].output})
             task.run()
-        task.summarize(os.path.join(output_dir, "results", self.command), self.command)
+        self.summarize(os.path.join(output_dir, "results", self.command), self.command)
+
+    def summarize(self, _final_output_dir: str, _name: str):
+        _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s-paths_summary.tsv" % _name), "w")
+        for task_list in self.task_list:
+            pass
