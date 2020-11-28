@@ -7,6 +7,9 @@ class MMSeqsCreateDBIter(TaskList):
     class MMSeqsCreateDB(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            self.output = {
+                "db": os.getcwd()
+            }
 
         @program_catch
         def run_1(self):

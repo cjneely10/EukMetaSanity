@@ -34,13 +34,13 @@ class OutputResultsFileError(FileNotFoundError):
 
 
 class Task(ABC):
-    def __init__(self, input_data: Dict[str, List[object]], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int):
         self._name = db_name
         # Store passed input flag:input_path dict
         self._input_data = input_data
         # Instantiate output dict variable
-        self._output_paths: List[object] = []
+        self._output_paths: Dict[str, object] = {}
         # Store threads and workers
         self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
@@ -57,6 +57,7 @@ class Task(ABC):
         self._wdir = pm.get_dir(record_id, db_name)
         # Store id of record in Task
         self._record_id = record_id
+        # Check if task is set to be skipped in config file
         self.is_skip = getattr(self, "skip", "False") != "False"
         super().__init__()
 
@@ -97,15 +98,15 @@ class Task(ABC):
         return self._name
 
     @property
-    def output(self) -> List[object]:
+    def output(self) -> Dict[str, object]:
         return self._output_paths
 
     @output.setter
-    def output(self, v: List[object]):
+    def output(self, v: Dict[str, object]):
         self._output_paths = v
 
     @property
-    def input(self) -> Dict[str, List[object]]:
+    def input(self) -> Dict[str, Dict[str, object]]:
         return self._input_data
 
     @property
@@ -129,10 +130,10 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> List[object]:
+    def results(self) -> Dict[str, object]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
-        for _path in self._output_paths:
+        for _path in self._output_paths.values():
             if isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
@@ -181,7 +182,7 @@ class Task(ABC):
         if self.is_skip:
             return
         completed = True
-        for _path in self._output_paths:
+        for _path in self._output_paths.values():
             if isinstance(_path, str) and not os.path.exists(_path):
                 # Only call function if missing path
                 # Then move on
@@ -255,11 +256,10 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def output(self) -> Tuple[ConfigManager, List[List[object]], PathManager, List[str], int]:
-        # Run task list
+    def output(self) -> Tuple[ConfigManager, List[Dict[str, object]], PathManager, List[str], int]:
         return (
             self._cfg,
-            [task.results() for task in self._tasks],  # Output files using required Data object
+            [task.results() for task in self._tasks],
             self._pm,
             [task.record_id for task in self._tasks],
             self._mode,

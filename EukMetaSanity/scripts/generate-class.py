@@ -13,6 +13,9 @@ class {0}Iter(TaskList):
     class {0}(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            self.output = {
+                
+            }
             
         @program_catch
         def run_1(self):
