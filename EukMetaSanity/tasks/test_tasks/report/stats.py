@@ -17,6 +17,7 @@ class StatsIter(TaskList):
             self.output = {
                 "summary-db": os.path.join(self.wdir, self.record_id + ".db"),
                 "summary": os.path.join(self.wdir, self.record_id + ".summary"),
+                "final": ["summary-db", "summary"]
             }
             
         @program_catch
