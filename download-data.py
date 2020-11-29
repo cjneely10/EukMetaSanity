@@ -4,8 +4,8 @@ import shutil
 from typing import List
 from pathlib import Path
 from plumbum import local
+from EukMetaSanity.data.data import data_urls
 from EukMetaSanity.utils.arg_parse import ArgParse
-from EukMetaSanity.tasks.manager.data import data_urls
 
 """
 Download required ODB dataset for Run pipeline
