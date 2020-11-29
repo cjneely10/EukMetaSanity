@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-from pathlib import Path
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 

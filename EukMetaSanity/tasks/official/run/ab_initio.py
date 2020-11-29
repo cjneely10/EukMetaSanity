@@ -5,8 +5,9 @@ from pathlib import Path
 from typing import Tuple, List
 from collections import Counter
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids, prefix
-from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.official.run.abinitio_helpers import augustus_taxon_ids
+from EukMetaSanity.tasks.utils.helpers import prefix
+from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
 
 """
 Perform ab initio gene identification using either Augustus or GeneMark

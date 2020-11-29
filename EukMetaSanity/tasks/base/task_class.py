@@ -3,7 +3,6 @@ import logging
 from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
-from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.utils.path_manager import PathManager
 from typing import Dict, List, Tuple, Callable, Optional
@@ -26,6 +25,7 @@ def program_catch(f: Callable):
         except ProcessExecutionError as e:
             logging.info(e)
             print(e)
+
     return _add_try_except
 
 
@@ -147,7 +147,7 @@ class Task(ABC):
         return self._output_paths
 
     # Function logs and runs dask command
-    def log_and_run(self, cmd: LocalCommand, time_override: Optional[str] = None):
+    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
         print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
@@ -163,6 +163,13 @@ class Task(ABC):
                 self.cfg.get_slurm_flagged_arguments(),
                 time_override
             )
+        # Run command directly
+        logging.info(str(cmd))
+        if self._mode == 1:
+            logging.info(cmd())
+
+    def single(self, cmd: LocalCommand):
+        print("  " + str(cmd))
         # Run command directly
         logging.info(str(cmd))
         if self._mode == 1:
@@ -204,12 +211,13 @@ class TaskList(ABC):
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
                  input_paths: List[Dict[str, Dict[str, object]]], pm: PathManager, record_ids: List[str], mode: int):
         # Call data function for pertinent info
-        dt = Data(cfg, name)
-        self.name, _, statement = getattr(dt, dt.name)()
+        self.name = name
         # Get workers for TaskList
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement
-        self._statement = statement % (workers, int(cfg.config.get(name, ConfigManager.THREADS)))
+        self._statement = "\nRunning %s protocol using %i worker(s) and %i thread(s) per worker" % (
+                              self.name, workers, int(cfg.config.get(name, ConfigManager.THREADS))
+                          )
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
@@ -259,45 +267,6 @@ class TaskList(ABC):
             [task.results() for task in self._tasks],
             [task.record_id for task in self._tasks],
         )
-
-    # Write summary file of results
-    def summarize(self, _final_output_dir: str, _name: str):
-        # Create softlinks (or copies) of final output files to output directory
-        _output = self.output()
-        _output_files_list = _output[0]
-        _files_prefixes = _output[1]
-        if not os.path.exists(_final_output_dir):
-            os.makedirs(_final_output_dir)
-        _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s-paths_summary.tsv" % _name), "w")
-        for _files, _file_prefix, _task in zip(_output_files_list, _files_prefixes, self._tasks):
-            # Create subdirectory
-            _sub_out = os.path.join(_final_output_dir, _file_prefix)
-            if not os.path.exists(_sub_out):
-                os.makedirs(_sub_out)
-            # Copy results to results dir for easier access
-            for _file in _files:
-                # Write info to file
-                if isinstance(_file, dict) and len(_file.keys()) > 0:
-                    _sorted_keys = sorted(list(_file.keys()))
-                    # Header
-                    _paths_output_file.write("".join(("\t".join(["ID"] + _sorted_keys), "\n")))
-                    # Path info
-                    _paths_output_file.write(
-                        "".join((
-                            "\t".join((
-                                _file_prefix,  # Name of record
-                                *(os.path.join(_sub_out, str(_file[_f])) for _f in _sorted_keys)  # Files for record
-                            )), "\n"
-                        ))
-                    )
-                # Generate link of path, or create copy as requested
-                elif isinstance(_file, str):
-                    if os.path.exists(_file):
-                        _task.program[
-                            (*_task.added_flags),
-                            _file, _sub_out,
-                        ]()
-        _paths_output_file.close()
 
 
 if __name__ == "__main__":

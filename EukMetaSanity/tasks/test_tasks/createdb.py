@@ -16,7 +16,9 @@ class MMSeqsCreateDBIter(TaskList):
 
         @program_catch
         def run(self):
-            self.local["mmseqs"]["createdb"][self.input["root"]["fna"], self.output["db"]]()
+            self.single(
+                self.local["mmseqs"]["createdb"][self.input["root"]["fna"], self.output["db"]]
+            )
 
     def __init__(self, *args, **kwargs):
         super().__init__(MMSeqsCreateDBIter.MMSeqsCreateDB, MMSeqsCreateDBIter.name, *args, **kwargs)

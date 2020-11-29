@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import json
 import logging
 from Bio import SeqIO
 from pathlib import Path
@@ -53,24 +54,10 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str, file_types: List[str]) -> Tuple[List[str], List[Dict[str, str]]]:
-    file_fp = open(summary_file, "r")
-    out = []
-    prefixes = []
-    try:
-        while True:
-            inner = {}
-            head = next(file_fp).rstrip("\r\n").split()
-            line = next(file_fp).rstrip("\r\n").split()
-            prefixes.append(line[0])
-            for file_type in file_types:
-                _col_idx = head.index(file_type)
-                _path = str(Path(line[_col_idx]).resolve())
-                assert os.path.exists(_path)
-                inner.update({file_type: _path})
-            out.append(inner)
-    except StopIteration:
-        return prefixes, out
+def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, str]]]:
+    data = dict(json.load(open(summary_file, "r")))
+    out_ids = sorted(list(data.keys()))
+    return out_ids, [data[_id] for _id in out_ids]
 
 
 # # Driver logic
@@ -84,10 +71,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineMan
         # Gather from existing data
         for f in (logging.info, print):
             f("Getting files from last run...")
-        input_prefixes, input_files = _get_list_of_files(
-            ap.args.fasta_directory,
-            tpm.input_type[ap.args.command],
-        )
+        input_prefixes, input_files = _get_list_of_files(ap.args.fasta_directory)
     else:
         for f in (logging.info, print):
             f("Creating working directory")

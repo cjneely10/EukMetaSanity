@@ -5,7 +5,7 @@ from typing import List
 from pathlib import Path
 from EukMetaSanity.tasks.utils.helpers import prefix, touch
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.official.run import TaxonomyIter
 
 """
 Model the repeated regions of a FASTA sequence

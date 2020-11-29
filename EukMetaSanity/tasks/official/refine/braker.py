@@ -1,8 +1,7 @@
 import os
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
-from EukMetaSanity.tasks.run.initial_evidence import EvidenceIter
+from EukMetaSanity.tasks.official.run import TaxonomyIter
 
 
 class BrakerIter(TaskList):

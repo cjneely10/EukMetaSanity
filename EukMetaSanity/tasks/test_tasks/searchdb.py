@@ -11,16 +11,16 @@ class MMSeqsSearchDBIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "results-file": os.path.join(self.wdir, self.record_id + ".fna"),
+                "results-file": os.path.join(self.wdir, self.record_id + ".m8"),
                 "final": {
-                    "results-file": os.path.join(self.wdir, self.record_id + ".fna")
+                    "search": os.path.join(self.wdir, self.record_id + ".m8")
                 }
             }
             
         @program_catch
         def run(self):
             out_db = os.path.join(self.wdir, self.record_id + "_db")
-            self.log_and_run(
+            self.parallel(
                 self.local["mmseqs"]["search"][
                     self.input["createdb"]["db"],
                     self.data,
@@ -30,7 +30,7 @@ class MMSeqsSearchDBIter(TaskList):
                     (*self.added_flags),
                 ]
             )
-            self.log_and_run(
+            self.parallel(
                 self.local["mmseqs"]["convertalis"][
                     self.input["createdb"]["db"],
                     self.data,

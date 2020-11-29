@@ -2,7 +2,7 @@ import os
 from typing import List
 from EukMetaSanity.tasks.utils.helpers import prefix
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.official.run import TaxonomyIter
 
 """
 Add protein evidence using MetaEuk
