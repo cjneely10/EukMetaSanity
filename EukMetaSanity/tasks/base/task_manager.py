@@ -52,7 +52,8 @@ class TaskManager:
                     if not os.path.exists(_sub_out):
                         os.makedirs(_sub_out)
                     output_dicts[task_record_id] = task_result["final"]
-                    for _file in task_result["final"].values():
+                    for _file in task_result["final"]:
+                        _file = task_result[_file]
                         if isinstance(_file, str):
                             if os.path.exists(_file):
                                 copy(_file, _sub_out)

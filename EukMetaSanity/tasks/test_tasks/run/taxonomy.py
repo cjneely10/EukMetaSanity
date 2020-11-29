@@ -1,5 +1,6 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
 class TaxonomyIter(TaskList):
@@ -13,13 +14,13 @@ class TaxonomyIter(TaskList):
                 "seq_db": os.path.join(self.wdir, self.record_id + "_db"),
                 "tax_db": os.path.join(self.wdir, self.record_id + "-tax_db"),
                 "tax-report": os.path.join(self.wdir, "tax-report.txt"),
-                "final": {
-                    "tax-report": os.path.join(self.wdir, "tax-report.txt"),
-                }
+                "final": ["tax-report"]
             }
             
         @program_catch
         def run(self):
+            if not os.path.exists(self.data):
+                raise MissingDataError
             # Create mmseqs database
             self.single(
                 self.program[

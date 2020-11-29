@@ -6,6 +6,7 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 boilerplate = """import os
 from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
+from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
 class {0}Iter(TaskList):

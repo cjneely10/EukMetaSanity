@@ -21,6 +21,10 @@ class MissingDataError(FileExistsError):
     pass
 
 
+class InvalidProtocolError(FileExistsError):
+    pass
+
+
 class ConfigManager:
     # Default accessors
     # Starting PATH value - * * API: THIS IS CALLABLE * *

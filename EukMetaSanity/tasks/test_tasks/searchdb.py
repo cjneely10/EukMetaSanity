@@ -12,9 +12,7 @@ class MMSeqsSearchDBIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "results-file": os.path.join(self.wdir, self.record_id + ".m8"),
-                "final": {
-                    "search": os.path.join(self.wdir, self.record_id + ".m8")
-                }
+                "final": ["results-file"]
             }
             
         @program_catch

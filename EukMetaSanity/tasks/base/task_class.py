@@ -31,6 +31,9 @@ def program_catch(f: Callable):
         except ProcessExecutionError as e:
             logging.info(e)
             print(e)
+        except FileExistsError as e:
+            logging.info(e)
+            print(e)
 
     return _add_try_except
 
@@ -180,11 +183,7 @@ class Task(ABC):
         if self._mode == 1:
             logging.info(cmd())
 
-    def run_script(self, cmd: LocalCommand, _path: str):
-        print("  " + str(cmd))
-        # Run command directly
-        logging.info(str(cmd))
-
+    def create_script(self, cmd: LocalCommand, _path: str) -> str:
         _path = os.path.join(self.wdir, _path)
         fp = open(_path, "w")
         # Write shebang and move to working directory
@@ -193,8 +192,7 @@ class Task(ABC):
         fp.write("".join((str(cmd), "\n")))
         fp.close()
         self.local["chmod"]["+x", _path]()
-        if self._mode == 1:
-            logging.info(self.local[_path]())
+        return _path
 
     def batch(self, cmds: List[LocalCommand]):
         for i in range(0, len(cmds), int(self.threads)):
