@@ -60,15 +60,16 @@ def update_config_file(cfg_path: str, cfg_name: str):
         fp.write(config_boilerplate)
         fp.close()
     fp = open(cfg_path, "a")
-    fp.write("""[{}]
-    # # Required options
-    WORKERS = 1
-    THREADS = 1
-    MEMORY = 10G
-    TIME = 1:00:00
-    # # Additional options
-    FLAGS = ''
-    
+    fp.write("""
+[{}]
+# # Required options
+WORKERS = 1
+THREADS = 1
+MEMORY = 10G
+TIME = 1:00:00
+# # Additional options
+FLAGS = ''
+
     """.format(cfg_name))
     fp.close()
 

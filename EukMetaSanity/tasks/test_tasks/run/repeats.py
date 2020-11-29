@@ -3,9 +3,9 @@ import glob
 import shutil
 from typing import List
 from pathlib import Path
+from EukMetaSanity import InvalidProtocolError
 from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
 from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
 class RepeatsIter(TaskList):

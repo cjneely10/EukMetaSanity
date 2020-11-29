@@ -1,12 +1,11 @@
 import os
 import shutil
-from pathlib import Path
-
 from Bio import SeqIO
+from pathlib import Path
 from collections import Counter
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
+from EukMetaSanity import InvalidProtocolError
+from EukMetaSanity import Task, TaskList, program_catch, prefix
 from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 from EukMetaSanity.tasks.test_tasks.run.helpers.abinitio import augustus_taxon_ids
 
 

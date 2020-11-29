@@ -1,6 +1,6 @@
 import os
+from EukMetaSanity import MissingDataError
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
 class TaxonomyIter(TaskList):
