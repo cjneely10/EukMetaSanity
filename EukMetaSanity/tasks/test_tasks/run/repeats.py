@@ -77,15 +77,17 @@ class RepeatsIter(TaskList):
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
                 # Call RepeatMasker on modeled repeats in the new directory
-                self.parallel(
+                script = self.create_script(
                     self.program_masker[
                         "-pa", self.threads,
                         (*self.added_flags),
                         (*search),
                         "-dir", self.pm.get_dir(self.record_id, _dir),
                         input_file,
-                    ]
+                    ],
+                    "mask.sh"
                 )
+                self.parallel(self.local[script])
             # Combine repeat results and process
             self.parse_output(_added_dirs, input_file)
 
