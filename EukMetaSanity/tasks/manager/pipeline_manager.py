@@ -10,6 +10,11 @@ from EukMetaSanity.tasks.test_tasks.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.test_tasks.run.repeats import RepeatsIter
 from EukMetaSanity.tasks.test_tasks.run.abinitio import AbInitioIter
 from EukMetaSanity.tasks.test_tasks.run.evidence import EvidenceIter
+# # Report imports
+from EukMetaSanity.tasks.test_tasks.report.kofamscan import KoFamScanIter
+from EukMetaSanity.tasks.test_tasks.report.eggnog import EggNogMapperIter
+from EukMetaSanity.tasks.test_tasks.report.mmseqs import MMseqsIter
+from EukMetaSanity.tasks.test_tasks.report.stats import StatsIter
 
 """
 Class handles ordering of tasks to complete
@@ -29,5 +34,11 @@ class PipelineManager:
                 TaxonomyIter,
                 AbInitioIter,
                 RepeatsIter,
-            ]
+            ],
+            "test_report": [
+                StatsIter,
+                KoFamScanIter,
+                EggNogMapperIter,
+                MMseqsIter,
+            ],
         }
