@@ -100,18 +100,35 @@ class Task(ABC):
 
     @property
     def local(self) -> LocalMachine:
+        """ Return reference to all commands on user's PATH
+
+        :return: LocalMachine object to use as dictionary to get command to run
+        """
         return local
 
     @property
     def added_flags(self) -> List[str]:
+        """ Get additional flags that user provided in config file
+
+        :return: List of arguments to pass to calling program
+        """
         return self.cfg.get_added_flags(self.name)
 
     @property
     def name(self) -> str:
+        """ Name of task and matching config section
+
+        :return: Task name
+        """
         return self._name
 
     @property
     def output(self) -> Dict[str, object]:
+        """ Expected output objects from a successful run
+        Output also contains keys that consist of output objects to copy to final results directory
+
+        :return: {'output-name': object}, where object can be a str representing a path, or some other object.
+        """
         return self._output_paths
 
     @output.setter
