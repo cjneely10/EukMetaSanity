@@ -30,8 +30,23 @@ class StatsIter(TaskList):
                 "-e", self.max_evalue,
             ]()
 
-        def _parse_input(self) -> List[str]:
-            pass
+        def parse_input(self) -> List[str]:
+            _out = []
+            for _file in (
+                str(self.input["emapper"]["emapper"]),
+                str(self.input["kofamscan"]["kegg"]),
+                *(str(v) for k, v in self.input["mmseqs"].items() if k != "final"),
+            ):
+                if _file.endswith(".emapper"):
+                    _out.append("%s=%s" % ("eggnog", _file))
+                elif _file.endswith(".kegg"):
+                    _out.append("%s=%s" % ("kegg", _file))
+                else:
+                    _db_name = os.path.splitext(_file)[1][1:-3]
+                    if _db_name in ("", "g", "rfam_db"):
+                        continue
+                    _out.append("%s=%s" % (_db_name, _file))
+            return _out
             
     def __init__(self, *args, **kwargs):
         super().__init__(StatsIter.Stats, StatsIter.name, *args, **kwargs)
