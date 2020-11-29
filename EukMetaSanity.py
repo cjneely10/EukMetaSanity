@@ -13,6 +13,8 @@ from EukMetaSanity.tasks.base.task_manager import TaskManager
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 """
+EukMetaSanity.py
+===============================================
 EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 """
@@ -20,6 +22,11 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 # Logging initialize
 def _initialize_logging(ap: ArgParse):
+    """
+
+    :param ap:
+    :return:
+    """
     # Initialize logging
     log_file = os.path.join(ap.args.output, "%s-eukmetasanity.log" % ap.args.command)
     if os.path.exists(log_file):

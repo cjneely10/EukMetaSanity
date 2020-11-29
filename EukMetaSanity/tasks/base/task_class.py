@@ -121,7 +121,6 @@ class Task(ABC):
     def cfg(self) -> ConfigManager:
         return self._cfg
 
-    # Returns dict of config section for this task
     @property
     def config(self) -> Dict[str, str]:
         return self._cfg.config[self._name]
