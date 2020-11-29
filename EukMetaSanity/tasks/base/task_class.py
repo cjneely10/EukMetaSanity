@@ -127,12 +127,28 @@ class Task(ABC):
         """ Expected output objects from a successful run
         Output also contains keys that consist of output objects to copy to final results directory
 
+        Example:
+            self.output = {
+                "out" : "file-path",
+                "final": ["out"]}
+
         :return: {'output-name': object}, where object can be a str representing a path, or some other object.
         """
         return self._output_paths
 
     @output.setter
     def output(self, v: Dict[str, object]):
+        """ Expected output objects from a successful run
+        Output also contains keys that consist of output objects to copy to final results directory
+
+        Example
+            self.output = {
+                "out" : "file-path",
+                "final": ["out"]}
+
+        :param v: Dictionary of paths and objects that represent the expected output of a successful task run
+        :return:
+        """
         self._output_paths = v
 
     @property
