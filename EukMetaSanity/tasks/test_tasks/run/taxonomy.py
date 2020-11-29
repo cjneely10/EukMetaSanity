@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class TaxonomyIter(TaskList):

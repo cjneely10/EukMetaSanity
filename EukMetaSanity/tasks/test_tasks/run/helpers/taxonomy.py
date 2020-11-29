@@ -1,3 +1,6 @@
+from typing import Tuple
+
+
 def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> Tuple[str, int]:
     tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
     taxonomy = {key: None for key in tax_levels}
