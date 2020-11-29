@@ -1,5 +1,4 @@
 import os
-from typing import Dict
 
 """
 General functions
@@ -8,12 +7,18 @@ General functions
 
 
 def touch(_path: str):
-    """ Mimic touch command from linux
+    """ Mimic linux "touch" command
+
+    :param _path: Empty file path to create, or to check if it exists
+    :return:
     """
-    open(_path, "w").close()
+    open(_path, "a").close()
 
 
 def prefix(_path: str) -> str:
-    """ For path /path/to/file.txt return file
+    """ Extract prefix from file path
+
+    :param _path: Path-like string
+    :return: For path /path/to/file.txt return file
     """
     return os.path.basename(os.path.splitext(_path)[0])
