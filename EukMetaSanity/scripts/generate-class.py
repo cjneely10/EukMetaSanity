@@ -70,7 +70,7 @@ TIME = 1:00:00
 # # Additional options
 FLAGS = ''
 
-    """.format(cfg_name))
+""".format(cfg_name))
     fp.close()
 
 
