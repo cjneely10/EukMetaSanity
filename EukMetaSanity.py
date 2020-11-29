@@ -104,8 +104,8 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> Tuple[ConfigManager, bool]
     is_continued = False
     # FASTA directory provided by user
     assert os.path.exists(ap.args.fasta_directory)
-    # Directory not provided, based on output directory
-    if ap.args.fasta_directory[-3:] == "tsv":
+    # A single file was provided - use this as input to run
+    if os.path.isfile(ap.args.fasta_directory):
         is_continued = True
     # Ensure command is valid
     assert ap.args.command in tm.programs.keys()

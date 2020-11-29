@@ -2,6 +2,7 @@ import os
 import json
 from shutil import copy
 from typing import List, Dict
+from collections import defaultdict
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.utils.path_manager import PathManager
@@ -41,8 +42,8 @@ class TaskManager:
     def summarize(self, _final_output_dir: str, _name: str):
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
-        _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s-paths_summary.json" % _name), "w")
-        output_dicts: Dict[str, Dict[str, str]] = {}
+        _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s.json" % _name), "w")
+        output_dicts: Dict[str, Dict[str, str]] = defaultdict(default_factory=defaultdict(str))
         # Collect header ids and corresponding files
         for task_list in self.completed_tasks.values():
             output = task_list.output()
@@ -51,13 +52,14 @@ class TaskManager:
                     _sub_out = os.path.join(_final_output_dir, task_record_id)
                     if not os.path.exists(_sub_out):
                         os.makedirs(_sub_out)
-                    output_dicts[task_record_id] = task_result["final"]
                     for _file in task_result["final"]:
+                        output_dicts[task_record_id] = {_file: task_result[_file]}
                         _file = task_result[_file]
                         if isinstance(_file, str):
                             if os.path.exists(_file):
                                 copy(_file, _sub_out)
                             elif self.debug:
                                 touch(os.path.join(_sub_out, _file))
-        json.dump(output_dicts, _paths_output_file, sort_keys=True)
+        del output_dicts["default_factory"]
+        json.dump(dict(output_dicts), _paths_output_file, sort_keys=True)
         _paths_output_file.close()
