@@ -102,7 +102,7 @@ class GffReader:
             self._count += 1
             # Putative gene
             gene_data = {
-                "geneid": "gene%i" % self._count,
+                "geneid": "%s_gene%i" % (line[0], self._count),
                 "fasta-id": line[0],
                 "strand": line[6],
             }

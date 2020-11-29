@@ -115,21 +115,16 @@ class RepeatsIter(TaskList):
                 # Create contained directory
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
-                new_path = os.path.join(self.wdir, "run.sh")
-                self.local["cp"][self.local["which"]["run.sh"]().rstrip("\r\n"), self.wdir]()
-                self.local["sed"][
-                    "-i", "s/%s/%s/g" % (
-                        "CMD",
-                        " ".join((
-                            str(self.program_masker).replace("/", "\/"),
-                            "-pa", str(int(self.threads)),
-                            (*self.added_flags), (*search),
-                            "-dir", self.pm.get_dir(self.record_id, _dir).replace("/", "\/"),
-                            input_file.replace("/", "\/"),
-                        ))
-                    ), new_path
-                ]()
-                self.log_and_run(self.local[new_path][self.wdir])
+                # Call RepeatMasker on modeled repeats in the new directory
+                self.log_and_run(
+                    self.program_masker[
+                        "-pa", self.threads,
+                        (*self.added_flags),
+                        (*search),
+                        "-dir", self.pm.get_dir(self.record_id, _dir),
+                        input_file,
+                    ]
+                )
             # Combine repeat results and process
             self._parse_output(_added_dirs, input_file)
 
