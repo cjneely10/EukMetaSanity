@@ -20,7 +20,7 @@ class MMSeqsSearchDBIter(TaskList):
         @program_catch
         def run(self):
             out_db = os.path.join(self.wdir, self.record_id + "_db")
-            self.parallel(
+            self.run_script(
                 self.local["mmseqs"]["search"][
                     self.input["createdb"]["db"],
                     self.data,
@@ -28,7 +28,8 @@ class MMSeqsSearchDBIter(TaskList):
                     os.path.join(self.wdir, "tmp"),
                     "--threads", self.threads,
                     (*self.added_flags),
-                ]
+                ],
+                "search.sh"
             )
             self.parallel(
                 self.local["mmseqs"]["convertalis"][

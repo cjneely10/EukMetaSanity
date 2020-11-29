@@ -175,6 +175,22 @@ class Task(ABC):
         if self._mode == 1:
             logging.info(cmd())
 
+    def run_script(self, cmd: LocalCommand, _path: str):
+        print("  " + str(cmd))
+        # Run command directly
+        logging.info(str(cmd))
+
+        _path = os.path.join(self.wdir, _path)
+        fp = open(_path, "w")
+        # Write shebang and move to working directory
+        fp.write("#!/bin/bash\ncd %s || return\n\n" % self.wdir)
+        # Write command to run
+        fp.write("".join((str(cmd), "\n")))
+        fp.close()
+        self.local["chmod"]["+x", _path]()
+        if self._mode == 1:
+            logging.info(self.local[_path]())
+
     def batch(self, cmds: List[LocalCommand]):
         for i in range(0, len(cmds), int(self.threads)):
             running = []

@@ -19,7 +19,7 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 
 # Logging initialize
-def _initialize_logging(ap: ArgParse) -> None:
+def _initialize_logging(ap: ArgParse):
     # Initialize logging
     log_file = os.path.join(ap.args.output, "%s-eukmetasanity.log" % ap.args.command)
     if os.path.exists(log_file):
@@ -54,10 +54,10 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, str]]]:
+def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, Dict[str, str]]]]:
     data = dict(json.load(open(summary_file, "r")))
     out_ids = sorted(list(data.keys()))
-    return out_ids, [data[_id] for _id in out_ids]
+    return out_ids, [{"root": data[_id]} for _id in out_ids]
 
 
 # # Driver logic
