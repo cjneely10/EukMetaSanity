@@ -66,7 +66,7 @@ class EvidenceIter(TaskList):
                     )
                 # Convert to GFF3
                 self.single(
-                    self.local["fasta-to-gff3.py"][
+                    self.local["metaeuk-to-gff3.py"][
                         str(self.input["root"]["fna"]), _outfile + ".fas", "-o",
                         os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
                     ]

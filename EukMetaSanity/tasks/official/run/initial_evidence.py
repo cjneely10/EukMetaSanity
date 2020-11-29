@@ -78,7 +78,7 @@ class EvidenceIter(TaskList):
                         ]
                     )
                 # Convert to GFF3
-                self.local["fasta-to-gff3.py"][
+                self.local["metaeuk-to-gff3.py"][
                     self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
                 ]()
                 out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
