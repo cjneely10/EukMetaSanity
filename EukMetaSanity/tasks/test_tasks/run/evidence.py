@@ -1,8 +1,8 @@
 import os
 from typing import List
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
+from EukMetaSanity import MissingDataError
+from EukMetaSanity import Task, TaskList, program_catch, prefix
 from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
 class EvidenceIter(TaskList):
@@ -32,6 +32,8 @@ class EvidenceIter(TaskList):
                 if "p:" in db:
                     is_profile.append("--slice-search")
                     db = db[2:]
+                if not os.path.exists(db):
+                    raise MissingDataError
                 db_prefix = prefix(db)
                 subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % db_prefix)
                 if not os.path.exists(subset_db_outpath):
