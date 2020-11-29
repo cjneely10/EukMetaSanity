@@ -19,6 +19,12 @@ TaskList: Collection of Task objects that calls run function on each
 
 
 def program_catch(f: Callable):
+    """ Decorator function checks for ProcessExecutionErrors when running an executable
+    Logging info recorded and printed to stdout
+
+    :param f: Function to test and whose exceptions to catch
+    :return:
+    """
     def _add_try_except(self, *args, **kwargs):
         try:
             return f(self, *args, **kwargs)
