@@ -19,7 +19,7 @@ TaskList: Collection of Task objects that calls run function on each
 
 
 def program_catch(f: Callable):
-    """ Decorator function checks for ProcessExecutionErrors when running an executable
+    """ Decorator function checks for ProcessExecutionErrors and FileExistErrors when running an executable
     Logging info recorded and printed to stdout
 
     :param f: Function to test and whose exceptions to catch
@@ -98,9 +98,41 @@ class Task(ABC):
                     _set_attr,  # Local path, or config path, for calling program
                 )
 
+    def _run(self) -> None:
+        # Check if task has completed based on provided output data
+        if self.is_skip:
+            return
+        completed = True
+        for _path in self._output_paths.values():
+            if isinstance(_path, str) and not os.path.exists(_path):
+                # Only call function if missing path
+                # Then move on
+                completed = False
+                break
+        # Run if not completed (e.g. missing data)
+        if completed:
+            logging.info("%s  %s is complete" % (self.record_id, self.name))
+        else:
+            logging.info("%s  Running %s" % (self.record_id, self.name))
+            self.run()
+
+    def _results(self) -> Dict[str, object]:
+        # Check that all required datasets are fulfilled
+        # Alert if data output is provided, but does not exist
+        for _path in self._output_paths.values():
+            if isinstance(_path, str) and not os.path.exists(_path):
+                # Write dummy file if in developer mode
+                if self._mode == 0:
+                    touch(_path)
+                elif not self.is_skip:
+                    raise OutputResultsFileError(_path)
+        return self._output_paths
+
     @property
     def local(self) -> LocalMachine:
         """ Return reference to all commands on user's PATH
+        Wrapper for plumbum's LocalMachine object, see plumbum documentation for more info
+        https://plumbum.readthedocs.io/en/latest/local_commands.html
 
         Example: self.local["ls"], self.local["echo"], etc.
 
@@ -159,7 +191,6 @@ class Task(ABC):
         If a task `task2` is dependent on `task`, then the former's input will contain (at least):
         self.input["root"]
         self.input["task"]
-        As well as all of the output data that `task` generated.
 
         :return: Dictionary of available input data
         """
@@ -167,35 +198,49 @@ class Task(ABC):
 
     @property
     def record_id(self) -> str:
+        """ Return the ID of a given genome record - typically the basename of the file used in analysis
+
+        :return: ID of file
+        """
         return self._record_id
 
     @property
     def cfg(self) -> ConfigManager:
+        """ ConfigManager is a wrapper class for Python's configparser package.
+        self.cfg contains references to the entire config file's contents, not just this task's data
+
+        :return: Reference to ConfigManager object that was used to launch this pipeline
+        """
         return self._cfg
 
     @property
     def config(self) -> Dict[str, str]:
+        """ ConfigManager is a wrapper class for Python's configparser package.
+        self.config contains references to the portion of the config file that contains this task's contents
+
+        :return: Dictionary containing contents of config file that was used to launch this task
+        """
         return self._cfg.config[self._name]
 
     @property
     def wdir(self) -> str:
+        """ self.wdir contains the directory that should house this task's intermediary files and output
+        The directory is automatically created when the task object is created.
+
+        Example:
+        self.local["echo"]["Hello world!"] >> os.path.join(self.wdir, "test-output.txt")
+
+        :return: str with the path created for working on current task, storing contents, output, etc.
+        """
         return self._wdir
 
     @property
     def pm(self) -> PathManager:
-        return self._pm
+        """
 
-    def _results(self) -> Dict[str, object]:
-        # Check that all required datasets are fulfilled
-        # Alert if data output is provided, but does not exist
-        for _path in self._output_paths.values():
-            if isinstance(_path, str) and not os.path.exists(_path):
-                # Write dummy file if in developer mode
-                if self._mode == 0:
-                    touch(_path)
-                elif not self.is_skip:
-                    raise OutputResultsFileError(_path)
-        return self._output_paths
+        :return:
+        """
+        return self._pm
 
     # Function logs and runs dask command
     def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
@@ -249,24 +294,6 @@ class Task(ABC):
                     f = cmds[j] & BG
                     running.append(f)
             all([_f.wait() for _f in running])
-
-    def _run(self) -> None:
-        # Check if task has completed based on provided output data
-        if self.is_skip:
-            return
-        completed = True
-        for _path in self._output_paths.values():
-            if isinstance(_path, str) and not os.path.exists(_path):
-                # Only call function if missing path
-                # Then move on
-                completed = False
-                break
-        # Run if not completed (e.g. missing data)
-        if completed:
-            logging.info("%s  %s is complete" % (self.record_id, self.name))
-        else:
-            logging.info("%s  Running %s" % (self.record_id, self.name))
-            self.run()
 
 
 class TaskList(ABC):

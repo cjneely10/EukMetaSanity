@@ -5,6 +5,9 @@ Welcome to EukMetaSanity's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. automodule:: EukMetaSanity
+   :members:
+
 .. autoclass:: EukMetaSanity.tasks.base.task_class.Task
    :members:
 
