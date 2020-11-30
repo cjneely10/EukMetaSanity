@@ -76,6 +76,6 @@ class TaskManager:
         del output_dicts["default_factory"]
         # Also store original files
         for in_prefix, in_data in zip(self.input_prefixes, self.input_files):
-            output_dicts[in_prefix]["root"] = in_data["root"]
+            output_dicts[in_prefix].update(in_data["root"])
         json.dump(dict(output_dicts), _paths_output_file, sort_keys=True)
         _paths_output_file.close()
