@@ -14,14 +14,24 @@ class Config(RawConfigParser):
 
 
 class InvalidPathError(FileExistsError):
+    """ Wraps FileExistsError, raise if user provided a path that does not exist
+
+    """
     pass
 
 
 class MissingDataError(FileExistsError):
+    """ Wraps FileExistsError, raise if user did not fill out a required DATA
+    section in a configuration file
+
+    """
     pass
 
 
-class InvalidProtocolError(FileExistsError):
+class InvalidProtocolError(ValueError):
+    """ Wraps ValueError, raise if user requests to use a protocol that isn't implemented
+
+    """
     pass
 
 
@@ -67,7 +77,14 @@ class ConfigManager:
                 raise InvalidPathError("Invalid path %s for %s %s" % (_path, key, possible_key))
 
     # Gather user-passed flags for analysis
-    def get_added_flags(self, _dict_name):
+    def get_added_flags(self, _dict_name: str) -> List[str]:
+        """ Parse all added flags in a config section into a list
+
+        Checks FLAGS variable and parses into same list
+
+        :param _dict_name: Config file section name
+        :return: List of parsed flags
+        """
         out = []
         _attrs = set(dir(self))
         for key in dict(self.config[_dict_name]).keys():
@@ -95,7 +112,12 @@ class ConfigManager:
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]
 
-    def get_FLAGS(self, _dict_name):
+    def get_FLAGS(self, _dict_name: str) -> List[str]:
+        """ Parse FLAGS variable into list
+
+        :param _dict_name: Config file section name
+        :return: List of parsed flags
+        """
         return [val for val in [def_key.lstrip(" ").rstrip(" ")
                                 for def_key in
                                 self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")

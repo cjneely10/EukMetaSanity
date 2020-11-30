@@ -16,13 +16,15 @@ from EukMetaSanity.tasks.test_tasks.report.eggnog import EggNogMapperIter
 from EukMetaSanity.tasks.test_tasks.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.test_tasks.report.stats import StatsIter
 
-"""
-Class handles ordering of tasks to complete
-
-"""
-
 
 class PipelineManager:
+    """ Class handles ordering of tasks to complete
+
+    Key represents the program name that the user will pass on the command line
+
+    :param programs: Programs in pipeline (need not be in any order)
+    :type programs: Dict[str, List[Type[TaskList]]]
+    """
     def __init__(self):
         self.programs: Dict[str, List[Type[TaskList]]] = {
             "test": [

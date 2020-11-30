@@ -38,6 +38,10 @@ class TaskManager:
         self.input_prefixes = input_prefixes
 
     def run(self, output_dir: str):
+        """ Run pipeline!
+
+        :param output_dir: Directory to write final result file
+        """
         task = self.task_list[0](self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
         task.run()
         self.completed_tasks[task.name] = task
@@ -53,6 +57,11 @@ class TaskManager:
         self.summarize(os.path.join(output_dir, "results", self.command), self.command)
 
     def summarize(self, _final_output_dir: str, _name: str):
+        """ Summarize contents of pipeline - populate output files and summary .json paths file
+
+        :param _final_output_dir: Output directory
+        :param _name: Name of pipeline
+        """
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s.json" % _name), "w")
