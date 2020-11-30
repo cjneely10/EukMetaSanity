@@ -12,6 +12,19 @@ from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 
 class TaskManager:
+    """ Class interfaces stored pipelines and input data from users.
+
+    Dependency graph created using pipeline TaskList class object `requires` members, and this graph is
+    output in topologically-sorted order to run pipeline
+
+    Output of each task is automatically parsed into other tasks that depend on its output
+
+    At the end of a pipeline, any task that contains a "final" key in its `output` member will have valid member
+    paths copied into a final results directory.
+
+    All dictionary data will also be serialized into a final "task.json" file for loading into other pipelines
+
+    """
     def __init__(self, pm: PipelineManager, cfg: ConfigManager, pam: PathManager,
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
@@ -43,7 +56,7 @@ class TaskManager:
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s.json" % _name), "w")
-        output_dicts: Dict[str, Dict[str, str]] = defaultdict(default_factory=defaultdict(str))
+        output_dicts: Dict[str, Dict[str, object]] = defaultdict(default_factory=defaultdict(str))
         # Collect header ids and corresponding files
         for task_list in self.completed_tasks.values():
             output = task_list.output()
@@ -63,6 +76,6 @@ class TaskManager:
         del output_dicts["default_factory"]
         # Also store original files
         for in_prefix, in_data in zip(self.input_prefixes, self.input_files):
-            output_dicts[in_prefix].update(in_data)
+            output_dicts[in_prefix]["root"] = in_data["root"]
         json.dump(dict(output_dicts), _paths_output_file, sort_keys=True)
         _paths_output_file.close()

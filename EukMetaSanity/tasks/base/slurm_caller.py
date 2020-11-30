@@ -5,15 +5,11 @@ from plumbum.machines.local import LocalCommand, LocalMachine
 
 
 class SLURMCaller:
-    """ SLURMCaller handles running a program on
+    """ SLURMCaller handles running a program on a SLURM cluster
 
-    :param user_id: User id for running slurm job
-    :param wdir: Working directory to write slurm script
-    :param threads: Number of threads/cpus for job
-    :param cmd: Command to run within script
-    :param config_data: Dict of data to parse for sbatch script header
-    :param _local: local object from which to get sbatch command object
-    :param slurm_flags: Added flags to include in script, if any
+    Overrides __str__ and __call__ method to allow script command to be displayed within config
+    and called by dask task manager, respectively.
+
     """
     OUTPUT_SCRIPTS = "slurm-runner.sh"
     FAILED_ID = "failed-job-id"
@@ -43,14 +39,12 @@ class SLURMCaller:
     def __repr__(self):
         return self.__str__()
 
-    def __del__(self):
-        self.kill_process()
-
-    def kill_process(self):
-        self.local["scancel"][self.job_id]()
-
     # Run script written
     def launch_script(self):
+        """ Run generated script using sbatch
+
+        Check if loaded properly and store in object data if properly launched
+        """
         log_line = str(self.local["sbatch"][self.script]()).split()
         if len(log_line) == 0:
             return
@@ -58,10 +52,19 @@ class SLURMCaller:
 
     # Call squeue using user id and check if created job id is present
     def is_running(self) -> bool:
+        """ Method will check if the job_id created by launching the sbatch script is still
+        visible within a user's `squeue`.
+
+        :return: Task still running (true) or has completed/failed to start (false)
+        """
         return self.running and self.job_id in str(self.local["squeue"]["-u", self.user_id]())
 
-    # Parse output from sbatch to see if job id was adequately created
     def has_launched(self, log_line: str) -> bool:
+        """ Parse output from sbatch to see if job id was adequately created
+
+        :param log_line: Output from running sbatch that should be a parsable integer
+        :return: True if launched properly, or False if unable to parse/task was not launched properly
+        """
         try:
             self.job_id = str(int(log_line))
         except ValueError:
@@ -70,10 +73,20 @@ class SLURMCaller:
 
     # check if a particular job is still running
     def has_ended(self) -> bool:
+        """ Checks if a task is still running on a user's `squeue`
+
+        :return: True is job stopped running, or False if still running
+        """
         return not self.is_running()
 
     # Create slurm script to run program
     def generate_script(self):
+        """ Create script using passed command within SLURM format
+
+        Include all additional flags to SLURM
+
+        Flags to command should already be passed to command itself
+        """
         # Initialize file
         fp = open(self.script, "w")
         fp.write("#!/bin/bash\n\n")

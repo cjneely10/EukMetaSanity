@@ -37,9 +37,10 @@ class DependencyGraph:
                 self.graph.add_edge(dependency, task_list.name)
 
     def sorted_tasks(self) -> List[Type[TaskList]]:
-        """
+        """ Run topological sort of all tasks in pipeline and output in order that allows
+        for completion of dependencies in required order
 
-        :return:
+        :return: List of TaskList child classes to run
         """
         sorted_nodes = list(nx.topological_sort(self.graph))
         sorted_nodes.remove("root")
