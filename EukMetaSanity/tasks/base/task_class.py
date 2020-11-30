@@ -23,7 +23,7 @@ def program_catch(f: Callable):
     Logging info recorded and printed to stdout
 
     :param f: Function to test and whose exceptions to catch
-    :return:
+    :return: Decorated function
     """
     def _add_try_except(self, *args, **kwargs):
         try:
@@ -168,8 +168,6 @@ class Task(ABC):
 
         Example:
         self.output = {"out" : "file-path", "final": ["out"]}
-
-        :return:
         """
         return self._output_paths
 
@@ -253,7 +251,6 @@ class Task(ABC):
 
         :param cmd: plumbum LocalCommand object to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
-        :return:
         """
         print("  " + str(cmd))
         # Write command to slurm script file and run
@@ -285,7 +282,6 @@ class Task(ABC):
         self.single(self.local["pwd"])
 
         :param cmd: plumbum LocalCommand object to run
-        :return:
         """
         print("  " + str(cmd))
         # Run command directly
@@ -316,7 +312,6 @@ class Task(ABC):
 
         :param cmd: Command to write to file
         :param file_name: Name of file to create
-        :return:
         """
         _path = os.path.join(self.wdir, file_name)
         fp = open(_path, "w")
@@ -335,7 +330,6 @@ class Task(ABC):
         self.batch([self.local["pwd"], self.local["echo"]])
 
         :param cmds: List of LocalCommand objects to run in parallel
-        :return:
         """
         for i in range(0, len(cmds), int(self.threads)):
             running = []
