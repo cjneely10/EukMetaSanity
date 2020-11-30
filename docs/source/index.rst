@@ -1,18 +1,15 @@
-Welcome to EukMetaSanity's documentation!
-=========================================
+EukMetaSanity: Highly parallelized platform for eukaryote annotation
+====================================================================
+
+**EukMetaSanity** is packaged with three analysis pipelines - ``run``, ``report``, and ``refine``.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: EukMetaSanity
-   :members:
-
-.. autoclass:: EukMetaSanity.tasks.base.task_class.Task
-   :members:
-
-.. autoclass:: EukMetaSanity.tasks.test_tasks.run.taxonomy.TaxonomyIter
-   :members:
+   run
+   report
+   refine
 
 Indices and tables
 ==================

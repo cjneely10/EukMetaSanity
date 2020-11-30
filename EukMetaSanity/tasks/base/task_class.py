@@ -235,6 +235,14 @@ class Task(ABC):
         """
         return self._wdir
 
+    @property
+    def pm(self) -> PathManager:
+        """ PathManager object for handling directory creation within task directory
+
+        :return: Reference to PathManager for project
+        """
+        return self._pm
+
     def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
