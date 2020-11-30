@@ -3,10 +3,15 @@ from typing import List
 from pathlib import Path
 from plumbum import local
 
+# Reference to `mkdir` command on system
 mkdir = local["mkdir"]
 
 
 class PathManager:
+    """ This class manages a set of working directories.
+    Useful for keeping files organized
+    :raises: AssertionError if base path does not exist
+    """
     def __init__(self, base_path: str):
         assert base_path is not None
         self._wdir = "wdir"
@@ -17,19 +22,42 @@ class PathManager:
     # Get working dir
     @property
     def wdir(self):
+        """ Working directory which PathManager object is maintaining.
+        Multiple working directories are maintained within
+
+        :return: str of full path to working directory
+        """
         return os.path.join(self.base, self._wdir)
 
     # Get base dir
     @property
     def base(self):
+        """ Base dir contains all working directories
+        Typically it is the current directory, the directory the program was launched,
+        or, possibly, some other user-specified directory (though this isn't yet implemented).
+
+        :return: str of full path to base directory
+        """
         return str(self._base)
 
     @property
     def dbs(self):
+        """ Dictionary of subdirectories
+        Subdirectories are maintained by a parent directory
+        There are multiple parent directories within a given working directory
+
+        :return: Dict of subdirectories and their paths
+        """
         return self._dbs
 
     # Add record directory to wdir
     def add_dirs(self, record_id: str, _subdirs: List[str] = None):
+        """ Add a subdirectory to a given record directory
+
+        :param record_id: Directory within self.wdir to which to add subdirectories
+        :param _subdirs: List of subdirectories to add to a directory within self.wdir
+        :return:
+        """
         assert record_id is not None
         # Record base dir
         mkdir["-p", os.path.join(self.wdir, str(record_id))]()
@@ -42,7 +70,14 @@ class PathManager:
                 self._dbs[_subd] = added_path
 
     # Get record directory in wdir
-    def get_dir(self, record_id: str = None, subdir: str = None):
+    def get_dir(self, record_id: str = None, subdir: str = None) -> str:
+        """ Get full path to a subdirectory
+
+        :param record_id: Directory in self.wdir with the label `record_id`
+        :param subdir: Subdirectory within given label's directory
+        :return: str of full path to record_id/subdir
+        :raises: ValueError if unable to locate directory within storage
+        """
         loc = self.wdir
         if record_id is not None:
             loc = os.path.join(loc, str(record_id))
