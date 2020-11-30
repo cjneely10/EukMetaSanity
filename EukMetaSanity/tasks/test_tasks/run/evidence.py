@@ -6,6 +6,12 @@ from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
 
 
 class EvidenceIter(TaskList):
+    """ Task uses MetaEuk to align protein profiles to genome and output gff file of putative protein locations
+
+    Outputs: metaeuk-gff3, nr-gff3, prot, cds, all_gff3
+    Finalizes: metaeuk-gff3, nr-gff3, prot, cds, all_gff3
+
+    """
     name = "evidence"
     requires = ["repeats", "taxonomy", "abinitio"]
     

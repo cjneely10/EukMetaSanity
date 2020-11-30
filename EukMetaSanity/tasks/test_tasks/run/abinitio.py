@@ -10,6 +10,12 @@ from EukMetaSanity.tasks.test_tasks.run.helpers.abinitio import augustus_taxon_i
 
 
 class AbInitioIter(TaskList):
+    """ Task runs either Augustus or GeneMark ab initio prediction pipelines on genome file
+
+    Outputs: ab-gff3
+    Finalizes: ab-gff3
+
+    """
     name = "abinitio"
     requires = ["taxonomy", "repeats"]
     

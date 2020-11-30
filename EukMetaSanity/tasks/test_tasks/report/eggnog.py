@@ -3,6 +3,12 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 
 class EggNogMapperIter(TaskList):
+    """ Task runs eggnog-mapper on a set of gene calls
+
+    Outputs: emapper
+    Finalizes: emapper
+
+    """
     name = "eggnog"
     requires = []
     

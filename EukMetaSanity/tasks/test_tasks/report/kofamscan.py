@@ -3,6 +3,12 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 
 class KoFamScanIter(TaskList):
+    """ Task runs kofamscan on a set of gene calls
+
+    Outputs: kegg
+    Finalizes: kegg
+
+    """
     name = "kofamscan"
     requires = []
     

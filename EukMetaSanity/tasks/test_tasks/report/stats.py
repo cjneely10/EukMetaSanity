@@ -4,6 +4,12 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 
 class StatsIter(TaskList):
+    """ Task summarizes all gene call annotations into a tsv and sqlite3 database
+
+    Outputs: summary-db, summary
+    Finalizes: summary-db, summary
+
+    """
     name = "stats"
     requires = ["emapper", "kofamscan", "mmseqs"]
     

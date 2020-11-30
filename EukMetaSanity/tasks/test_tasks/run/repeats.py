@@ -9,6 +9,12 @@ from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
 
 
 class RepeatsIter(TaskList):
+    """ Task will use NCBI repeats libraries to mask genome. Also can generate ab-initio repeat models to mask genome.
+
+    Outputs: mask-fna, mask-tbl, mask-gff3
+    Finalizes: mask-tbl
+
+    """
     name = "repeats"
     requires = ["taxonomy"]
     
@@ -19,6 +25,7 @@ class RepeatsIter(TaskList):
                 "mask-fna": os.path.join(self.wdir, self.record_id + "-mask.fna"),
                 "mask-tbl": os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.tbl"),
                 "mask-gff3": os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3"),
+                "final": ["mask-tbl"]
             }
             
         @program_catch

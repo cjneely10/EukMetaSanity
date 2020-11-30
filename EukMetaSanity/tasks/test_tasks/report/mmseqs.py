@@ -3,6 +3,12 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 
 class MMseqsIter(TaskList):
+    """ Task searches gene calls through one (or more) mmseqs databases or profile databases
+
+    Outputs: [db-prefix, dynamic]
+    Finalizes: [db-prefix, dynamic]
+
+    """
     name = "mmseqs"
     requires = []
     
