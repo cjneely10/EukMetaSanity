@@ -102,6 +102,8 @@ class Task(ABC):
     def local(self) -> LocalMachine:
         """ Return reference to all commands on user's PATH
 
+        Example: self.local["ls"], self.local["echo"], etc.
+
         :return: LocalMachine object to use as dictionary to get command to run
         """
         return local
@@ -109,6 +111,8 @@ class Task(ABC):
     @property
     def added_flags(self) -> List[str]:
         """ Get additional flags that user provided in config file
+
+        Example: self.local["ls"][(\*self.added_flags())]
 
         :return: List of arguments to pass to calling program
         """
@@ -128,9 +132,7 @@ class Task(ABC):
         Output also contains keys that consist of output objects to copy to final results directory
 
         Example:
-            self.output = {
-                "out" : "file-path",
-                "final": ["out"]}
+        self.output = {"out" : "file-path", "final": ["out"]}
 
         :return:
         """
@@ -142,6 +144,25 @@ class Task(ABC):
 
     @property
     def input(self) -> Dict[str, Dict[str, object]]:
+        """ Dictionary of files available as input to this task.
+        By default, available input consists of all files that were passed as input to EukMetaSanity:
+
+        Example:
+        self.input["root"] accesses all available input.
+        Some available input: self.input["root"]["fna"], self.input["root"]["prot"], self.input["root"]["nr-gff3"]
+        This will depend on the pipeline you are using and/or writing
+
+        A task may contain dependencies that must run prior to itself. The output of all of these dependencies
+        will be stored within a task's input.
+
+        Example:
+        If a task `task2` is dependent on `task`, then the former's input will contain (at least):
+        self.input["root"]
+        self.input["task"]
+        As well as all of the output data that `task` generated.
+
+        :return: Dictionary of available input data
+        """
         return self._input_data
 
     @property
