@@ -234,16 +234,24 @@ class Task(ABC):
         """
         return self._wdir
 
-    @property
-    def pm(self) -> PathManager:
-        """
+    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
+        """ Launch a command that uses multiple threads
+        This method will call a given command on a SLURM cluster automatically (if requested by the user)
+        In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
+        is the number of jobs that will run simultaneously.
 
+        A time-override may be specified to manually set the maximum time limit a command (job) may run on a cluster,
+        which will override the time that is specified by the user in a config file
+
+        The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
+
+        Example:
+        self.parallel(self.local["pwd"], "1:00")
+
+        :param cmd: plumbum LocalCommand object to run
+        :param time_override: Time override in "HH:MM:SS" format, if needed
         :return:
         """
-        return self._pm
-
-    # Function logs and runs dask command
-    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
         print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
@@ -265,14 +273,49 @@ class Task(ABC):
             logging.info(cmd())
 
     def single(self, cmd: LocalCommand):
+        """ Launch a command that uses a single thread
+        For SLURM users, this method will launch a given command on the node on which EukMetaSanity is launched.
+
+        The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
+
+        Example:
+        self.single(self.local["pwd"])
+
+        :param cmd: plumbum LocalCommand object to run
+        :return:
+        """
         print("  " + str(cmd))
         # Run command directly
         logging.info(str(cmd))
         if self._mode == 1:
             logging.info(cmd())
 
-    def create_script(self, cmd: LocalCommand, _path: str) -> str:
-        _path = os.path.join(self.wdir, _path)
+    def create_script(self, cmd: LocalCommand, file_name: str) -> LocalCommand:
+        """ Write a command to file and return its value packaged as a LocalCommand.
+
+        This is highly useful when incorporating programs that only launch in the directory in which it was called
+
+        Example:
+
+        script = self.create_script(self.local["ls"]["~"], "cd.sh")
+
+        This will create a file within self.wdir named `cd.sh`, the contents of which will be:
+
+        #!/bin/bash
+        cd <wdir> || return
+
+        ls ~
+
+
+        This can then be run in parallel or singly:
+        self.parallel(script)
+        self.single(script)
+
+        :param cmd: Command to write to file
+        :param file_name: Name of file to create
+        :return:
+        """
+        _path = os.path.join(self.wdir, file_name)
         fp = open(_path, "w")
         # Write shebang and move to working directory
         fp.write("#!/bin/bash\ncd %s || return\n\n" % self.wdir)
@@ -280,9 +323,17 @@ class Task(ABC):
         fp.write("".join((str(cmd), "\n")))
         fp.close()
         self.local["chmod"]["+x", _path]()
-        return _path
+        return self.local[_path]
 
     def batch(self, cmds: List[LocalCommand]):
+        """ Run a list of commands using self.threads (one task per thread)
+
+        Example:
+        self.batch([self.local["pwd"], self.local["echo"]])
+
+        :param cmds: List of LocalCommand objects to run in parallel
+        :return:
+        """
         for i in range(0, len(cmds), int(self.threads)):
             running = []
             for j in range(i, i + int(self.threads)):

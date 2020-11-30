@@ -262,7 +262,7 @@ class AbInitioIter(TaskList):
                 "abinitio.sh"
             )
             # Run script
-            self.parallel(self.local[script])
+            self.parallel(script)
             # Move program to match required output name
             self.single(
                 self.program_gffread[

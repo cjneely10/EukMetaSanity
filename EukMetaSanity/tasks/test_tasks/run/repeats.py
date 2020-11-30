@@ -52,7 +52,7 @@ class RepeatsIter(TaskList):
                 ],
                 "modeler.sh"
             )
-            self.parallel(self.local[script])
+            self.parallel(script)
 
         @program_catch
         def mask(self, input_file: str):
@@ -87,7 +87,7 @@ class RepeatsIter(TaskList):
                     ],
                     "mask.sh"
                 )
-                self.parallel(self.local[script])
+                self.parallel(script)
             # Combine repeat results and process
             self.parse_output(_added_dirs, input_file)
 

@@ -29,7 +29,7 @@ class MMSeqsSearchDBIter(TaskList):
                 ],
                 "search.sh"
             )
-            self.parallel(self.local[script])
+            self.parallel(script)
             self.parallel(
                 self.local["mmseqs"]["convertalis"][
                     self.input["createdb"]["db"],
