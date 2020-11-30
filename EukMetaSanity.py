@@ -61,7 +61,7 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 
 # Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, Dict[str, str]]]]:
+def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, Dict[str, object]]]]:
     data = dict(json.load(open(summary_file, "r")))
     out_ids = sorted(list(data.keys()))
     out_dict_list = []
