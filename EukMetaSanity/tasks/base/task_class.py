@@ -258,13 +258,13 @@ class Task(ABC):
             if ConfigManager.MEMORY not in self.config.keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
             cmd = SLURMCaller(
-                self.cfg.config["SLURM"]["user-id"],
+                self.cfg._get_slurm_userid(),
                 self.wdir,
                 str(self._threads_pw),
                 cmd,
                 self.config,
                 self.local,
-                self.cfg.get_slurm_flagged_arguments(),
+                self.cfg._get_slurm_flagged_arguments(),
                 time_override
             )
         # Run command directly

@@ -5,22 +5,21 @@ from plumbum.machines.local import LocalCommand, LocalMachine
 
 
 class SLURMCaller:
+    """ SLURMCaller handles running a program on
 
+    :param user_id: User id for running slurm job
+    :param wdir: Working directory to write slurm script
+    :param threads: Number of threads/cpus for job
+    :param cmd: Command to run within script
+    :param config_data: Dict of data to parse for sbatch script header
+    :param _local: local object from which to get sbatch command object
+    :param slurm_flags: Added flags to include in script, if any
+    """
     OUTPUT_SCRIPTS = "slurm-runner.sh"
     FAILED_ID = "failed-job-id"
 
     def __init__(self, user_id: str, wdir: str, threads: str, cmd: LocalCommand, config_data: Dict[str, str],
                  _local: LocalMachine, slurm_flags: List[Tuple[str, str]], time_override: Optional[str]):
-        """
-
-        :param user_id: User id for running slurm job
-        :param wdir: Working directory to write slurm script
-        :param threads: Number of threads/cpus for job
-        :param cmd: Command to run within script
-        :param config_data: Dict of data to parse for sbatch script header
-        :param _local: local object from which to get sbatch command object
-        :param slurm_flags: Added flags to include in script, if any
-        """
         self.user_id = user_id
         self.wdir = wdir
         self.threads = threads

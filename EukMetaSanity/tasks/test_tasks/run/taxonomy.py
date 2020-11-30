@@ -4,6 +4,13 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 
 class TaxonomyIter(TaskList):
+    """ This class will use `mmseqs` to identify putative taxonomy for an organism.
+
+    Outputs: seq_db, tax_db, tax-report
+
+    Finalizes: tax-report
+
+    """
     name = "taxonomy"
     requires = []
     

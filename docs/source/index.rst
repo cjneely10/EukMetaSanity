@@ -11,6 +11,9 @@ Welcome to EukMetaSanity's documentation!
 .. autoclass:: EukMetaSanity.tasks.base.task_class.Task
    :members:
 
+.. autoclass:: EukMetaSanity.tasks.test_tasks.run.taxonomy.TaxonomyIter
+   :members:
+
 Indices and tables
 ==================
 
