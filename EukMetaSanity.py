@@ -64,7 +64,16 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, Dict[str, str]]]]:
     data = dict(json.load(open(summary_file, "r")))
     out_ids = sorted(list(data.keys()))
-    return out_ids, [{"root": data[_id]} for _id in out_ids]
+    out_dict_list = []
+    for _id in out_ids:
+        to_add = {"root": {}}
+        for key, val in data[_id].items():
+            if type(data[val]) != dict:
+                to_add["root"][key] = val
+            else:
+                to_add[key] = val
+        out_dict_list.append(to_add)
+    return out_ids, out_dict_list
 
 
 # # Driver logic
