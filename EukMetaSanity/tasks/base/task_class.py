@@ -118,7 +118,7 @@ class Task(ABC):
     def name(self) -> str:
         """ Name of task and matching config section
 
-        :return: Task name
+        :return: Assigned task name
         """
         return self._name
 
@@ -132,23 +132,12 @@ class Task(ABC):
                 "out" : "file-path",
                 "final": ["out"]}
 
-        :return: {'output-name': object}, where object can be a str representing a path, or some other object.
+        :return:
         """
         return self._output_paths
 
     @output.setter
     def output(self, v: Dict[str, object]):
-        """ Expected output objects from a successful run
-        Output also contains keys that consist of output objects to copy to final results directory
-
-        Example
-            self.output = {
-                "out" : "file-path",
-                "final": ["out"]}
-
-        :param v: Dictionary of paths and objects that represent the expected output of a successful task run
-        :return:
-        """
         self._output_paths = v
 
     @property
@@ -175,7 +164,7 @@ class Task(ABC):
     def pm(self) -> PathManager:
         return self._pm
 
-    def results(self) -> Dict[str, object]:
+    def _results(self) -> Dict[str, object]:
         # Check that all required datasets are fulfilled
         # Alert if data output is provided, but does not exist
         for _path in self._output_paths.values():
@@ -316,7 +305,7 @@ class TaskList(ABC):
 
     def output(self) -> Tuple[List[Dict[str, object]], List[str]]:
         return (
-            [task.results() for task in self._tasks],
+            [task._results() for task in self._tasks],
             [task.record_id for task in self._tasks],
         )
 
