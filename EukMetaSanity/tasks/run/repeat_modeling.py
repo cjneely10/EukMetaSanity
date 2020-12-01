@@ -146,13 +146,14 @@ class RepeatsIter(TaskList):
                 (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
                 for rep_dir in repeats_dirs if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat"))))
             ])
-            # Run ProcessRepeats
-            self.program_process_repeats[
-                # Input taxonomy from OrthoDB search
-                "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
-                "-maskSource", input_file,
-                final_out,
-            ]()
+            if os.path.getsize(final_out) > 0:
+                # Run ProcessRepeats
+                self.program_process_repeats[
+                    # Input taxonomy from OrthoDB search
+                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
+                    "-maskSource", input_file,
+                    final_out,
+                ]()
             if os.path.exists(input_file + ".masked"):
                 # Rename output file
                 os.replace(
