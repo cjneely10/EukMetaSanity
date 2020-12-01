@@ -7,10 +7,7 @@ Biological Data Analysis Pipelines
 ==================================
 **EukMetaSanity** is packaged with three pipelines:
 
-``run`` accepts a directory of FASTA files and outputs a series of gene annotations in GFF3 and FASTA format.
-
-Eukaryotic gene annotation requires additional calculation that is not present in prokaryotic annotation. Specifically,
-the ``run`` pipeline will:
+The ``run`` pipeline is the first step in eukaryotic annotation. Specifically, it will:
 
 * Provide an initial taxonomy assignment by searching combined OrthoDB and MMETSP databases.
 * Mask repetitive regions using data from NCBI and/or ab-initio predicted repeats.
@@ -25,7 +22,7 @@ After initial evidence-based gene models are created, users may elect to identif
 * Search OrthoDB/MMETSP databases.
 * Search any mmseqs sequence or profile database.
 
-Users may also elect to integrate transciptomic evidence into their prediction pipeline using the ``refine`` step:
+Users may also elect to integrate transcriptomic evidence into their prediction pipeline using the ``refine`` step:
 
 * Map RNA-seq data or assembled transcriptomes to genome/MAG.
 
@@ -38,8 +35,9 @@ generate their own data analysis pipelines using **EukMetaSanity's** backend.
 .. toctree::
 	:maxdepth: 2
 
-	api/task
+	api/overview
 	api/pipeline_manager
+	api/task
 	api/example
 
 Indices and tables

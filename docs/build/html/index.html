@@ -17,7 +17,7 @@
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Task API" href="api/task.html" />
+    <link rel="next" title="API Overview" href="api/overview.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -30,7 +30,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="api/task.html" title="Task API"
+          <a href="api/overview.html" title="API Overview"
              accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
       </ul>
@@ -49,8 +49,8 @@
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="api/task.html"
-                        title="next chapter">Task API</a></p>
+  <p class="topless"><a href="api/overview.html"
+                        title="next chapter">API Overview</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -85,9 +85,7 @@
 <div class="section" id="biological-data-analysis-pipelines">
 <h1>Biological Data Analysis Pipelines<a class="headerlink" href="#biological-data-analysis-pipelines" title="Permalink to this headline">¶</a></h1>
 <p><strong>EukMetaSanity</strong> is packaged with three pipelines:</p>
-<p><code class="docutils literal notranslate"><span class="pre">run</span></code> accepts a directory of FASTA files and outputs a series of gene annotations in GFF3 and FASTA format.</p>
-<p>Eukaryotic gene annotation requires additional calculation that is not present in prokaryotic annotation. Specifically,
-the <code class="docutils literal notranslate"><span class="pre">run</span></code> pipeline will:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">run</span></code> pipeline is the first step in eukaryotic annotation. Specifically, it will:</p>
 <ul class="simple">
 <li><p>Provide an initial taxonomy assignment by searching combined OrthoDB and MMETSP databases.</p></li>
 <li><p>Mask repetitive regions using data from NCBI and/or ab-initio predicted repeats.</p></li>
@@ -102,7 +100,7 @@ the <code class="docutils literal notranslate"><span class="pre">run</span></cod
 <li><p>Search OrthoDB/MMETSP databases.</p></li>
 <li><p>Search any mmseqs sequence or profile database.</p></li>
 </ul>
-<p>Users may also elect to integrate transciptomic evidence into their prediction pipeline using the <code class="docutils literal notranslate"><span class="pre">refine</span></code> step:</p>
+<p>Users may also elect to integrate transcriptomic evidence into their prediction pipeline using the <code class="docutils literal notranslate"><span class="pre">refine</span></code> step:</p>
 <ul class="simple">
 <li><p>Map RNA-seq data or assembled transcriptomes to genome/MAG.</p></li>
 </ul>
@@ -114,8 +112,9 @@ the <code class="docutils literal notranslate"><span class="pre">run</span></cod
 generate their own data analysis pipelines using <strong>EukMetaSanity’s</strong> backend.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/task.html">Task API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/overview.html">API Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pipeline_manager.html">PipelineManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/task.html">Task API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/example.html">Example Implementation</a></li>
 </ul>
 </div>
@@ -141,7 +140,7 @@ generate their own data analysis pipelines using <strong>EukMetaSanity’s</stro
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="api/task.html" title="Task API"
+          <a href="api/overview.html" title="API Overview"
              >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
       </ul>
