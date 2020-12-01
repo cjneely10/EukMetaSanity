@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>EukMetaSanity: Highly parallelized platform for eukaryote annotation &#8212; EukMetaSanity 1.0.0 documentation</title>
+    <title>EukMetaSanity &#8212; EukMetaSanity 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -17,7 +17,6 @@
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Run" href="run.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -29,9 +28,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="run.html" title="Run"
-             accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
@@ -39,13 +35,15 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">EukMetaSanity: Highly parallelized platform for eukaryote annotation</a></li>
+<li><a class="reference internal" href="#">EukMetaSanity</a><ul>
+<li><a class="reference internal" href="#highly-parallelized-platform-for-eukaryote-annotation">Highly parallelized platform for eukaryote annotation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#biological-data-analysis-pipelines">Biological Data Analysis Pipelines</a></li>
+<li><a class="reference internal" href="#data-pipeline-api">Data Pipeline API</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
-  <h4>Next topic</h4>
-  <p class="topless"><a href="run.html"
-                        title="next chapter">Run</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -71,29 +69,42 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="eukmetasanity-highly-parallelized-platform-for-eukaryote-annotation">
-<h1>EukMetaSanity: Highly parallelized platform for eukaryote annotation<a class="headerlink" href="#eukmetasanity-highly-parallelized-platform-for-eukaryote-annotation" title="Permalink to this headline">¶</a></h1>
-<p><strong>EukMetaSanity</strong> is packaged with three analysis pipelines - <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">report</span></code>, and <code class="docutils literal notranslate"><span class="pre">refine</span></code>.</p>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="run.html">Run</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="run.html#input">Input</a></li>
-<li class="toctree-l2"><a class="reference internal" href="run.html#output">Output</a></li>
+  <div class="section" id="eukmetasanity">
+<h1>EukMetaSanity<a class="headerlink" href="#eukmetasanity" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="highly-parallelized-platform-for-eukaryote-annotation">
+<h2>Highly parallelized platform for eukaryote annotation<a class="headerlink" href="#highly-parallelized-platform-for-eukaryote-annotation" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="biological-data-analysis-pipelines">
+<h1>Biological Data Analysis Pipelines<a class="headerlink" href="#biological-data-analysis-pipelines" title="Permalink to this headline">¶</a></h1>
+<p><strong>EukMetaSanity</strong> is packaged with three pipelines:</p>
+<p><code class="docutils literal notranslate"><span class="pre">run</span></code> accepts a directory of FASTA files and outputs a series of gene annotations in GFF3 and FASTA format.</p>
+<p>Eukaryotic gene annotation requires additional calculation that is not present in prokaryotic annotation. Specifically,
+the <code class="docutils literal notranslate"><span class="pre">run</span></code> pipeline will:</p>
+<ul class="simple">
+<li><p>Provide an initial taxonomy assignment by searching combined OrthoDB and MMETSP databases.</p></li>
+<li><p>Mask repetitive regions using data from NCBI and/or ab-initio predicted repeats.</p></li>
+<li><p>Generate ab-initio predictions of exon/intron structure and boundaries.</p></li>
+<li><p>Integrate protein evidence from OrthoDB and MMETSP to validate or extend ab-initio predictions.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="report.html">Report</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="report.html#input">Input</a></li>
-<li class="toctree-l2"><a class="reference internal" href="report.html#output">Output</a></li>
+<p>After initial evidence-based gene models are created, users may elect to identify functional annotations using
+<code class="docutils literal notranslate"><span class="pre">report</span></code>:</p>
+<ul class="simple">
+<li><p>Search EggNOG database</p></li>
+<li><p>Search KEGG database</p></li>
+<li><p>Search OrthoDB/MMETSP databases</p></li>
+<li><p>Search any mmseqs sequence or profile database</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="refine.html">Refine</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="refine.html#input">Input</a></li>
-<li class="toctree-l2"><a class="reference internal" href="refine.html#output">Output</a></li>
-</ul>
-</li>
+<p>Users may also elect to integrate transciptomic evidence into their prediction pipeline using the <code class="docutils literal notranslate"><span class="pre">refine</span></code> step:</p>
+<ul class="simple">
+<li><p>Map RNA-seq data or assembled transcriptomes to genome/MAG.</p></li>
 </ul>
 </div>
+<div class="section" id="data-pipeline-api">
+<h1>Data Pipeline API<a class="headerlink" href="#data-pipeline-api" title="Permalink to this headline">¶</a></h1>
+<p><strong>EukMetaSanity</strong> is built upon a flexible API combining resource acquisition/task scheduling operations from Python’s
+<code class="docutils literal notranslate"><span class="pre">dask</span></code> with filesystem access/program calling functions of <code class="docutils literal notranslate"><span class="pre">plumbum</span></code>. This API is available for users who wish to
+generate their own data analysis pipelines using <strong>EukMetaSanity’s</strong> backend.</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -116,9 +127,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="run.html" title="Run"
-             >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
