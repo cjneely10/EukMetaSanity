@@ -1,7 +1,9 @@
 EukMetaSanity: Highly parallelized platform for eukaryote annotation
 ====================================================================
 
-**EukMetaSanity** is packaged with three analysis pipelines - ``run``, ``report``, and ``refine``.
+Biological Data Analysis Pipelines
+==================================
+**EukMetaSanity** is packaged with three pipelines:
 
 .. toctree::
    :maxdepth: 2
@@ -10,6 +12,13 @@ EukMetaSanity: Highly parallelized platform for eukaryote annotation
    run
    report
    refine
+
+``run`` accepts a directory of FASTA files and outputs a series of gene annotations in GFF3 and FASTA format.
+
+Eukaryotic gene annotation requires additional calculation that is not present in prokaryotic annotation. Specificall,
+the ``run`` pipeline will:
+
+* Provide an initial taxonomy assignment
 
 Indices and tables
 ==================
