@@ -135,7 +135,7 @@ if __name__ == "__main__":
     _ap = ArgParse(
         (
             (("command",),
-             {"help": "Select from %s" % "/".join(_tm.programs)}),
+             {"help": "Select from %s" % "/".join(list(_tm.programs.keys()))}),
             (("-f", "--fasta_directory",),
              {"help": "Directory of FASTA files to annotate"}),
             (("-c", "--config_file"),
