@@ -22,6 +22,9 @@ class PipelineManager:
 
     Key represents the program name that the user will pass on the command line
 
+    Example:
+    self.program["test"] = [MMSeqsSearchDBIter, MMSeqsCreateDBIter]
+
     :param programs: Programs in pipeline (need not be in any order)
     :type programs: Dict[str, List[Type[TaskList]]]
     """

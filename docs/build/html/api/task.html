@@ -1,0 +1,302 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Task API &#8212; EukMetaSanity 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="EukMetaSanity" href="../index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../index.html" title="EukMetaSanity"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">EukMetaSanity</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/task.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="task-api">
+<h1>Task API<a class="headerlink" href="#task-api" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="EukMetaSanity.tasks.base.task_class.Task">
+<em class="property">class </em><code class="sig-prename descclassname">EukMetaSanity.tasks.base.task_class.</code><code class="sig-name descname">Task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_data</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span>object<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">cfg</span><span class="p">:</span> <span class="n">EukMetaSanity.utils.config_manager.ConfigManager</span></em>, <em class="sig-param"><span class="n">pm</span><span class="p">:</span> <span class="n">EukMetaSanity.utils.path_manager.PathManager</span></em>, <em class="sig-param"><span class="n">record_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">db_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mode</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.added_flags">
+<em class="property">property </em><code class="sig-name descname">added_flags</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.added_flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get additional flags that user provided in config file</p>
+<p>Example: self.local[“ls”][(*self.added_flags())]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of arguments to pass to calling program</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.batch">
+<code class="sig-name descname">batch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmds</span><span class="p">:</span> <span class="n">List<span class="p">[</span>plumbum.machines.local.LocalCommand<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a list of commands using self.threads (one task per thread)</p>
+<p>Example:
+self.batch([self.local[“pwd”], self.local[“echo”]])</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cmds</strong> – List of LocalCommand objects to run in parallel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.cfg">
+<em class="property">property </em><code class="sig-name descname">cfg</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.cfg" title="Permalink to this definition">¶</a></dt>
+<dd><p>ConfigManager is a wrapper class for Python’s configparser package.
+self.cfg contains references to the entire config file’s contents, not just this task’s data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Reference to ConfigManager object that was used to launch this pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.config">
+<em class="property">property </em><code class="sig-name descname">config</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>ConfigManager is a wrapper class for Python’s configparser package.
+self.config contains references to the portion of the config file that contains this task’s contents</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary containing contents of config file that was used to launch this task</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.create_script">
+<code class="sig-name descname">create_script</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">plumbum.machines.local.LocalCommand</span></em>, <em class="sig-param"><span class="n">file_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; plumbum.machines.local.LocalCommand<a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.create_script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a command to file and return its value packaged as a LocalCommand.</p>
+<p>This is highly useful when incorporating programs that only launch in the directory in which it was called</p>
+<p>Example:</p>
+<p>script = self.create_script(self.local[“ls”][“~”], “cd.sh”)</p>
+<p>This will create a file within self.wdir named <cite>cd.sh</cite>, the contents of which will be:</p>
+<p>#!/bin/bash
+cd &lt;wdir&gt; || return</p>
+<p>ls ~</p>
+<p>This can then be run in parallel or singly:
+self.parallel(script)
+self.single(script)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – Command to write to file</p></li>
+<li><p><strong>file_name</strong> – Name of file to create</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.input">
+<em class="property">property </em><code class="sig-name descname">input</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary of files available as input to this task.
+By default, available input consists of all files that were passed as input to EukMetaSanity:</p>
+<p>Example:
+self.input[“root”] accesses all available input.
+Some available input: self.input[“root”][“fna”], self.input[“root”][“prot”], self.input[“root”][“nr-gff3”]
+This will depend on the pipeline you are using and/or writing</p>
+<p>A task may contain dependencies that must run prior to itself. The output of all of these dependencies
+will be stored within a task’s input.</p>
+<p>Example:
+If a task <cite>task2</cite> is dependent on <cite>task</cite>, then the former’s input will contain (at least):
+self.input[“root”]
+self.input[“task”]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary of available input data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.local">
+<em class="property">property </em><code class="sig-name descname">local</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return reference to all commands on user’s PATH
+Wrapper for plumbum’s LocalMachine object, see plumbum documentation for more info
+<a class="reference external" href="https://plumbum.readthedocs.io/en/latest/local_commands.html">https://plumbum.readthedocs.io/en/latest/local_commands.html</a></p>
+<p>Example: self.local[“ls”], self.local[“echo”], etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>LocalMachine object to use as dictionary to get command to run</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of task and matching config section</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Assigned task name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.output">
+<em class="property">property </em><code class="sig-name descname">output</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expected output objects from a successful run
+Output also contains keys that consist of output objects to copy to final results directory</p>
+<p>Example:
+self.output = {“out” : “file-path”, “final”: [“out”]}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.parallel">
+<code class="sig-name descname">parallel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">plumbum.machines.local.LocalCommand</span></em>, <em class="sig-param"><span class="n">time_override</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.parallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launch a command that uses multiple threads
+This method will call a given command on a SLURM cluster automatically (if requested by the user)
+In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
+is the number of jobs that will run simultaneously.</p>
+<p>A time-override may be specified to manually set the maximum time limit a command (job) may run on a cluster,
+which will override the time that is specified by the user in a config file</p>
+<p>The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen</p>
+<p>Example:
+self.parallel(self.local[“pwd”], “1:00”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – plumbum LocalCommand object to run</p></li>
+<li><p><strong>time_override</strong> – Time override in “HH:MM:SS” format, if needed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.pm">
+<em class="property">property </em><code class="sig-name descname">pm</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.pm" title="Permalink to this definition">¶</a></dt>
+<dd><p>PathManager object for handling directory creation within task directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Reference to PathManager for project</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.record_id">
+<em class="property">property </em><code class="sig-name descname">record_id</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.record_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the ID of a given genome record - typically the basename of the file used in analysis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>ID of file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.single">
+<code class="sig-name descname">single</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">plumbum.machines.local.LocalCommand</span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.single" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launch a command that uses a single thread
+For SLURM users, this method will launch a given command on the node on which EukMetaSanity is launched.</p>
+<p>The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen</p>
+<p>Example:
+self.single(self.local[“pwd”])</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cmd</strong> – plumbum LocalCommand object to run</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_class.Task.wdir">
+<em class="property">property </em><code class="sig-name descname">wdir</code><a class="headerlink" href="#EukMetaSanity.tasks.base.task_class.Task.wdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>self.wdir contains the directory that should house this task’s intermediary files and output
+The directory is automatically created when the task object is created.</p>
+<p>Example:
+self.local[“echo”][“Hello world!”] &gt;&gt; os.path.join(self.wdir, “test-output.txt”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>str with the path created for working on current task, storing contents, output, etc.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../index.html" title="EukMetaSanity"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Christopher Neely.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.1.
+    </div>
+  </body>
+</html>

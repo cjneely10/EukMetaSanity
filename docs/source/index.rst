@@ -35,9 +35,15 @@ Data Pipeline API
 ``dask`` with filesystem access/program calling functions of ``plumbum``. This API is available for users who wish to
 generate their own data analysis pipelines using **EukMetaSanity's** backend.
 
+.. toctree::
+	:maxdepth: 2
+
+	api/task
+	api/pipeline_manager
+	api/example
+
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
