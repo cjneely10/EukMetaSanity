@@ -66,7 +66,7 @@ class RepeatsIter(TaskList):
         def mask(self, input_file: str):
             data_files = []
             _added_dirs = []
-            _file = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
+            _file = glob.glob(os.path.join(self.wdir, "RM*"))
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
@@ -117,13 +117,14 @@ class RepeatsIter(TaskList):
                 (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
                 for rep_dir in repeats_dirs if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat"))))
             ])
-            # Run ProcessRepeats
-            self.program_process_repeats[
-                # Input taxonomy from OrthoDB search
-                "-species", get_taxonomy(str(self.input["taxonomy"]["tax-report"]), float(self.cutoff), "family")[0],
-                "-maskSource", input_file,
-                final_out,
-            ]()
+            if os.path.getsize(final_out) > 0:
+                # Run ProcessRepeats
+                self.program_process_repeats[
+                    # Input taxonomy from OrthoDB search
+                    "-species", get_taxonomy(str(self.input["taxonomy"]["tax-report"]), float(self.cutoff), "family")[0],
+                    "-maskSource", input_file,
+                    final_out,
+                ]()
             if os.path.exists(input_file + ".masked"):
                 # Rename output file
                 os.replace(
