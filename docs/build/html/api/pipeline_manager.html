@@ -17,7 +17,8 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Task API" href="task.html" />
+    <link rel="next" title="Task API" href="task.html" />
+    <link rel="prev" title="API Overview" href="overview.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -31,6 +32,9 @@
              accesskey="I">index</a></li>
         <li class="right" >
           <a href="task.html" title="Task API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="API Overview"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
       </ul>
@@ -38,8 +42,11 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="previous chapter">API Overview</a></p>
+  <h4>Next topic</h4>
   <p class="topless"><a href="task.html"
-                        title="previous chapter">Task API</a></p>
+                        title="next chapter">Task API</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -81,6 +88,22 @@ self.program[“test”] = [MMSeqsSearchDBIter, MMSeqsCreateDBIter]</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt id="EukMetaSanity.data.data.data_urls">
+<code class="sig-prename descclassname">EukMetaSanity.data.data.</code><code class="sig-name descname">data_urls</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>EukMetaSanity.data.data.UrlInfo<span class="p">]</span><a class="headerlink" href="#EukMetaSanity.data.data.data_urls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return dictionary of config_replacement_string: instructions for unpackaging data</p>
+<p>Upon first installation, all config files in the EukMetaSanity/config directory will have
+values corresponding to keys of the dictionary returned by this function replaced with their
+respective paths post-installation.</p>
+<p>This allows seamless linking of downloading required data for new pipelines in new
+installations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dict of str: UrlInfo consisting of replacement_string: instructions to follow to unpackage data</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
@@ -97,6 +120,9 @@ self.program[“test”] = [MMSeqsSearchDBIter, MMSeqsCreateDBIter]</p>
              >index</a></li>
         <li class="right" >
           <a href="task.html" title="Task API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="API Overview"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">EukMetaSanity 1.0.0 documentation</a> &#187;</li> 
       </ul>

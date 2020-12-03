@@ -76,8 +76,48 @@
 <h1>API Overview<a class="headerlink" href="#api-overview" title="Permalink to this headline">¶</a></h1>
 <p><strong>EukMetaSanity</strong> has a simple set of high-level goals:</p>
 <ul class="simple">
-<li></li>
+<li><p>Run a series of analysis programs on a set of input files.</p></li>
+<li><p>Parallelize to match system resources.</p></li>
+<li><p>Collect all output data and package for user.</p></li>
 </ul>
+<p>Each of these goals is accomplished through the <code class="docutils literal notranslate"><span class="pre">TaskManager</span></code> class:</p>
+<dl class="py class">
+<dt id="EukMetaSanity.tasks.base.task_manager.TaskManager">
+<em class="property">class </em><code class="sig-prename descclassname">EukMetaSanity.tasks.base.task_manager.</code><code class="sig-name descname">TaskManager</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pm</span><span class="p">:</span> <span class="n"><a class="reference internal" href="pipeline_manager.html#EukMetaSanity.tasks.manager.pipeline_manager.PipelineManager" title="EukMetaSanity.tasks.manager.pipeline_manager.PipelineManager">EukMetaSanity.tasks.manager.pipeline_manager.PipelineManager</a></span></em>, <em class="sig-param"><span class="n">cfg</span><span class="p">:</span> <span class="n">EukMetaSanity.utils.config_manager.ConfigManager</span></em>, <em class="sig-param"><span class="n">pam</span><span class="p">:</span> <span class="n">EukMetaSanity.utils.path_manager.PathManager</span></em>, <em class="sig-param"><span class="n">input_files</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span>object<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">input_prefixes</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">debug</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">command</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_manager.TaskManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class interfaces stored pipelines and input data from users.</p>
+<p>Dependency graph created using pipeline TaskList class object <cite>requires</cite> members, and this graph is
+output in topologically-sorted order to run pipeline</p>
+<p>Output of each task is automatically parsed into other tasks that depend on its output</p>
+<p>At the end of a pipeline, any task that contains a “final” key in its <cite>output</cite> member will have valid member
+paths copied into a final results directory.</p>
+<p>All dictionary data will also be serialized into a final “task.json” file for loading into other pipelines</p>
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_manager.TaskManager.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output_dir</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_manager.TaskManager.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run pipeline!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_dir</strong> – Directory to write final result file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="EukMetaSanity.tasks.base.task_manager.TaskManager.summarize">
+<code class="sig-name descname">summarize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_final_output_dir</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#EukMetaSanity.tasks.base.task_manager.TaskManager.summarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summarize contents of pipeline - populate output files and summary .json paths file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_final_output_dir</strong> – Output directory</p></li>
+<li><p><strong>_name</strong> – Name of pipeline</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
