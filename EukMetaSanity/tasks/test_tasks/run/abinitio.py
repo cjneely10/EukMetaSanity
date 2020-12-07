@@ -227,7 +227,7 @@ class AbInitioIter(TaskList):
 
         @program_catch
         def gmes(self):
-            tax = get_taxonomy(str(self.input["root"]["fna"]), 2.0, "species")
+            tax = get_taxonomy(str(self.input["root"]["fna"]), 2.0, "order")
             subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data))
             _fasta_output = os.path.join(self.wdir, self.record_id + ".faa")
             self.parallel(
