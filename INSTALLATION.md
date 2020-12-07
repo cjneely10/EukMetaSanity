@@ -34,7 +34,9 @@ must install them separately.
 *(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
 may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`)*
 
-Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.)
+Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
+
+The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
 
 ### Installing RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
