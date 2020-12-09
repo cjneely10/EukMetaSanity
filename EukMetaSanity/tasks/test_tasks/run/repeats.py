@@ -101,8 +101,6 @@ class RepeatsIter(TaskList):
 
         @program_catch
         def parse_output(self, repeats_dirs: List[str], input_file: str):
-            if len(repeats_dirs) == 0:
-                return
             self.pm.add_dirs(self.record_id, ["repeats_final"])
             _basename = os.path.basename(input_file)
             # Unzip results
@@ -113,6 +111,7 @@ class RepeatsIter(TaskList):
             ])
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
+            touch(final_out)
             all([
                 (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
                 for rep_dir in repeats_dirs if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat"))))
