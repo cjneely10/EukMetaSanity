@@ -3,8 +3,8 @@ import os
 import re
 import sys
 from Bio import SeqIO
-from io import StringIO
 from Bio.Seq import Seq
+from io import StringIO
 from datetime import datetime
 from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
@@ -211,27 +211,29 @@ class GffMerge:
         longest = ""
         possible_starts = ("ATG", "CCA", "CTG", "CAG")
         for start in possible_starts:
-            for pos in (m.start() for m in re.finditer(start, sequence)):
+            start_pos = (m.start() for m in re.finditer(start, sequence))
+            for pos in start_pos:
                 idx = set()
-                orf = GffMerge.l_orf_helper(sequence, idx, "", 3, pos)
+                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
                 if len(orf) > len(longest):
                     longest = orf
         return longest
 
     @staticmethod
-    def l_orf_helper(sequence: str, idx: Set[int], out: str, k: int, start: int) -> str:
+    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, k: int, start: int) -> str:
         possible_ends = ("TAG", "TAA", "TGA")
         for offset in range(k):
             if start + offset + k <= len(sequence):
                 if start + offset in idx:
                     continue
-                idx.add(start + offset)
-                s = sequence[start + offset: start + offset + k]
-                out += s
+                pos = start + offset
+                idx.add(pos)
+                s = sequence[pos: pos + k]
+                out.write(s)
                 if s in possible_ends:
-                    return out
-                return GffMerge.l_orf_helper(sequence, idx, out, k, start + offset + k)
-        return out
+                    return out.getvalue()
+                return GffMerge.l_orf_helper(sequence, idx, out, k, pos + k)
+        return out.getvalue()
 
 
 class GffWriter:
@@ -302,7 +304,7 @@ class GffWriter:
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(12000)
+    sys.setrecursionlimit(1200000)
     ap = ArgParse(
         (
             (("-g", "--gff3_file"),
