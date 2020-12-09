@@ -1,6 +1,6 @@
 # Installation
 
-`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, `cargo` should be on your PATH.
+`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, `cmake` &ge; 3.17 should be on your PATH.
 
 Ensure you have `conda`&ge;4.8.3 installed, that you have conda activated, and that you are in your `(base)` conda 
 environment. Then, run the following commands:
