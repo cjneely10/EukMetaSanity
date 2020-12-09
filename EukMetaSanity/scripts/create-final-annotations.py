@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 import os
+import re
+import sys
 from Bio import SeqIO
-from io import StringIO
 from Bio.Seq import Seq
+from io import StringIO
 from datetime import datetime
 from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
 from EukMetaSanity.utils.arg_parse import ArgParse
-from typing import List, Dict, Tuple, Generator, Optional
+from typing import List, Dict, Tuple, Generator, Optional, Set
 
 
 class Gene:
@@ -80,7 +82,7 @@ class Gene:
     # Returns if part of query coord overlaps target coord
     @staticmethod
     def in_exon(query_coord: Tuple[int, int, int], target_coord: Tuple[int, int, int]) -> bool:
-        return len(set(range(*target_coord[:-1])).intersection(set(range(*query_coord[:-1])))) > 0
+        return max(query_coord[0], target_coord[0]) <= min(query_coord[1], target_coord[1])
 
 
 class GffReader:
@@ -161,32 +163,20 @@ class GffMerge:
             yield (gene_data, *self.create_cds(gene_data, gene))
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
-        orig_seq = self.fasta_dict[gene_data["fasta-id"]].seq
+        orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
-        out_cds: List[SeqRecord] = []
+        out_cds: str = ""
         offsets: List[int] = []
         for exon in gene_data["transcripts"]:
-            start, end = 0, 0
+            record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
             if strand == "-":
-                end = exon[2]
-            else:
-                start = exon[2]
-            dist = exon[1] - end - exon[0] - start + 1
-            if dist % 3 == 0:
-                dist = 0
-            else:
-                dist = 3 - dist % 3
-            if strand == "+":
-                record = SeqRecord(seq=orig_seq[exon[0] - 1 + start: exon[1] - end] + Seq("N" * dist))
-            else:
-                record = SeqRecord(seq=Seq("N" * dist) + orig_seq[exon[0] - 1 + start: exon[1] - end])
                 record = record.reverse_complement()
-            out_cds.append(record)
+            out_cds += str(record.seq)
             offsets.append(exon[2])
         if strand == "-":
             offsets.reverse()
-        cds = Seq("".join(str(val.seq) for val in out_cds))
-        _prot_seq = Seq(str(cds.translate()).replace("X", ""))
+        cds = Seq(GffMerge.longest_orf(out_cds))
+        _prot_seq = cds.translate()
         _stats = "|".join(map(str, (
             gene.num_ab_initio,
             gene.trimmed_ab_initio,
@@ -215,6 +205,35 @@ class GffMerge:
             ),
             offsets
         )
+
+    @staticmethod
+    def longest_orf(sequence: str) -> str:
+        longest = ""
+        possible_starts = ("ATG", "CCA", "CTG", "CAG")
+        for start in possible_starts:
+            start_pos = (m.start() for m in re.finditer(start, sequence))
+            for pos in start_pos:
+                idx = set()
+                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
+                if len(orf) > len(longest):
+                    longest = orf
+        return longest
+
+    @staticmethod
+    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, k: int, start: int) -> str:
+        possible_ends = ("TAG", "TAA", "TGA")
+        for offset in range(k):
+            if start + offset + k <= len(sequence):
+                if start + offset in idx:
+                    continue
+                pos = start + offset
+                idx.add(pos)
+                s = sequence[pos: pos + k]
+                out.write(s)
+                if s in possible_ends:
+                    return out.getvalue()
+                return GffMerge.l_orf_helper(sequence, idx, out, k, pos + k)
+        return out.getvalue()
 
 
 class GffWriter:
@@ -285,6 +304,7 @@ class GffWriter:
 
 
 if __name__ == "__main__":
+    sys.setrecursionlimit(2000000)
     ap = ArgParse(
         (
             (("-g", "--gff3_file"),
