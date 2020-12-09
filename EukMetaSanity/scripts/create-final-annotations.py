@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import sys
 from Bio import SeqIO
 from io import StringIO
@@ -208,11 +209,10 @@ class GffMerge:
     @staticmethod
     def longest_orf(sequence: str) -> str:
         longest = ""
-        idx = set()
-        POSSIBLE_STARTS = ("ATG", "CCA")
-        for start in POSSIBLE_STARTS:
-            pos = sequence.find(start)
-            if pos != -1:
+        possible_starts = ("ATG", "CCA")
+        for start in possible_starts:
+            for pos in (m.start() for m in re.finditer(start, sequence)):
+                idx = set()
                 l = GffMerge.l_orf_helper(sequence, idx, "", 3, pos)
                 if len(l) > len(longest):
                     longest = l
@@ -220,7 +220,7 @@ class GffMerge:
 
     @staticmethod
     def l_orf_helper(sequence: str, idx: Set[int], out: str, k: int, start: int) -> str:
-        POSSIBLE_ENDS = ("TAG", "TAA", "TGA")
+        possible_ends = ("TAG", "TAA", "TGA")
         for offset in range(k):
             if start + offset + k <= len(sequence):
                 if start + offset in idx:
@@ -228,7 +228,7 @@ class GffMerge:
                 idx.add(start + offset)
                 s = sequence[start + offset: start + offset + k]
                 out += s
-                if s in POSSIBLE_ENDS:
+                if s in possible_ends:
                     return out
                 return GffMerge.l_orf_helper(sequence, idx, out, k, start + offset + k)
         return ""
