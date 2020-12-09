@@ -304,7 +304,7 @@ class GffWriter:
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(1200000)
+    sys.setrecursionlimit(2000000)
     ap = ArgParse(
         (
             (("-g", "--gff3_file"),
