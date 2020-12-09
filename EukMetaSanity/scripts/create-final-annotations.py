@@ -228,7 +228,7 @@ class GffMerge:
                 idx.add(start + offset)
                 s = sequence[start + offset: start + offset + k]
                 out += s
-                if s in POSSIBLE_ENDS and len(out) <= len(sequence):
+                if s in POSSIBLE_ENDS:
                     return out
                 return GffMerge.l_orf_helper(sequence, idx, out, k, start + offset + k)
         return ""
