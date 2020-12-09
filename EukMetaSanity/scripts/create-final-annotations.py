@@ -165,17 +165,17 @@ class GffMerge:
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
-        out_cds: List[SeqRecord] = []
+        out_cds: str = ""
         offsets: List[int] = []
         for exon in gene_data["transcripts"]:
             record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
             if strand == "-":
                 record = record.reverse_complement()
-            out_cds.append(record)
+            out_cds += str(record.seq)
             offsets.append(exon[2])
         if strand == "-":
             offsets.reverse()
-        cds = Seq(GffMerge.longest_orf("".join((str(cds.seq) for cds in out_cds))))
+        cds = Seq(GffMerge.longest_orf(out_cds))
         _prot_seq = cds.translate()
         _stats = "|".join(map(str, (
             gene.num_ab_initio,
@@ -209,13 +209,13 @@ class GffMerge:
     @staticmethod
     def longest_orf(sequence: str) -> str:
         longest = ""
-        possible_starts = ("ATG", "CCA")
+        possible_starts = ("ATG", "CCA", "CTG", "CAG")
         for start in possible_starts:
             for pos in (m.start() for m in re.finditer(start, sequence)):
                 idx = set()
-                l = GffMerge.l_orf_helper(sequence, idx, "", 3, pos)
-                if len(l) > len(longest):
-                    longest = l
+                orf = GffMerge.l_orf_helper(sequence, idx, "", 3, pos)
+                if len(orf) > len(longest):
+                    longest = orf
         return longest
 
     @staticmethod
@@ -231,7 +231,7 @@ class GffMerge:
                 if s in possible_ends:
                     return out
                 return GffMerge.l_orf_helper(sequence, idx, out, k, start + offset + k)
-        return ""
+        return out
 
 
 class GffWriter:
