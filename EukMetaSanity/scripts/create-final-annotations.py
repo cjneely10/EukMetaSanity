@@ -165,17 +165,17 @@ class GffMerge:
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
-        out_cds: str = ""
+        out_cds: List[str] = []
         offsets: List[int] = []
         for exon in gene_data["transcripts"]:
             record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
             if strand == "-":
                 record = record.reverse_complement()
-            out_cds += str(record.seq)
+            out_cds.append(str(record.seq))
             offsets.append(exon[2])
         if strand == "-":
             offsets.reverse()
-        cds = Seq(GffMerge.longest_orf(out_cds))
+        cds = Seq(GffMerge.longest_orf("".join(out_cds)))
         _prot_seq = cds.translate()
         _stats = "|".join(map(str, (
             gene.num_ab_initio,
