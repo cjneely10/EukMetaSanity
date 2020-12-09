@@ -128,6 +128,7 @@ class Task(ABC):
                 if self._mode == 0:
                     touch(_path)
                 elif not self.is_skip:
+                    print("Missing file: ", _path)
                     raise OutputResultsFileError(_path)
         return self._output_paths
 
