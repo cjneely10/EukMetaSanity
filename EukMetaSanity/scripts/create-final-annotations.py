@@ -47,7 +47,7 @@ class Gene:
                 _exon = None
                 for exon in evidence_data:
                     # An overlap is found
-                    if Gene.in_exon(exon, ab_exon):
+                    if max(exon[0], ab_exon[0]) <= min(exon[1], ab_exon[1]):
                         is_found = True
                         _exon = exon
                         break
@@ -67,7 +67,7 @@ class Gene:
         for exon in evidence_data:
             is_found = False
             for ab_exon in out_exons:
-                if Gene.in_exon(ab_exon, exon):
+                if max(exon[0], ab_exon[0]) <= min(exon[1], ab_exon[1]):
                     is_found = True
                     break
             if not is_found:
@@ -78,11 +78,6 @@ class Gene:
             self.exons.sort(key=itemgetter(0))
         else:
             self.exons.sort(key=itemgetter(0), reverse=True)
-
-    # Returns if part of query coord overlaps target coord
-    @staticmethod
-    def in_exon(query_coord: Tuple[int, int, int], target_coord: Tuple[int, int, int]) -> bool:
-        return max(query_coord[0], target_coord[0]) <= min(query_coord[1], target_coord[1])
 
 
 class GffReader:
