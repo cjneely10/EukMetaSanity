@@ -214,13 +214,14 @@ class GffMerge:
             start_pos = (m.start() for m in re.finditer(start, sequence))
             for pos in start_pos:
                 idx = set()
-                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
+                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), pos)
                 if len(orf) > len(longest):
                     longest = orf
         return longest
 
     @staticmethod
-    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, k: int, start: int) -> str:
+    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, start: int) -> str:
+        k = 3
         possible_ends = ("TAG", "TAA", "TGA")
         for offset in range(k):
             if start + offset + k <= len(sequence):
@@ -232,7 +233,7 @@ class GffMerge:
                 out.write(s)
                 if s in possible_ends:
                     return out.getvalue()
-                return GffMerge.l_orf_helper(sequence, idx, out, k, pos + k)
+                return GffMerge.l_orf_helper(sequence, idx, out, pos + k)
         return out.getvalue()
 
 

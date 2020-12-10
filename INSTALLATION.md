@@ -36,7 +36,7 @@ may need to run their accessory script `perl change_path_in_perl_scripts.pl "/us
 
 Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
 
-The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
+The `gmes_linux_64` directory and its enclosed `ProtHint/bin` directory should both be on your system path.
 
 ### Installing RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
