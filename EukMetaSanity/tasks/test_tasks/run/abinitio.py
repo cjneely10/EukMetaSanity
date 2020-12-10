@@ -3,6 +3,9 @@ import shutil
 from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
+
+from plumbum import ProcessExecutionError
+
 from EukMetaSanity import InvalidProtocolError
 from EukMetaSanity import Task, TaskList, program_catch, prefix
 from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
@@ -248,20 +251,26 @@ class AbInitioIter(TaskList):
                     _fasta_output,
                 ]
             )
-            # Run prothint
-            self.parallel(
-                self.program_prothint[
-                    str(self.input["root"]["fna"]),
-                    _fasta_output,
-                    "--workdir", self.wdir,
-                    "--threads", self.threads,
-                ]
-            )
+            try:
+                # Run prothint
+                self.parallel(
+                    self.program_prothint[
+                        str(self.input["root"]["fna"]),
+                        _fasta_output,
+                        "--workdir", self.wdir,
+                        "--threads", self.threads,
+                    ]
+                )
+            except ProcessExecutionError as e:
+                pass
+            ev_vals = ["--ES"]
+            if os.path.exists(os.path.join(self.wdir, "prothint.gff")):
+                ev_vals = ["--EP", os.path.join(self.wdir, "prothint.gff"),
+                           "--evidence", os.path.join(self.wdir, "evidence.gff")]
             script = self.create_script(
                 self.program_gmes[
                     "--sequence", str(self.input["root"]["fna"]),
-                    "--EP", os.path.join(self.wdir, "prothint.gff"),
-                    "--evidence", os.path.join(self.wdir, "evidence.gff"),
+                    (*ev_vals),
                     "--cores", self.threads, (*self.added_flags),
                     ("--fungus" if "fungi" == tax[0] else "")
                 ],
