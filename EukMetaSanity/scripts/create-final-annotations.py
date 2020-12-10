@@ -237,9 +237,9 @@ class GffMerge:
 
 
 class GffWriter:
-    def __init__(self, in_gff3_path: str, fasta_file: str):
+    def __init__(self, in_gff3_path: str, fasta_file: str, output_prefix: str):
         self.in_fp = open(in_gff3_path, "r")
-        self.base = os.path.splitext(in_gff3_path)[0]
+        self.base = output_prefix
         self.out_fp = open(self.base + ".nr.gff3", "w")
         self.merger = GffMerge(in_gff3_path, fasta_file)
 
@@ -311,10 +311,14 @@ if __name__ == "__main__":
              {"help": ".all.gff3 file", "required": True}),
             (("-f", "--fasta_file"),
              {"help": "FASTA file", "required": True}),
+            (("-o", "--output_prefix"),
+             {"help": "Output prefix, default is path/prefix of gff3_file"})
         ),
         description="GFF3 output final annotations as <prefix>.nr.gff3"
     )
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file
-    writer = GffWriter(ap.args.gff3_file, ap.args.fasta_file)
+    if ap.args.output_prefix is None:
+        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0]
+    writer = GffWriter(ap.args.gff3_file, ap.args.fasta_file, ap.args.output_prefix)
     writer.write()
