@@ -289,7 +289,6 @@ class Task(ABC):
             if out is not None:
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
                     w.write(out)
-                print(out)
 
     def single(self, cmd: LocalCommand):
         """ Launch a command that uses a single thread
@@ -310,7 +309,6 @@ class Task(ABC):
             if out is not None:
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
                     w.write(out)
-                print(out)
 
     def create_script(self, cmd: LocalCommand, file_name: str) -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
