@@ -291,7 +291,8 @@ class AbInitioIter(TaskList):
                     str(self.output["ab-gff3"])
                 ]
             )
-            self.local["rm"][_fasta_output]()
+            if os.path.exists(_fasta_output):
+                self.local["rm"][_fasta_output]()
             for file in os.listdir(self.wdir):
                 file = os.path.join(self.wdir, file)
                 if subset_db_outpath in file:
