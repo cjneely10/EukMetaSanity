@@ -169,8 +169,8 @@ class Task(ABC):
         if self.mode == 1:
             out = cmd()
             with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write(out)
-            print(out)
+                w.write(str(out))
+            print(str(out))
 
     def batch(self, cmds: List[LocalCommand]):
         for i in range(0, len(cmds), int(self.threads)):
