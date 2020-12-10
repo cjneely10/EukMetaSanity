@@ -4,6 +4,7 @@ from Bio import SeqIO
 from pathlib import Path
 from typing import Tuple, List
 from collections import Counter
+from plumbum import ProcessExecutionError
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids, prefix
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
@@ -82,8 +83,8 @@ class AbInitioIter(TaskList):
             self.batch(progs)
             # Combine files
             (
-                self.local["cat"][out_gffs] |
-                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"]
+                    self.local["cat"][out_gffs] |
+                    self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"]
             )()
             # Make ids unique
             self._make_unique(out_gff)
@@ -247,15 +248,22 @@ class AbInitioIter(TaskList):
                 subset_db_outpath,
                 _fasta_output,
             ]()
-            # Run prothint
-            self.log_and_run(
-                self.program_prothint[
-                    self.input[0],
-                    _fasta_output,
-                    "--workdir", self.wdir,
-                    "--threads", self.threads,
-                ]
-            )
+            try:
+                # Run prothint
+                self.log_and_run(
+                    self.program_prothint[
+                        self.input[0],
+                        _fasta_output,
+                        "--workdir", self.wdir,
+                        "--threads", self.threads,
+                    ]
+                )
+            except ProcessExecutionError as e:
+                pass
+            ev_vals = ["--ES"]
+            if os.path.exists(os.path.join(self.wdir, "prothint.gff")):
+                ev_vals = ["--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
+                           "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/")]
             # Edit in proper locations
             self.local["sed"][
                 "-i", "s/%s/%s/g" % (
@@ -263,8 +271,7 @@ class AbInitioIter(TaskList):
                     " ".join((
                         str(self.program_gmes).replace("/", "\/"),
                         "--sequence", self.input[0].replace("/", "\/"),
-                        "--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
-                        "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/"),
+                        (*ev_vals),
                         "--cores", self.threads, (*self.added_flags),
                         ("--fungus" if "fungi" == tax[0] else "")
                     ))
