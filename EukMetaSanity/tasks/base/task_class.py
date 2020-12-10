@@ -280,7 +280,8 @@ class Task(ABC):
         logging.info(str(cmd))
         if self._mode == 1:
             out = cmd()
-            logging.info(out)
+            with open(os.path.join(self.wdir, "task.log"), "w") as w:
+                w.write(out)
             print(out)
 
     def single(self, cmd: LocalCommand):
@@ -299,7 +300,8 @@ class Task(ABC):
         logging.info(str(cmd))
         if self._mode == 1:
             out = cmd()
-            logging.info(out)
+            with open(os.path.join(self.wdir, "task.log"), "w") as w:
+                w.write(out)
             print(out)
 
     def create_script(self, cmd: LocalCommand, file_name: str) -> LocalCommand:
