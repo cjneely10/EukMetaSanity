@@ -70,7 +70,7 @@ class RepeatsIter(TaskList):
 
         @program_catch
         def _model(self):
-            if len(glob.glob(os.path.join(self.wdir, "RM*"))) > 0:
+            if len(glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))) > 0:
                 return self.input[0]
             # Build database
             _name = os.path.join(self.wdir, self.record_id)
