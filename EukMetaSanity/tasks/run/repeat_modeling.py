@@ -3,6 +3,9 @@ import glob
 import shutil
 from typing import List
 from pathlib import Path
+
+from plumbum import ProcessExecutionError
+
 from EukMetaSanity.tasks.utils.helpers import prefix, touch
 from EukMetaSanity import Task, TaskList, program_catch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
@@ -116,15 +119,18 @@ class RepeatsIter(TaskList):
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
                 # Call RepeatMasker on modeled repeats in the new directory
-                self.log_and_run(
-                    self.program_masker[
-                        "-pa", self.threads,
-                        (*self.added_flags),
-                        (*search),
-                        "-dir", self.pm.get_dir(self.record_id, _dir),
-                        input_file,
-                    ]
-                )
+                try:
+                    self.log_and_run(
+                        self.program_masker[
+                            "-pa", self.threads,
+                            (*self.added_flags),
+                            (*search),
+                            "-dir", self.pm.get_dir(self.record_id, _dir),
+                            input_file,
+                        ]
+                    )
+                except ProcessExecutionError as e:
+                    continue
             # Combine repeat results and process
             self._parse_output(_added_dirs, input_file)
 
