@@ -3,6 +3,7 @@ import glob
 import shutil
 from typing import List
 from pathlib import Path
+from plumbum import ProcessExecutionError
 from EukMetaSanity import InvalidProtocolError
 from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
 from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
@@ -95,7 +96,10 @@ class RepeatsIter(TaskList):
                     ],
                     "mask.sh"
                 )
-                self.parallel(script)
+                try:
+                    self.parallel(script)
+                except ProcessExecutionError as e:
+                    continue
             # Combine repeat results and process
             self.parse_output(_added_dirs, input_file)
 

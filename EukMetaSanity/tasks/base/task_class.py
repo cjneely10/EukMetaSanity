@@ -280,7 +280,7 @@ class Task(ABC):
         logging.info(str(cmd))
         if self._mode == 1:
             out = cmd()
-            with open(os.path.join(self.wdir, "task.log"), "w") as w:
+            with open(os.path.join(self.wdir, "task.log"), "a") as w:
                 w.write(out)
             print(out)
 
@@ -300,7 +300,7 @@ class Task(ABC):
         logging.info(str(cmd))
         if self._mode == 1:
             out = cmd()
-            with open(os.path.join(self.wdir, "task.log"), "w") as w:
+            with open(os.path.join(self.wdir, "task.log"), "a") as w:
                 w.write(out)
             print(out)
 
