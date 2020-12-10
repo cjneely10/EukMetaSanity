@@ -25,6 +25,8 @@ def program_catch(f: Callable):
             return f(self, *args, **kwargs)
         except ProcessExecutionError as e:
             logging.info(e)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w:
+                w.write(str(e))
             print(e)
     return _add_try_except
 
@@ -168,9 +170,10 @@ class Task(ABC):
         logging.info(str(cmd))
         if self.mode == 1:
             out = cmd()
-            with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write(str(out))
-            print(str(out))
+            if out is not None:
+                with open(os.path.join(self.wdir, "task.log"), "a") as w:
+                    w.write(str(out))
+                print(str(out))
 
     def batch(self, cmds: List[LocalCommand]):
         for i in range(0, len(cmds), int(self.threads)):
