@@ -30,12 +30,18 @@ def program_catch(f: Callable):
             return f(self, *args, **kwargs)
         except ProcessExecutionError as e:
             logging.info(e)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w:
+                w.write(str(e))
             print(e)
         except FileExistsError as e:
             logging.info(e)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w:
+                w.write(str(e))
             print(e)
         except ValueError as e:
             logging.info(e)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w:
+                w.write(str(e))
             print(e)
 
     return _add_try_except
@@ -280,9 +286,10 @@ class Task(ABC):
         logging.info(str(cmd))
         if self._mode == 1:
             out = cmd()
-            with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write(out)
-            print(out)
+            if out is not None:
+                with open(os.path.join(self.wdir, "task.log"), "a") as w:
+                    w.write(out)
+                print(out)
 
     def single(self, cmd: LocalCommand):
         """ Launch a command that uses a single thread
@@ -300,9 +307,10 @@ class Task(ABC):
         logging.info(str(cmd))
         if self._mode == 1:
             out = cmd()
-            with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write(out)
-            print(out)
+            if out is not None:
+                with open(os.path.join(self.wdir, "task.log"), "a") as w:
+                    w.write(out)
+                print(out)
 
     def create_script(self, cmd: LocalCommand, file_name: str) -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
