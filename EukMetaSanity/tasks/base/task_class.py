@@ -167,7 +167,9 @@ class Task(ABC):
         # Run command directly
         logging.info(str(cmd))
         if self.mode == 1:
-            logging.info(cmd())
+            out = cmd()
+            logging.info(out)
+            print(out)
 
     def batch(self, cmds: List[LocalCommand]):
         for i in range(0, len(cmds), int(self.threads)):
