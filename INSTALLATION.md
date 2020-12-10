@@ -29,7 +29,9 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately.
 
-### Installing GeneMark
+### Installing GeneMark 4.62
+
+GeneMark is not packaged with **EukMetaSanity** and must be downloaded and installed separately.
 
 *(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
 may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`)*
