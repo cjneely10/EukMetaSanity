@@ -279,7 +279,9 @@ class Task(ABC):
         # Run command directly
         logging.info(str(cmd))
         if self._mode == 1:
-            logging.info(cmd())
+            out = cmd()
+            logging.info(out)
+            print(out)
 
     def single(self, cmd: LocalCommand):
         """ Launch a command that uses a single thread
@@ -296,7 +298,9 @@ class Task(ABC):
         # Run command directly
         logging.info(str(cmd))
         if self._mode == 1:
-            logging.info(cmd())
+            out = cmd()
+            logging.info(out)
+            print(out)
 
     def create_script(self, cmd: LocalCommand, file_name: str) -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
