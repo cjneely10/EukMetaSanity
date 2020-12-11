@@ -49,7 +49,8 @@ class EvidenceIter(TaskList):
                             db,
                             subset_db_outpath,
                             "--taxon-list", get_taxonomy(
-                                str(self.input["root"]["fna"]), 0, self.level,  # Allow for level override by user
+                                # Allow for level override by user
+                                str(self.input["taxonomy"]["tax-report"]), 0, self.level,
                             )[1],
                             "--threads", self.threads,
                         ],
