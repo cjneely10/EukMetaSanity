@@ -6,10 +6,10 @@ from EukMetaSanity.tasks.test_tasks.createdb import MMSeqsCreateDBIter
 from EukMetaSanity.tasks.test_tasks.searchdb import MMSeqsSearchDBIter
 # # # Test new api
 # # Run imports
-from EukMetaSanity.tasks.test_tasks.run.taxonomy import TaxonomyIter
-from EukMetaSanity.tasks.test_tasks.run.repeats import RepeatsIter
-from EukMetaSanity.tasks.test_tasks.run.abinitio import AbInitioIter
-from EukMetaSanity.tasks.test_tasks.run.evidence import EvidenceIter
+from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
+from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
+from EukMetaSanity.tasks.official.run.abinitio import AbInitioIter
+from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 # # Report imports
 from EukMetaSanity.tasks.test_tasks.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.test_tasks.report.eggnog import EggNogMapperIter
@@ -34,7 +34,7 @@ class PipelineManager:
                 MMSeqsSearchDBIter,
                 MMSeqsCreateDBIter,
             ],
-            "test_run": [
+            "run": [
                 EvidenceIter,
                 TaxonomyIter,
                 AbInitioIter,

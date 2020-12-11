@@ -1,90 +1,65 @@
 import os
-from typing import Tuple
+from EukMetaSanity import MissingDataError
 from EukMetaSanity import Task, TaskList, program_catch
-
-"""
-Determine the taxonomy of the Eukaryotic MAG
-
-"""
 
 
 class TaxonomyIter(TaskList):
+    """ This class will use `mmseqs` to identify putative taxonomy for an organism.
+
+    Outputs: seq_db, tax_db, tax-report
+
+    Finalizes: tax-report
+
+    """
+    name = "taxonomy"
+    requires = []
+    
     class Taxonomy(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            seq_db = os.path.join(self.wdir, self.record_id + "_db")
-            # Expected output
-            self.output = [
-                self.input[0],  # Input FASTA sequence for repeat masking
-                seq_db,  # MMseqs database for use in metaeuk or repeat masking
-                os.path.join(self.wdir, "tax-report.txt")  # Tax file
-            ]
-
+            self.output = {
+                "seq_db": os.path.join(self.wdir, self.record_id + "_db"),
+                "tax-report": os.path.join(self.wdir, "tax-report.txt"),
+                "final": ["tax-report"]
+            }
+            
         @program_catch
-        def run_1(self):
+        def run(self):
+            if not os.path.exists(self.data):
+                raise MissingDataError
+            # Create mmseqs database
+            self.single(
+                self.program[
+                    "createdb",
+                    self.input["root"]["fna"], self.output["seq_db"]
+                ]
+            )
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
-            seq_db = self.output[1]
-            # Create sequence database
-            self.program[
-                "createdb",
-                self.input[0],  # Input FASTA file
-                seq_db,  # Output FASTA sequence db
-            ]()
-            # Run taxonomy search
-            self.log_and_run(
+            # Search taxonomy db
+            self.parallel(
                 self.program[
                     "taxonomy",
-                    seq_db,  # Input FASTA sequence db
-                    self.data,  # Input OrthoDB
-                    tax_db,  # Output tax db
+                    self.output["seq_db"],
+                    self.data,
+                    tax_db,
                     os.path.join(self.wdir, "tmp"),
                     (*self.added_flags),
                     "--threads", self.threads,
                 ]
             )
-            # Tax report path
-            tax_report = os.path.join(self.wdir, "tax-report.txt")
-            # Output results
-            self.program[
-                "taxonomyreport",
-                self.data,  # Input OrthoDB
-                tax_db,  # Input tax db
-                tax_report
-            ]()
-
-        @staticmethod
-        def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> Tuple[str, int]:
-            tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
-            taxonomy = {key: None for key in tax_levels}
-            assert deepest_level in taxonomy.keys()
-            assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
-            _id: int = 2759
-            try:
-                # Get first line
-                _tax_results_file = open(tax_results_file, "r")
-                _level = ""
-                while True:
-                    line = next(_tax_results_file).rstrip("\r\n").split("\t")
-                    # Parse line for assignment
-                    _score, _level, _tax_id, _assignment = float(line[0]), line[3], int(line[4]), line[5].lstrip(" ")
-                    if _assignment in ("unclassified", "root"):
-                        continue
-                    if _score >= cutoff and taxonomy.get(_level, None) is None:
-                        taxonomy[_level] = (_assignment, _tax_id)
-            except StopIteration:
-                pass
-            # Found requested level
-            if taxonomy.get(deepest_level, None) is not None:
-                return taxonomy[deepest_level]
-            # Return deepest level with matching cutoff
-            for i in range(len(tax_levels) - 1, -1, -1):
-                if taxonomy[tax_levels[i]] is not None:
-                    return taxonomy[tax_levels[i]]
-            return '"%s"' % assignment.lower(), _id
-
+            # Generate taxonomy report
+            self.single(
+                self.program[
+                    "taxonomyreport",
+                    self.data,
+                    tax_db,
+                    self.output["tax_report"]
+                ]
+            )
+            
     def __init__(self, *args, **kwargs):
-        super().__init__(TaxonomyIter.Taxonomy, "taxonomy", *args, **kwargs)
+        super().__init__(TaxonomyIter.Taxonomy, TaxonomyIter.name, *args, **kwargs)
 
 
-if __name__ == "__main__":
+if __name__ == "__main_":
     pass

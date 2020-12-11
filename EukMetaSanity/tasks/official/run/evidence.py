@@ -1,43 +1,34 @@
 import os
 from typing import List
-from EukMetaSanity.tasks.utils.helpers import prefix
-from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.official.run import TaxonomyIter
-
-"""
-Add protein evidence using MetaEuk
-Provides custom summary for easy in use in next pipelines
-
-"""
+from EukMetaSanity import MissingDataError
+from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity.tasks.official.run.helpers.taxonomy import get_taxonomy
 
 
 class EvidenceIter(TaskList):
+    """ Task uses MetaEuk to align protein profiles to genome and output gff file of putative protein locations
+
+    Outputs: metaeuk-gff3, nr-gff3, prot, cds, all_gff3
+    Finalizes: metaeuk-gff3, nr-gff3, prot, cds, all_gff3
+
+    """
+    name = "evidence"
+    requires = ["repeats", "taxonomy", "abinitio"]
+    
     class Evidence(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            _merged_out = os.path.join(self.wdir, self.record_id + ".nr.gff3")
-            if os.path.exists(_merged_out):
-                os.remove(_merged_out)
-            _out = {
-                "metaeuk": os.path.join(self.wdir, "metaeuk.gff3"),  # Combined results of ab initio + evidence
-                "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # Proteins
-                "cds": os.path.join(self.wdir, self.record_id + ".cds.fna"),  # CDS
-                "mask": self.input[4],  # Masked results
-                "nr_gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
-                "abinitio": self.input[0],  # Ab initio file
-                "tax": self.input[3],  # Taxonomy results file
-                "mask_tbl": self.input[5],  # Summarized mask results
-                "mask_gff3": self.input[6],  # Mask gff3 file
-                "fna": self.input[2],  # Original fna file
-                "all_gff": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
+            self.output = {
+                "metaeuk-gff3": os.path.join(self.wdir, "metaeuk.gff3"),  # Metaeuk output
+                "nr-gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
+                "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # NR Proteins
+                "cds": os.path.join(self.wdir, self.record_id + ".cds.fna"),  # NR CDS
+                "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
+                "final": ["metaeuk-gff3", "nr-gff3", "prot", "cds", "all_gff3"]
             }
-            self.output = [
-                _out,  # Dictionary for accessing to write final summary
-                *list(_out.values()),  # Regular list of values for final path checking
-            ]
-
+            
         @program_catch
-        def run_1(self):
+        def run(self):
             # Subset taxonomic database
             out_results = []
             for db in self.data.split(","):
@@ -47,16 +38,18 @@ class EvidenceIter(TaskList):
                 if "p:" in db:
                     is_profile.append("--slice-search")
                     db = db[2:]
+                if not os.path.exists(db):
+                    raise MissingDataError
                 db_prefix = prefix(db)
                 subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % db_prefix)
                 if not os.path.exists(subset_db_outpath):
-                    self.log_and_run(
+                    self.parallel(
                         self.program_mmseqs[
                             "filtertaxseqdb",
                             db,
                             subset_db_outpath,
-                            "--taxon-list", TaxonomyIter.Taxonomy.get_taxonomy(
-                                self.input[3], 0, self.level,  # Allow for level override by user
+                            "--taxon-list", get_taxonomy(
+                                str(self.input["root"]["fna"]), 0, self.level,  # Allow for level override by user
                             )[1],
                             "--threads", self.threads,
                         ],
@@ -65,10 +58,10 @@ class EvidenceIter(TaskList):
                 # Run metaeuk
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
                 if not os.path.exists(_outfile + ".fas"):
-                    self.log_and_run(
+                    self.parallel(
                         self.program_metaeuk[
                             "easy-predict",
-                            self.input[4],
+                            str(self.input["repeats"]["mask-fna"]),
                             subset_db_outpath,
                             _outfile,
                             os.path.join(self.wdir, "tmp"),
@@ -78,18 +71,23 @@ class EvidenceIter(TaskList):
                         ]
                     )
                 # Convert to GFF3
-                self.local["metaeuk-to-gff3.py"][
-                    self.input[2], _outfile + ".fas", "-o", os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
-                ]()
+                self.single(
+                    self.local["metaeuk-to-gff3.py"][
+                        str(self.input["root"]["fna"]), _outfile + ".fas", "-o",
+                        os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
+                    ]
+                )
                 out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
-            self.program_gffread[
-                (*out_results), "-G", "--cluster-only",
-                "-o", os.path.join(self.wdir, "metaeuk.gff3")
-            ]()
+            self.single(
+                self.program_gffread[
+                    (*out_results), "-G", "--cluster-only",
+                    "-o", str(self.output["metaeuk-gff3"])
+                ]
+            )
             # Merge final results
             EvidenceIter.Evidence.merge(
-                self, [self.input[0], *out_results],
-                self.input[2],
+                self, [str(self.input["abinitio"]["ab-gff3"]), *out_results],
+                str(self.input["root"]["fna"]),
                 os.path.join(self.wdir, self.record_id),
             )
 
@@ -116,10 +114,10 @@ class EvidenceIter(TaskList):
                 out_prefix + ".all.cds.fna",
                 out_prefix + ".cds.fna"
             )
-
+            
     def __init__(self, *args, **kwargs):
-        super().__init__(EvidenceIter.Evidence, "evidence", *args, **kwargs)
+        super().__init__(EvidenceIter.Evidence, EvidenceIter.name, *args, **kwargs)
 
 
-if __name__ == "__main__":
+if __name__ == "__main_":
     pass

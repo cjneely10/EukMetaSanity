@@ -8,8 +8,8 @@ from plumbum import ProcessExecutionError
 
 from EukMetaSanity import InvalidProtocolError
 from EukMetaSanity import Task, TaskList, program_catch, prefix
-from EukMetaSanity.tasks.test_tasks.run.helpers.taxonomy import get_taxonomy
-from EukMetaSanity.tasks.test_tasks.run.helpers.abinitio import augustus_taxon_ids
+from EukMetaSanity.tasks.official.run.helpers.taxonomy import get_taxonomy
+from EukMetaSanity.tasks.official.run.helpers.abinitio import augustus_taxon_ids
 
 
 class AbInitioIter(TaskList):
