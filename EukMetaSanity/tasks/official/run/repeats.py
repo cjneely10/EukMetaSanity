@@ -45,7 +45,7 @@ class RepeatsIter(TaskList):
         @program_catch
         def model(self):
             # Database exists, move on
-            if len(glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))) > 0:
+            if len(glob.glob(os.path.join(self.wdir, "RM*"))) > 0:
                 return
             _name = os.path.join(self.wdir, self.record_id)
             self.single(
@@ -67,11 +67,11 @@ class RepeatsIter(TaskList):
         def mask(self, input_file: str):
             data_files = []
             _added_dirs = []
-            _file = glob.glob(os.path.join(self.wdir, "RM*"))
+            _file = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
-            data_files += [get_taxonomy(str(self.input["taxonomy"]["tax-report"]), float(self.cutoff), "family")[0]]
+            data_files += [get_taxonomy(str(self.input["taxonomy"]["tax-report"]), 5.0, "family")[0]]
             if len(_file) > 0 and os.path.exists(_file[0]):
                 data_files.append(_file[0])
             for _search in data_files:
