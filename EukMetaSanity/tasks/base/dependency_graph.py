@@ -41,30 +41,25 @@ class DependencyGraph:
         self.graph.add_node(Node(name="root", scope=""))
         # Add dependencies stored in TaskList object's .requires member
         for task_list in tasks:
-            self.graph.add_edge(Node(name="root", scope=""), Node(name=task_list.name, scope=""))
+            task_node = Node(name=task_list.name, scope=task_list.name)
+            self.graph.add_edge(Node(name="root", scope=""), task_node)
             for dependency in task_list.requires:
-                self._add_dependency_stack((dependency, task_list.name), task_list.name, "")
+                self._add_dependency_stack(Node(name=dependency, scope=task_node.name), task_node.name, task_node.name)
 
-    def _add_dependency_stack(self, dependency: Tuple[str, str], main_task_name: str, scope: str):
-        self.graph.add_edge(dependency, (main_task_name, scope))
-        dep_task: TaskList = self.idx[dependency[0]]
+    def _add_dependency_stack(self, dependency: Node, main_task_name: str, scope: str):
+        self.graph.add_edge(dependency, Node(name=main_task_name, scope=scope))
+        dep_task: TaskList = self.idx[dependency.name]
         for dep in dep_task.requires:
-            self.graph.add_edge((dep, scope), (dep_task.name, scope))
-            self._add_dependency_stack((dep, scope), dep_task.name, scope)
+            self.graph.add_edge(Node(name=dep, scope=scope), Node(name=dep_task.name, scope=scope))
+            self._add_dependency_stack(Node(name=dep, scope=scope), dep_task.name, scope)
 
     @property
-    def sorted_tasks(self) -> List[Type[TaskList]]:
+    def sorted_tasks(self) -> List[Tuple[Type[TaskList], str]]:
         """ Run topological sort of all tasks in pipeline and output in order that allows
         for completion of dependencies in required order
 
         :return: List of TaskList child classes to run
         """
-        sorted_nodes = list(nx.topological_sort(self.graph))
-        print(sorted_nodes)
-        sorted_nodes.remove(("root", ""))
-        out = []
-        for name in sorted_nodes:
-            task = self.idx[name[0]]
-            task.scope = name[1]
-            out.append(task)
-        return out
+        sorted_nodes: List[Node] = list(nx.topological_sort(self.graph))
+        sorted_nodes.remove(Node(name="root", scope=""))
+        return [(self.idx[node.name], node.scope) for node in sorted_nodes]

@@ -54,7 +54,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 class Task(ABC):
     def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
-                 record_id: str, db_name: str, mode: int):
+                 record_id: str, db_name: str, mode: int, scope: str):
         self._name = db_name
         # Store passed input flag:input_path dict
         self._input_data = input_data
@@ -64,8 +64,11 @@ class Task(ABC):
         self._cfg = cfg
         # Store threads and workers
         self._threads_pw = "1"
+        self._scope = scope
         if db_name in self.cfg.config.keys():
-            self._threads_pw = str(cfg.config.get(db_name, ConfigManager.THREADS))
+            self._threads_pw = str(cfg.config[db_name][ConfigManager.THREADS])
+        else:
+            self._threads_pw = str(cfg.config[scope][ConfigManager.THREADS])
         # Store path manager
         self._pm = pm
         # Developer(0) or User(1) mode
@@ -121,9 +124,9 @@ class Task(ABC):
 
     @property
     def program(self) -> LocalCommand:
-        if isinstance(self.config[ConfigManager.DEPENDENCIES][self._name], dict):
-            return self.local[self.config[ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]]
-        return self.local[self.config[ConfigManager.DEPENDENCIES][self._name]]
+        if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
+            return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]]
+        return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]]
 
     @property
     def local(self) -> LocalMachine:
@@ -145,8 +148,8 @@ class Task(ABC):
 
         :return: List of arguments to pass to calling program
         """
-        if isinstance(self.config[ConfigManager.DEPENDENCIES][self._name], dict):
-            return self.config[ConfigManager.DEPENDENCIES][self._name][ConfigManager.FLAGS].split(" ")
+        if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
+            return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.FLAGS].split(" ")
         return []
 
     @property
@@ -221,12 +224,10 @@ class Task(ABC):
 
         :return: Dictionary containing contents of config file that was used to launch this task
         """
-        n = self.name.split(".")
-        print(n)
-        if len(n) == 1:
+        if self._scope == "":
             return self._cfg.config[self._name]
         else:
-            return self._cfg.config[n[-1]][".".join(n[0:-1])]
+            return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]
 
     @property
     def wdir(self) -> str:
@@ -267,7 +268,7 @@ class Task(ABC):
         """
         print("  " + str(cmd))
         # Write command to slurm script file and run
-        if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is not False:
+        if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is True:
             if ConfigManager.MEMORY not in self.config.keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
             cmd = SLURMCaller(
@@ -369,19 +370,23 @@ class TaskList(ABC):
     def requires(cls) -> List[str]:
         pass
 
-    scope = ""
-
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
-                 input_paths: List[Dict[str, Dict[str, object]]], pm: PathManager, record_ids: List[str], mode: int):
+                 input_paths: List[Dict[str, Dict[str, object]]],
+                 pm: PathManager, record_ids: List[str], mode: int,
+                 scope: str):
         # Call data function for pertinent info
         self.name = name
         # Get workers for TaskList
         # Store workers
         self._workers = 1
         self._threads = 1
+        self._scope = scope
         if name in cfg.config.keys():
-            self._workers = int(cfg.config.get(name, ConfigManager.WORKERS))
-            self._threads = int(cfg.config.get(name, ConfigManager.THREADS))
+            self._workers = int(cfg.config[name][ConfigManager.WORKERS])
+            self._threads = int(cfg.config[name][ConfigManager.THREADS])
+        else:
+            self._workers = int(cfg.config[scope][ConfigManager.WORKERS])
+            self._threads = int(cfg.config[scope][ConfigManager.THREADS])
         # Get log statement
         self._statement = "\nRunning %s protocol using %i worker(s) and %i thread(s) per worker" % (
             self.name, self._workers, self._threads
@@ -393,8 +398,9 @@ class TaskList(ABC):
                 cfg,
                 pm,
                 record_id,
-                (TaskList.scope + name if TaskList.scope is not "" else name),
+                name,
                 mode,
+                scope
             )
             for input_path, record_id in zip(input_paths, record_ids)
         ]
@@ -405,11 +411,15 @@ class TaskList(ABC):
         # Single(0) or Threaded(1) mode
         self._mode = mode
 
+    @property
+    def scope(self) -> str:
+        return self._scope
+
     def run(self):
         # Single
         logging.info(self._statement)
         for _task in self._tasks:
-            if _task.is_skip is not False:
+            if _task.is_skip is False:
                 print(self._statement)
                 break
         if self._mode == 0:

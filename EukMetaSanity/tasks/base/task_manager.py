@@ -1,6 +1,6 @@
 import os
 from shutil import copy
-from typing import List, Dict
+from typing import List, Dict, Tuple, Type
 from EukMetaSanity.tasks.helpers import touch
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
@@ -27,7 +27,7 @@ class TaskManager:
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
         self.task_list = self.dep_graph.sorted_tasks
-        self.completed_tasks: Dict[str, TaskList] = {}
+        self.completed_tasks: Dict[Tuple[str, str], TaskList] = {}
         self.pm = pam
         self.cfg = cfg
         self.debug = debug
@@ -40,17 +40,20 @@ class TaskManager:
 
         :param output_dir: Directory to write final result file
         """
-        task = self.task_list[0](self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
+        task = self.task_list[0][0](
+            self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1])
+        task.update({req_str: self.completed_tasks[(req_str, task.scope)].output()[0][0]
+                     for req_str in task.requires})
         task.run()
-        self.completed_tasks[task.name] = task
+        self.completed_tasks[(task.name, task.scope)] = task
         i = 1
         while i < len(self.task_list):
-            task = self.task_list[i](self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug)
-            for req_str in task.requires:
-                for out_data in self.completed_tasks[req_str].output()[0]:
-                    task.update({req_str: out_data})
+            task = self.task_list[i][0](
+                self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1])
+            task.update({req_str: self.completed_tasks[(req_str, task.scope)].output()[0][0]
+                         for req_str in task.requires})
             task.run()
-            self.completed_tasks[task.name] = task
+            self.completed_tasks[(task.name, task.scope)] = task
             i += 1
         self.summarize(os.path.join(output_dir, "results", self.command), self.command)
 
@@ -65,16 +68,22 @@ class TaskManager:
         # Collect header ids and corresponding files
         for task_list in self.completed_tasks.values():
             output = task_list.output()
+            i = 0
             for task_result, task_record_id in zip(*output):
                 if "final" in task_result.keys():
-                    print(task_result)
                     _sub_out = os.path.join(_final_output_dir, task_record_id)
                     if not os.path.exists(_sub_out):
                         os.makedirs(_sub_out)
                     for _file in task_result["final"]:
-                        _file = task_result[_file]
+                        if _file in task_result.keys():
+                            _file = task_result[_file]
+                        else:
+                            class_path = _file.split(".")
+                            front = ".".join(class_path[0:-1])
+                            _file = self.completed_tasks[(front, task_list.scope)].output()[0][i][class_path[-1]]
                         if isinstance(_file, str):
                             if os.path.exists(_file):
                                 copy(_file, _sub_out)
                             elif self.debug:
                                 touch(os.path.join(_sub_out, _file))
+                i += 1

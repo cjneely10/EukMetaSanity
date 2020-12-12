@@ -18,9 +18,7 @@ class TaxonomyIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "Parser": TaxonomyIter.Taxonomy.get_taxonomy,
-                "seq_db": self.input["mmseqs.createdb"]["db"],
-                "tax-report": self.input["mmseqs.taxonomy"]["tax-report"],
-                "final": ["tax-report"]
+                "final": ["mmseqs.taxonomy.tax-report"]
             }
             
         @program_catch

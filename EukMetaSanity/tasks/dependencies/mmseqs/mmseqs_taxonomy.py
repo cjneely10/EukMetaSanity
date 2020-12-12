@@ -7,11 +7,11 @@ class TaxonomyIter(TaskList):
     name = "mmseqs.taxonomy"
     requires = ["mmseqs.createdb"]
     
-    class TaxonomyIter(Task):
+    class Taxonomy(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "tax-report": os.path.join(self.wdir, "tax-report.txt")
+                "tax-report": os.path.join(self.wdir, "tax-report.txt"),
             }
             
         @program_catch
@@ -37,12 +37,12 @@ class TaxonomyIter(TaskList):
                     "taxonomyreport",
                     self.data[0],
                     tax_db,
-                    self.output["tax_report"]
+                    self.output["tax-report"]
                 ]
             )
             
     def __init__(self, *args, **kwargs):
-        super().__init__(TaxonomyIter.TaxonomyIter, TaxonomyIter.name, *args, **kwargs)
+        super().__init__(TaxonomyIter.Taxonomy, TaxonomyIter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":
