@@ -1,10 +1,12 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.utils.helpers import prefix, touch
 
 
-class MMSeqsCreateDBIter(TaskList):
-    name = "createdb"
+class CreateDBIter(TaskList):
+    """ This class will create an MMseqs database
+
+    """
+    name = "mmseqs.createdb"
     requires = []
 
     class MMSeqsCreateDB(Task):
@@ -17,11 +19,11 @@ class MMSeqsCreateDBIter(TaskList):
         @program_catch
         def run(self):
             self.single(
-                self.local["mmseqs"]["createdb"][self.input["root"]["fna"], self.output["db"]]
+                self.program["createdb"][self.input["root"]["fna"], self.output["db"]]
             )
 
     def __init__(self, *args, **kwargs):
-        super().__init__(MMSeqsCreateDBIter.MMSeqsCreateDB, MMSeqsCreateDBIter.name, *args, **kwargs)
+        super().__init__(CreateDBIter.MMSeqsCreateDB, CreateDBIter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":

@@ -61,8 +61,9 @@ class Task(ABC):
         # Instantiate output dict variable
         self._output_paths: Dict[str, object] = {}
         # Store threads and workers
-        # TODO Handle classes that are subtasks
-        self._threads_pw = cfg.config.get(db_name, ConfigManager.THREADS)
+        self._threads_pw = "1"
+        if db_name in self.config.keys():
+            self._threads_pw = str(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
         self._pm = pm
         # Store config manager
@@ -118,10 +119,11 @@ class Task(ABC):
     def threads(self) -> str:
         return self._threads_pw
 
-    def program(self, prog_name: str) -> LocalCommand:
-        if isinstance(self.config["dependencies"][prog_name], dict):
-            return self.local[self.config["dependencies"][prog_name]["program"]]
-        return self.local[self.config["dependencies"][prog_name]]
+    @property
+    def program(self) -> LocalCommand:
+        if isinstance(self.config[ConfigManager.DEPENDENCIES][self._name], dict):
+            return self.local[self.config[ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]]
+        return self.local[self.config[ConfigManager.DEPENDENCIES][self._name]]
 
     @property
     def local(self) -> LocalMachine:
@@ -135,15 +137,16 @@ class Task(ABC):
         """
         return local
 
-    def added_flags(self, prog_name: str) -> List[str]:
+    @property
+    def added_flags(self) -> List[str]:
         """ Get additional flags that user provided in config file
 
         Example: self.local["ls"][(\*self.added_flags("ls"))]
 
         :return: List of arguments to pass to calling program
         """
-        if isinstance(self.config["dependencies"][prog_name], dict):
-            return self.config["dependencies"][prog_name]["FLAGS"].split(" ")
+        if isinstance(self.config[ConfigManager.DEPENDENCIES][self._name], dict):
+            return self.config[ConfigManager.DEPENDENCIES][self._name][ConfigManager.FLAGS].split(" ")
         return []
 
     @property
@@ -156,7 +159,7 @@ class Task(ABC):
 
     @property
     def data(self) -> List[str]:
-        return self.config["data"].split(",")
+        return self.config[ConfigManager.DATA].split(",")
 
     @property
     def output(self) -> Dict[str, object]:
@@ -380,7 +383,9 @@ class TaskList(ABC):
         ]
         # Store workers
         self._workers = workers
-        self._threads = int(cfg.config.get(name, ConfigManager.THREADS))
+        self._threads = 1
+        if name in cfg.config.keys():
+            self._threads = int(cfg.config.get(name, ConfigManager.THREADS))
         # Store ConfigManager object
         self._cfg = cfg
         # Store PathManager object

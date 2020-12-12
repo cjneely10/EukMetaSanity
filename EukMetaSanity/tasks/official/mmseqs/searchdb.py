@@ -5,7 +5,7 @@ from EukMetaSanity.tasks.utils.helpers import prefix, touch
 
 class MMSeqsSearchDBIter(TaskList):
     name = "searchdb"
-    requires = ["createdb"]
+    requires = ["mmseqs.createdb"]
 
     class MMSeqsSearchDB(Task):
         def __init__(self, *args, **kwargs):

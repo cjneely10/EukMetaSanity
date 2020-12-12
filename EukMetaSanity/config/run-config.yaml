@@ -15,10 +15,12 @@ taxonomy:
   threads: 1
   memory: 40G
   time: "12:00:00"
-  data: /path/to/ortho_db
   dependencies:
-    mmseqs:
+    mmseqs.createdb:
       program: mmseqs
+    mmseqs.taxonomy:
+      program: mmseqs
+      data: /path/to/ortho_db
       # Pass any flags to mmseqs required
       FLAGS:
         --remove-tmp-files

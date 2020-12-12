@@ -6,6 +6,7 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 boilerplate = """import os
 from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
+from EukMetaSanity import ProcessExecutionError, CommandNotFound
 from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
@@ -46,7 +47,7 @@ user-id = uid
 
 
 def create_class_file(file_path: str, class_name: str, cfg_name: str):
-    fp = open(os.path.join(file_path, cfg_name + ".py"), "w")
+    fp = open(os.path.join(file_path, cfg_name.replace(".", "_") + ".py"), "w")
     fp.write(boilerplate.format(class_name, cfg_name, """{
                 
             }"""))

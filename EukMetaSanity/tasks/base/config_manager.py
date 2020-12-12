@@ -40,6 +40,10 @@ class ConfigManager:
     TIME = "time"
     PROTOCOL = "protocol"
     USE_CLUSTER = "USE_CLUSTER"
+    DEPENDENCIES = "dependencies"
+    PROGRAM = "program"
+    FLAGS = "FLAGS"
+    DATA = "data"
 
     def __init__(self, config_path: str):
         self._config = yaml.load(str(Path(config_path).resolve()), Loader=yaml.FullLoader)
