@@ -1,6 +1,7 @@
 import networkx as nx
 from typing import List, Type
 from EukMetaSanity.tasks.base.task_class import TaskList
+from EukMetaSanity.tasks.dependencies import dependencies
 
 
 class DependencyGraphGenerationError(BaseException):
@@ -22,6 +23,7 @@ class DependencyGraph:
     """
     def __init__(self, tasks: List[TaskList]):
         self.idx = {task.name: task for task in tasks}
+        self.idx.update(dependencies)
         self.graph = nx.DiGraph()
         self._build_dependency_graph(tasks)
         if not nx.is_directed_acyclic_graph(self.graph):

@@ -1,10 +1,6 @@
 from typing import Dict, List, Type
 # General imports
 from EukMetaSanity.tasks.base.task_class import TaskList
-# Test imports
-from EukMetaSanity.tasks.dependencies.mmseqs.mmseqs_createdb import CreateDBIter
-from EukMetaSanity.tasks.dependencies.mmseqs.searchdb import MMSeqsSearchDBIter
-# # # Test new api
 # # Run imports
 from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
@@ -30,10 +26,6 @@ class PipelineManager:
     """
     def __init__(self):
         self.programs: Dict[str, List[Type[TaskList]]] = {
-            "test": [
-                MMSeqsSearchDBIter,
-                CreateDBIter,
-            ],
             "run": [
                 EvidenceIter,
                 TaxonomyIter,

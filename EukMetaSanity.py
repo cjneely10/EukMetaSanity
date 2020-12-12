@@ -83,6 +83,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineMan
     # Begin logging
     _initialize_logging(ap)
     # Gather list of files to analyze
+    # TODO: Handle loading from wdir all required input for specific pipeline
     if is_continued:
         # Gather from existing data
         for f in (logging.info, print):
