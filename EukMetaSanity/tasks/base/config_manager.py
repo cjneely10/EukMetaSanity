@@ -1,16 +1,13 @@
 import os
+import yaml
 from pathlib import Path
-from typing import List, Tuple
-from configparser import RawConfigParser
+from plumbum import local, CommandNotFound
+from typing import List, Tuple, Dict, Union
 
 """
 Manages the config file, as well as arguments that are set for each part of the pipeline
 
 """
-
-
-class Config(RawConfigParser):
-    pass
 
 
 class InvalidPathError(FileExistsError):
@@ -36,92 +33,56 @@ class InvalidProtocolError(ValueError):
 
 
 class ConfigManager:
-    # Default accessors
-    # Starting PATH value - * * API: THIS IS CALLABLE * *
-    PROGRAM = "PROGRAM"
-    # Config file
-    DATA = "DATA"
-    # Workers for task
-    WORKERS = "WORKERS"
-    # Threads per worker
-    THREADS = "THREADS"
-    # Memory assigned per worker
-    MEMORY = "MEMORY"
-    # Time allotted for job
-    TIME = "TIME"
-    # # Protocols for running a choice of a program
-    PROTOCOL = "PROTOCOL"
-    # # slurm identifiers
-    USE_CLUSTER = "USE_CLUSTER"
-
-    def __init__(self, config_path):
-        self._config = Config()
-        self._config.optionxform = str
-        self._config.read(config_path)
+    def __init__(self, config_path: str):
+        self._config = yaml.load(str(Path(config_path).resolve()), Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
-        for k, value_dict in self.config.items():
-            # Ensure all data is valid
-            ConfigManager._validate_data(k, value_dict)
+        self._validate()
 
     @property
-    def config(self):
+    def config(self) -> Dict[str, Dict[str, Union[str, dict]]]:
         return self._config
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
-    @staticmethod
-    def _validate_data(key, inner_dict):
-        for possible_key in (ConfigManager.DATA,):
-            _path = inner_dict.get(possible_key, None)
-            if _path is not None and not all(
-                    [os.path.exists(Path(_p).resolve()) for _p in _path.split(",") if ":" not in _p]):
-                raise InvalidPathError("Invalid path %s for %s %s" % (_path, key, possible_key))
-
-    # Gather user-passed flags for analysis
-    def get_added_flags(self, _dict_name: str) -> List[str]:
-        """ Parse all added flags in a config section into a list
-
-        Checks FLAGS variable and parses into same list
-
-        :param _dict_name: Config file section name
-        :return: List of parsed flags
-        """
-        out = []
-        _attrs = set(dir(self))
-        for key in dict(self.config[_dict_name]).keys():
-            # Parse FLAGS argument from comma-separated
-            if key == "FLAGS":
-                all(out.append(val) for val in [def_key.lstrip(" ").rstrip(" ")
-                                                for def_key in
-                                                self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
-                                                if def_key != ""])
-            # Parse remaining args as dictionary items (for those not used in API)
-            # Automatically ignores all capitalized values
-            elif key not in dir(self) and not any([key.startswith(_attr) for _attr in dir(self) if _attr.isupper()]) \
-                    and not any([key.startswith(_attr) for _attr in self.config[_dict_name] if _attr.isupper()]):
-                out.append(key)
-                out.append(self.config[_dict_name][key])
-        return out
+    def _validate(self):
+        for task_name, task_dict in self.config.items():
+            if "data" in task_dict:
+                if not os.path.exists(str(Path(task_dict["data"]).resolve())):
+                    raise MissingDataError("Data for task %s (provided: %s) does not exist!" % (
+                        task_name, task_dict["data"]
+                    ))
+            if "dependencies" in task_dict.keys():
+                for prog_name, prog_data in task_dict["dependencies"].items():
+                    # Simple - is only a path with no ability to pass flags
+                    if isinstance(prog_data, str):
+                        try:
+                            local[prog_data]
+                        except CommandNotFound:
+                            raise MissingDataError(
+                                "Dependency %s (provided: %s) is not present in your system's path!" % (
+                                    prog_name, prog_data))
+                    # Provided as dict with program path and FLAGS
+                    elif isinstance(prog_data, dict):
+                        try:
+                            if "program" not in prog_data:
+                                raise InvalidPathError(
+                                    "Dependency %s is improperly configured in your config file!" % prog_name
+                                )
+                            bool(prog_data["program"])
+                        except CommandNotFound:
+                            raise MissingDataError(
+                                "Dependency %s (provided: %s) is not present in your system's path!" % (
+                                    prog_name, prog_data["program"]))
 
     def _get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
-        return [(key, val) for key, val in self.config["SLURM"].items()
-                # if key not in {ConfigManager.USE_CLUSTER, "FLAGS"}}
-                if key not in {ConfigManager.USE_CLUSTER, "--nodes", "--ntasks", "--mem", "user-id"}]
+        return [
+            (key, str(val)) for key, val in self.config["SLURM"].items()
+            if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
+        ]
 
     def _get_slurm_userid(self):
         if "user-id" not in self.config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]
-
-    def get_FLAGS(self, _dict_name: str) -> List[str]:
-        """ Parse FLAGS variable into list
-
-        :param _dict_name: Config file section name
-        :return: List of parsed flags
-        """
-        return [val for val in [def_key.lstrip(" ").rstrip(" ")
-                                for def_key in
-                                self.config[_dict_name]["FLAGS"].rstrip("\r\n").split(",")
-                                if def_key != ""]]
 
 
 if __name__ == "__main__":
