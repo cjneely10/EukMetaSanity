@@ -15,6 +15,7 @@ taxonomy:
   threads: 1
   memory: 40G
   time: "12:00:00"
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
   dependencies:
     mmseqs.createdb:
       program: mmseqs
@@ -35,7 +36,6 @@ repeats:
   memory: 40G
   time: "8:00:00"
   protocol: full  # Select from ab-initio/ncbi/full
-  cutoff: 8.0  # Minimum % of mapped reads to tax level
   dependencies:
     repmod.build_database:
       program: BuildDatabase

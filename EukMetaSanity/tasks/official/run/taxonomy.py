@@ -2,7 +2,7 @@ from collections import namedtuple
 from typing import Tuple, Optional
 from EukMetaSanity import Task, TaskList, program_catch
 
-Assignment = namedtuple("Assignment", ("value", "score"))
+Assignment = namedtuple("Assignment", ("value", "tax_id", "score"))
 
 
 class TaxonomyAssignment:
@@ -54,15 +54,17 @@ class TaxonomyIter(TaskList):
             
         @program_catch
         def run(self):
-            pass
+            self.output["taxonomy"] = TaxonomyIter.Taxonomy.get_taxonomy(
+                str(self.input["mmseqs.taxonomy"]["tax-report"]),
+                float(self.config["cutoff"]))
 
         @staticmethod
         def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> TaxonomyAssignment:
+            tax_assignment_out = TaxonomyAssignment()
             tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
             taxonomy = {key: None for key in tax_levels}
+            tax_assignment_out.kingdom = Assignment("Eukaryota", 2759, -1)
             assert deepest_level in taxonomy.keys()
-            assignment: str = "Eukaryota"  # Default to Eukaryota if nothing better is found
-            _id: int = 2759
             try:
                 # Get first line
                 _tax_results_file = open(tax_results_file, "r")
@@ -74,17 +76,15 @@ class TaxonomyIter(TaskList):
                     if _assignment in ("unclassified", "root"):
                         continue
                     if _score >= cutoff and taxonomy.get(_level, None) is None:
-                        taxonomy[_level] = (_assignment, _tax_id)
+                        taxonomy[_level] = Assignment(_assignment, _tax_id, _score)
             except StopIteration:
                 pass
-            # Found requested level
-            if taxonomy.get(deepest_level, None) is not None:
-                return taxonomy[deepest_level]
-            # Return deepest level with matching cutoff
-            for i in range(len(tax_levels) - 1, -1, -1):
-                if taxonomy[tax_levels[i]] is not None:
-                    return taxonomy[tax_levels[i]]
-            return '"%s"' % assignment.lower(), _id
+            for level, assignment in taxonomy.items():
+                if level == "class":
+                    setattr(tax_assignment_out, "_class", assignment)
+                else:
+                    setattr(tax_assignment_out, level, assignment)
+            return tax_assignment_out
             
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, TaxonomyIter.name, *args, **kwargs)
