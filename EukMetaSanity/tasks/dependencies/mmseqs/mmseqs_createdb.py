@@ -5,6 +5,14 @@ from EukMetaSanity import Task, TaskList, program_catch
 class CreateDBIter(TaskList):
     """ This class will create an MMseqs database
 
+    name: mmseqs.createdb
+
+    requires: None
+
+    output keys: db
+
+    finalizes: None
+
     """
     name = "mmseqs.createdb"
     requires = []

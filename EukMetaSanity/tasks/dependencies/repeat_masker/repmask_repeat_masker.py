@@ -6,7 +6,7 @@ from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolErr
 
 class RepeatMaskerIter(TaskList):
     name = "repmask.repeat_masker"
-    requires = []
+    requires = ["taxonomy"]
     
     class RepeatMasker(Task):
         def __init__(self, *args, **kwargs):

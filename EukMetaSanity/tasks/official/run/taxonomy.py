@@ -1,13 +1,44 @@
-from typing import Tuple
+from collections import namedtuple
+from typing import Tuple, Optional
 from EukMetaSanity import Task, TaskList, program_catch
+
+Assignment = namedtuple("Assignment", ("value", "score"))
+
+
+class TaxonomyAssignment:
+    """ This class holds the results of a taxonomic assignment by varying taxonomic levels
+
+    """
+    def __init__(self):
+        self.kingdom: Optional[Assignment] = None
+        self.phylum: Optional[Assignment] = None
+        self._class: Optional[Assignment] = None
+        self.order: Optional[Assignment] = None
+        self.superfamily: Optional[Assignment] = None
+        self.family: Optional[Assignment] = None
+        self.genus: Optional[Assignment] = None
+        self.species: Optional[Assignment] = None
+
+    def assignment(self, level: str) -> Optional[Assignment]:
+        """ Get Assignment object at given level.
+        Returns None is level not found in file, or if level did not exist in file
+
+        :param level: Taxonomy level string (e.g. kingdom, order, _class, etc.)
+        :return: Assignment object or None
+        """
+        return getattr(self, level, None)
 
 
 class TaxonomyIter(TaskList):
     """ This class will use `mmseqs` to identify putative taxonomy for an organism.
 
-    Outputs: seq_db, tax_db, tax-report
+    name: taxonomy
 
-    Finalizes: tax-report
+    requires: mmseqs.createdb, mmseqs.taxonomy
+
+    output keys: taxonomy
+
+    finalizes: mmseqs.taxonomy.tax-report
 
     """
     name = "taxonomy"
@@ -17,7 +48,7 @@ class TaxonomyIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "Parser": TaxonomyIter.Taxonomy.get_taxonomy,
+                "taxonomy": TaxonomyAssignment(),
                 "final": ["mmseqs.taxonomy.tax-report"]
             }
             
@@ -26,7 +57,7 @@ class TaxonomyIter(TaskList):
             pass
 
         @staticmethod
-        def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> Tuple[str, int]:
+        def get_taxonomy(tax_results_file: str, cutoff: float, deepest_level: str = "strain") -> TaxonomyAssignment:
             tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
             taxonomy = {key: None for key in tax_levels}
             assert deepest_level in taxonomy.keys()

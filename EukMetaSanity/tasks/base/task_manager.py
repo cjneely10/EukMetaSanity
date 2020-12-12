@@ -79,8 +79,9 @@ class TaskManager:
                             _file = task_result[_file]
                         else:
                             class_path = _file.split(".")
-                            front = ".".join(class_path[0:-1])
-                            _file = self.completed_tasks[(front, task_list.scope)].output()[0][i][class_path[-1]]
+                            _file = self.completed_tasks[
+                                (".".join(class_path[0:-1]), task_list.scope)
+                            ].output()[0][i][class_path[-1]]
                         if isinstance(_file, str):
                             if os.path.exists(_file):
                                 copy(_file, _sub_out)

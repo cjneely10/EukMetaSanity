@@ -4,6 +4,17 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 
 class TaxonomyIter(TaskList):
+    """ This class runs the MMseqs taxonomy subprogram
+
+    name: mmseqs.taxonomy
+
+    requires: mmseqs.createdb
+
+    output keys: tax-report
+
+    finalizes: None
+
+    """
     name = "mmseqs.taxonomy"
     requires = ["mmseqs.createdb"]
     

@@ -1,7 +1,7 @@
 import os
 import glob
 import shutil
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, touch
 
 
 class RepeatModelerIter(TaskList):
@@ -12,7 +12,6 @@ class RepeatModelerIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "successful": True,
                 "model": os.path.join(self.wdir, "consensi.fa.classified")
             }
             
@@ -30,7 +29,7 @@ class RepeatModelerIter(TaskList):
             if len(_output) > 0:
                 shutil.move(_output[0], os.path.join(self.wdir, "consensi.fa.classified"))
             else:
-                self.output["successful"] = False
+                touch(str(self.output["model"]))
             
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatModelerIter.RepeatModeler, RepeatModelerIter.name, *args, **kwargs)
