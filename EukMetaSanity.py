@@ -7,9 +7,9 @@ from pathlib import Path
 from signal import signal, SIGPIPE, SIG_DFL
 from typing import Generator, List, Tuple, Dict
 from EukMetaSanity.utils.arg_parse import ArgParse
-from EukMetaSanity.utils.path_manager import PathManager
-from EukMetaSanity.utils.config_manager import ConfigManager
+from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
+from EukMetaSanity.tasks.base.config_manager import ConfigManager
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 """
@@ -62,13 +62,13 @@ def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
 
 # Get program-needed list of files for this step in pipeline
 def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, Dict[str, object]]]]:
-    data = dict(json.load(open(summary_file, "r")))
+    data = json.load(open(summary_file, "r"))
     out_ids = sorted(list(data.keys()))
     out_dict_list = []
     for _id in out_ids:
         to_add = {"root": {}}
         for key, val in data[_id].items():
-            if type(data[val]) != dict:
+            if isinstance(val, dict):
                 to_add["root"][key] = val
             else:
                 to_add[key] = val

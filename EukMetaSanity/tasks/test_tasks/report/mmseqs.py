@@ -25,6 +25,7 @@ class MMseqsIter(TaskList):
             
         @program_catch
         def run(self):
+            print(self.input)
             # Generate MMseqs database for proteins
             _file_db = os.path.join(self.wdir, self.record_id + "_db")
             if not os.path.exists(_file_db):

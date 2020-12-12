@@ -11,7 +11,7 @@ class StatsIter(TaskList):
 
     """
     name = "stats"
-    requires = ["emapper", "kofamscan", "mmseqs"]
+    requires = ["eggnog", "kofamscan", "mmseqs"]
     
     class Stats(Task):
         def __init__(self, *args, **kwargs):

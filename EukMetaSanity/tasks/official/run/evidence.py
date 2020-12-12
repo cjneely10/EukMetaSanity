@@ -95,14 +95,18 @@ class EvidenceIter(TaskList):
         @staticmethod
         def merge(task_object: Task, input_list: List[str], fasta_file: str, out_prefix: str):
             # Convert to gff3 file
-            task_object.program_gffread[
-                (*input_list), "-G", "--merge",
-                "-o", out_prefix + ".all.gff3"
-            ]()
+            task_object.single(
+                task_object.program_gffread[
+                    (*input_list), "-G", "--merge",
+                    "-o", out_prefix + ".all.gff3"
+                ]
+            )
             # Replace transcripts with gene identifier and write cds/aa sequences
-            task_object.local["create-final-annotations.py"][
-                "-f", fasta_file, "-g", out_prefix + ".all.gff3"
-            ]()
+            task_object.single(
+                task_object.local["create-final-annotations.py"][
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3"
+                ]
+            )
             os.replace(
                 out_prefix + ".all.nr.gff3",
                 out_prefix + ".nr.gff3",

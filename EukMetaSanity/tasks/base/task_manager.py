@@ -5,8 +5,8 @@ from typing import List, Dict
 from collections import defaultdict
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.tasks.base.task_class import TaskList
-from EukMetaSanity.utils.path_manager import PathManager
-from EukMetaSanity.utils.config_manager import ConfigManager
+from EukMetaSanity.tasks.base.path_manager import PathManager
+from EukMetaSanity.tasks.base.config_manager import ConfigManager
 from EukMetaSanity.tasks.base.dependency_graph import DependencyGraph
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
@@ -65,17 +65,19 @@ class TaskManager:
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s.json" % _name), "w")
-        output_dicts: Dict[str, Dict[str, object]] = defaultdict(default_factory=defaultdict(str))
+        output_dicts: Dict[str, Dict[str, Dict[str, str]]] = defaultdict(default_factory=defaultdict(default_factory=defaultdict(str)))
         # Collect header ids and corresponding files
         for task_list in self.completed_tasks.values():
             output = task_list.output()
             for task_result, task_record_id in zip(*output):
                 if "final" in task_result.keys():
+                    print(task_result)
                     _sub_out = os.path.join(_final_output_dir, task_record_id)
                     if not os.path.exists(_sub_out):
                         os.makedirs(_sub_out)
                     for _file in task_result["final"]:
                         output_dicts[task_record_id] = {task_list.name: {_file: task_result[_file]}}
+                        # output_dicts[task_record_id][task_list.name].update({_file: task_result[_file]})
                         _file = task_result[_file]
                         if isinstance(_file, str):
                             if os.path.exists(_file):

@@ -4,12 +4,12 @@ from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
 from EukMetaSanity.tasks.utils.helpers import touch
-from EukMetaSanity.utils.path_manager import PathManager
+from EukMetaSanity.tasks.base.path_manager import PathManager
 from typing import Dict, List, Tuple, Callable, Optional
 from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from plumbum.machines.local import LocalCommand, LocalMachine
-from EukMetaSanity.utils.config_manager import ConfigManager, MissingDataError
+from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 """
 Task: Class that manages and handles working directory to complete an operation
