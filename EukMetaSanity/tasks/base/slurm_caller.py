@@ -1,7 +1,8 @@
 import os
 from time import sleep
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
 from plumbum.machines.local import LocalCommand, LocalMachine
+from EukMetaSanity.tasks.base.config_manager import ConfigManager
 
 
 class SLURMCaller:
@@ -14,8 +15,9 @@ class SLURMCaller:
     OUTPUT_SCRIPTS = "slurm-runner.sh"
     FAILED_ID = "failed-job-id"
 
-    def __init__(self, user_id: str, wdir: str, threads: str, cmd: LocalCommand, config_data: Dict[str, str],
-                 _local: LocalMachine, slurm_flags: List[Tuple[str, str]], time_override: Optional[str]):
+    def __init__(self, user_id: str, wdir: str, threads: str, cmd: LocalCommand,
+                 config_data: Dict[str, Dict[str, Union[str, dict]]], _local: LocalMachine,
+                 slurm_flags: List[Tuple[str, str]], time_override: Optional[str]):
         self.user_id = user_id
         self.wdir = wdir
         self.threads = threads
@@ -95,12 +97,12 @@ class SLURMCaller:
         fp.write(SLURMCaller.create_header_line("--nodes", "1"))
         fp.write(SLURMCaller.create_header_line("--tasks", "1"))
         fp.write(SLURMCaller.create_header_line("--cpus-per-task", self.threads))
-        fp.write(SLURMCaller.create_header_line("--mem", self.config["MEMORY"]))
-        if "TIME" in self.config.keys():
+        fp.write(SLURMCaller.create_header_line("--mem", str(self.config[ConfigManager.MEMORY])))
+        if ConfigManager.TIME in self.config.keys():
             if self.time_override is not None:
                 fp.write(SLURMCaller.create_header_line("--time", self.time_override))
             else:
-                fp.write(SLURMCaller.create_header_line("--time", self.config["TIME"]))
+                fp.write(SLURMCaller.create_header_line("--time", str(self.config[ConfigManager.TIME])))
         # Write additional header lines passed in by user
         for added_arg in self.added_flags:
             fp.write(SLURMCaller.create_header_line(*added_arg))

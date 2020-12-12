@@ -25,11 +25,11 @@ class TaxonomyIter(TaskList):
             
         @program_catch
         def run(self):
-            if not os.path.exists(self.data):
+            if not os.path.exists(self.data[0]):
                 raise MissingDataError
             # Create mmseqs database
             self.single(
-                self.program[
+                self.program("mmseqs")[
                     "createdb",
                     self.input["root"]["fna"], self.output["seq_db"]
                 ]
@@ -37,21 +37,21 @@ class TaxonomyIter(TaskList):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             # Search taxonomy db
             self.parallel(
-                self.program[
+                self.program("mmseqs")[
                     "taxonomy",
                     self.output["seq_db"],
-                    self.data,
+                    self.data[0],
                     tax_db,
                     os.path.join(self.wdir, "tmp"),
-                    (*self.added_flags),
+                    (*self.added_flags("mmseqs")),
                     "--threads", self.threads,
                 ]
             )
             # Generate taxonomy report
             self.single(
-                self.program[
+                self.program("mmseqs")[
                     "taxonomyreport",
-                    self.data,
+                    self.data[0],
                     tax_db,
                     self.output["tax_report"]
                 ]

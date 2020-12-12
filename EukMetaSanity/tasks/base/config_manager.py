@@ -33,6 +33,14 @@ class InvalidProtocolError(ValueError):
 
 
 class ConfigManager:
+    SLURM = "SLURM"
+    THREADS = "threads"
+    WORKERS = "workers"
+    MEMORY = "memory"
+    TIME = "time"
+    PROTOCOL = "protocol"
+    USE_CLUSTER = "USE_CLUSTER"
+
     def __init__(self, config_path: str):
         self._config = yaml.load(str(Path(config_path).resolve()), Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
@@ -46,10 +54,13 @@ class ConfigManager:
     def _validate(self):
         for task_name, task_dict in self.config.items():
             if "data" in task_dict:
-                if not os.path.exists(str(Path(task_dict["data"]).resolve())):
-                    raise MissingDataError("Data for task %s (provided: %s) does not exist!" % (
-                        task_name, task_dict["data"]
-                    ))
+                for _val in task_dict["data"].split(","):
+                    if ":" in _val:
+                        _val = _val.split(":")[1]
+                    if not os.path.exists(str(Path(_val).resolve())):
+                        raise MissingDataError("Data for task %s (provided: %s) does not exist!" % (
+                            task_name, _val
+                        ))
             if "dependencies" in task_dict.keys():
                 for prog_name, prog_data in task_dict["dependencies"].items():
                     # Simple - is only a path with no ability to pass flags
@@ -73,13 +84,13 @@ class ConfigManager:
                                 "Dependency %s (provided: %s) is not present in your system's path!" % (
                                     prog_name, prog_data["program"]))
 
-    def _get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
+    def get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
         return [
             (key, str(val)) for key, val in self.config["SLURM"].items()
             if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         ]
 
-    def _get_slurm_userid(self):
+    def get_slurm_userid(self):
         if "user-id" not in self.config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]

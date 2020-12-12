@@ -4,11 +4,11 @@ from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
 from EukMetaSanity.tasks.utils.helpers import touch
-from EukMetaSanity.tasks.base.path_manager import PathManager
-from typing import Dict, List, Tuple, Callable, Optional
 from plumbum.commands.processes import ProcessExecutionError
+from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from plumbum.machines.local import LocalCommand, LocalMachine
+from typing import Dict, List, Tuple, Callable, Optional, Union
 from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 """
@@ -25,6 +25,7 @@ def program_catch(f: Callable):
     :param f: Function to test and whose exceptions to catch
     :return: Decorated function
     """
+
     def _add_try_except(self, *args, **kwargs):
         try:
             return f(self, *args, **kwargs)
@@ -60,13 +61,12 @@ class Task(ABC):
         # Instantiate output dict variable
         self._output_paths: Dict[str, object] = {}
         # Store threads and workers
-        self._threads_pw = int(cfg.config.get(db_name, ConfigManager.THREADS))
+        # TODO Handle classes that are subtasks
+        self._threads_pw = cfg.config.get(db_name, ConfigManager.THREADS)
         # Store path manager
         self._pm = pm
         # Store config manager
         self._cfg = cfg
-        # Dynamically generate program attributes for easy in API access
-        self._set_api_accessors(cfg, db_name)
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -76,36 +76,12 @@ class Task(ABC):
         # Store id of record in Task
         self._record_id = record_id
         # Check if task is set to be skipped in config file
-        self.is_skip = getattr(self, "skip", "False") != "False"
+        self.is_skip = getattr(self, "skip", False) is not False
         super().__init__()
 
     @abstractmethod
     def run(self):
         pass
-
-    def _set_api_accessors(self, cfg: ConfigManager, db_name: str):
-        for _path, _value in cfg.config[db_name].items():
-            # Set attribute
-            if _path.split("_")[0].isupper() and _value != "None":
-                _path = _path.lower()
-                # Set as self.program is only default Config PATH variable
-                # Set attribute for ease of use in API
-                _set_attr = _value
-                # Add program from local environment
-                if _path.startswith("program"):
-                    # assert os.path.exists(_value)
-                    _set_attr = local[_set_attr]
-                # Check for existence if a data value
-                elif _path.startswith("data"):
-                    for _val in _value.split(","):
-                        if ":" in _val:
-                            _val = _val.split(":")[1]
-                        assert os.path.exists(_val)
-                setattr(
-                    self,
-                    _path,  # Name: PATH -> program/data; PATH2/DATA_2 = program2/data_2;
-                    _set_attr,  # Local path, or config path, for calling program
-                )
 
     def _run(self) -> None:
         # Check if task has completed based on provided output data
@@ -139,6 +115,15 @@ class Task(ABC):
         return self._output_paths
 
     @property
+    def threads(self) -> str:
+        return self._threads_pw
+
+    def program(self, prog_name: str) -> LocalCommand:
+        if isinstance(self.config["dependencies"][prog_name], dict):
+            return self.local[self.config["dependencies"][prog_name]["program"]]
+        return self.local[self.config["dependencies"][prog_name]]
+
+    @property
     def local(self) -> LocalMachine:
         """ Return reference to all commands on user's PATH
         Wrapper for plumbum's LocalMachine object, see plumbum documentation for more info
@@ -150,15 +135,16 @@ class Task(ABC):
         """
         return local
 
-    @property
-    def added_flags(self) -> List[str]:
+    def added_flags(self, prog_name: str) -> List[str]:
         """ Get additional flags that user provided in config file
 
-        Example: self.local["ls"][(\*self.added_flags())]
+        Example: self.local["ls"][(\*self.added_flags("ls"))]
 
         :return: List of arguments to pass to calling program
         """
-        return self.cfg.get_added_flags(self.name)
+        if isinstance(self.config["dependencies"][prog_name], dict):
+            return self.config["dependencies"][prog_name]["FLAGS"].split(" ")
+        return []
 
     @property
     def name(self) -> str:
@@ -167,6 +153,10 @@ class Task(ABC):
         :return: Assigned task name
         """
         return self._name
+
+    @property
+    def data(self) -> List[str]:
+        return self.config["data"].split(",")
 
     @property
     def output(self) -> Dict[str, object]:
@@ -222,7 +212,7 @@ class Task(ABC):
         return self._cfg
 
     @property
-    def config(self) -> Dict[str, str]:
+    def config(self) -> Dict[str, Union[str, Dict[str, Union[str, dict]]]]:
         """ ConfigManager is a wrapper class for Python's configparser package.
         self.config contains references to the portion of the config file that contains this task's contents
 
@@ -269,17 +259,17 @@ class Task(ABC):
         """
         print("  " + str(cmd))
         # Write command to slurm script file and run
-        if self.cfg.config.get("SLURM", ConfigManager.USE_CLUSTER) != "False":
+        if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is not False:
             if ConfigManager.MEMORY not in self.config.keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
             cmd = SLURMCaller(
-                self.cfg._get_slurm_userid(),
+                self.cfg.get_slurm_userid(),
                 self.wdir,
                 str(self._threads_pw),
                 cmd,
                 self.config,
                 self.local,
-                self.cfg._get_slurm_flagged_arguments(),
+                self.cfg.get_slurm_flagged_arguments(),
                 time_override
             )
         # Run command directly
@@ -374,8 +364,8 @@ class TaskList(ABC):
         workers = int(cfg.config.get(name, ConfigManager.WORKERS))
         # Get log statement
         self._statement = "\nRunning %s protocol using %i worker(s) and %i thread(s) per worker" % (
-                              self.name, workers, int(cfg.config.get(name, ConfigManager.THREADS))
-                          )
+            self.name, workers, int(cfg.config.get(name, ConfigManager.THREADS))
+        )
         # Store list of tasks to complete
         self._tasks: List[Task] = [
             new_task(
@@ -401,8 +391,10 @@ class TaskList(ABC):
     def run(self):
         # Single
         logging.info(self._statement)
-        if getattr(self._tasks[0], "skip", "False") == "False":
-            print(self._statement)
+        for _task in self._tasks:
+            if _task.is_skip is not False:
+                print(self._statement)
+                break
         if self._mode == 0:
             for task in self._tasks:
                 task._run()

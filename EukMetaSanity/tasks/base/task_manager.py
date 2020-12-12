@@ -1,8 +1,6 @@
 import os
-import json
 from shutil import copy
 from typing import List, Dict
-from collections import defaultdict
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
@@ -64,8 +62,6 @@ class TaskManager:
         """
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
-        _paths_output_file = open(os.path.join(os.path.dirname(_final_output_dir), "%s.json" % _name), "w")
-        output_dicts: Dict[str, Dict[str, Dict[str, str]]] = defaultdict(default_factory=defaultdict(default_factory=defaultdict(str)))
         # Collect header ids and corresponding files
         for task_list in self.completed_tasks.values():
             output = task_list.output()
@@ -76,17 +72,9 @@ class TaskManager:
                     if not os.path.exists(_sub_out):
                         os.makedirs(_sub_out)
                     for _file in task_result["final"]:
-                        output_dicts[task_record_id] = {task_list.name: {_file: task_result[_file]}}
-                        # output_dicts[task_record_id][task_list.name].update({_file: task_result[_file]})
                         _file = task_result[_file]
                         if isinstance(_file, str):
                             if os.path.exists(_file):
                                 copy(_file, _sub_out)
                             elif self.debug:
                                 touch(os.path.join(_sub_out, _file))
-        del output_dicts["default_factory"]
-        # Also store original files
-        for in_prefix, in_data in zip(self.input_prefixes, self.input_files):
-            output_dicts[in_prefix].update(in_data["root"])
-        json.dump(dict(output_dicts), _paths_output_file, sort_keys=True)
-        _paths_output_file.close()
