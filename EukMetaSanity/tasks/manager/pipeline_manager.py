@@ -3,9 +3,9 @@ from typing import Dict, List, Type
 from EukMetaSanity.tasks.base.task_class import TaskList
 # # Run imports
 from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
-from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
-from EukMetaSanity.tasks.official.run.abinitio import AbInitioIter
-from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
+# from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
+# from EukMetaSanity.tasks.official.run.abinitio import AbInitioIter
+# from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 # # Report imports
 from EukMetaSanity.tasks.test_tasks.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.test_tasks.report.eggnog import EggNogMapperIter
@@ -21,16 +21,14 @@ class PipelineManager:
     Example:
     self.program["test"] = [MMSeqsSearchDBIter, MMSeqsCreateDBIter]
 
-    :param programs: Programs in pipeline (need not be in any order)
-    :type programs: Dict[str, List[Type[TaskList]]]
     """
     def __init__(self):
         self.programs: Dict[str, List[Type[TaskList]]] = {
             "run": [
-                EvidenceIter,
+                # EvidenceIter,
                 TaxonomyIter,
-                AbInitioIter,
-                RepeatsIter,
+                # AbInitioIter,
+                # RepeatsIter,
             ],
             "test_report": [
                 StatsIter,

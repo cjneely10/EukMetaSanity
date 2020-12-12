@@ -1,3 +1,4 @@
+from typing import Tuple
 from EukMetaSanity import Task, TaskList, program_catch
 
 

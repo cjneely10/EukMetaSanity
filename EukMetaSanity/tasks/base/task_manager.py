@@ -26,7 +26,7 @@ class TaskManager:
     def __init__(self, pm: PipelineManager, cfg: ConfigManager, pam: PathManager,
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
-        self.task_list = self.dep_graph.sorted_tasks()
+        self.task_list = self.dep_graph.sorted_tasks
         self.completed_tasks: Dict[str, TaskList] = {}
         self.pm = pam
         self.cfg = cfg

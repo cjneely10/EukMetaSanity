@@ -60,14 +60,14 @@ class Task(ABC):
         self._input_data = input_data
         # Instantiate output dict variable
         self._output_paths: Dict[str, object] = {}
+        # Store config manager
+        self._cfg = cfg
         # Store threads and workers
         self._threads_pw = "1"
-        if db_name in self.config.keys():
+        if db_name in self.cfg.config.keys():
             self._threads_pw = str(cfg.config.get(db_name, ConfigManager.THREADS))
         # Store path manager
         self._pm = pm
-        # Store config manager
-        self._cfg = cfg
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
@@ -221,7 +221,12 @@ class Task(ABC):
 
         :return: Dictionary containing contents of config file that was used to launch this task
         """
-        return self._cfg.config[self._name]
+        n = self.name.split(".")
+        print(n)
+        if len(n) == 1:
+            return self._cfg.config[self._name]
+        else:
+            return self._cfg.config[n[-1]][".".join(n[0:-1])]
 
     @property
     def wdir(self) -> str:
@@ -359,15 +364,27 @@ class Task(ABC):
 
 
 class TaskList(ABC):
+    @property
+    @abstractmethod
+    def requires(cls) -> List[str]:
+        pass
+
+    scope = ""
+
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
                  input_paths: List[Dict[str, Dict[str, object]]], pm: PathManager, record_ids: List[str], mode: int):
         # Call data function for pertinent info
         self.name = name
         # Get workers for TaskList
-        workers = int(cfg.config.get(name, ConfigManager.WORKERS))
+        # Store workers
+        self._workers = 1
+        self._threads = 1
+        if name in cfg.config.keys():
+            self._workers = int(cfg.config.get(name, ConfigManager.WORKERS))
+            self._threads = int(cfg.config.get(name, ConfigManager.THREADS))
         # Get log statement
         self._statement = "\nRunning %s protocol using %i worker(s) and %i thread(s) per worker" % (
-            self.name, workers, int(cfg.config.get(name, ConfigManager.THREADS))
+            self.name, self._workers, self._threads
         )
         # Store list of tasks to complete
         self._tasks: List[Task] = [
@@ -376,16 +393,11 @@ class TaskList(ABC):
                 cfg,
                 pm,
                 record_id,
-                name,
+                (TaskList.scope + name if TaskList.scope is not "" else name),
                 mode,
             )
             for input_path, record_id in zip(input_paths, record_ids)
         ]
-        # Store workers
-        self._workers = workers
-        self._threads = 1
-        if name in cfg.config.keys():
-            self._threads = int(cfg.config.get(name, ConfigManager.THREADS))
         # Store ConfigManager object
         self._cfg = cfg
         # Store PathManager object

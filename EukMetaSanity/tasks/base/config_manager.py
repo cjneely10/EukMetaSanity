@@ -46,7 +46,7 @@ class ConfigManager:
     DATA = "data"
 
     def __init__(self, config_path: str):
-        self._config = yaml.load(str(Path(config_path).resolve()), Loader=yaml.FullLoader)
+        self._config = yaml.load(open(str(Path(config_path).resolve()), "r"), Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
         self._validate()
 
@@ -54,10 +54,13 @@ class ConfigManager:
     def config(self) -> Dict[str, Dict[str, Union[str, dict]]]:
         return self._config
 
+    def get(self, key: str) -> Dict[str, Dict[str, Union[str, dict]]]:
+        pass
+
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate(self):
         for task_name, task_dict in self.config.items():
-            if "data" in task_dict:
+            if "data" in task_dict.keys() and ("skip" not in task_dict.keys() or task_dict["skip"] is not True):
                 for _val in task_dict["data"].split(","):
                     if ":" in _val:
                         _val = _val.split(":")[1]
