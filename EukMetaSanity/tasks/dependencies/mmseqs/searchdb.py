@@ -1,6 +1,5 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.utils.helpers import prefix, touch
 
 
 class MMSeqsSearchDBIter(TaskList):

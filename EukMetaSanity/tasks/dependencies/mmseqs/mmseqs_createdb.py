@@ -19,7 +19,11 @@ class CreateDBIter(TaskList):
         @program_catch
         def run(self):
             self.single(
-                self.program["createdb"][self.input["root"]["fna"], self.output["db"]]
+                self.program[
+                    "createdb",
+                    self.input["root"]["fna"],
+                    self.output["db"]
+                ]
             )
 
     def __init__(self, *args, **kwargs):

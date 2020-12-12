@@ -2,8 +2,8 @@ from typing import Dict, List, Type
 # General imports
 from EukMetaSanity.tasks.base.task_class import TaskList
 # Test imports
-from EukMetaSanity.tasks.official.mmseqs.mmseqs_createdb import CreateDBIter
-from EukMetaSanity.tasks.official.mmseqs.searchdb import MMSeqsSearchDBIter
+from EukMetaSanity.tasks.dependencies.mmseqs.mmseqs_createdb import CreateDBIter
+from EukMetaSanity.tasks.dependencies.mmseqs.searchdb import MMSeqsSearchDBIter
 # # # Test new api
 # # Run imports
 from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter

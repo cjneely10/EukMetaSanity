@@ -36,7 +36,8 @@ repeats:
   time: "8:00:00"
   protocol: full  # Select from ab-initio/ncbi/full
   dependencies:
-    build-database: BuildDatabase
+    repmod.build_database:
+      program: BuildDatabase
     modeler: RepeatModeler
     masker:
       program: RepeatMasker
@@ -44,7 +45,7 @@ repeats:
         -nolow
     process-repeats: ProcessRepeats
     rmout: rmOutToGFF3.pl
-  cutoff: 8.0
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
 
 abinitio:
   workers: 1
