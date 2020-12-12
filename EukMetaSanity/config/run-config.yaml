@@ -1,0 +1,112 @@
+---  # document start
+
+SLURM:
+  # Set to True if using SLURM
+  USE_CLUSTER: False
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following: --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+taxonomy:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: 12:00:00
+  data: /path/to/ortho_db
+  dependencies:
+    mmseqs:
+      program: mmseqs
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 7
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
+
+repeats:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: 8:00:00
+  protocol: full  # Select from ab-initio/ncbi/full
+  dependencies:
+    build-database: BuildDatabase
+    modeler: RepeatModeler
+    masker:
+      program: RepeatMasker
+      FLAGS:
+        -nolow
+    process-repeats: ProcessRepeats
+    rmout: rmOutToGFF3.pl
+  cutoff: 8.0
+
+abinitio:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: 6:00:00
+  protocol: augustus  # Select from augustus/gmes
+  # Augustus protocol
+  augustus:
+    data: /path/to/ortho_db
+    dependencies:
+      augustus: augustus
+      new_species_pl: new_species.pl
+      etraining: etraining
+      mmseqs:
+        program: mmseqs
+        # Pass any flags to mmseqs required
+        FLAGS:
+          --split-memory-limit 40G
+          --cov-mode 0
+          -c 0.6
+          -e 0.01
+          --remove-tmp-files
+    cutoff: 25.0
+    rounds: 3
+  # GeneMark protocol
+  gmes:
+    dependencies:
+      gffread: gffread
+      gmes:
+        program: gmes_petap.pl
+        # Pass any flags to gmes_petap.pl required
+        FLAGS:
+          --min_contig 100
+          --max_contig 100000000
+          --max_gap 5000
+          --max_mask 5000
+          --min_contig_in_predict 100
+          --min_gene_in_predict 10
+          --gc_donor 0.001
+          --max_intron 10000
+          --max_intergenic 50000
+          --soft_mask auto
+      prothint: prothint.py
+
+evidence:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: 12:00:00
+  data: /path/to/ortho_db
+  level: order
+  dependencies:
+    mmseqs: mmseqs
+    metaeuk:
+      program: metaeuk
+      # Pass any flags to metaeuk required
+      FLAGS:
+        --min-length 30
+        --metaeuk-eval 0.0001
+        --split-memory-limit 40G
+        -s 7
+        --cov-mode 0
+        -c 0.3
+        -e 100
+        --max-overlap 0
+
+...  # document end
