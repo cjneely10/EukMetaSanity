@@ -1,5 +1,4 @@
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.official.run.helpers.taxonomy import get_taxonomy
 
 
 class TaxonomyIter(TaskList):

@@ -35,17 +35,20 @@ repeats:
   memory: 40G
   time: "8:00:00"
   protocol: full  # Select from ab-initio/ncbi/full
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
   dependencies:
     repmod.build_database:
       program: BuildDatabase
-    modeler: RepeatModeler
-    masker:
+    repmod.modeler:
+      program: RepeatModeler
+    repmask.repeat_masker:
       program: RepeatMasker
       FLAGS:
         -nolow
-    process-repeats: ProcessRepeats
-    rmout: rmOutToGFF3.pl
-  cutoff: 8.0  # Minimum % of mapped reads to tax level
+    repmask.process_repeats:
+      program: ProcessRepeats
+    repmask.rmout:
+      program: rmOutToGFF3.pl
 
 abinitio:
   workers: 1

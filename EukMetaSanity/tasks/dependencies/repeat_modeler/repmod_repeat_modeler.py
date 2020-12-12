@@ -1,7 +1,7 @@
 import os
 import glob
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
-from EukMetaSanity import ProcessExecutionError, CommandNotFound, InvalidPathError, MissingDataError, InvalidProtocolError
+import shutil
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class RepeatModelerIter(TaskList):
@@ -12,7 +12,8 @@ class RepeatModelerIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "successful": True,
+                "model": os.path.join(self.wdir, "consensi.fa.classified")
             }
             
         @program_catch
@@ -25,11 +26,11 @@ class RepeatModelerIter(TaskList):
                 "modeler.sh"
             )
             self.parallel(script)
-            _output = glob.glob(os.path.join(self.wdir, "RM*"))
+            _output = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
             if len(_output) > 0:
-                os.replace(
-                    _output[0], os.path.join()
-                )
+                shutil.move(_output[0], os.path.join(self.wdir, "consensi.fa.classified"))
+            else:
+                self.output["successful"] = False
             
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatModelerIter.RepeatModeler, RepeatModelerIter.name, *args, **kwargs)
