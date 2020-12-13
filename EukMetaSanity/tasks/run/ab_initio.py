@@ -6,7 +6,7 @@ from typing import Tuple, List
 from collections import Counter
 from plumbum import ProcessExecutionError
 from EukMetaSanity import Task, TaskList, program_catch
-from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids, prefix
+from EukMetaSanity.tasks.utils.helpers import augustus_taxon_ids, prefix, touch
 from EukMetaSanity.tasks.run.taxonomy import TaxonomyIter
 
 """
@@ -294,6 +294,8 @@ class AbInitioIter(TaskList):
                 file = os.path.join(self.wdir, file)
                 if subset_db_outpath in file:
                     self.local["rm"][file]()
+            if not os.path.exists(str(self.output[0])):
+                touch(str(self.output[0]))
 
         @staticmethod
         def update_cfg(in_path: str, replace_tuple: List[Tuple[str, str]], out_path: str):
