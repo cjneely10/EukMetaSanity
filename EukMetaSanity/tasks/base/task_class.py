@@ -8,7 +8,7 @@ from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from plumbum.machines.local import LocalCommand, LocalMachine
-from typing import Dict, List, Tuple, Callable, Optional, Union
+from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
 from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 """
@@ -165,7 +165,7 @@ class Task(ABC):
         return self.config[ConfigManager.DATA].split(",")
 
     @property
-    def output(self) -> Dict[str, object]:
+    def output(self) -> Dict[str, Union[Iterable, object]]:
         """ Expected output objects from a successful run
         Output also contains keys that consist of output objects to copy to final results directory
 
@@ -179,7 +179,7 @@ class Task(ABC):
         self._output_paths = v
 
     @property
-    def input(self) -> Dict[str, Dict[str, object]]:
+    def input(self) -> Dict[str, Dict[str, Union[Iterable, object]]]:
         """ Dictionary of files available as input to this task.
         By default, available input consists of all files that were passed as input to EukMetaSanity:
 
