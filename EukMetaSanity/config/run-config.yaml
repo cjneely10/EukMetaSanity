@@ -35,12 +35,12 @@ repeats:
   threads: 1
   memory: 40G
   time: "8:00:00"
-  protocol: full  # Select from ab-initio/ncbi/full
   dependencies:
     repmod.build_database:
       program: BuildDatabase
-    repmod.modeler:
+    repmod.repeat_modeler:
       program: RepeatModeler
+      skip: False
     repmask.repeat_masker:
       program: RepeatMasker
       FLAGS:

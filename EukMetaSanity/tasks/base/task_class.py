@@ -80,7 +80,7 @@ class Task(ABC):
         # Store id of record in Task
         self._record_id = record_id
         # Check if task is set to be skipped in config file
-        self.is_skip = getattr(self, "skip", False) is not False
+        self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True
         super().__init__()
 
     @abstractmethod

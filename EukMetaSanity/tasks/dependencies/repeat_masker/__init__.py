@@ -1,1 +1,3 @@
 from .repmask_repeat_masker import RepeatMaskerIter
+from .repmask_rmout import RepeatMaskerOutIter
+from .repmask_process_repeats import ProcessRepeatsIter

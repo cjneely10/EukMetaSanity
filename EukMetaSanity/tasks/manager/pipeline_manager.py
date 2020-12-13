@@ -3,7 +3,7 @@ from typing import Dict, List, Type
 from EukMetaSanity.tasks.base.task_class import TaskList
 # # Run imports
 from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
-# from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
+from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
 # from EukMetaSanity.tasks.official.run.abinitio import AbInitioIter
 # from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 # # Report imports
@@ -28,7 +28,7 @@ class PipelineManager:
                 # EvidenceIter,
                 TaxonomyIter,
                 # AbInitioIter,
-                # RepeatsIter,
+                RepeatsIter,
             ],
             "test_report": [
                 StatsIter,
