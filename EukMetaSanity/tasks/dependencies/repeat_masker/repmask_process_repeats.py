@@ -36,7 +36,7 @@ class ProcessRepeatsIter(TaskList):
                 # Run ProcessRepeats
                 self.program[
                     # Input taxonomy from OrthoDB search
-                    "-species", self.input["taxonomy"]["taxonomy"].family,
+                    "-species", self.input["taxonomy"]["taxonomy"].family.value,
                     "-maskSource", str(self.input["root"]["fna"]),
                     final_out,
                 ]()

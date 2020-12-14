@@ -24,7 +24,7 @@ class RepeatMaskerIter(TaskList):
             data_files += [_f for _f in self.data if _f != ""]
             # Perform on optimal taxonomic identification
             if self.input["taxonomy"]["taxonomy"].family is not None:
-                data_files += [self.input["taxonomy"]["taxonomy"].family]
+                data_files += [self.input["taxonomy"]["taxonomy"].family.value]
             if os.path.exists(_file) and os.path.getsize(_file) > 0:
                 data_files.append(_file)
             self.output = {"libraries": data_files}

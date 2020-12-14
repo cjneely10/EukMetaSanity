@@ -52,14 +52,14 @@ repeats:
     repmask.rmout:
       program: rmOutToGFF3.pl
 
-abinitio:
+abinitio-augustus:
   workers: 1
   threads: 1
   memory: 40G
   time: "6:00:00"
-  protocol: augustus  # Select from augustus/gmes
+  skip: False
   dependencies:
-    augustus.augustus:
+    augustus:
       program: augustus
       data: /path/to/ortho_db
       cutoff: 25.0
@@ -70,7 +70,6 @@ abinitio:
       data: /path/to/ortho_db
       program: mmseqs
       subname: linsearch
-      # Pass any flags to mmseqs required
       FLAGS:
         --split-memory-limit 12G
         --cov-mode 0
@@ -82,10 +81,16 @@ abinitio:
       program: mmseqs
       FLAGS:
         --format-output query,target,pident,taxid,taxname,taxlineage
-    # GeneMark protocol
+
+abinitio-genemark:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "6:00:00"
+  skip: False
+  dependencies:
     gmes.gmes_petap:
       program: gmes_petap.pl
-      # Pass any flags to gmes_petap.pl required
       FLAGS:
         --min_contig 100
         --max_contig 100000000
@@ -99,8 +104,13 @@ abinitio:
         --soft_mask auto
     gmes.prothint:
       program: prothint.py
-    gffread:
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      data: /path/to/ortho_db
+    gmes.gffread:
       program: gffread
+      FLAGS:
+        -G
 
 evidence:
   workers: 1

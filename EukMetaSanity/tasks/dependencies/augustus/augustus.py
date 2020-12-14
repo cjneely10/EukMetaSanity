@@ -8,7 +8,7 @@ from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_i
 
 
 class AugustusIter(TaskList):
-    name = "augustus.augustus"
+    name = "augustus"
     requires = []
     depends = ["mmseqs.search"]
     
@@ -16,7 +16,7 @@ class AugustusIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "ab-gff3": os.path.join(self.wdir, self.record_id + ".gff3")
             }
             
         @program_catch
