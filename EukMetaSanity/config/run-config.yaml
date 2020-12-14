@@ -43,6 +43,7 @@ repeats:
       skip: False
     repmask.repeat_masker:
       program: RepeatMasker
+      data: ""
       FLAGS:
         -nolow
     repmask.process_repeats:

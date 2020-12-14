@@ -42,20 +42,27 @@ class TaskManager:
         """
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1])
-        task.update({req_str: self.completed_tasks[(req_str, task.scope)].output()[0][0]
-                     for req_str in task.requires})
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
-        print(self.completed_tasks)
         i = 1
         while i < len(self.task_list):
+            old_task = task
             task = self.task_list[i][0](
                 self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1])
-            task.update({req_str: self.completed_tasks[(req_str, task.scope)].output()[0][0]
-                         for req_str in task.requires})
+            to_add = []
+            for k in range(len(old_task.output()[1])):
+                inner_add = {}
+                for req_str in task.requires:
+                    inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
+                for req_str in task.depends:
+                    inner_add[req_str] = self.completed_tasks[
+                        (req_str, task.scope) if (req_str, task.scope) in self.completed_tasks.keys()
+                        else (req_str, task.name)
+                    ].tasks[k].output
+                to_add.append(inner_add)
+            task.update(to_add)
             task.run()
             self.completed_tasks[(task.name, task.scope)] = task
-            print(self.completed_tasks)
             i += 1
         self.summarize(os.path.join(output_dir, "results", self.command), self.command)
 
@@ -82,7 +89,7 @@ class TaskManager:
                         else:
                             class_path = _file.split(".")
                             _file = self.completed_tasks[
-                                (".".join(class_path[0:-1]), task_list.scope)
+                                (".".join(class_path[0:-1]), task_list.name)
                             ].output()[0][i][class_path[-1]]
                         if isinstance(_file, str):
                             if os.path.exists(_file):

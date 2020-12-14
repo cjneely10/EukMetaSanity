@@ -99,7 +99,7 @@ class Task(ABC):
                 completed = False
                 break
         # Run if not completed (e.g. missing data)
-        if completed:
+        if completed and len(self._output_paths) > 0:
             logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
             logging.info("%s  Running %s" % (self.record_id, self.name))
@@ -417,6 +417,10 @@ class TaskList(ABC):
         self._mode = mode
 
     @property
+    def tasks(self) -> List[Task]:
+        return self._tasks
+
+    @property
     def scope(self) -> str:
         return self._scope
 
@@ -440,9 +444,9 @@ class TaskList(ABC):
             wait(futures)
             client.close()
 
-    def update(self, to_add):
-        for task in self._tasks:
-            task.input.update(to_add)
+    def update(self, to_add: List[Dict[str, object]]):
+        for task, task_data in zip(self._tasks, to_add):
+            task.input.update(task_data)
 
     def output(self) -> Tuple[List[Dict[str, object]], List[str]]:
         return (
