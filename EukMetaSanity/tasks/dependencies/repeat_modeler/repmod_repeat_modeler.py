@@ -6,7 +6,8 @@ from EukMetaSanity import Task, TaskList, program_catch, touch
 
 class RepeatModelerIter(TaskList):
     name = "repmod.repeat_modeler"
-    requires = ["repmod.build_database"]
+    requires = []
+    depends = ["repmod.build_database"]
     
     class RepeatModeler(Task):
         def __init__(self, *args, **kwargs):

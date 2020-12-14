@@ -16,6 +16,7 @@ class CreateDBIter(TaskList):
     """
     name = "mmseqs.createdb"
     requires = []
+    depends = []
 
     class MMSeqsCreateDB(Task):
         def __init__(self, *args, **kwargs):

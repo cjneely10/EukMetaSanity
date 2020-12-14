@@ -370,6 +370,11 @@ class TaskList(ABC):
     def requires(cls) -> List[str]:
         pass
 
+    @property
+    @abstractmethod
+    def depends(cls) -> List[str]:
+        pass
+
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
                  input_paths: List[Dict[str, Dict[str, object]]],
                  pm: PathManager, record_ids: List[str], mode: int,

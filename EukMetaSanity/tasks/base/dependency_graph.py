@@ -4,7 +4,6 @@ from typing import List, Type, Tuple
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.dependencies import dependencies
 
-
 Node = namedtuple("Node", ("name", "scope"))
 
 
@@ -25,6 +24,7 @@ class DependencyGraph:
     The root task is simply populating input files to run in a pipeline
 
     """
+
     def __init__(self, tasks: List[TaskList]):
         self.idx = {task.name: task for task in tasks}
         self.idx.update(dependencies)
@@ -41,17 +41,20 @@ class DependencyGraph:
         self.graph.add_node(Node(name="root", scope=""))
         # Add dependencies stored in TaskList object's .requires member
         for task_list in tasks:
-            task_node = Node(name=task_list.name, scope=task_list.name)
+            task_node = Node(name=task_list.name, scope="")
             self.graph.add_edge(Node(name="root", scope=""), task_node)
-            for dependency in task_list.requires:
-                self._add_dependency_stack(Node(name=dependency, scope=task_node.name), task_node.name, task_node.name)
+            for requirement in task_list.requires:
+                self._add_dependency_stack(Node(name=requirement, scope=""), task_list.name, "")
+            for requirement in task_list.depends:
+                self._add_dependency_stack(Node(name=requirement, scope=""), task_list.name, "")
 
     def _add_dependency_stack(self, dependency: Node, main_task_name: str, scope: str):
         self.graph.add_edge(dependency, Node(name=main_task_name, scope=scope))
         dep_task: TaskList = self.idx[dependency.name]
-        for dep in dep_task.requires:
-            self.graph.add_edge(Node(name=dep, scope=scope), Node(name=dep_task.name, scope=scope))
-            self._add_dependency_stack(Node(name=dep, scope=scope), dep_task.name, scope)
+        for attr in ("requires", "depends"):
+            for dep in getattr(dep_task, attr):
+                self.graph.add_edge(Node(name=dep, scope=scope), Node(name=dep_task.name, scope=scope))
+                self._add_dependency_stack(Node(name=dep, scope=scope), dep_task.name, scope)
 
     @property
     def sorted_tasks(self) -> List[Tuple[Type[TaskList], str]]:

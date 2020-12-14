@@ -1,6 +1,6 @@
 import os
 from shutil import copy
-from typing import List, Dict, Tuple, Type
+from typing import List, Dict, Tuple
 from EukMetaSanity.tasks.helpers import touch
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
@@ -41,6 +41,7 @@ class TaskManager:
         :param output_dir: Directory to write final result file
         """
         print(*self.task_list, sep="\n")
+        exit()
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1])
         task.update({req_str: self.completed_tasks[(req_str, task.scope)].output()[0][0]

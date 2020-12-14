@@ -5,6 +5,7 @@ from EukMetaSanity import Task, TaskList, program_catch
 class BuildDatabaseIter(TaskList):
     name = "repmod.build_database"
     requires = []
+    depends = []
     
     class BuildDatabase(Task):
         def __init__(self, *args, **kwargs):

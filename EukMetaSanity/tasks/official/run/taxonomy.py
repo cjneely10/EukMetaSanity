@@ -42,7 +42,8 @@ class TaxonomyIter(TaskList):
 
     """
     name = "taxonomy"
-    requires = ["mmseqs.createdb", "mmseqs.taxonomy"]
+    requires = []
+    depends = ["mmseqs.createdb", "mmseqs.taxonomy"]
     
     class Taxonomy(Task):
         def __init__(self, *args, **kwargs):

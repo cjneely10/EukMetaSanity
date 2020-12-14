@@ -4,7 +4,8 @@ from EukMetaSanity import Task, TaskList, program_catch, touch
 
 class ProcessRepeatsIter(TaskList):
     name = "repmask.process_repeats"
-    requires = ["taxonomy", "repmask.repeat_masker"]
+    requires = ["taxonomy"]
+    depends = ["repmask.repeat_masker"]
     
     class ProcessRepeats(Task):
         def __init__(self, *args, **kwargs):

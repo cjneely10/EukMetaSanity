@@ -10,7 +10,8 @@ class RepeatsIter(TaskList):
 
     """
     name = "repeats"
-    requires = ["repmask.process_repeats"]
+    requires = ["taxonomy"]
+    depends = ["repmask.process_repeats"]
     
     class Repeats(Task):
         def __init__(self, *args, **kwargs):

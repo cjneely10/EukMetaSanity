@@ -5,7 +5,8 @@ from EukMetaSanity import Task, TaskList, program_catch, touch
 
 class RepeatMaskerOutIter(TaskList):
     name = "repmask.rmout"
-    requires = ["repmask.process_repeats"]
+    requires = []
+    depends = ["repmask.process_repeats"]
     
     class RepeatModelerOut(Task):
         def __init__(self, *args, **kwargs):

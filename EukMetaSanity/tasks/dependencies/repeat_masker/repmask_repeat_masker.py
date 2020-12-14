@@ -6,7 +6,8 @@ from EukMetaSanity import Task, TaskList, program_catch, prefix
 
 class RepeatMaskerIter(TaskList):
     name = "repmask.repeat_masker"
-    requires = ["taxonomy", "repmod.repeat_modeler"]
+    requires = ["taxonomy"]
+    depends = ["repmod.repeat_modeler"]
     
     class RepeatMasker(Task):
         def __init__(self, *args, **kwargs):
