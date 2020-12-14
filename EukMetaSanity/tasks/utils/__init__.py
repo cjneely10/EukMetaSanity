@@ -1,0 +1,1 @@
+from .taxonomy_assignment import TaxonomyAssignment

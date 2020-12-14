@@ -13,6 +13,7 @@ from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolErr
 class {0}Iter(TaskList):
     name = "{1}"
     requires = []
+    depends = []
     
     class {0}(Task):
         def __init__(self, *args, **kwargs):

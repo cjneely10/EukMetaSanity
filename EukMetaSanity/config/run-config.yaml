@@ -70,7 +70,7 @@ abinitio:
       program: etraining
     mmseqs.createdb:
       program: mmseqs
-    mmseqs.search:
+    mmseqs.linsearch:
       data: /path/to/ortho_db
       program: mmseqs
       # Pass any flags to mmseqs required
