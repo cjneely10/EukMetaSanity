@@ -1,7 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
+from EukMetaSanity import Task, TaskList, program_catch, prefix
 
 
 class FilterTaxSeqDBIter(TaskList):
@@ -38,6 +36,10 @@ class FilterTaxSeqDBIter(TaskList):
                     self.output["fasta"],
                 ]
             )
+            for file in os.listdir(self.wdir):
+                file = os.path.join(self.wdir, file)
+                if subset_db_outpath in file:
+                    self.local["rm"][file]()
             
     def __init__(self, *args, **kwargs):
         super().__init__(FilterTaxSeqDBIter.FilterTaxSeqDB, FilterTaxSeqDBIter.name, *args, **kwargs)

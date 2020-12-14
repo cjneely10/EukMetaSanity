@@ -1,7 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class GeneMarkPetapIter(TaskList):
@@ -13,7 +11,7 @@ class GeneMarkPetapIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "gtf": os.path.join(self.wdir, "genemark.gtf")
             }
             
         @program_catch

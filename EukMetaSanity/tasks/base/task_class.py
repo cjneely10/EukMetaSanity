@@ -3,7 +3,7 @@ import logging
 from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
-from EukMetaSanity.tasks.helpers import touch
+from EukMetaSanity.tasks.utils.helpers import touch
 from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller

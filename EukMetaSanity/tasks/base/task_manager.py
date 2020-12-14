@@ -1,7 +1,7 @@
 import os
 from shutil import copy
 from typing import List, Dict, Tuple
-from EukMetaSanity.tasks.helpers import touch
+from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager

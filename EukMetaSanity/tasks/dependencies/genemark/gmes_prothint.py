@@ -1,7 +1,6 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
+from EukMetaSanity import ProcessExecutionError
+from EukMetaSanity import Task, TaskList, program_catch, touch
 
 
 class ProtHintIter(TaskList):
@@ -29,6 +28,7 @@ class ProtHintIter(TaskList):
                         "--threads", self.threads,
                     ]
                 )
+                os.remove(str(self.input["mmseqs.filtertaxseqdb"]["fasta"]))
             except ProcessExecutionError:
                 touch(str(self.output["hints"]))
                 touch(str(self.output["evidence"]))
