@@ -81,7 +81,7 @@ abinitio:
         -e 0.01
         --remove-tmp-files
     # GeneMark protocol
-    gmes:
+    gmes.gmes_petap:
       program: gmes_petap.pl
       # Pass any flags to gmes_petap.pl required
       FLAGS:
@@ -95,10 +95,10 @@ abinitio:
         --max_intron 10000
         --max_intergenic 50000
         --soft_mask auto
-    gffread:
-      program: gffread
     gmes.prothint:
       program: prothint.py
+    gffread:
+      program: gffread
 
 evidence:
   workers: 1
