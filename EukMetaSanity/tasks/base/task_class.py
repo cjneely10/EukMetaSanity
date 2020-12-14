@@ -74,6 +74,7 @@ class Task(ABC):
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
+        db_name = db_name + "_" + scope
         pm.add_dirs(record_id, [db_name])
         # Store working directory
         self._wdir = pm.get_dir(record_id, db_name)

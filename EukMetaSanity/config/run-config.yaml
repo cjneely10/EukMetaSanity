@@ -29,6 +29,7 @@ taxonomy:
         --min-seq-id 0.40
         -c 0.3
         --cov-mode 0
+        --split-memory-limit 12G
 
 repeats:
   workers: 1
