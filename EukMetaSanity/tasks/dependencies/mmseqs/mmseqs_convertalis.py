@@ -1,7 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class ConvertAlisIter(TaskList):

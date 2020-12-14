@@ -64,13 +64,9 @@ abinitio:
       data: /path/to/ortho_db
       cutoff: 25.0
       rounds: 3
-    augustus.new_species_pl:
-      program: new_species.pl
-    augustus.etraining:
-      program: etraining
     mmseqs.createdb:
       program: mmseqs
-    mmseqs.linsearch:
+    mmseqs.search:
       data: /path/to/ortho_db
       program: mmseqs
       subname: linsearch
