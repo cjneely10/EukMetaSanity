@@ -1,6 +1,6 @@
 import networkx as nx
 from collections import namedtuple
-from typing import List, Type, Tuple
+from typing import List, Type, Tuple, Dict
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.dependencies import dependencies
 
@@ -26,7 +26,7 @@ class DependencyGraph:
     """
 
     def __init__(self, tasks: List[TaskList]):
-        self.idx = {task.name: task for task in tasks}
+        self.idx: Dict[str, TaskList] = {task.name: task for task in tasks}
         self.idx.update(dependencies)
         self.graph = nx.DiGraph()
         self._build_dependency_graph(tasks)
@@ -38,23 +38,33 @@ class DependencyGraph:
             )
 
     def _build_dependency_graph(self, tasks: List[TaskList]):
-        self.graph.add_node(Node(name="root", scope=""))
+        root = Node(name="root", scope="")
+        self.graph.add_node(root)
         # Add dependencies stored in TaskList object's .requires member
         for task_list in tasks:
             task_node = Node(name=task_list.name, scope="")
-            self.graph.add_edge(Node(name="root", scope=""), task_node)
+            self.graph.add_edge(root, task_node)
             for requirement in task_list.requires:
-                self._add_dependency_stack(Node(name=requirement, scope=""), task_list.name, "")
-            for requirement in task_list.depends:
-                self._add_dependency_stack(Node(name=requirement, scope=""), task_list.name, "")
+                self.graph.add_edge(Node(name=requirement, scope=""), task_node)
+            for dependency in task_list.depends:
+                self._add_requirements_within_dependencies(self.graph, Node(name=dependency, scope=task_list.name), task_node, "requires", "")
 
-    def _add_dependency_stack(self, dependency: Node, main_task_name: str, scope: str):
-        self.graph.add_edge(dependency, Node(name=main_task_name, scope=scope))
-        dep_task: TaskList = self.idx[dependency.name]
-        for attr in ("requires", "depends"):
-            for dep in getattr(dep_task, attr):
-                self.graph.add_edge(Node(name=dep, scope=scope), Node(name=dep_task.name, scope=scope))
-                self._add_dependency_stack(Node(name=dep, scope=scope), dep_task.name, scope)
+    def _add_requirements_within_dependencies(self, graph: nx.DiGraph, node: Node, task_node: Node, attr: str, scope: str):
+        for requirement in getattr(self.idx[node.name], attr):
+            new_node = Node(name=requirement, scope=scope)
+            graph.add_edge(new_node, task_node)
+            self._add_requirements_within_dependencies(graph, new_node, task_node, attr, scope)
+
+    def _get_dependencies_at_level(self, task: TaskList) -> List[Tuple[Type[TaskList], str]]:
+        graph = nx.DiGraph()
+        task_node = Node(name=task.name, scope="")
+        graph.add_node(task_node)
+        for dependency in task.depends:
+            graph.add_edge(Node(name=dependency, scope=task.name), task_node)
+            self._add_requirements_within_dependencies(graph, Node(name=dependency, scope=task.name), task_node, "depends", task.name)
+        sorted_nodes = list(nx.topological_sort(graph))
+        sorted_nodes.remove(task_node)
+        return [(self.idx[node.name], node.scope) for node in sorted_nodes]
 
     @property
     def sorted_tasks(self) -> List[Tuple[Type[TaskList], str]]:
@@ -65,4 +75,8 @@ class DependencyGraph:
         """
         sorted_nodes: List[Node] = list(nx.topological_sort(self.graph))
         sorted_nodes.remove(Node(name="root", scope=""))
-        return [(self.idx[node.name], node.scope) for node in sorted_nodes]
+        final_sort: List[Tuple[Type[TaskList], str]] = []
+        for node in sorted_nodes:
+            final_sort += self._get_dependencies_at_level(self.idx[node.name])
+            final_sort.append((self.idx[node.name], node.scope))
+        return final_sort
