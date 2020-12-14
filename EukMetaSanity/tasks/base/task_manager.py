@@ -40,14 +40,13 @@ class TaskManager:
 
         :param output_dir: Directory to write final result file
         """
-        print(*self.task_list, sep="\n")
-        exit()
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1])
         task.update({req_str: self.completed_tasks[(req_str, task.scope)].output()[0][0]
                      for req_str in task.requires})
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
+        print(self.completed_tasks)
         i = 1
         while i < len(self.task_list):
             task = self.task_list[i][0](
@@ -56,6 +55,7 @@ class TaskManager:
                          for req_str in task.requires})
             task.run()
             self.completed_tasks[(task.name, task.scope)] = task
+            print(self.completed_tasks)
             i += 1
         self.summarize(os.path.join(output_dir, "results", self.command), self.command)
 
