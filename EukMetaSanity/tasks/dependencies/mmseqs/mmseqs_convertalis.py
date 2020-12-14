@@ -26,7 +26,8 @@ class ConvertAlisIter(TaskList):
                     self.data[0],  # Input augustus-db
                     self.input["mmseqs.linsearch"]["db"],  # Input tax db
                     self.output["results-file"],  # Output results file
-                    "--threads", self.threads
+                    "--threads", self.threads,
+                    (*self.added_flags)
                 ],
                 "2:00:00"
             )

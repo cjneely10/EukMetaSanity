@@ -73,6 +73,7 @@ abinitio:
     mmseqs.linsearch:
       data: /path/to/ortho_db
       program: mmseqs
+      subname: linsearch
       # Pass any flags to mmseqs required
       FLAGS:
         --split-memory-limit 12G

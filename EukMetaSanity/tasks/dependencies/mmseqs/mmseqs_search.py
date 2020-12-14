@@ -2,7 +2,7 @@ import os
 from EukMetaSanity import Task, TaskList, program_catch
 
 
-class LinSearchIter(TaskList):
+class SearchIter(TaskList):
     name = "mmseqs.linsearch"
     requires = []
     depends = ["mmseqs.createdb"]
@@ -19,7 +19,7 @@ class LinSearchIter(TaskList):
             # Run search
             self.parallel(
                 self.program[
-                    "linsearch",
+                    self.config["subname"],
                     str(self.input["mmseqs.createdb"]["db"]),  # Input FASTA sequence db
                     self.data[0],  # Input db
                     self.output["results_file"],  # Output db
@@ -30,7 +30,7 @@ class LinSearchIter(TaskList):
             )
             
     def __init__(self, *args, **kwargs):
-        super().__init__(LinSearchIter.LinSearch, LinSearchIter.name, *args, **kwargs)
+        super().__init__(SearchIter.LinSearch, SearchIter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":
