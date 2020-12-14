@@ -3,9 +3,7 @@ import shutil
 from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
-
 from plumbum import ProcessExecutionError
-
 from EukMetaSanity import InvalidProtocolError
 from EukMetaSanity import Task, TaskList, program_catch, prefix
 from EukMetaSanity.tasks.official.run.helpers.taxonomy import get_taxonomy

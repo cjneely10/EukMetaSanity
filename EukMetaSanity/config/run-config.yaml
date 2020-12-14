@@ -44,7 +44,7 @@ repeats:
       skip: False
     repmask.repeat_masker:
       program: RepeatMasker
-      data: ""
+      data: ""  # Comma-separated list of repeat models to incorporate
       FLAGS:
         -nolow
     repmask.process_repeats:
@@ -58,43 +58,47 @@ abinitio:
   memory: 40G
   time: "6:00:00"
   protocol: augustus  # Select from augustus/gmes
-  # Augustus protocol
-  augustus:
-    data: /path/to/ortho_db
-    dependencies:
-      augustus: augustus
-      new_species_pl: new_species.pl
-      etraining: etraining
-      mmseqs:
-        program: mmseqs
-        # Pass any flags to mmseqs required
-        FLAGS:
-          --split-memory-limit 40G
-          --cov-mode 0
-          -c 0.6
-          -e 0.01
-          --remove-tmp-files
-    cutoff: 25.0
-    rounds: 3
-  # GeneMark protocol
-  gmes:
-    dependencies:
-      gffread: gffread
-      gmes:
-        program: gmes_petap.pl
-        # Pass any flags to gmes_petap.pl required
-        FLAGS:
-          --min_contig 100
-          --max_contig 100000000
-          --max_gap 5000
-          --max_mask 5000
-          --min_contig_in_predict 100
-          --min_gene_in_predict 10
-          --gc_donor 0.001
-          --max_intron 10000
-          --max_intergenic 50000
-          --soft_mask auto
-      prothint: prothint.py
+  dependencies:
+    augustus.augustus:
+      program: augustus
+      data: /path/to/ortho_db
+      cutoff: 25.0
+      rounds: 3
+    augustus.new_species_pl:
+      program: new_species.pl
+    augustus.etraining:
+      program: etraining
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.search:
+      data: /path/to/ortho_db
+      program: mmseqs
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --split-memory-limit 40G
+        --cov-mode 0
+        -c 0.6
+        -e 0.01
+        --remove-tmp-files
+    # GeneMark protocol
+    gmes:
+      program: gmes_petap.pl
+      # Pass any flags to gmes_petap.pl required
+      FLAGS:
+        --min_contig 100
+        --max_contig 100000000
+        --max_gap 5000
+        --max_mask 5000
+        --min_contig_in_predict 100
+        --min_gene_in_predict 10
+        --gc_donor 0.001
+        --max_intron 10000
+        --max_intergenic 50000
+        --soft_mask auto
+    gffread:
+      program: gffread
+    gmes.prothint:
+      program: prothint.py
 
 evidence:
   workers: 1
