@@ -75,7 +75,7 @@ abinitio:
       program: mmseqs
       # Pass any flags to mmseqs required
       FLAGS:
-        --split-memory-limit 40G
+        --split-memory-limit 12G
         --cov-mode 0
         -c 0.6
         -e 0.01
@@ -115,7 +115,7 @@ evidence:
       FLAGS:
         --min-length 30
         --metaeuk-eval 0.0001
-        --split-memory-limit 40G
+        --split-memory-limit 12G
         -s 7
         --cov-mode 0
         -c 0.3
