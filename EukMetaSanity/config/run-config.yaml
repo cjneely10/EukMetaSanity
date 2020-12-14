@@ -80,6 +80,11 @@ abinitio:
         -c 0.6
         -e 0.01
         --remove-tmp-files
+    mmseqs.convertalis:
+      data: /path/to/ortho_db
+      program: mmseqs
+      FLAGS:
+        --format-output query,target,pident,taxid,taxname,taxlineage
     # GeneMark protocol
     gmes.gmes_petap:
       program: gmes_petap.pl
