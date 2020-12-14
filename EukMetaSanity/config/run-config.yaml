@@ -52,7 +52,7 @@ repeats:
     repmask.rmout:
       program: rmOutToGFF3.pl
 
-abinitio-augustus:
+abinitio.augustus:
   workers: 1
   threads: 1
   memory: 40G
@@ -82,7 +82,7 @@ abinitio-augustus:
       FLAGS:
         --format-output query,target,pident,taxid,taxname,taxlineage
 
-abinitio-genemark:
+abinitio.genemark:
   workers: 1
   threads: 1
   memory: 40G
