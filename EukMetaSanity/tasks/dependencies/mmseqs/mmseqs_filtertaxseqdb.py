@@ -18,7 +18,7 @@ class FilterTaxSeqDBIter(TaskList):
             
         @program_catch
         def run(self):
-            tax = self.input["taxonomy"]["taxonomy"].order
+            tax = self.input["taxonomy"]["taxonomy"].order.tax_id
             subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(self.data[0]))
             self.parallel(
                 self.program[
@@ -32,7 +32,7 @@ class FilterTaxSeqDBIter(TaskList):
             )
             # Output as FASTA file
             self.single(
-                self.program_mmseqs[
+                self.program[
                     "convert2fasta",
                     subset_db_outpath,
                     self.output["fasta"],

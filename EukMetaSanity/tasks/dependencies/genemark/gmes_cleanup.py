@@ -4,12 +4,12 @@ from EukMetaSanity import ProcessExecutionError, CommandNotFound
 from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 
 
-class GffReadIter(TaskList):
-    name = "gmes.gffread"
+class CleanupIter(TaskList):
+    name = "gmes.cleanup"
     requires = []
     depends = []
     
-    class GffRead(Task):
+    class Cleanup(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
@@ -21,7 +21,7 @@ class GffReadIter(TaskList):
             pass
             
     def __init__(self, *args, **kwargs):
-        super().__init__(GffReadIter.GffRead, GffReadIter.name, *args, **kwargs)
+        super().__init__(CleanupIter.Cleanup, CleanupIter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":

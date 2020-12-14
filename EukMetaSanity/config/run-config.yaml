@@ -111,6 +111,8 @@ abinitio-genemark:
       program: gffread
       FLAGS:
         -G
+    gmes.cleanup:
+      program: sed
 
 evidence:
   workers: 1
