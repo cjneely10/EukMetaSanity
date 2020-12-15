@@ -105,9 +105,13 @@ class Task(ABC):
                     completed = True
         # Run if not completed (e.g. missing data)
         if completed is not None and completed is True:
-            logging.info("%s  %s is complete" % (self.record_id, self.name))
+            _str = "Complete: {:<20} {}".format(self.name, self.record_id)
+            logging.info(_str)
+            print(colors.blue & colors.bold | _str)
         else:
-            logging.info("%s  Running %s" % (self.record_id, self.name))
+            _str = "Running:  {:<20} {}".format(self.name, self.record_id)
+            logging.info(_str)
+            print(colors.blue & colors.bold | _str)
             self.run()
 
     def _results(self) -> Dict[str, object]:
