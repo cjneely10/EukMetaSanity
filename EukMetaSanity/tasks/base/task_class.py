@@ -270,7 +270,6 @@ class Task(ABC):
         :param cmd: plumbum LocalCommand object to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
         """
-        print("  " + str(cmd))
         # Write command to slurm script file and run
         if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is True:
             if ConfigManager.MEMORY not in self.config.keys():
@@ -285,9 +284,10 @@ class Task(ABC):
                 self.cfg.get_slurm_flagged_arguments(),
                 time_override
             )
-        # Run command directly
-        logging.info(str(cmd))
         if self._mode == 1:
+            # Run command directly
+            logging.info(str(cmd))
+            print("  " + str(cmd))
             out = cmd()
             if out is not None:
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
@@ -304,10 +304,10 @@ class Task(ABC):
 
         :param cmd: plumbum LocalCommand object to run
         """
-        print("  " + str(cmd))
-        # Run command directly
-        logging.info(str(cmd))
         if self._mode == 1:
+            print("  " + str(cmd))
+            # Run command directly
+            logging.info(str(cmd))
             out = cmd()
             if out is not None:
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:

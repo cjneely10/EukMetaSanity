@@ -3,6 +3,8 @@ import inspect
 from EukMetaSanity.tasks.dependencies.mmseqs import *
 from EukMetaSanity.tasks.dependencies.repeat_modeler import *
 from EukMetaSanity.tasks.dependencies.repeat_masker import *
+from EukMetaSanity.tasks.dependencies.augustus import *
+from EukMetaSanity.tasks.dependencies.genemark import *
 
 # Populate dependencies for easy loading
 dependencies = {

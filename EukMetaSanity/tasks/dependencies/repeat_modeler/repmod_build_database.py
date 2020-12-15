@@ -1,5 +1,4 @@
 import os
-import glob
 from EukMetaSanity import Task, TaskList, program_catch
 
 
