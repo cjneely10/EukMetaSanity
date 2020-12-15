@@ -1,5 +1,6 @@
 import os
 import logging
+from plumbum import colors
 from plumbum import local, BG
 from abc import ABC, abstractmethod
 from dask.distributed import Client, wait
@@ -33,17 +34,17 @@ def program_catch(f: Callable):
             logging.info(e)
             with open(os.path.join(self.wdir, "task.err"), "a") as w:
                 w.write(str(e))
-            print(e)
+            print(colors.warn | e)
         except FileExistsError as e:
             logging.info(e)
             with open(os.path.join(self.wdir, "task.err"), "a") as w:
                 w.write(str(e))
-            print(e)
+            print(colors.warn | e)
         except ValueError as e:
             logging.info(e)
             with open(os.path.join(self.wdir, "task.err"), "a") as w:
                 w.write(str(e))
-            print(e)
+            print(colors.warn | e)
 
     return _add_try_except
 
@@ -397,7 +398,7 @@ class TaskList(ABC):
             self._workers = int(cfg.config[scope][ConfigManager.WORKERS])
             self._threads = int(cfg.config[scope][ConfigManager.THREADS])
         # Get log statement
-        self._statement = "\nRunning %s protocol using %i worker(s) and <= %i thread(s) per worker" % (
+        self._statement = "\nRunning %s protocol using %i worker(s) and (up to) %i thread(s) per worker" % (
             self.name, self._workers, self._threads
         )
         # Store list of tasks to complete
@@ -433,7 +434,7 @@ class TaskList(ABC):
         logging.info(self._statement)
         for _task in self._tasks:
             if _task.is_skip is False:
-                print(self._statement)
+                print(colors.green & colors.bold | self._statement)
                 break
         if self._mode == 0:
             for task in self._tasks:
