@@ -21,7 +21,7 @@ class RepeatModelerIter(TaskList):
             script = self.create_script(
                 self.program[
                     "-pa", str(int(self.threads) // 4 or 1),
-                    "-engine", "ncbi", "-database", self.input["repmod.build_database"]["db"]
+                    "-engine", "ncbi", "-database", str(self.input["repmod.build_database"]["db"][0])
                 ],
                 "modeler.sh"
             )

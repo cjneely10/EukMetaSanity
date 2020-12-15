@@ -92,15 +92,18 @@ class Task(ABC):
         # Check if task has completed based on provided output data
         if self.is_skip:
             return
-        completed = True
+        completed = None
         for _path in self._output_paths.values():
-            if isinstance(_path, str) and not os.path.exists(_path):
-                # Only call function if missing path
-                # Then move on
-                completed = False
-                break
+            if isinstance(_path, str):
+                if not os.path.exists(_path):
+                    # Only call function if missing path
+                    # Then move on
+                    completed = False
+                    break
+                else:
+                    completed = True
         # Run if not completed (e.g. missing data)
-        if completed and len(self._output_paths) > 0:
+        if completed is not None and completed is True:
             logging.info("%s  %s is complete" % (self.record_id, self.name))
         else:
             logging.info("%s  Running %s" % (self.record_id, self.name))
@@ -394,7 +397,7 @@ class TaskList(ABC):
             self._workers = int(cfg.config[scope][ConfigManager.WORKERS])
             self._threads = int(cfg.config[scope][ConfigManager.THREADS])
         # Get log statement
-        self._statement = "\nRunning %s protocol using %i worker(s) and <=%i thread(s) per worker" % (
+        self._statement = "\nRunning %s protocol using %i worker(s) and <= %i thread(s) per worker" % (
             self.name, self._workers, self._threads
         )
         # Store list of tasks to complete

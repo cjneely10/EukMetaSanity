@@ -38,7 +38,6 @@ class TaxonomyIter(TaskList):
             tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
             taxonomy = {key: None for key in tax_levels}
             tax_assignment_out.kingdom = TaxonomyAssignment.Assignment("Eukaryota", 2759, -1)
-            assert deepest_level in taxonomy.keys()
             try:
                 # Get first line
                 _tax_results_file = open(tax_results_file, "r")
