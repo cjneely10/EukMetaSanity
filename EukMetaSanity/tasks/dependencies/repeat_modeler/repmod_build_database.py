@@ -16,12 +16,13 @@ class BuildDatabaseIter(TaskList):
             
         @program_catch
         def run(self):
-            self.single(
-                self.program[
-                    "-name", os.path.join(self.wdir, self.record_id),
-                    str(self.input["root"]["fna"]),
-                ]
-            )
+            if len(os.listdir(self.wdir)) == 0:
+                self.single(
+                    self.program[
+                        "-name", os.path.join(self.wdir, self.record_id),
+                        str(self.input["root"]["fna"]),
+                    ]
+                )
             
     def __init__(self, *args, **kwargs):
         super().__init__(BuildDatabaseIter.BuildDatabase, BuildDatabaseIter.name, *args, **kwargs)

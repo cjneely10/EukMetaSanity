@@ -13,7 +13,7 @@ class RepeatMaskerIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-
+                "libraries": []
             }
             
         @program_catch
