@@ -12,7 +12,6 @@ class RepeatMaskerIter(TaskList):
     class RepeatMasker(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            _added_dirs = []
             _file = str(self.input["repmod.repeat_modeler"]["model"])
             data_files = []
             data_files += [_f for _f in self.data if _f != ""]
@@ -27,8 +26,7 @@ class RepeatMaskerIter(TaskList):
             
         @program_catch
         def run(self):
-
-
+            _added_dirs = []
             for _search in self.output["libraries"]:
                 # Parse for if as file or a RepeatMasker library
                 if "RM" in _search:
