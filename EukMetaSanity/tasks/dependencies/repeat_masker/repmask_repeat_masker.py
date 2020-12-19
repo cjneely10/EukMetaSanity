@@ -12,13 +12,6 @@ class RepeatMaskerIter(TaskList):
     class RepeatMasker(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.output = {
-                "libraries": []
-            }
-            
-        @program_catch
-        def run(self):
-            print(self.input)
             _added_dirs = []
             _file = str(self.input["repmod.repeat_modeler"]["model"])
             data_files = []
@@ -28,7 +21,13 @@ class RepeatMaskerIter(TaskList):
                 data_files += [self.input["taxonomy"]["taxonomy"].family.value]
             if os.path.exists(_file) and os.path.getsize(_file) > 0:
                 data_files.append(_file)
-            self.output = {"libraries": data_files}
+            self.output = {
+                "libraries": data_files
+            }
+            
+        @program_catch
+        def run(self):
+
 
             for _search in self.output["libraries"]:
                 # Parse for if as file or a RepeatMasker library
