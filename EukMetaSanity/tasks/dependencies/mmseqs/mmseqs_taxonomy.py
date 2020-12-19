@@ -1,6 +1,5 @@
 import os
-from EukMetaSanity import MissingDataError
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, data_catch
 
 
 class TaxonomyIter(TaskList):
@@ -25,11 +24,10 @@ class TaxonomyIter(TaskList):
             self.output = {
                 "tax-report": os.path.join(self.wdir, "tax-report.txt"),
             }
-            
+
+        @data_catch
         @program_catch
         def run(self):
-            if not os.path.exists(self.data[0]):
-                raise MissingDataError
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             # Search taxonomy db
             self.parallel(

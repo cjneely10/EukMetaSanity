@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, prefix, data_catch
 
 
 class FilterTaxSeqDBIter(TaskList):
@@ -13,7 +13,8 @@ class FilterTaxSeqDBIter(TaskList):
             self.output = {
                 "fasta": os.path.join(self.wdir, self.record_id + ".faa")
             }
-            
+
+        @data_catch
         @program_catch
         def run(self):
             tax = self.input["taxonomy"]["taxonomy"].order.tax_id

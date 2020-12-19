@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, data_catch
 
 
 class SearchIter(TaskList):
@@ -13,7 +13,8 @@ class SearchIter(TaskList):
             self.output = {
                 "db": os.path.join(self.wdir, self.record_id + "_db")
             }
-            
+
+        @data_catch
         @program_catch
         def run(self):
             # Run search

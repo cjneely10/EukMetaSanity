@@ -49,6 +49,21 @@ def program_catch(f: Callable):
     return _add_try_except
 
 
+def data_catch(func: Callable):
+    """ Decorator function to confirm that a specific number of files are present
+    Existence of all files has already been checked at the config level
+
+    :param func: Function that is using self.data member
+    :return: Decorated function
+    """
+    def inner(self):
+        if len(self.data) >= 1:
+            return func()
+        else:
+            raise MissingDataError
+    return inner
+
+
 class OutputResultsFileError(FileNotFoundError):
     pass
 

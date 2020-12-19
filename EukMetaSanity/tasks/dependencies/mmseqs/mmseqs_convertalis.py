@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, data_catch
 
 
 class ConvertAlisIter(TaskList):
@@ -13,7 +13,8 @@ class ConvertAlisIter(TaskList):
             self.output = {
                 "results_file": os.path.join(self.wdir, self.record_id + ".m8")
             }
-            
+
+        @data_catch
         @program_catch
         def run(self):
             # Output results
