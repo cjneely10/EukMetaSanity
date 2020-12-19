@@ -18,6 +18,7 @@ class RepeatMaskerIter(TaskList):
             
         @program_catch
         def run(self):
+            print(self.input)
             _added_dirs = []
             _file = str(self.input["repmod.repeat_modeler"]["model"])
             data_files = []

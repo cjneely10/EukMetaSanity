@@ -55,10 +55,12 @@ class OutputResultsFileError(FileNotFoundError):
 
 class Task(ABC):
     def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
-                 record_id: str, db_name: str, mode: int, scope: str):
+                 record_id: str, db_name: str, mode: int, scope: str,
+                 requested_input_data: Dict[str, Dict[str, object]]):
         self._name = db_name
         # Store passed input flag:input_path dict
         self._input_data = input_data
+        self._input_data.update(requested_input_data)
         # Instantiate output dict variable
         self._output_paths: Dict[str, object] = {}
         # Store config manager
@@ -105,11 +107,11 @@ class Task(ABC):
                     completed = True
         # Run if not completed (e.g. missing data)
         if completed is not None and completed is True:
-            _str = "Complete: {:<20} {}".format(self.name, self.record_id)
+            _str = "Complete: {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
         else:
-            _str = "Running:  {:<20} {}".format(self.name, self.record_id)
+            _str = "Running:  {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
             self.run()
@@ -123,7 +125,7 @@ class Task(ABC):
                 if self._mode == 0:
                     touch(_path)
                 elif not self.is_skip:
-                    print("Missing file: ", _path)
+                    print(colors.red & colors.bold | "Missing file: %s" % _path)
                     raise OutputResultsFileError(_path)
         return self._output_paths
 
@@ -387,7 +389,7 @@ class TaskList(ABC):
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
                  input_paths: List[Dict[str, Dict[str, object]]],
                  pm: PathManager, record_ids: List[str], mode: int,
-                 scope: str):
+                 scope: str, requested_input_data: List[Dict[str, Dict[str, object]]]):
         # Call data function for pertinent info
         self.name = name
         # Get workers for TaskList
@@ -414,9 +416,10 @@ class TaskList(ABC):
                 record_id,
                 name,
                 mode,
-                scope
+                scope,
+                req_data
             )
-            for input_path, record_id in zip(input_paths, record_ids)
+            for input_path, record_id, req_data in zip(input_paths, record_ids, requested_input_data)
         ]
         # Store ConfigManager object
         self._cfg = cfg
