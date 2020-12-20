@@ -12,7 +12,6 @@ class EMapperIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "emapper": os.path.join(self.wdir, self.record_id + ".emapper"),
-                "final": ["emapper"]
             }
 
         @program_catch
