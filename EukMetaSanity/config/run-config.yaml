@@ -117,12 +117,11 @@ evidence:
   threads: 1
   memory: 40G
   time: "12:00:00"
-  data: /path/to/ortho_db
   level: order
   dependencies:
-    mmseqs: mmseqs
     metaeuk:
       program: metaeuk
+      data: /path/to/ortho_db
       # Pass any flags to metaeuk required
       FLAGS:
         --min-length 30
@@ -133,5 +132,7 @@ evidence:
         -c 0.3
         -e 100
         --max-overlap 0
+    merge:
+      program: create-final-annotations.py
 
 ...  # document end
