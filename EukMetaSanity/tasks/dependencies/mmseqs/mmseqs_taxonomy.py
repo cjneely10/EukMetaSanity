@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, data_catch
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class TaxonomyIter(TaskList):
@@ -25,7 +25,6 @@ class TaxonomyIter(TaskList):
                 "tax-report": os.path.join(self.wdir, "tax-report.txt"),
             }
 
-        @data_catch
         @program_catch
         def run(self):
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")

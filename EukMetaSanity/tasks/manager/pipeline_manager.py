@@ -4,7 +4,8 @@ from EukMetaSanity.tasks.base.task_class import TaskList
 # # Run imports
 from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
-# from EukMetaSanity.tasks.official.run.abinitio import AbInitioIter
+from EukMetaSanity.tasks.official.run.abinitio_augustus import AbInitioAugustusIter
+from EukMetaSanity.tasks.official.run.abinitio_genemark import AbInitioGeneMarkIter
 # from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 # # Report imports
 from EukMetaSanity.tasks.test_tasks.report.kofamscan import KoFamScanIter
@@ -27,7 +28,8 @@ class PipelineManager:
             "run": [
                 # EvidenceIter,
                 TaxonomyIter,
-                # AbInitioIter,
+                AbInitioAugustusIter,
+                AbInitioGeneMarkIter,
                 RepeatsIter,
             ],
             "test_report": [

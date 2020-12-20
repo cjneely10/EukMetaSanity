@@ -5,7 +5,7 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 
 boilerplate = """import os
-from EukMetaSanity import Task, TaskList, program_catch, data_catch, prefix, touch
+from EukMetaSanity import Task, TaskList, program_catch, prefix, touch
 from EukMetaSanity import ProcessExecutionError, CommandNotFound
 from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
 

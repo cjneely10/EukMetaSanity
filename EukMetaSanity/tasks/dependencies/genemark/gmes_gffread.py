@@ -26,7 +26,7 @@ class GffReadIter(TaskList):
             self.single(
                 self.local["sed"][
                     "-i", "s/GeneMark.hmm/ab-initio/g",
-                    str(self.input["gmes.gffread"]["gff3"])
+                    str(self.output["gff3"])
                 ]
             )
             

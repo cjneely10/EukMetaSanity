@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, data_catch
+from EukMetaSanity import Task, TaskList, program_catch, prefix
 
 
 class FilterTaxSeqDBIter(TaskList):
@@ -14,7 +14,6 @@ class FilterTaxSeqDBIter(TaskList):
                 "fasta": os.path.join(self.wdir, self.record_id + ".faa")
             }
 
-        @data_catch
         @program_catch
         def run(self):
             tax = self.input["taxonomy"]["taxonomy"].order.tax_id
@@ -24,7 +23,7 @@ class FilterTaxSeqDBIter(TaskList):
                     "filtertaxseqdb",
                     self.data[0],
                     subset_db_outpath,
-                    "--taxon-list", tax[1],
+                    "--taxon-list", tax,
                     "--threads", self.threads,
                 ],
                 "1:00:00"

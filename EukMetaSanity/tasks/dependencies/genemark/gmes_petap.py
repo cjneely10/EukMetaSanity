@@ -6,14 +6,14 @@ class GeneMarkPetapIter(TaskList):
     name = "gmes.petap"
     requires = ["taxonomy"]
     depends = ["gmes.prothint"]
-    
+
     class GeneMarkPetap(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
                 "gtf": os.path.join(self.wdir, "genemark.gtf")
             }
-            
+
         @program_catch
         def run(self):
             ev_vals = ["--ES"]
@@ -25,13 +25,15 @@ class GeneMarkPetapIter(TaskList):
                     "--sequence", str(self.input["root"]["fna"]),
                     (*ev_vals),
                     "--cores", self.threads, (*self.added_flags),
-                    ("--fungus" if "fungi" == self.input["taxonomy"]["taxonomy"].kingdom.value.lower() else "")
+                    ("--fungus"
+                     if self.input["taxonomy"]["taxonomy"].kingdom is not None and
+                        "fungi" == self.input["taxonomy"]["taxonomy"].kingdom.value.lower() else "")
                 ],
                 "abinitio.sh"
             )
             # Run script
             self.parallel(script)
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(GeneMarkPetapIter.GeneMarkPetap, GeneMarkPetapIter.name, *args, **kwargs)
 

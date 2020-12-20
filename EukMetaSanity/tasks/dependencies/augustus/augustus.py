@@ -23,7 +23,7 @@ class AugustusIter(TaskList):
         def run(self):
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(
-                self.parse_search_output(str(self.input["mmseqs.search"]["results_file"])), 1,
+                self.parse_search_output(str(self.input["mmseqs.search"]["db"])), 1,
                 str(self.input["root"]["fna"])
             )
             self._train_augustus(1, str(self.input["root"]["fna"]), out_gff)

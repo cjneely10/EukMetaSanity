@@ -1,4 +1,4 @@
 from plumbum import ProcessExecutionError, CommandNotFound
-from EukMetaSanity.tasks.base.task_class import Task, TaskList, program_catch, data_catch
+from EukMetaSanity.tasks.base.task_class import Task, TaskList, program_catch
 from EukMetaSanity.tasks.base.config_manager import InvalidPathError, MissingDataError, InvalidProtocolError
 from EukMetaSanity.tasks.utils import *

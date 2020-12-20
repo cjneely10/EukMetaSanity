@@ -1,8 +1,7 @@
 import os
 from time import sleep
-from typing import List, Dict, Tuple, Optional, Union
+from typing import List, Tuple
 from plumbum.machines.local import LocalCommand, LocalMachine
-from EukMetaSanity.tasks.base.config_manager import ConfigManager
 
 
 class SLURMCaller:
@@ -16,16 +15,15 @@ class SLURMCaller:
     FAILED_ID = "failed-job-id"
 
     def __init__(self, user_id: str, wdir: str, threads: str, cmd: LocalCommand,
-                 config_data: Dict[str, Dict[str, Union[str, dict]]], _local: LocalMachine,
-                 slurm_flags: List[Tuple[str, str]], time_override: Optional[str]):
+                 memory: str, time: str, _local: LocalMachine, slurm_flags: List[Tuple[str, str]]):
         self.user_id = user_id
         self.wdir = wdir
         self.threads = threads
         self.cmd = cmd
-        self.config = config_data
+        self.memory = memory
+        self.time = time
         self.local = _local
         self.added_flags = slurm_flags
-        self.time_override = time_override
 
         # Generated job id
         self.job_id: str = SLURMCaller.FAILED_ID
@@ -97,12 +95,8 @@ class SLURMCaller:
         fp.write(SLURMCaller.create_header_line("--nodes", "1"))
         fp.write(SLURMCaller.create_header_line("--tasks", "1"))
         fp.write(SLURMCaller.create_header_line("--cpus-per-task", self.threads))
-        fp.write(SLURMCaller.create_header_line("--mem", str(self.config[ConfigManager.MEMORY])))
-        if ConfigManager.TIME in self.config.keys():
-            if self.time_override is not None:
-                fp.write(SLURMCaller.create_header_line("--time", self.time_override))
-            else:
-                fp.write(SLURMCaller.create_header_line("--time", str(self.config[ConfigManager.TIME])))
+        fp.write(SLURMCaller.create_header_line("--mem", self.memory))
+        fp.write(SLURMCaller.create_header_line("--time", self.time))
         # Write additional header lines passed in by user
         for added_arg in self.added_flags:
             fp.write(SLURMCaller.create_header_line(*added_arg))

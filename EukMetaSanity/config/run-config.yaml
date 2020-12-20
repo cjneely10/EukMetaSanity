@@ -2,7 +2,7 @@
 
 SLURM:
   ## Set to True if using SLURM
-  USE_CLUSTER: False
+  USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
   ## --nodes, --ntasks, --mem, --cpus-per-task
@@ -41,7 +41,7 @@ repeats:
       program: BuildDatabase
     repmod.repeat_modeler:
       program: RepeatModeler
-      skip: False
+      skip: false
     repmask.repeat_masker:
       program: RepeatMasker
       data: ""  # Comma-separated list of repeat models to incorporate
@@ -57,7 +57,7 @@ abinitio.augustus:
   threads: 1
   memory: 40G
   time: "6:00:00"
-  skip: False
+  skip: false
   dependencies:
     augustus:
       program: augustus
@@ -87,9 +87,9 @@ abinitio.genemark:
   threads: 1
   memory: 40G
   time: "6:00:00"
-  skip: False
+  skip: false
   dependencies:
-    gmes.gmes_petap:
+    gmes.petap:
       program: gmes_petap.pl
       FLAGS:
         --min_contig 100

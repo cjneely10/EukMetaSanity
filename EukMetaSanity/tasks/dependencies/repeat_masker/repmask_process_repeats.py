@@ -1,6 +1,4 @@
 import os
-import shutil
-
 from EukMetaSanity import Task, TaskList, program_catch, touch
 
 
@@ -24,6 +22,7 @@ class ProcessRepeatsIter(TaskList):
                 self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))]()
                 for rep_dir in self.input["repmask.repeat_masker"]["libraries"]
                 if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat.gz"))))
+                and os.path.getsize(os.path.join(rep_dir, "".join((_basename, ".cat.gz")))) > 0
             ])
             # Combine results into single file
             final_out = os.path.join(self.wdir, "mask.final.cat")

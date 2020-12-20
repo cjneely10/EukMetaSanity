@@ -1,20 +1,19 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, data_catch
+from EukMetaSanity import Task, TaskList, program_catch
 
 
 class SearchIter(TaskList):
-    name = "mmseqs.linsearch"
+    name = "mmseqs.search"
     requires = []
     depends = ["mmseqs.createdb"]
     
-    class LinSearch(Task):
+    class Search(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
                 "db": os.path.join(self.wdir, self.record_id + "_db")
             }
 
-        @data_catch
         @program_catch
         def run(self):
             # Run search
@@ -23,7 +22,7 @@ class SearchIter(TaskList):
                     self.config["subname"],
                     str(self.input["mmseqs.createdb"]["db"]),  # Input FASTA sequence db
                     self.data[0],  # Input db
-                    self.output["results_file"],  # Output db
+                    self.output["db"],  # Output db
                     os.path.join(self.wdir, "tmp"),
                     (*self.added_flags),
                     "--threads", self.threads,
@@ -31,7 +30,7 @@ class SearchIter(TaskList):
             )
             
     def __init__(self, *args, **kwargs):
-        super().__init__(SearchIter.LinSearch, SearchIter.name, *args, **kwargs)
+        super().__init__(SearchIter.Search, SearchIter.name, *args, **kwargs)
 
 
 if __name__ == "__main_":

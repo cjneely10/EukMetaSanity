@@ -34,34 +34,19 @@ def program_catch(f: Callable):
             logging.info(e)
             with open(os.path.join(self.wdir, "task.err"), "a") as w:
                 w.write(str(e))
-            print(colors.warn | e)
+            print(colors.warn | str(e))
         except FileExistsError as e:
             logging.info(e)
             with open(os.path.join(self.wdir, "task.err"), "a") as w:
                 w.write(str(e))
-            print(colors.warn | e)
+            print(colors.warn | str(e))
         except ValueError as e:
             logging.info(e)
             with open(os.path.join(self.wdir, "task.err"), "a") as w:
                 w.write(str(e))
-            print(colors.warn | e)
+            print(colors.warn | str(e))
 
     return _add_try_except
-
-
-def data_catch(func: Callable):
-    """ Decorator function to confirm that a specific number of files are present
-    Existence of all files has already been checked at the config level
-
-    :param func: Function that is using self.data member
-    :return: Decorated function
-    """
-    def inner(self):
-        if len(self.data) >= 1:
-            return func()
-        else:
-            raise MissingDataError
-    return inner
 
 
 class OutputResultsFileError(FileNotFoundError):
@@ -92,7 +77,7 @@ class Task(ABC):
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
-        db_name = db_name + "_" + scope
+        db_name = db_name + "_" + scope if scope != "" else db_name
         pm.add_dirs(record_id, [db_name])
         # Store working directory
         self._wdir = pm.get_dir(record_id, db_name)
@@ -294,17 +279,18 @@ class Task(ABC):
         """
         # Write command to slurm script file and run
         if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is True:
-            if ConfigManager.MEMORY not in self.config.keys():
+            sel = self._scope if self._scope is not None else self._name
+            if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
             cmd = SLURMCaller(
                 self.cfg.get_slurm_userid(),
                 self.wdir,
                 str(self._threads_pw),
                 cmd,
-                self.config,
+                self.cfg.config[sel][ConfigManager.MEMORY],
+                self.cfg.config[sel][ConfigManager.TIME] if time_override is not None else time_override,
                 self.local,
                 self.cfg.get_slurm_flagged_arguments(),
-                time_override
             )
         if self._mode == 1:
             # Run command directly

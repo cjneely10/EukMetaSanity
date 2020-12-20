@@ -2,22 +2,15 @@
 import os
 import json
 import logging
-from Bio import SeqIO
 from pathlib import Path
 from signal import signal, SIGPIPE, SIG_DFL
 from typing import Generator, List, Tuple, Dict
+from Bio import SeqIO
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
-
-"""
-EukMetaSanity.py
-===============================================
-EukMetaSanity - Generate structural/functional annotations for Eukaryotes
-
-"""
 
 
 # Logging initialize
@@ -36,7 +29,7 @@ def _initialize_logging(ap: ArgParse):
         "*" * 80, "",
         "All log statements are redirected to %s" % log_file, "",
         "*" * 80, "",
-        "Displaying step summaries here:\n\n",
+        "Displaying step summaries here:\n",
         sep="\n"
     )
 
@@ -47,7 +40,6 @@ def _files_iter(ap: ArgParse, storage_dir: str) -> Generator[str, ArgParse, None
         for ext in ap.args.extensions:
             if file.endswith(ext):
                 yield _simplify_fasta(ap, file, storage_dir)
-    return None
 
 
 def _simplify_fasta(ap: ArgParse, file, storage_dir: str) -> str:
@@ -90,9 +82,6 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineMan
             f("Getting files from last run...")
         input_prefixes, input_files = _get_list_of_files(ap.args.fasta_directory)
     else:
-        for f in (logging.info, print):
-            f("Creating working directory")
-            f("Simplifying FASTA sequences")
         # Simplify FASTA files into working directory
         pm.add_dirs("MAGS")
         input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
