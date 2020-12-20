@@ -1,0 +1,67 @@
+---  # document start
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+eggnog:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: false
+  dependencies:
+    emapper:
+      program: /path/to/emapper.py
+      python: /path/to/python2.7
+      FLAGS:
+        # Provide flags as needed
+        -m diamond
+
+kofamscan:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: false
+  dependencies:
+    kofamscan.exec_annotation:
+      program: /path/to/kofamscan/exec_annotation
+      kolist: /path/to/kofam/ko_list
+      profiles: /path/to/profiles/eukaryote.hal
+
+mmseqs:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.search:
+      data: /path/to/ortho_db,/path/to/rfam_db
+      program: mmseqs
+      subname: linsearch
+      FLAGS:
+        --split-memory-limit 12G
+        -s 7
+        -k 7
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+
+stats:
+  workers: 1
+  threads: 1
+  memory: 1G
+  time: "1:00:00"
+  evalue: "1e-5"
+
+...  # document end

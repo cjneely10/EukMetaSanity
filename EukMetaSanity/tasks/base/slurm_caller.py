@@ -107,6 +107,12 @@ class SLURMCaller:
 
     @staticmethod
     def create_header_line(param: str, arg: str) -> str:
+        """ Creates a header line in a SLURM script of form SBATCH key=val
+
+        :param param: key
+        :param arg: val
+        :return: str of header line (with newline added)
+        """
         return "#SBATCH %s=%s\n" % (param, arg)
 
     # Call will run script using sbatch and periodically check for when to stop running

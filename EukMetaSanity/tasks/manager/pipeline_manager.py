@@ -8,10 +8,10 @@ from EukMetaSanity.tasks.official.run.abinitio_augustus import AbInitioAugustusI
 from EukMetaSanity.tasks.official.run.abinitio_genemark import AbInitioGeneMarkIter
 from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 # # Report imports
-from EukMetaSanity.tasks.test_tasks.report.kofamscan import KoFamScanIter
-from EukMetaSanity.tasks.test_tasks.report.eggnog import EggNogMapperIter
-from EukMetaSanity.tasks.test_tasks.report.mmseqs import MMseqsIter
-from EukMetaSanity.tasks.test_tasks.report.stats import StatsIter
+from EukMetaSanity.tasks.official.report.kofamscan import KoFamScanIter
+from EukMetaSanity.tasks.official.report.eggnog import EggNogMapperIter
+from EukMetaSanity.tasks.official.report.mmseqs import MMseqsIter
+from EukMetaSanity.tasks.official.report.stats import StatsIter
 
 
 class PipelineManager:
@@ -32,7 +32,7 @@ class PipelineManager:
                 AbInitioGeneMarkIter,
                 RepeatsIter,
             ],
-            "test_report": [
+            "report": [
                 StatsIter,
                 KoFamScanIter,
                 EggNogMapperIter,

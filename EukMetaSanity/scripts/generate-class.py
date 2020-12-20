@@ -32,6 +32,7 @@ if __name__ == "__main_":
     pass
 """
 
+# TODO(1): Handle config file generation
 config_boilerplate = """[SLURM]
 # Set to True if using SLURM
 USE_CLUSTER = False

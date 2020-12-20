@@ -1,52 +1,51 @@
 import os
 from EukMetaSanity import Task, TaskList, program_catch
 
-"""
-Use search/linsearch in MMseqs program for annotation of all
-user-provided datasets
-
-"""
-
 
 class MMseqsIter(TaskList):
+    """ Task searches gene calls through one (or more) mmseqs databases or profile databases
+
+    Outputs: [db-prefix, dynamic]
+    Finalizes: [db-prefix, dynamic]
+
+    """
+    name = "mmseqs"
+    requires = []
+    
     class MMseqs(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             dbs = (os.path.basename(os.path.splitext(db)[0]) for db in self.data.split(","))
-            self.output = [
-                *self.input,  # Forward input
-                *[  # BLASTx-like results for each database provided
-                    os.path.join(
-                        self.wdir,
-                        self.record_id + "_%s-results.%s-m8" % (db, db)
-                    ) for db in dbs
-                ]
-            ]
-
+            self.output = {
+                **{db: os.path.join(
+                    self.record_id + "_%s-results.%s-m8" % (db, db)
+                ) for db in dbs},
+                "final": list(dbs)
+            }
+            
         @program_catch
-        def run_1(self):
+        def run(self):
+            print(self.input)
             # Generate MMseqs database for proteins
             _file_db = os.path.join(self.wdir, self.record_id + "_db")
             if not os.path.exists(_file_db):
-                self.log_and_run(
+                self.single(
                     self.program[
                         "createdb",
-                        self.input[0],
+                        self.input["root"]["prot"],
                         _file_db,
-                    ],
-                    "20:00"
+                    ]
                 )
             # Search through each database
             for db in self.data.split(","):
                 if "rfam" in db:
                     _file_db = _file_db + "_nuc_db"
-                    self.log_and_run(
+                    self.single(
                         self.program[
                             "createdb",
-                            self.input[2],
+                            self.input["root"]["fna"],
                             _file_db,
                         ],
-                        "20:00"
                     )
                 search_prog = "search"
                 added_flags = self.added_flags
@@ -65,7 +64,7 @@ class MMseqsIter(TaskList):
                     _file_db = _file_db.replace("_nuc_db", "")
                 _out_db = _file_db[:-3] + "_%s-results_db" % os.path.basename(os.path.splitext(db)[0])
                 # Linear search
-                self.log_and_run(
+                self.parallel(
                     self.program[
                         search_prog,
                         _file_db,  # Input FASTA sequence db
@@ -77,7 +76,7 @@ class MMseqsIter(TaskList):
                     ]
                 )
                 # Output results
-                self.log_and_run(
+                self.parallel(
                     self.program[
                         "convertalis",
                         _file_db,  # Input FASTA sequence db
@@ -88,10 +87,10 @@ class MMseqsIter(TaskList):
                     ],
                     "2:00:00"
                 )
-
+            
     def __init__(self, *args, **kwargs):
-        super().__init__(MMseqsIter.MMseqs, "mmseqs", *args, **kwargs)
+        super().__init__(MMseqsIter.MMseqs, MMseqsIter.name, *args, **kwargs)
 
 
-if __name__ == "__main__":
+if __name__ == "__main_":
     pass

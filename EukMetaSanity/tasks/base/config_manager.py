@@ -1,13 +1,13 @@
-import os
-import yaml
-from pathlib import Path
-from plumbum import local, CommandNotFound
-from typing import List, Tuple, Dict, Union
-
 """
 Manages the config file, as well as arguments that are set for each part of the pipeline
 
 """
+
+import os
+from pathlib import Path
+from typing import List, Tuple, Dict, Union
+from plumbum import local, CommandNotFound
+import yaml
 
 
 class InvalidPathError(FileExistsError):

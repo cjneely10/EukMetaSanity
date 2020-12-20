@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+
+"""
+EukMetaSanity.py
+===============================================
+EukMetaSanity - Generate structural/functional annotations for Eukaryotes
+
+"""
+
 import os
 import json
 import logging
