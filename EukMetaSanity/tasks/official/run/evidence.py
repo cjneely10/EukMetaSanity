@@ -29,7 +29,7 @@ class EvidenceIter(TaskList):
         def run(self):
             # Merge final results
             EvidenceIter.Evidence.merge(
-                self, [str(self.input["abinitio"]["ab-gff3"]),
+                self, [str(self.input["metaeuk"]["gff3"]),
                        self.input["augustus"]["ab-gff3"], self.input["gmes.gffread"]["ab-gff3"]],
                 str(self.input["root"]["fna"]),
                 os.path.join(self.wdir, self.record_id),
