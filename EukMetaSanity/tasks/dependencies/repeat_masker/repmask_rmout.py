@@ -12,9 +12,9 @@ class RepeatMaskerOutIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "mask-fna": os.path.join(self.wdir, self.record_id + "-mask.fna"),
-                "mask-tbl": os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.tbl"),
-                "mask-gff3": os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.gff3"),
+                "mask-fna": os.path.join(self.wdir, self.record_id + ".mask.fna"),
+                "mask-tbl": os.path.join(self.wdir, "mask.final.tbl"),
+                "mask-gff3": os.path.join(self.wdir, "mask.final.gff3"),
             }
             
         @program_catch
@@ -27,12 +27,12 @@ class RepeatMaskerOutIter(TaskList):
                 )
                 # Output the repeats file as a gff3 file
                 (self.program[
-                     os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
+                     self.input["repmask.process_repeats"]["rmout"]
                  ] > str(self.output["mask-gff3"]))()
             else:
-                shutil.copy(str(self.input["root"]["fna"]), str(self.output["mask-fna"]))
                 touch(str(self.output["mask-tbl"]))
                 touch(str(self.output["mask-gff3"]))
+                shutil.copy(str(self.input["root"]["fna"]), str(self.output["mask-fna"]))
             
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatMaskerOutIter.RepeatModelerOut, RepeatMaskerOutIter.name, *args, **kwargs)

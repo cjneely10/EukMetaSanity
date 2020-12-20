@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from EukMetaSanity import Task, TaskList, program_catch, touch
 
 
@@ -11,12 +13,11 @@ class ProcessRepeatsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "rmout": os.path.join(os.path.dirname(self.wdir), "repeats_final", "mask.final.out")
+                "rmout": os.path.join(self.wdir, "mask.final.out")
             }
             
         @program_catch
         def run(self):
-            self.pm.add_dirs(self.record_id, ["repeats_final"])
             _basename = os.path.basename(str(self.input["root"]["fna"]))
             # Unzip results
             all([
@@ -25,7 +26,7 @@ class ProcessRepeatsIter(TaskList):
                 if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat.gz"))))
             ])
             # Combine results into single file
-            final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
+            final_out = os.path.join(self.wdir, "mask.final.cat")
             touch(final_out)
             all([
                 (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
@@ -40,6 +41,8 @@ class ProcessRepeatsIter(TaskList):
                     "-maskSource", str(self.input["root"]["fna"]),
                     final_out,
                 ]()
+            else:
+                touch(str(self.output["rmout"]))
             
     def __init__(self, *args, **kwargs):
         super().__init__(ProcessRepeatsIter.ProcessRepeats, ProcessRepeatsIter.name, *args, **kwargs)
