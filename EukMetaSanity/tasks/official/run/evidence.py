@@ -11,7 +11,7 @@ class EvidenceIter(TaskList):
 
     """
     name = "evidence"
-    requires = []
+    requires = ["abinitio.augustus", "abinitio.genemark"]
     depends = ["metaeuk", "augustus", "gmes.gffread"]
     
     class Evidence(Task):
