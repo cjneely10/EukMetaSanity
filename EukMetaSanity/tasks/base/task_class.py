@@ -405,8 +405,8 @@ class TaskList(ABC):
             self._workers = int(cfg.config[scope][ConfigManager.WORKERS])
             self._threads = int(cfg.config[scope][ConfigManager.THREADS])
         # Get log statement
-        self._statement = "\nRunning %s protocol using %i worker(s) and (up to) %i thread(s) per worker" % (
-            self.name, self._workers, self._threads
+        self._statement = "\nRunning %s%s protocol using %i worker(s) and (up to) %i thread(s) per worker" % (
+            self.name, (" (%s)" % self._scope if self._scope != "" else ""), self._workers, self._threads
         )
         # Store list of tasks to complete
         self._tasks: List[Task] = [

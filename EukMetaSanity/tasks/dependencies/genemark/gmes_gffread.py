@@ -20,13 +20,13 @@ class GffReadIter(TaskList):
                 self.program[
                     self.input["gmes.petap"]["gtf"],
                     (*self.added_flags),
-                    "-o", str(self.output["gff3"])
+                    "-o", str(self.output["ab-gff3"])
                 ]
             )
             self.single(
                 self.local["sed"][
                     "-i", "s/GeneMark.hmm/ab-initio/g",
-                    str(self.output["gff3"])
+                    str(self.output["ab-gff3"])
                 ]
             )
             

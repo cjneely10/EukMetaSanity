@@ -69,7 +69,7 @@ abinitio.augustus:
     mmseqs.search:
       data: /path/to/ortho_db
       program: mmseqs
-      subname: linsearch
+      subname: search
       FLAGS:
         --split-memory-limit 12G
         --cov-mode 0
