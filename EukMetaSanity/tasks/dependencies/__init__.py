@@ -6,6 +6,7 @@ from EukMetaSanity.tasks.dependencies.repeat_masker import *
 from EukMetaSanity.tasks.dependencies.augustus import *
 from EukMetaSanity.tasks.dependencies.genemark import *
 from EukMetaSanity.tasks.dependencies.metaeuk import *
+from EukMetaSanity.tasks.dependencies.emapper import *
 
 # Populate dependencies for easy loading
 dependencies = {

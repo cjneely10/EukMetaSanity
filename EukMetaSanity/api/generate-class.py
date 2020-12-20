@@ -14,16 +14,16 @@ class {0}Iter(TaskList):
     name = "{1}"
     requires = []
     depends = []
-    
+
     class {0}(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {2}
-            
+
         @program_catch
         def run(self):
             pass
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__({0}Iter.{0}, {0}Iter.name, *args, **kwargs)
 
