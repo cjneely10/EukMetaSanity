@@ -21,7 +21,8 @@ taxonomy:
       program: mmseqs
     mmseqs.taxonomy:
       program: mmseqs
-      data: /path/to/ortho_db
+      data:
+        /path/to/ortho_db
       # Pass any flags to mmseqs required
       FLAGS:
         --remove-tmp-files
@@ -44,7 +45,8 @@ repeats:
       skip: false
     repmask.repeat_masker:
       program: RepeatMasker
-      data: ""  # Comma-separated list of repeat models to incorporate
+      data:
+        # Comma-separated list of repeat models to incorporate
       FLAGS:
         -nolow
     repmask.process_repeats:
@@ -66,7 +68,8 @@ abinitio.augustus:
     mmseqs.createdb:
       program: mmseqs
     mmseqs.search:
-      data: /path/to/ortho_db
+      data:
+        /path/to/ortho_db
       program: mmseqs
       subname: search
       FLAGS:
@@ -76,7 +79,8 @@ abinitio.augustus:
         -e 0.01
         --remove-tmp-files
     mmseqs.convertalis:
-      data: /path/to/ortho_db
+      data:
+        /path/to/ortho_db
       program: mmseqs
       FLAGS:
         --format-output query,target,pident,taxid,taxname,taxlineage
@@ -105,7 +109,8 @@ abinitio.genemark:
       program: prothint.py
     mmseqs.filtertaxseqdb:
       program: mmseqs
-      data: /path/to/ortho_db
+      data:
+        /path/to/ortho_db
     gmes.gffread:
       program: gffread
       FLAGS:
@@ -120,7 +125,8 @@ evidence:
   dependencies:
     metaeuk:
       program: metaeuk
-      data: /path/to/ortho_db
+      data:
+        /path/to/ortho_db
       # Pass any flags to metaeuk required
       FLAGS:
         --min-length 30

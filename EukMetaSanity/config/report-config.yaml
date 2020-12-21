@@ -46,7 +46,9 @@ mmseqs:
     mmseqs.createdb:
       program: mmseqs
     mmseqs.search:
-      data: /path/to/ortho_db,/path/to/rfam_db
+      data:
+        /path/to/ortho_db
+        /path/to/rfam_db
       program: mmseqs
       subname: linsearch
       FLAGS:

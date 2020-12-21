@@ -173,7 +173,7 @@ class Task(ABC):
 
     @property
     def data(self) -> List[str]:
-        return self.config[ConfigManager.DATA].split(",")
+        return self.config[ConfigManager.DATA].split(" ")
 
     @property
     def output(self) -> Dict[str, Union[Iterable, object]]:
