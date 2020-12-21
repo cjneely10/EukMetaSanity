@@ -107,11 +107,11 @@ class Task(ABC):
                     completed = True
         # Run if not completed (e.g. missing data)
         if completed is not None and completed is True:
-            _str = "Complete: {}".format(self.record_id)
+            _str = "Is complete: {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
         else:
-            _str = "Running:  {}".format(self.record_id)
+            _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
             self.run()
