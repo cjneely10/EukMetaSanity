@@ -11,6 +11,7 @@ class MMseqsIter(TaskList):
     """
     name = "mmseqs"
     requires = []
+    depends = ["mmseqs.search"]
     
     class MMseqs(Task):
         def __init__(self, *args, **kwargs):
@@ -25,7 +26,6 @@ class MMseqsIter(TaskList):
             
         @program_catch
         def run(self):
-            print(self.input)
             # Generate MMseqs database for proteins
             _file_db = os.path.join(self.wdir, self.record_id + "_db")
             if not os.path.exists(_file_db):

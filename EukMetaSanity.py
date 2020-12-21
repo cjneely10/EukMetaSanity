@@ -128,6 +128,7 @@ if __name__ == "__main__":
     signal(SIGPIPE, SIG_DFL)
     DEFAULT_EXTS = ".fna/.fasta/.fa"
     _tm = PipelineManager()
+    # TODO: UI methods - clean step, soft-run to show what will launch
     _ap = ArgParse(
         (
             (("command",),

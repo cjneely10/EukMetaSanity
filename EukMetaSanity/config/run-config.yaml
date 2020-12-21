@@ -61,7 +61,6 @@ abinitio.augustus:
   dependencies:
     augustus:
       program: augustus
-      data: /path/to/ortho_db
       cutoff: 25.0
       rounds: 3
     mmseqs.createdb:

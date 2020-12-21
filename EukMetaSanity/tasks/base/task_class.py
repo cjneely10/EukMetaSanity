@@ -77,7 +77,7 @@ class Task(ABC):
         # Developer(0) or User(1) mode
         self._mode = mode
         # Add name of db
-        db_name = db_name + "_" + scope if scope != "" else db_name
+        db_name = scope + "_" + db_name if scope != "" else db_name
         pm.add_dirs(record_id, [db_name])
         # Store working directory
         self._wdir = pm.get_dir(record_id, db_name)
@@ -405,7 +405,7 @@ class TaskList(ABC):
             self._workers = int(cfg.config[scope][ConfigManager.WORKERS])
             self._threads = int(cfg.config[scope][ConfigManager.THREADS])
         # Get log statement
-        self._statement = "\nRunning %s%s protocol using %i worker(s) and (up to) %i thread(s) per worker" % (
+        self._statement = "\nRunning:\n  %s%s\n  %i worker(s)\n  %i thread(s) per worker" % (
             self.name, (" (%s)" % self._scope if self._scope != "" else ""), self._workers, self._threads
         )
         # Store list of tasks to complete

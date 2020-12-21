@@ -10,7 +10,7 @@ from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_i
 class AugustusIter(TaskList):
     name = "augustus"
     requires = []
-    depends = ["mmseqs.search"]
+    depends = ["mmseqs.convertalis"]
     
     class Augustus(Task):
         def __init__(self, *args, **kwargs):
@@ -23,7 +23,7 @@ class AugustusIter(TaskList):
         def run(self):
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(
-                self.parse_search_output(str(self.input["mmseqs.search"]["db"])), 1,
+                self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])), 1,
                 str(self.input["root"]["fna"])
             )
             self._train_augustus(1, str(self.input["root"]["fna"]), out_gff)
