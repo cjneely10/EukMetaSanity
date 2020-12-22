@@ -27,8 +27,9 @@ class RepeatModelerIter(TaskList):
             )
             self.parallel(script)
             _output = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
+            print(_output)
             if len(_output) > 0:
-                shutil.copy(_output[0], str(self.output["model"]))
+                shutil.copyfile(_output[0], str(self.output["model"]))
             else:
                 touch(str(self.output["model"]))
 
