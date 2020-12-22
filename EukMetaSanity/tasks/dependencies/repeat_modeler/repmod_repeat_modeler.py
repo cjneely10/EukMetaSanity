@@ -8,14 +8,14 @@ class RepeatModelerIter(TaskList):
     name = "repmod.repeat_modeler"
     requires = []
     depends = ["repmod.build_database"]
-    
+
     class RepeatModeler(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
                 "model": os.path.join(self.wdir, "consensi.fa.classified")
             }
-            
+
         @program_catch
         def run(self):
             script = self.create_script(
@@ -28,10 +28,10 @@ class RepeatModelerIter(TaskList):
             self.parallel(script)
             _output = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
             if len(_output) > 0:
-                shutil.move(_output[0], str(self.output["model"]))
+                shutil.copy(_output[0], str(self.output["model"]))
             else:
                 touch(str(self.output["model"]))
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatModelerIter.RepeatModeler, RepeatModelerIter.name, *args, **kwargs)
 

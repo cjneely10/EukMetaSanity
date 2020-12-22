@@ -46,7 +46,7 @@ repeats:
     repmask.repeat_masker:
       program: RepeatMasker
       data:
-        # Comma-separated list of repeat models to incorporate
+        "" # Comma-separated list of repeat models to incorporate
       FLAGS:
         -nolow
     repmask.process_repeats:

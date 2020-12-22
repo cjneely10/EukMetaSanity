@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from plumbum import colors
 from plumbum import local, BG
@@ -114,7 +115,12 @@ class Task(ABC):
             _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
+            start_time = time.time()
             self.run()
+            end_time = time.time()
+            _str = "Is complete:  {} ({:.3f}s)".format(self.record_id, end_time - start_time)
+            logging.info(_str)
+            print(colors.blue & colors.bold | _str)
 
     def _results(self) -> Dict[str, object]:
         # Check that all required datasets are fulfilled
@@ -237,8 +243,7 @@ class Task(ABC):
         """
         if self._scope == "":
             return self._cfg.config[self._name]
-        else:
-            return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]
+        return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]
 
     @property
     def wdir(self) -> str:

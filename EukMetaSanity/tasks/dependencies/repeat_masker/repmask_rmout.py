@@ -7,7 +7,7 @@ class RepeatMaskerOutIter(TaskList):
     name = "repmask.rmout"
     requires = []
     depends = ["repmask.process_repeats"]
-    
+
     class RepeatModelerOut(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -16,7 +16,7 @@ class RepeatMaskerOutIter(TaskList):
                 "mask-tbl": os.path.join(self.wdir, "mask.final.tbl"),
                 "mask-gff3": os.path.join(self.wdir, "mask.final.gff3"),
             }
-            
+
         @program_catch
         def run(self):
             if os.path.exists(str(self.input["root"]["fna"]) + ".masked"):
@@ -33,7 +33,7 @@ class RepeatMaskerOutIter(TaskList):
                 touch(str(self.output["mask-tbl"]))
                 touch(str(self.output["mask-gff3"]))
                 shutil.copy(str(self.input["root"]["fna"]), str(self.output["mask-fna"]))
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatMaskerOutIter.RepeatModelerOut, RepeatMaskerOutIter.name, *args, **kwargs)
 

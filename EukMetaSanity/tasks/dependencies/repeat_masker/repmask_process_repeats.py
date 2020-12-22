@@ -6,14 +6,14 @@ class ProcessRepeatsIter(TaskList):
     name = "repmask.process_repeats"
     requires = ["taxonomy"]
     depends = ["repmask.repeat_masker"]
-    
+
     class ProcessRepeats(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
                 "rmout": os.path.join(self.wdir, "mask.final.out")
             }
-            
+
         @program_catch
         def run(self):
             _basename = os.path.basename(str(self.input["root"]["fna"]))
@@ -42,7 +42,7 @@ class ProcessRepeatsIter(TaskList):
                 ]()
             else:
                 touch(str(self.output["rmout"]))
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(ProcessRepeatsIter.ProcessRepeats, ProcessRepeatsIter.name, *args, **kwargs)
 
