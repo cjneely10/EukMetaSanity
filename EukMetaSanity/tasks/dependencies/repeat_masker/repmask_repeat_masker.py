@@ -39,9 +39,9 @@ class RepeatMaskerIter(TaskList):
             for val in self.output["libraries"]:
                 search, _dir = val
                 # Create contained directory
-                self.pm.add_dirs(self.record_id, [_dir])
-                if os.path.exists(self.pm.get_dir(self.record_id, _dir)):
+                if os.path.exists(os.path.join(self.wdir, self.record_id, _dir)):
                     continue
+                self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
                 # Call RepeatMasker on modeled repeats in the new directory
                 script = self.create_script(
@@ -52,7 +52,7 @@ class RepeatMaskerIter(TaskList):
                         "-dir", self.pm.get_dir(self.record_id, _dir),
                         self.input["root"]["fna"],
                     ],
-                    "mask.sh"
+                    "%s.sh" % _dir
                 )
                 try:
                     self.parallel(script)

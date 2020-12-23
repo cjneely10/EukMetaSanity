@@ -12,7 +12,8 @@ class ProcessRepeatsIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "rmout": os.path.join(self.wdir, "mask.final.out"),
-                "tbl": os.path.join(self.wdir, "mask.final.tbl")
+                "rmtbl": os.path.join(self.wdir, "mask.final.tbl"),
+                "rmcat": os.path.join(self.wdir, "mask.final.cat"),
             }
 
         @program_catch
@@ -26,7 +27,7 @@ class ProcessRepeatsIter(TaskList):
             # Unzip results
             all([
                 self.local["gunzip"][_file]()
-                for _file in cat_files
+                for _file in cat_files if os.path.exists(_file)
             ])
             # Combine results into single file
             final_out = os.path.join(self.wdir, "mask.final.cat")
