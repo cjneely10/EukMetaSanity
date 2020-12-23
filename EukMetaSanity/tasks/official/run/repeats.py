@@ -11,13 +11,13 @@ class RepeatsIter(TaskList):
     """
     name = "repeats"
     requires = ["taxonomy"]
-    depends = ["repmask.rmout"]
+    depends = ["repmask.rmout", "repmask.process_repeats"]
     
     class Repeats(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "final": ["repmask.rmout.mask-tbl", "repmask.rmout.mask-fna",
+                "final": ["repmask.process_repeats.mask-tbl", "repmask.rmout.mask-fna",
                           "repmask.rmout.mask-gff3"]
             }
             

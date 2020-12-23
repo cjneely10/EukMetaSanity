@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, touch
+from EukMetaSanity import Task, TaskList, program_catch, touch, prefix
 
 
 class ProcessRepeatsIter(TaskList):
@@ -11,26 +11,30 @@ class ProcessRepeatsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "rmout": os.path.join(self.wdir, "mask.final.out")
+                "rmout": os.path.join(self.wdir, "mask.final.out"),
+                "tbl": os.path.join(self.wdir, "mask.final.tbl")
             }
 
         @program_catch
         def run(self):
             _basename = os.path.basename(str(self.input["root"]["fna"]))
+            cat_files = []
+            for rep_dir in self.input["repmask.repeat_masker"]["libraries"]:
+                _file = os.path.join(os.path.dirname(self.wdir), rep_dir[1], "".join((_basename, ".cat.gz")))
+                if os.path.exists(_file) and os.path.getsize(_file) > 0:
+                    cat_files.append(_file)
             # Unzip results
             all([
-                self.local["gunzip"][os.path.join(rep_dir, "".join((_basename, ".cat.gz")))]()
-                for rep_dir in self.input["repmask.repeat_masker"]["libraries"]
-                if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat.gz"))))
-                and os.path.getsize(os.path.join(rep_dir, "".join((_basename, ".cat.gz")))) > 0
+                self.local["gunzip"][_file]()
+                for _file in cat_files
             ])
             # Combine results into single file
             final_out = os.path.join(self.wdir, "mask.final.cat")
             touch(final_out)
             all([
-                (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
-                for rep_dir in self.input["repmask.repeat_masker"]["libraries"]
-                if os.path.exists(os.path.join(rep_dir, "".join((_basename, ".cat"))))
+                (self.local["cat"][os.path.splitext(_file)[0]] >> final_out)()
+                for _file in cat_files
+                if os.path.exists(os.path.splitext(_file)[0]) and os.path.getsize(os.path.splitext(_file)[0]) > 0
             ])
             if os.path.getsize(final_out) > 0:
                 # Run ProcessRepeats

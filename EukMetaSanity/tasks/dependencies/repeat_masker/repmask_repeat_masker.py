@@ -12,31 +12,36 @@ class RepeatMaskerIter(TaskList):
     class RepeatMasker(Task):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            _file = str(self.input["repmod.repeat_modeler"]["model"])
             data_files = []
             data_files += [_f for _f in self.data if _f != ""]
             # Perform on optimal taxonomic identification
             if self.input["taxonomy"]["taxonomy"].family is not None:
                 data_files += [self.input["taxonomy"]["taxonomy"].family.value]
+            _file = str(self.input["repmod.repeat_modeler"]["model"])
             if os.path.exists(_file) and os.path.getsize(_file) > 0:
                 data_files.append(_file)
-            self.output = {
-                "libraries": data_files
-            }
-            
-        @program_catch
-        def run(self):
-            _added_dirs = []
-            for _search in self.output["libraries"]:
-                # Parse for if as file or a RepeatMasker library
-                if "RM" in _search:
+            out = []
+            for _search in data_files:
+                if "classified" in _search:
                     search = ("-lib", str(Path(_search).resolve()))
                     _dir = "repeats_" + prefix(_search)
                 else:
                     search = ("-species", _search)
                     _dir = "repeats_" + _search.replace(" ", "_")
+                out.append((search, _dir))
+            self.output = {
+                "libraries": out
+            }
+            
+        @program_catch
+        def run(self):
+            _added_dirs = []
+            for val in self.output["libraries"]:
+                search, _dir = val
                 # Create contained directory
                 self.pm.add_dirs(self.record_id, [_dir])
+                if os.path.exists(self.pm.get_dir(self.record_id, _dir)):
+                    continue
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
                 # Call RepeatMasker on modeled repeats in the new directory
                 script = self.create_script(
