@@ -4,7 +4,7 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 class GeneMarkPetapIter(TaskList):
     name = "gmes.petap"
-    requires = ["taxonomy"]
+    requires = ["taxonomy", "repeats"]
     depends = ["gmes.prothint"]
 
     class GeneMarkPetap(Task):
@@ -22,7 +22,7 @@ class GeneMarkPetapIter(TaskList):
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
             script = self.create_script(
                 self.program[
-                    "--sequence", str(self.input["root"]["fna"]),
+                    "--sequence", str(self.input["repeats"]["mask-fna"]),
                     (*ev_vals),
                     "--cores", self.threads, (*self.added_flags),
                     ("--fungus"

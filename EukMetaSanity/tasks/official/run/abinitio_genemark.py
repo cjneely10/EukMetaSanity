@@ -3,7 +3,7 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 class AbInitioGeneMarkIter(TaskList):
     name = "abinitio.genemark"
-    requires = ["taxonomy"]
+    requires = ["taxonomy", "repeats"]
     depends = ["gmes.gffread"]
     
     class AbInitioGeneMark(Task):

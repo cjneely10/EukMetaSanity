@@ -17,6 +17,7 @@ class RepeatsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
+                "mask-fna": self.input["repmask.rmout"]["mask-fna"],
                 "final": [
                     "repmask.process_repeats.rmout",
                     "repmask.process_repeats.rmcat",

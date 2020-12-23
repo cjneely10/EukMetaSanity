@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from EukMetaSanity import Task, TaskList, program_catch, touch
 
 
@@ -24,12 +26,17 @@ class RepeatMaskerOutIter(TaskList):
                     str(self.output["mask-fna"])
                 )
                 # Output the repeats file as a gff3 file
-                (self.program[
-                     self.input["repmask.process_repeats"]["rmout"]
-                 ] > str(self.output["mask-gff3"]))()
+                self.single(
+                    (self.program[
+                         self.input["repmask.process_repeats"]["rmout"]
+                     ] > str(self.output["mask-gff3"]))
+                )
             else:
                 touch(str(self.output["mask-gff3"]))
-                touch(str(self.output["mask-fna"]))
+                shutil.copyfile(
+                    str(self.input["root"]["fna"]),
+                    str(self.output["mask-fna"])
+                )
 
     def __init__(self, *args, **kwargs):
         super().__init__(RepeatMaskerOutIter.RepeatModelerOut, RepeatMaskerOutIter.name, *args, **kwargs)

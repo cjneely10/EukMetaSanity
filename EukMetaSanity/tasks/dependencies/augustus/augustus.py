@@ -10,7 +10,7 @@ from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_i
 class AugustusIter(TaskList):
     name = "augustus"
     requires = []
-    depends = ["mmseqs.convertalis"]
+    depends = ["mmseqs.convertalis", "repmask.rmout"]
     
     class Augustus(Task):
         def __init__(self, *args, **kwargs):

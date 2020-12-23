@@ -39,13 +39,17 @@ class ProcessRepeatsIter(TaskList):
             ])
             if os.path.getsize(final_out) > 0:
                 # Run ProcessRepeats
-                self.program[
-                    # Input taxonomy from OrthoDB search
-                    "-species", self.input["taxonomy"]["taxonomy"].family.value,
-                    "-maskSource", str(self.input["root"]["fna"]),
-                    final_out,
-                ]()
+                self.single(
+                    self.program[
+                        # Input taxonomy from OrthoDB search
+                        "-species", self.input["taxonomy"]["taxonomy"].family.value,
+                        "-maskSource", str(self.input["root"]["fna"]),
+                        final_out,
+                    ]
+                )
             else:
+                touch(str(self.output["rmcat"]))
+                touch(str(self.output["rmtbl"]))
                 touch(str(self.output["rmout"]))
 
     def __init__(self, *args, **kwargs):

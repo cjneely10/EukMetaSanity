@@ -118,7 +118,7 @@ class Task(ABC):
             start_time = time.time()
             self.run()
             end_time = time.time()
-            _str = "Is complete:  {} ({:.3f}s)".format(self.record_id, end_time - start_time)
+            _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
 
@@ -379,6 +379,16 @@ class Task(ABC):
                     f = cmds[j] & BG
                     running.append(f)
             all([_f.wait() for _f in running])
+
+    @staticmethod
+    def _parse_time(_time: float) -> Tuple[float, str]:
+        if _time > 3600 * 24:
+            return _time / (3600 * 24), "d"
+        elif _time > 3600:
+            return _time / 3600, "h"
+        elif _time > 60:
+            return _time / 60, "m"
+        return _time, "s"
 
 
 class TaskList(ABC):
