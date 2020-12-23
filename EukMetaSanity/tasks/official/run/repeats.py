@@ -17,8 +17,13 @@ class RepeatsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "final": ["repmask.process_repeats.mask-tbl", "repmask.rmout.mask-fna",
-                          "repmask.rmout.mask-gff3"]
+                "final": [
+                    "repmask.process_repeats.rmout",
+                    "repmask.process_repeats.rmcat",
+                    "repmask.process_repeats.rmtbl",
+                    "repmask.rmout.mask-fna",
+                    "repmask.rmout.mask-gff3"
+                ]
             }
             
         @program_catch

@@ -39,7 +39,7 @@ class RepeatMaskerIter(TaskList):
             for val in self.output["libraries"]:
                 search, _dir = val
                 # Create contained directory
-                if os.path.exists(os.path.join(self.wdir, self.record_id, _dir)):
+                if os.path.exists(os.path.join(self.wdir, _dir)):
                     continue
                 self.pm.add_dirs(self.record_id, [_dir])
                 _added_dirs.append(self.pm.get_dir(self.record_id, _dir))
