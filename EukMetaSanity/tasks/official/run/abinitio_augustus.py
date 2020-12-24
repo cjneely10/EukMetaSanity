@@ -12,6 +12,7 @@ class AbInitioAugustusIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
+                "ab-gff3": self.input["augustus"]["ab-gff3"],
                 "final": ["augustus.ab-gff3"]
             }
             

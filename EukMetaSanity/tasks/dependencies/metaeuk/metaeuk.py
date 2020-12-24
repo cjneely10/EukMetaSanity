@@ -4,7 +4,7 @@ from EukMetaSanity import Task, TaskList, program_catch, prefix
 
 class MetaEukIter(TaskList):
     name = "metaeuk"
-    requires = ["repeats"]
+    requires = []
     depends = []
     
     class MetaEuk(Task):
@@ -29,7 +29,7 @@ class MetaEukIter(TaskList):
                 self.parallel(
                     self.program[
                         "easy-predict",
-                        str(self.input["repeats"]["mask-fna"]),
+                        str(self.dependency_input),
                         db,
                         _outfile,
                         os.path.join(self.wdir, "tmp"),
@@ -41,7 +41,7 @@ class MetaEukIter(TaskList):
                 # Convert to GFF3
                 self.single(
                     self.local["metaeuk-to-gff3.py"][
-                        str(self.input["root"]["fna"]), _outfile + ".fas", "-o",
+                        str(self.dependency_input), _outfile + ".fas", "-o",
                         os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
                     ]
                 )

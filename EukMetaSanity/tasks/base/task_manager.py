@@ -27,7 +27,6 @@ class TaskManager:
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
         self.task_list = self.dep_graph.sorted_tasks
-        print(*self.task_list, sep="\n")
         self.completed_tasks: Dict[Tuple[str, str], TaskList] = {}
         self.pm = pam
         self.cfg = cfg

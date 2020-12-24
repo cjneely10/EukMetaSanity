@@ -10,6 +10,7 @@ class AbInitioGeneMarkIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
+                "ab-gff3": self.input["gmes.gffread"]["ab-gff3"],
                 "final": ["gmes.gffread.ab-gff3"]
             }
             
