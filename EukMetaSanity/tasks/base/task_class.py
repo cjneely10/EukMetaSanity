@@ -59,13 +59,13 @@ class Task(ABC):
     def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, scope: str,
                  requested_input_data: Dict[str, Dict[str, object]],
-                 expected_input: Tuple[str, str]):
+                 expected_input: object):
         self._name = db_name
         # Store passed input flag:input_path dict
         self._input_data = input_data
         self._input_data.update(requested_input_data)
         # Store override input for dependency
-        self._dep_input = self._input_data[expected_input[0]][expected_input[1]]
+        self._dep_input = expected_input
         # Instantiate output dict variable
         self._output_paths: Dict[str, object] = {}
         # Store config manager
@@ -414,7 +414,7 @@ class TaskList(ABC):
                  input_paths: List[Dict[str, Dict[str, object]]],
                  pm: PathManager, record_ids: List[str], mode: int,
                  scope: str, requested_input_data: List[Dict[str, Dict[str, object]]],
-                 expected_input_list: List[Tuple[str, str]]):
+                 expected_input_list: List[object]):
         # Call data function for pertinent info
         self.name = name
         # Get workers for TaskList
