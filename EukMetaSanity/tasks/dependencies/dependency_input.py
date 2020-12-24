@@ -16,9 +16,17 @@ class DependencyInput:
 
     @property
     def name(self) -> str:
+        """ Get name of dependency
+
+        :return: str of name
+        """
         return self._name
 
     @property
     def input(self) -> Tuple[str, str]:
+        """ Get dependency input object string
+
+        :return: Parsed input object string as tuple
+        """
         split_data = self._input.split(".")
         return ".".join(split_data[:-1]), split_data[-1]
