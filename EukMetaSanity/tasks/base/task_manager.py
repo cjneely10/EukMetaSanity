@@ -27,6 +27,8 @@ class TaskManager:
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
         self.task_list = self.dep_graph.sorted_tasks
+        print(*self.task_list, sep="\n")
+        exit()
         self.completed_tasks: Dict[Tuple[str, str], TaskList] = {}
         self.pm = pam
         self.cfg = cfg
@@ -52,7 +54,6 @@ class TaskManager:
             expected_input = []
             for k in range(len(old_task.output()[1])):
                 inner_add = {}
-                inner_dep = []
                 for req_str in self.task_list[i][0].requires:
                     inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
                 for req_str in self.task_list[i][0].depends:
@@ -60,9 +61,8 @@ class TaskManager:
                         (req_str.name, task.scope) if (req_str.name, task.scope) in self.completed_tasks.keys()
                         else (req_str.name, task.name)
                     ].tasks[k].output
-                    inner_dep.append(req_str.input)
-                expected_input.append(inner_dep[0] if len(inner_dep) > 0 else ("root", "fna"))
                 to_add.append(inner_add)
+                expected_input.append(self.task_list[i][2])
             task = self.task_list[i][0](
                 self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1], to_add, expected_input)
             print(task.name, expected_input)
