@@ -47,12 +47,14 @@ class DependencyGraph:
             for requirement in task_list.requires:
                 self.graph.add_edge(Node(name=requirement, scope=""), task_node)
             for dependency in task_list.depends:
-                self._add_requirements_within_dependencies(self.graph, Node(name=dependency, scope=task_list.name),
+                self._add_requirements_within_dependencies(self.graph, Node(name=dependency.name, scope=task_list.name),
                                                            task_node, "requires", "")
 
     def _add_requirements_within_dependencies(self, graph: nx.DiGraph, node: Node, task_node: Node, attr: str,
                                               scope: str):
         for requirement in getattr(self.idx[node.name], attr):
+            if attr == "depends":
+                requirement = requirement.name
             new_node = Node(name=requirement, scope=scope)
             graph.add_edge(new_node, task_node)
             self._add_requirements_within_dependencies(graph, new_node, task_node, attr, scope)
@@ -62,8 +64,8 @@ class DependencyGraph:
         task_node = Node(name=task.name, scope="")
         graph.add_node(task_node)
         for dependency in task.depends:
-            graph.add_edge(Node(name=dependency, scope=task.name), task_node)
-            self._add_requirements_within_dependencies(graph, Node(name=dependency, scope=task.name), task_node,
+            graph.add_edge(Node(name=dependency.name, scope=task.name), task_node)
+            self._add_requirements_within_dependencies(graph, Node(name=dependency.name, scope=task.name), task_node,
                                                        "depends", task.name)
         sorted_nodes = list(nx.topological_sort(graph))
         sorted_nodes.remove(task_node)

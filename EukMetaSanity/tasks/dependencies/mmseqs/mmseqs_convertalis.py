@@ -1,11 +1,14 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
 
 
 class ConvertAlisIter(TaskList):
     name = "mmseqs.convertalis"
     requires = []
-    depends = ["mmseqs.search", "mmseqs.createdb"]
+    depends = [
+        DependencyInput("mmseqs.search"),
+        DependencyInput("mmseqs.createdb")
+    ]
     
     class ConvertAlis(Task):
         def __init__(self, *args, **kwargs):

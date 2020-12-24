@@ -1,13 +1,13 @@
 import os
 import glob
 import shutil
-from EukMetaSanity import Task, TaskList, program_catch, touch
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 
 class RepeatModelerIter(TaskList):
     name = "repmod.repeat_modeler"
     requires = []
-    depends = ["repmod.build_database"]
+    depends = [DependencyInput("repmod.build_database")]
 
     class RepeatModeler(Task):
         def __init__(self, *args, **kwargs):

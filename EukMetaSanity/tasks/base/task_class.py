@@ -10,8 +10,8 @@ from plumbum.commands.processes import ProcessExecutionError
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from plumbum.machines.local import LocalCommand, LocalMachine
+from EukMetaSanity.tasks.base.dependency_input import DependencyInput
 from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
-from EukMetaSanity.tasks.dependencies.dependency_input import DependencyInput
 from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 """

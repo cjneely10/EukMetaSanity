@@ -1,11 +1,11 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 
 class GeneMarkPetapIter(TaskList):
     name = "gmes.petap"
     requires = ["taxonomy", "repeats"]
-    depends = ["gmes.prothint"]
+    depends = [DependencyInput("gmes.prothint")]
 
     class GeneMarkPetap(Task):
         def __init__(self, *args, **kwargs):
@@ -22,7 +22,7 @@ class GeneMarkPetapIter(TaskList):
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
             script = self.create_script(
                 self.program[
-                    "--sequence", str(self.input["repeats"]["mask-fna"]),
+                    "--sequence", str(self.dependency_input),
                     (*ev_vals),
                     "--cores", self.threads, (*self.added_flags),
                     ("--fungus"

@@ -1,13 +1,13 @@
 import os
 import shutil
 
-from EukMetaSanity import Task, TaskList, program_catch, touch
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 
 class RepeatMaskerOutIter(TaskList):
     name = "repmask.rmout"
     requires = []
-    depends = ["repmask.process_repeats"]
+    depends = [DependencyInput("repmask.process_repeats")]
 
     class RepeatModelerOut(Task):
         def __init__(self, *args, **kwargs):
@@ -19,7 +19,7 @@ class RepeatMaskerOutIter(TaskList):
 
         @program_catch
         def run(self):
-            input_file = str(self.input["root"]["fna"]) + ".masked"
+            input_file = str(self.dependency_input) + ".masked"
             if os.path.exists(input_file):
                 os.replace(
                     input_file,
@@ -34,7 +34,7 @@ class RepeatMaskerOutIter(TaskList):
             else:
                 touch(str(self.output["mask-gff3"]))
                 shutil.copyfile(
-                    str(self.input["root"]["fna"]),
+                    str(self.dependency_input),
                     str(self.output["mask-fna"])
                 )
 

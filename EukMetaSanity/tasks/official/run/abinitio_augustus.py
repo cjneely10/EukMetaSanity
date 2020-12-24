@@ -1,10 +1,12 @@
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 
 class AbInitioAugustusIter(TaskList):
     name = "abinitio.augustus"
     requires = ["repeats"]
-    depends = ["augustus"]
+    depends = [
+        DependencyInput("augustus", "repeats.mask-fna")
+    ]
     
     class AbInitioAugustus(Task):
         def __init__(self, *args, **kwargs):

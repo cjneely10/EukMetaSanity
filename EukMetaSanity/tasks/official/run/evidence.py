@@ -1,6 +1,6 @@
 import os
 from typing import List
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 
 class EvidenceIter(TaskList):
@@ -12,7 +12,11 @@ class EvidenceIter(TaskList):
     """
     name = "evidence"
     requires = ["abinitio.augustus", "abinitio.genemark"]
-    depends = ["metaeuk", "augustus", "gmes.gffread"]
+    depends = [
+        DependencyInput("metaeuk"),
+        DependencyInput("augustus"),
+        DependencyInput("gmes.gffread")
+    ]
     
     class Evidence(Task):
         def __init__(self, *args, **kwargs):

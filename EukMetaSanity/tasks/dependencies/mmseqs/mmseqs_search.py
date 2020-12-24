@@ -1,12 +1,12 @@
 import os
 import glob
-from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
 
 
 class SearchIter(TaskList):
     name = "mmseqs.search"
     requires = []
-    depends = ["mmseqs.createdb"]
+    depends = [DependencyInput("mmseqs.createdb")]
     
     class Search(Task):
         def __init__(self, *args, **kwargs):

@@ -1,12 +1,12 @@
 import os
 from EukMetaSanity import ProcessExecutionError
-from EukMetaSanity import Task, TaskList, program_catch, touch
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 
 class ProtHintIter(TaskList):
     name = "gmes.prothint"
     requires = ["repeats"]
-    depends = ["mmseqs.filtertaxseqdb"]
+    depends = [DependencyInput("mmseqs.filtertaxseqdb")]
     
     class ProtHint(Task):
         def __init__(self, *args, **kwargs):

@@ -3,14 +3,16 @@ import shutil
 from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_ids
 
 
 class AugustusIter(TaskList):
     name = "augustus"
     requires = ["repeats"]
-    depends = ["mmseqs.convertalis"]
+    depends = [
+        DependencyInput("mmseqs.convertalis", "repeats.mask-fna")
+    ]
     
     class Augustus(Task):
         def __init__(self, *args, **kwargs):

@@ -1,11 +1,11 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, touch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 
 class ProcessRepeatsIter(TaskList):
     name = "repmask.process_repeats"
     requires = ["taxonomy"]
-    depends = ["repmask.repeat_masker"]
+    depends = [DependencyInput("repmask.repeat_masker")]
 
     class ProcessRepeats(Task):
         def __init__(self, *args, **kwargs):

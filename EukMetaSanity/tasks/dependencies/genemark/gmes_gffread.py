@@ -1,11 +1,11 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 
 class GffReadIter(TaskList):
     name = "gmes.gffread"
     requires = []
-    depends = ["gmes.petap"]
+    depends = [DependencyInput("gmes.petap")]
     
     class GffRead(Task):
         def __init__(self, *args, **kwargs):

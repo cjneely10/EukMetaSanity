@@ -42,16 +42,17 @@ class TaskManager:
         """
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
-            [{} for _ in range(len(self.input_files))])
+            [{} for _ in range(len(self.input_files))], [("root", "fna") for _ in range(len(self.input_files))])
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
         i = 1
         while i < len(self.task_list):
             old_task = task
             to_add = []
+            expected_input = []
             for k in range(len(old_task.output()[1])):
                 inner_add = {}
-                expected_input = []
+                inner_dep = []
                 for req_str in self.task_list[i][0].requires:
                     inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
                 for req_str in self.task_list[i][0].depends:
@@ -59,10 +60,12 @@ class TaskManager:
                         (req_str.name, task.scope) if (req_str.name, task.scope) in self.completed_tasks.keys()
                         else (req_str.name, task.name)
                     ].tasks[k].output
-                    expected_input.append(req_str.input)
+                    inner_dep.append(req_str.input)
+                expected_input.append(inner_dep[0] if len(inner_dep) > 0 else ("root", "fna"))
                 to_add.append(inner_add)
             task = self.task_list[i][0](
                 self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1], to_add, expected_input)
+            print(task.name, expected_input)
             task.run()
             self.completed_tasks[(task.name, task.scope)] = task
             i += 1

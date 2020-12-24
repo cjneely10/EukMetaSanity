@@ -1,4 +1,4 @@
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 
 class RepeatsIter(TaskList):
@@ -11,7 +11,10 @@ class RepeatsIter(TaskList):
     """
     name = "repeats"
     requires = ["taxonomy"]
-    depends = ["repmask.rmout", "repmask.process_repeats"]
+    depends = [
+        DependencyInput("repmask.rmout"),
+        DependencyInput("repmask.process_repeats")
+    ]
     
     class Repeats(Task):
         def __init__(self, *args, **kwargs):

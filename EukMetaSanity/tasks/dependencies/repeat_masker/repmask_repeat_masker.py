@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
 from EukMetaSanity import ProcessExecutionError
-from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
 
 
 class RepeatMaskerIter(TaskList):
     name = "repmask.repeat_masker"
     requires = ["taxonomy"]
-    depends = ["repmod.repeat_modeler"]
+    depends = [DependencyInput("repmod.repeat_modeler")]
     
     class RepeatMasker(Task):
         def __init__(self, *args, **kwargs):

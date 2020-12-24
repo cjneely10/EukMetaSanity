@@ -1,5 +1,5 @@
 from EukMetaSanity import TaxonomyAssignment
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 
 class TaxonomyIter(TaskList):
@@ -16,7 +16,7 @@ class TaxonomyIter(TaskList):
     """
     name = "taxonomy"
     requires = []
-    depends = ["mmseqs.taxonomy"]
+    depends = [DependencyInput("mmseqs.taxonomy")]
     
     class Taxonomy(Task):
         def __init__(self, *args, **kwargs):
