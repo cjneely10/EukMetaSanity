@@ -3,7 +3,7 @@ from EukMetaSanity import Task, TaskList, program_catch
 
 class AbInitioAugustusIter(TaskList):
     name = "abinitio.augustus"
-    requires = ["taxonomy"]
+    requires = ["repeats"]
     depends = ["augustus"]
     
     class AbInitioAugustus(Task):

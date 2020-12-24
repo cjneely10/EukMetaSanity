@@ -9,8 +9,8 @@ from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_i
 
 class AugustusIter(TaskList):
     name = "augustus"
-    requires = []
-    depends = ["mmseqs.convertalis", "repmask.rmout"]
+    requires = ["repeats"]
+    depends = ["mmseqs.convertalis"]
     
     class Augustus(Task):
         def __init__(self, *args, **kwargs):
@@ -24,17 +24,17 @@ class AugustusIter(TaskList):
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(
                 self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])), 1,
-                str(self.input["root"]["fna"])
+                str(self.input["repeats"]["mask-fna"])
             )
-            self._train_augustus(1, str(self.input["root"]["fna"]), out_gff)
+            self._train_augustus(1, str(self.input["repeats"]["mask-fna"]), out_gff)
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.config["rounds"])):
                 _last = False
                 if i == int(self.config["rounds"]) - 1:
                     _last = True
-                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.input["root"]["fna"]), _last)
+                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.input["repeats"]["mask-fna"]), _last)
                 if i != int(self.config["rounds"]) - 1:
-                    self._train_augustus(i + 2, str(self.input["root"]["fna"]), out_gff)
+                    self._train_augustus(i + 2, str(self.input["repeats"]["mask-fna"]), out_gff)
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
@@ -42,7 +42,7 @@ class AugustusIter(TaskList):
 
         def _augustus(self, species: str, _round: int, _file: str, _last: bool = False):
             out_gff = os.path.join(
-                self.wdir, AugustusIter.Augustus._out_path(str(self.input["root"]["fna"]), ".%i.gb" % _round)
+                self.wdir, AugustusIter.Augustus._out_path(str(self.input["repeats"]["mask-fna"]), ".%i.gb" % _round)
             )
             # Chunk file predictions
             record_p = SeqIO.parse(_file, "fasta")

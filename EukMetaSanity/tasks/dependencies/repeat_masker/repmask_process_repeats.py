@@ -21,7 +21,7 @@ class ProcessRepeatsIter(TaskList):
             _basename = os.path.basename(str(self.input["root"]["fna"]))
             cat_files = []
             for rep_dir in self.input["repmask.repeat_masker"]["libraries"]:
-                _file = os.path.join(os.path.dirname(self.wdir), rep_dir[1], "".join((_basename, ".cat.gz")))
+                _file = os.path.join(rep_dir[1], "".join((_basename, ".cat.gz")))
                 if os.path.exists(_file) and os.path.getsize(_file) > 0:
                     cat_files.append(_file)
             # Unzip results
@@ -29,6 +29,11 @@ class ProcessRepeatsIter(TaskList):
                 self.local["gunzip"][_file]()
                 for _file in cat_files if os.path.exists(_file)
             ])
+            cat_files = []
+            for rep_dir in self.input["repmask.repeat_masker"]["libraries"]:
+                _file = os.path.join(rep_dir[1], "".join((_basename, ".cat")))
+                if os.path.exists(_file) and os.path.getsize(_file) > 0:
+                    cat_files.append(_file)
             # Combine results into single file
             final_out = os.path.join(self.wdir, "mask.final.cat")
             touch(final_out)
