@@ -1,0 +1,24 @@
+from typing import Tuple
+
+
+class DependencyInput:
+    """ Class handles parsing input for dependency requirements
+
+    """
+    def __init__(self, name: str, primary_input: str = "root.fna"):
+        """ Create object
+
+        :param name: Name of dependency, example mmseqs.createdb
+        :param primary_input: Input to use, default is root.fna
+        """
+        self._name = name
+        self._input = primary_input
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def input(self) -> Tuple[str, str]:
+        split_data = self._input.split(".")
+        return ".".join(split_data[:-1]), split_data[-1]

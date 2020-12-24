@@ -11,6 +11,7 @@ from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from plumbum.machines.local import LocalCommand, LocalMachine
 from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
+from EukMetaSanity.tasks.dependencies.dependency_input import DependencyInput
 from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 """
@@ -57,11 +58,14 @@ class OutputResultsFileError(FileNotFoundError):
 class Task(ABC):
     def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, scope: str,
-                 requested_input_data: Dict[str, Dict[str, object]]):
+                 requested_input_data: Dict[str, Dict[str, object]],
+                 expected_input: Tuple[str, str]):
         self._name = db_name
         # Store passed input flag:input_path dict
         self._input_data = input_data
         self._input_data.update(requested_input_data)
+        # Store override input for dependency
+        self._dep_input = self._input_data[expected_input[0]][expected_input[1]]
         # Instantiate output dict variable
         self._output_paths: Dict[str, object] = {}
         # Store config manager
@@ -194,6 +198,10 @@ class Task(ABC):
     @output.setter
     def output(self, v: Dict[str, object]):
         self._output_paths = v
+
+    @property
+    def dependency_input(self) -> object:
+        return self._dep_input
 
     @property
     def input(self) -> Dict[str, Dict[str, Union[Iterable, object]]]:
@@ -399,13 +407,14 @@ class TaskList(ABC):
 
     @property
     @abstractmethod
-    def depends(cls) -> List[str]:
+    def depends(cls) -> List[DependencyInput]:
         pass
 
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
                  input_paths: List[Dict[str, Dict[str, object]]],
                  pm: PathManager, record_ids: List[str], mode: int,
-                 scope: str, requested_input_data: List[Dict[str, Dict[str, object]]]):
+                 scope: str, requested_input_data: List[Dict[str, Dict[str, object]]],
+                 expected_input_list: List[Tuple[str, str]]):
         # Call data function for pertinent info
         self.name = name
         # Get workers for TaskList
@@ -433,9 +442,10 @@ class TaskList(ABC):
                 name,
                 mode,
                 scope,
-                req_data
+                req_data,
+                exp_input
             )
-            for input_path, record_id, req_data in zip(input_paths, record_ids, requested_input_data)
+            for input_path, record_id, req_data, exp_input in zip(input_paths, record_ids, requested_input_data, expected_input_list)
         ]
         # Store ConfigManager object
         self._cfg = cfg

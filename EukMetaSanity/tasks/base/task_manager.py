@@ -51,16 +51,18 @@ class TaskManager:
             to_add = []
             for k in range(len(old_task.output()[1])):
                 inner_add = {}
+                expected_input = []
                 for req_str in self.task_list[i][0].requires:
                     inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
                 for req_str in self.task_list[i][0].depends:
-                    inner_add[req_str] = self.completed_tasks[
-                        (req_str, task.scope) if (req_str, task.scope) in self.completed_tasks.keys()
-                        else (req_str, task.name)
+                    inner_add[req_str.name] = self.completed_tasks[
+                        (req_str.name, task.scope) if (req_str.name, task.scope) in self.completed_tasks.keys()
+                        else (req_str.name, task.name)
                     ].tasks[k].output
+                    expected_input.append(req_str.input)
                 to_add.append(inner_add)
             task = self.task_list[i][0](
-                self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1], to_add)
+                self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1], to_add, expected_input)
             task.run()
             self.completed_tasks[(task.name, task.scope)] = task
             i += 1
