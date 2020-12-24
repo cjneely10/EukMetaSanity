@@ -4,7 +4,7 @@ from EukMetaSanity import Task, TaskList, program_catch, prefix
 
 class FilterTaxSeqDBIter(TaskList):
     name = "mmseqs.filtertaxseqdb"
-    requires = ["taxonomy"]
+    requires = ["taxonomy", "repeats"]
     depends = []
     
     class FilterTaxSeqDB(Task):

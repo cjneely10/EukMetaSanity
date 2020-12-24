@@ -4,7 +4,7 @@ from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
 
 class GeneMarkPetapIter(TaskList):
     name = "gmes.petap"
-    requires = ["taxonomy", "repeats"]
+    requires = ["taxonomy"]
     depends = [DependencyInput("gmes.prothint")]
 
     class GeneMarkPetap(Task):

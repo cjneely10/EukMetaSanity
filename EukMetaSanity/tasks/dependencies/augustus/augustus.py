@@ -11,7 +11,7 @@ class AugustusIter(TaskList):
     name = "augustus"
     requires = []
     depends = [
-        DependencyInput("mmseqs.convertalis", "repeats.mask-fna")
+        DependencyInput("mmseqs.convertalis")
     ]
     
     class Augustus(Task):
