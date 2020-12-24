@@ -5,7 +5,7 @@ class AbInitioAugustusIter(TaskList):
     name = "abinitio.augustus"
     requires = ["repeats"]
     depends = [
-        DependencyInput("augustus", "repeats.mask-fna")
+        DependencyInput("augustus", "repeats.fna")
     ]
     
     class AbInitioAugustus(Task):

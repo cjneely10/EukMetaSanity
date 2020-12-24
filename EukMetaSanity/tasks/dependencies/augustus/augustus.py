@@ -26,17 +26,17 @@ class AugustusIter(TaskList):
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(
                 self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])), 1,
-                str(self.dependency_input)
+                str(self.dependency_input["fna"])
             )
-            self._train_augustus(1, str(self.dependency_input), out_gff)
+            self._train_augustus(1, str(self.dependency_input["fna"]), out_gff)
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.config["rounds"])):
                 _last = False
                 if i == int(self.config["rounds"]) - 1:
                     _last = True
-                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.dependency_input), _last)
+                out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.dependency_input["fna"]), _last)
                 if i != int(self.config["rounds"]) - 1:
-                    self._train_augustus(i + 2, str(self.dependency_input), out_gff)
+                    self._train_augustus(i + 2, str(self.dependency_input["fna"]), out_gff)
             # Move any augustus-generated config stuff
             self._handle_config_output()
             # Rename final file
@@ -44,7 +44,7 @@ class AugustusIter(TaskList):
 
         def _augustus(self, species: str, _round: int, _file: str, _last: bool = False):
             out_gff = os.path.join(
-                self.wdir, AugustusIter.Augustus._out_path(str(self.dependency_input), ".%i.gb" % _round)
+                self.wdir, AugustusIter.Augustus._out_path(str(self.dependency_input["fna"]["fna"]), ".%i.gb" % _round)
             )
             # Chunk file predictions
             record_p = SeqIO.parse(_file, "fasta")

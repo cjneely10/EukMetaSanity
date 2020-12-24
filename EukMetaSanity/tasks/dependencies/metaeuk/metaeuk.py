@@ -29,7 +29,7 @@ class MetaEukIter(TaskList):
                 self.parallel(
                     self.program[
                         "easy-predict",
-                        str(self.dependency_input),
+                        str(self.dependency_input["fna"]),
                         db,
                         _outfile,
                         os.path.join(self.wdir, "tmp"),
@@ -41,7 +41,7 @@ class MetaEukIter(TaskList):
                 # Convert to GFF3
                 self.single(
                     self.local["metaeuk-to-gff3.py"][
-                        str(self.dependency_input), _outfile + ".fas", "-o",
+                        str(self.dependency_input["fna"]), _outfile + ".fas", "-o",
                         os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
                     ]
                 )

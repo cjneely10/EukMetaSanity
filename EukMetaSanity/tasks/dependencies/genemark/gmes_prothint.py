@@ -22,7 +22,7 @@ class ProtHintIter(TaskList):
                 # Run prothint
                 self.parallel(
                     self.program[
-                        str(self.dependency_input),
+                        str(self.dependency_input["fna"]),
                         self.input["mmseqs.filtertaxseqdb"]["fasta"],
                         "--workdir", self.wdir,
                         "--threads", self.threads,

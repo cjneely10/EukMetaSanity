@@ -22,7 +22,7 @@ class GeneMarkPetapIter(TaskList):
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
             script = self.create_script(
                 self.program[
-                    "--sequence", str(self.dependency_input),
+                    "--sequence", str(self.dependency_input["fna"]),
                     (*ev_vals),
                     "--cores", self.threads, (*self.added_flags),
                     ("--fungus"

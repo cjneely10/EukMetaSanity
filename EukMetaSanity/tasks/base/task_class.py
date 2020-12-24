@@ -59,7 +59,7 @@ class Task(ABC):
     def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, scope: str,
                  requested_input_data: Dict[str, Dict[str, object]],
-                 expected_input: object):
+                 expected_input: Dict[str, object]):
         self._name = db_name
         # Store passed input flag:input_path dict
         self._input_data = input_data
@@ -200,7 +200,7 @@ class Task(ABC):
         self._output_paths = v
 
     @property
-    def dependency_input(self) -> object:
+    def dependency_input(self) -> Dict[str, object]:
         return self._dep_input
 
     @property
@@ -414,7 +414,7 @@ class TaskList(ABC):
                  input_paths: List[Dict[str, Dict[str, object]]],
                  pm: PathManager, record_ids: List[str], mode: int,
                  scope: str, requested_input_data: List[Dict[str, Dict[str, object]]],
-                 expected_input_list: List[object]):
+                 expected_input_list: List[Dict[str, object]]):
         # Call data function for pertinent info
         self.name = name
         # Get workers for TaskList

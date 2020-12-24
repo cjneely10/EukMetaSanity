@@ -30,7 +30,7 @@ class CreateDBIter(TaskList):
             self.single(
                 self.program[
                     "createdb",
-                    self.dependency_input,
+                    self.dependency_input["fna"],
                     self.output["db"]
                 ]
             )
