@@ -42,7 +42,7 @@ class TaskManager:
         """
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
-            [{} for _ in range(len(self.input_files))], [("root", "fna") for _ in range(len(self.input_files))])
+            [{} for _ in range(len(self.input_files))], [self.input_files[k]["root"] for k in range(len(self.input_files))])
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
         i = 1
