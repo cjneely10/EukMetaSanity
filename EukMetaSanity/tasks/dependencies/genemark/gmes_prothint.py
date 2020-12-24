@@ -5,7 +5,7 @@ from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 class ProtHintIter(TaskList):
     name = "gmes.prothint"
-    requires = ["repeats"]
+    requires = []
     depends = [DependencyInput("mmseqs.filtertaxseqdb")]
     
     class ProtHint(Task):
@@ -22,13 +22,12 @@ class ProtHintIter(TaskList):
                 # Run prothint
                 self.parallel(
                     self.program[
-                        str(self.input["repeats"]["mask-fna"]),
+                        str(self.dependency_input),
                         self.input["mmseqs.filtertaxseqdb"]["fasta"],
                         "--workdir", self.wdir,
                         "--threads", self.threads,
                     ]
                 )
-                os.remove(str(self.input["mmseqs.filtertaxseqdb"]["fasta"]))
             except ProcessExecutionError:
                 touch(str(self.output["hints"]))
                 touch(str(self.output["evidence"]))
