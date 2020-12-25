@@ -28,11 +28,12 @@ class TaxonomyAssignment:
         return getattr(self, level, None)
 
     def __repr__(self):
-        attrs_as_str = [
-            str(v.value) if v is not None else "None" for v in (
-                self.kingdom, self.phylum, self._class, self.order, self.superfamily, self.family, self.genus,
-                self.species
-            )
-        ]
         return "TaxonomyAssignment(kingdom={}, phylum={}, class={}, order={}, superfamily={}, family={}, genus={}, " \
-               "species={})".format(*attrs_as_str)
+               "species={})".format(
+            *[
+                str(v.value) if v is not None else "None" for v in (
+                    self.kingdom, self.phylum, self._class, self.order, self.superfamily, self.family, self.genus,
+                    self.species
+                )
+            ]
+        )

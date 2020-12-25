@@ -113,7 +113,7 @@ class AugustusIter(TaskList):
 
             species_config_prefix = self.record_id + str(_round)
             # Write new species config file
-            self.local["new_species_pl"][
+            self.local["new_species.pl"][
                 "--species=%s" % species_config_prefix,
                 out_gb
             ]()
