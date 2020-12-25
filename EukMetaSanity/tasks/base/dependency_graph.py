@@ -38,14 +38,14 @@ class DependencyGraph:
             )
 
     def _build_dependency_graph(self, tasks: List[TaskList]):
-        root = Node(name="root", scope="", dependency_input=("root", "fna"))
+        root = Node(name="root", scope="", dependency_input="root")
         self.graph.add_node(root)
         # Add dependencies stored in TaskList object's .requires member
         for task_list in tasks:
-            task_node = Node(name=task_list.name, scope="", dependency_input=("root", "fna"))
+            task_node = Node(name=task_list.name, scope="", dependency_input="root")
             self.graph.add_edge(root, task_node)
             for requirement in task_list.requires:
-                self.graph.add_edge(Node(name=requirement, scope="", dependency_input=("root", "fna")), task_node)
+                self.graph.add_edge(Node(name=requirement, scope="", dependency_input="root"), task_node)
             for dependency in task_list.depends:
                 self._add_requirements_within_dependencies(self.graph, Node(name=dependency.name, scope=task_list.name,
                                                                             dependency_input=dependency.input),
@@ -61,9 +61,9 @@ class DependencyGraph:
             graph.add_edge(new_node, task_node)
             self._add_requirements_within_dependencies(graph, new_node, task_node, attr, scope)
 
-    def _get_dependencies_at_level(self, task: TaskList) -> List[Tuple[Type[TaskList], str, Tuple[str, str]]]:
+    def _get_dependencies_at_level(self, task: TaskList) -> List[Tuple[Type[TaskList], str, str]]:
         graph = nx.DiGraph()
-        task_node = Node(name=task.name, scope="", dependency_input=("root", "fna"))
+        task_node = Node(name=task.name, scope="", dependency_input="root")
         graph.add_node(task_node)
         for dependency in task.depends:
             graph.add_edge(Node(name=dependency.name, scope=task.name, dependency_input=dependency.input), task_node)
@@ -75,15 +75,15 @@ class DependencyGraph:
         return [(self.idx[node.name], str(node.scope), node.dependency_input) for node in sorted_nodes]
 
     @property
-    def sorted_tasks(self) -> List[Tuple[Type[TaskList], str, Tuple[str, str]]]:
+    def sorted_tasks(self) -> List[Tuple[Type[TaskList], str, str]]:
         """ Run topological sort of all tasks in pipeline and output in order that allows
         for completion of dependencies in required order
 
         :return: List of TaskList child classes to run
         """
         sorted_nodes: List[Node] = list(nx.topological_sort(self.graph))
-        sorted_nodes.remove(Node(name="root", scope="", dependency_input=("root", "fna")))
-        final_sort: List[Tuple[Type[TaskList], str, Tuple[str, str]]] = []
+        sorted_nodes.remove(Node(name="root", scope="", dependency_input="root"))
+        final_sort: List[Tuple[Type[TaskList], str, str]] = []
         for node in sorted_nodes:
             final_sort += self._get_dependencies_at_level(self.idx[node.name])
             final_sort.append((self.idx[node.name], node.scope, node.dependency_input))

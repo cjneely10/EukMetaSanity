@@ -19,7 +19,7 @@ class RepeatMaskerOutIter(TaskList):
 
         @program_catch
         def run(self):
-            input_file = str(self.dependency_input["fna"]) + ".masked"
+            input_file = str(self.dependency_input) + ".masked"
             if os.path.exists(input_file):
                 os.replace(
                     input_file,
@@ -34,7 +34,7 @@ class RepeatMaskerOutIter(TaskList):
             else:
                 touch(str(self.output["mask-gff3"]))
                 shutil.copyfile(
-                    str(self.dependency_input["fna"]),
+                    str(self.dependency_input),
                     str(self.output["mask-fna"])
                 )
 

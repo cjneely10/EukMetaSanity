@@ -5,7 +5,7 @@ class DependencyInput:
     """ Class handles parsing input for dependency requirements
 
     """
-    def __init__(self, name: str, primary_input: str = "root.fna"):
+    def __init__(self, name: str, primary_input: str = "root"):
         """ Create object
 
         :param name: Name of dependency, example mmseqs.createdb
@@ -23,10 +23,9 @@ class DependencyInput:
         return self._name
 
     @property
-    def input(self) -> Tuple[str, str]:
+    def input(self) -> str:
         """ Get dependency input object string
 
         :return: Parsed input object string as tuple
         """
-        split_data = self._input.split(".")
-        return ".".join(split_data[:-1]), split_data[-1]
+        return self._input

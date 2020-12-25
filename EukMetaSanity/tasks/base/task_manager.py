@@ -60,8 +60,10 @@ class TaskManager:
                         else (req_str.name, task.name)
                     ].tasks[k].output
                 to_add.append(inner_add)
-                if self.task_list[i][2] != ("root", "fna"):
-                    expected_input.append(self.completed_tasks[(self.task_list[i][2][0], "")].tasks[k].output)
+                if self.task_list[i][2] != "root":
+                    expected_input.append(
+                        self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
+                    )
                 else:
                     expected_input.append(self.input_files[k]["root"])
             task = self.task_list[i][0](

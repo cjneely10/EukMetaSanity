@@ -13,7 +13,7 @@ class EvidenceIter(TaskList):
     name = "evidence"
     requires = ["abinitio.augustus", "abinitio.genemark"]
     depends = [
-        DependencyInput("metaeuk", "abinitio.genemark.fna"),
+        DependencyInput("metaeuk", "abinitio.genemark"),
     ]
     
     class Evidence(Task):
