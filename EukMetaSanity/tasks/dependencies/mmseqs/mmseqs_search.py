@@ -1,5 +1,4 @@
 import os
-import glob
 from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
 
 
@@ -26,7 +25,7 @@ class SearchIter(TaskList):
         @program_catch
         def run(self):
             for outfile, db_path in zip(self.output["dbs"], self.data):
-                if len(glob.glob(outfile)) == 0:
+                if not os.path.exists(outfile + ".index"):
                     # Run search
                     self.parallel(
                         self.program[

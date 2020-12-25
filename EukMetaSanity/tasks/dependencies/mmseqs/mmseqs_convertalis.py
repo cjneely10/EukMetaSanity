@@ -23,18 +23,19 @@ class ConvertAlisIter(TaskList):
         def run(self):
             # Output results
             for data, db, outfile in zip(self.data, self.input["mmseqs.search"]["dbs"], self.output["results_files"]):
-                self.parallel(
-                    self.program[
-                        "convertalis",
-                        str(self.input["mmseqs.createdb"]["db"]),  # Input FASTA sequence db
-                        data,  # Input augustus-db
-                        db,  # Input tax db
-                        outfile,  # Output results file
-                        "--threads", self.threads,
-                        (*self.added_flags)
-                    ],
-                    "2:00:00"
-                )
+                if not os.path.exists(outfile):
+                    self.parallel(
+                        self.program[
+                            "convertalis",
+                            str(self.input["mmseqs.createdb"]["db"]),  # Input FASTA sequence db
+                            data,  # Input augustus-db
+                            db,  # Input tax db
+                            outfile,  # Output results file
+                            "--threads", self.threads,
+                            (*self.added_flags)
+                        ],
+                        "2:00:00"
+                    )
             
     def __init__(self, *args, **kwargs):
         super().__init__(ConvertAlisIter.ConvertAlis, ConvertAlisIter.name, *args, **kwargs)

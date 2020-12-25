@@ -3,7 +3,7 @@ import shutil
 from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, touch
 from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_ids
 
 
@@ -44,7 +44,7 @@ class AugustusIter(TaskList):
 
         def _augustus(self, species: str, _round: int, _file: str, _last: bool = False):
             out_gff = os.path.join(
-                self.wdir, AugustusIter.Augustus._out_path(str(self.dependency_input["fna"]["fna"]), ".%i.gb" % _round)
+                self.wdir, AugustusIter.Augustus._out_path(str(self.dependency_input["fna"]), ".%i.gb" % _round)
             )
             # Chunk file predictions
             record_p = SeqIO.parse(_file, "fasta")
@@ -69,11 +69,11 @@ class AugustusIter(TaskList):
                     ]
                 )
             self.batch(progs)
+            touch(out_gff + ".tmp")
+            for out_g in out_gffs:
+                (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
             # Combine files
-            (
-                self.local["cat"][out_gffs] |
-                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments"]
-            )()
+            self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"]()
             # Make ids unique
             self._make_unique(out_gff)
             # Remove intermediary files
