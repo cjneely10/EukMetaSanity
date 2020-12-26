@@ -71,7 +71,7 @@ abinitio.augustus:
       data:
         /path/to/ortho_db
       program: mmseqs
-      subname: search
+      subname: search  # Can use `linsearch` if linear index is present for database
       FLAGS:
         --split-memory-limit 12G
         --cov-mode 0

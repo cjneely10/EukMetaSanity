@@ -90,6 +90,7 @@ class Task(ABC):
         self._record_id = record_id
         # Check if task is set to be skipped in config file
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True
+        self._set_is_complete()
         super().__init__()
 
     @abstractmethod
@@ -125,6 +126,13 @@ class Task(ABC):
             _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
+
+    def _set_is_complete(self):
+        self.is_complete = True
+        for _path in self._output_paths.values():
+            if isinstance(_path, str) and not os.path.exists(_path):
+                self.is_complete = False
+        return self._output_paths
 
     def _results(self) -> Dict[str, object]:
         # Check that all required datasets are fulfilled
@@ -465,10 +473,17 @@ class TaskList(ABC):
     def run(self):
         # Single
         logging.info(self._statement)
+        are_complete = True
         for _task in self._tasks:
             if _task.is_skip is False:
                 print(colors.green & colors.bold | self._statement)
                 break
+        for _task in self._tasks:
+            if not _task.is_complete:
+                are_complete = False
+                break
+        if are_complete:
+            return
         if self._mode == 0:
             for task in self._tasks:
                 task._run()
