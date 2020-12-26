@@ -217,6 +217,10 @@ class Task(ABC):
 
     @property
     def data(self) -> List[str]:
+        """ List of data files passed to this task's config section
+
+        :return: List of paths of data in task's config section
+        """
         return self.config[ConfigManager.DATA].split(" ")
 
     @property
@@ -239,6 +243,11 @@ class Task(ABC):
 
     @property
     def dependency_input(self) -> Dict[str, object]:
+        """ Input to a dependency. Used to run a dependency using the output of a separate abstract
+        Task output
+
+        :return: Dict of str:object of the data that a dependency is expecting as input
+        """
         return self._dep_input
 
     @property
@@ -282,13 +291,14 @@ class Task(ABC):
 
     @property
     def config(self) -> Dict[str, Union[str, Dict[str, Union[str, dict]]]]:
-        """ ConfigManager is a wrapper class for Python's configparser package.
-        self.config contains references to the portion of the config file that contains this task's contents
+        """ Task's corresponding config file section as a dictionary
 
         :return: Dictionary containing contents of config file that was used to launch this task
         """
+        # Task is an outer-level abstract task
         if self._scope == "":
             return self._cfg.config[self._name]
+        # Task is an inner-level dependency of an abstract task
         return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]
 
     @property
@@ -331,8 +341,10 @@ class Task(ABC):
         # Write command to slurm script file and run
         if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is True:
             sel = self._scope if self._scope is not None else self._name
+            # Confirm valid SLURM section
             if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
                 raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
+            # Generate command to launch SLURM job
             cmd = SLURMCaller(
                 self.cfg.get_slurm_userid(),
                 self.wdir,
@@ -343,11 +355,12 @@ class Task(ABC):
                 self.local,
                 self.cfg.get_slurm_flagged_arguments(),
             )
+        # Run command directly
         if self._mode == 1:
-            # Run command directly
             logging.info(str(cmd))
             print("  " + str(cmd))
             out = cmd()
+            # Store log info in any was generated
             if out is not None:
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
                     w.write(str(out))
@@ -416,18 +429,27 @@ class Task(ABC):
         """
         for i in range(0, len(cmds), int(self.threads)):
             running = []
+            # Run up to `threads` tasks at a time
             for j in range(i, i + int(self.threads)):
                 if j >= len(cmds):
                     break
+                # Logging info
                 print("  " + str(cmds[j]))
                 logging.info(str(cmds[j]))
                 if self._mode == 1:
                     f = cmds[j] & BG
                     running.append(f)
+            # Batch run all jobs and wait to finish
             all([_f.wait() for _f in running])
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:
+        """ Parse time to complete a task into
+        day, hour, minute, or second representation based on scale
+
+        :param _time: Time to complete a given task
+        :return: time and string representing unit
+        """
         if _time > 3600 * 24:
             return _time / (3600 * 24), "d"
         elif _time > 3600:
@@ -441,11 +463,21 @@ class TaskList(ABC):
     @property
     @abstractmethod
     def requires(cls) -> List[str]:
+        """ Requirements to run a given TaskList
+
+        :return: List of task class names that must run before this task
+        """
         pass
 
     @property
     @abstractmethod
     def depends(cls) -> List[DependencyInput]:
+        """ Dependencies used to run task
+
+        :return: List of dependencies and the task output to use as its input.
+        This defaults to `root` info passed from the pipeline's initialization unless
+        explicitly specified in DependencyInput constructor
+        """
         pass
 
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
