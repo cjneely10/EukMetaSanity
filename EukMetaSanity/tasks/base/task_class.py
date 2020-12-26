@@ -1,24 +1,23 @@
-import os
-import time
-import logging
-from plumbum import colors
-from plumbum import local, BG
-from abc import ABC, abstractmethod
-from dask.distributed import Client, wait
-from EukMetaSanity.tasks.utils.helpers import touch
-from plumbum.commands.processes import ProcessExecutionError
-from EukMetaSanity.tasks.base.path_manager import PathManager
-from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
-from plumbum.machines.local import LocalCommand, LocalMachine
-from EukMetaSanity.tasks.base.dependency_input import DependencyInput
-from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
-from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
-
 """
 Task: Class that manages and handles working directory to complete an operation
 TaskList: Collection of Task objects that calls run function on each
 
 """
+
+import os
+import time
+import logging
+from abc import ABC, abstractmethod
+from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
+from dask.distributed import Client, wait
+from plumbum import colors, local, BG
+from plumbum.commands.processes import ProcessExecutionError
+from plumbum.machines.local import LocalCommand, LocalMachine
+from EukMetaSanity.tasks.utils.helpers import touch
+from EukMetaSanity.tasks.base.path_manager import PathManager
+from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
+from EukMetaSanity.tasks.base.dependency_input import DependencyInput
+from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 
 def program_catch(f: Callable):
@@ -52,10 +51,16 @@ def program_catch(f: Callable):
 
 
 class OutputResultsFileError(FileNotFoundError):
+    """ Wrapper class for FileNotFoundError
+
+    """
     pass
 
 
 class Task(ABC):
+    """ Task is an abstract base class that API writers will overwrite to handle Task functionality
+
+    """
     def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, scope: str,
                  requested_input_data: Dict[str, Dict[str, object]],
@@ -102,7 +107,7 @@ class Task(ABC):
         """
         pass
 
-    def _run(self) -> None:
+    def run_helper(self) -> None:
         """ Helper method to determine if Task needs is scheduled to run (e.g. not is_skip)
         and is not already completed
 
@@ -148,7 +153,7 @@ class Task(ABC):
                 return False
         return True
 
-    def _results(self) -> Dict[str, object]:
+    def results(self) -> Dict[str, object]:
         """ Check that all required datasets are fulfilled
         Alert if data output is provided, but does not exist
 
@@ -180,7 +185,9 @@ class Task(ABC):
         :return: LocalCommand to `program` path
         """
         if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
-            return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]]
+            return self.local[
+                self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]
+            ]
         return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]]
 
     @property
@@ -460,6 +467,11 @@ class Task(ABC):
 
 
 class TaskList(ABC):
+    """ TaskList is an abstract base class that API writers will define. The class handles distributing Task and
+    ensuring that Tasks are only run as needed, and that Dask is not called to unnecessarily distribute
+    Tasks
+
+    """
     @property
     @abstractmethod
     def requires(cls) -> List[str]:
@@ -514,7 +526,9 @@ class TaskList(ABC):
                 req_data,
                 exp_input
             )
-            for input_path, record_id, req_data, exp_input in zip(input_paths, record_ids, requested_input_data, expected_input_list)
+            for input_path, record_id, req_data, exp_input in zip(
+                input_paths, record_ids, requested_input_data, expected_input_list
+            )
         ]
         # Store ConfigManager object
         self._cfg = cfg
@@ -560,7 +574,7 @@ class TaskList(ABC):
         client = Client(n_workers=self._workers, threads_per_worker=1)
         # Run each future
         for _task in self._tasks:
-            futures.append(client.submit(_task._run))
+            futures.append(client.submit(_task.run_helper()))
         # Wait for all futures to complete and end client
         wait(futures)
         client.close()
@@ -581,7 +595,7 @@ class TaskList(ABC):
         :return:
         """
         return (
-            [task._results() for task in self._tasks],
+            [task.results() for task in self._tasks],
             [task.record_id for task in self._tasks],
         )
 
