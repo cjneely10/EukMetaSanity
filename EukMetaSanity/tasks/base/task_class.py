@@ -60,8 +60,9 @@ class Task(ABC):
                  record_id: str, db_name: str, mode: int, scope: str,
                  requested_input_data: Dict[str, Dict[str, object]],
                  expected_input: Dict[str, object]):
+        # Set name of task
         self._name = db_name
-        # Store passed input flag:input_path dict
+        # Store input data and update passed/requested data
         self._input_data = input_data
         self._input_data.update(requested_input_data)
         # Store override input for dependency
@@ -70,7 +71,7 @@ class Task(ABC):
         self._output_paths: Dict[str, object] = {}
         # Store config manager
         self._cfg = cfg
-        # Store threads and workers
+        # Store threads and scope
         self._threads_pw = "1"
         self._scope = scope
         if db_name in self.cfg.config.keys():
@@ -81,7 +82,7 @@ class Task(ABC):
         self._pm = pm
         # Developer(0) or User(1) mode
         self._mode = mode
-        # Add name of db
+        # Create working directory based on name of task and scope
         db_name = scope + "_" + db_name if scope != "" else db_name
         pm.add_dirs(record_id, [db_name])
         # Store working directory
@@ -90,19 +91,29 @@ class Task(ABC):
         self._record_id = record_id
         # Check if task is set to be skipped in config file
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True
-        self._set_is_complete()
+        # Store whether this task has been completed
+        self.is_complete = self._set_is_complete()
         super().__init__()
 
     @abstractmethod
     def run(self):
+        """ Abstract method to run for each task.
+
+        """
         pass
 
     def _run(self) -> None:
-        # Check if task has completed based on provided output data
+        """ Helper method to determine if Task needs is scheduled to run (e.g. not is_skip)
+        and is not already completed
+
+        """
+        # If task is set to skip,return
         if self.is_skip:
             return
+        # Check if task has been completed
         completed = None
         for _path in self._output_paths.values():
+            # Currently only check all strings
             if isinstance(_path, str):
                 if not os.path.exists(_path):
                     # Only call function if missing path
@@ -127,16 +138,22 @@ class Task(ABC):
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
 
-    def _set_is_complete(self):
-        self.is_complete = True
+    def _set_is_complete(self) -> bool:
+        """ Check all required output data to see if any part of task need to be completed
+
+        :return: Boolean representing if task has all required output
+        """
         for _path in self._output_paths.values():
             if isinstance(_path, str) and not os.path.exists(_path):
-                self.is_complete = False
-        return self._output_paths
+                return False
+        return True
 
     def _results(self) -> Dict[str, object]:
-        # Check that all required datasets are fulfilled
-        # Alert if data output is provided, but does not exist
+        """ Check that all required datasets are fulfilled
+        Alert if data output is provided, but does not exist
+
+        :return: Results dictionary that was set in Task __init__
+        """
         for _path in self._output_paths.values():
             if isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
@@ -149,10 +166,19 @@ class Task(ABC):
 
     @property
     def threads(self) -> str:
+        """ Number of threads when running task (as set in config file)
+
+        :return: Str of number of tasks
+        """
         return self._threads_pw
 
     @property
     def program(self) -> LocalCommand:
+        """ Run program assigned to task. This will be attached to a given config file section
+        based on its outer scope
+
+        :return: LocalCommand to `program` path
+        """
         if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
             return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]]
         return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]]
@@ -205,6 +231,10 @@ class Task(ABC):
 
     @output.setter
     def output(self, v: Dict[str, object]):
+        """ Dict of data that is output by this task
+
+        :param v: Dict of str: object that will output when the task successfully completes
+        """
         self._output_paths = v
 
     @property
