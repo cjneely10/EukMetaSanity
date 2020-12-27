@@ -12,9 +12,7 @@ class EvidenceIter(TaskList):
     """
     name = "evidence"
     requires = ["abinitio.augustus", "abinitio.genemark"]
-    depends = [
-        DependencyInput("metaeuk", "repeats"),
-    ]
+    depends = [DependencyInput("metaeuk", "repeats")]
     
     class Evidence(Task):
         @set_complete
@@ -48,7 +46,7 @@ class EvidenceIter(TaskList):
             )
             # Replace transcripts with gene identifier and write cds/aa sequences
             self.single(
-                self.program[
+                self.local["create-final-annotations.py"][
                     "-f", fasta_file, "-g", out_prefix + ".all.gff3"
                 ]
             )

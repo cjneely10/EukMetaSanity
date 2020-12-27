@@ -137,7 +137,5 @@ evidence:
         -c 0.3
         -e 100
         --max-overlap 0
-    merge:
-      program: create-final-annotations.py
 
 ...  # document end
