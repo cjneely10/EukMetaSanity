@@ -44,6 +44,7 @@ repeats:
       program: RepeatModeler
       skip: false
     repmask.repeat_masker:
+      level: family
       program: RepeatMasker
       data:
         "" # Comma-separated list of repeat models to incorporate
@@ -109,6 +110,7 @@ abinitio.genemark:
       program: prothint.py
     mmseqs.filtertaxseqdb:
       program: mmseqs
+      level: order
       data:
         /path/to/ortho_db
     gmes.gffread:
@@ -125,6 +127,7 @@ evidence:
   dependencies:
     mmseqs.filtertaxseqdb:
       program: mmseqs
+      level: order
       data:
         /path/to/ortho_db
     metaeuk:
