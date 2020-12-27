@@ -32,24 +32,25 @@ class FilterTaxSeqDBIter(TaskList):
             # TODO: Remove hard-coding of order-level search
             tax = self.input["taxonomy"]["taxonomy"].order.tax_id
             for db, subset_db_outpath, out_fasta in zip(self.data, self.output["dbs"], self.output["fastas"]):
-                self.parallel(
-                    self.program[
-                        "filtertaxseqdb",
-                        db,
-                        subset_db_outpath,
-                        "--taxon-list", tax,
-                        "--threads", self.threads,
-                    ],
-                    "1:00:00"
-                )
-                # Output as FASTA file
-                self.single(
-                    self.program[
-                        "convert2fasta",
-                        subset_db_outpath,
-                        out_fasta,
-                    ]
-                )
+                if not os.path.exists(out_fasta):
+                    self.parallel(
+                        self.program[
+                            "filtertaxseqdb",
+                            db,
+                            subset_db_outpath,
+                            "--taxon-list", tax,
+                            "--threads", self.threads,
+                        ],
+                        "1:00:00"
+                    )
+                    # Output as FASTA file
+                    self.single(
+                        self.program[
+                            "convert2fasta",
+                            subset_db_outpath,
+                            out_fasta,
+                        ]
+                    )
             
     def __init__(self, *args, **kwargs):
         super().__init__(FilterTaxSeqDBIter.FilterTaxSeqDB, FilterTaxSeqDBIter.name, *args, **kwargs)
