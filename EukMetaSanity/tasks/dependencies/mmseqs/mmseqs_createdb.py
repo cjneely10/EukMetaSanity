@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, set_complete
 
 
 class CreateDBIter(TaskList):
@@ -19,6 +19,7 @@ class CreateDBIter(TaskList):
     depends = []
 
     class MMSeqsCreateDB(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

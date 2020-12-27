@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import ProcessExecutionError
+from EukMetaSanity import ProcessExecutionError, set_complete
 from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 
@@ -9,6 +9,7 @@ class ProtHintIter(TaskList):
     depends = [DependencyInput("mmseqs.filtertaxseqdb")]
     
     class ProtHint(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

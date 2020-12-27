@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput, set_complete
 
 
 class SearchIter(TaskList):
@@ -8,6 +8,7 @@ class SearchIter(TaskList):
     depends = [DependencyInput("mmseqs.createdb")]
     
     class Search(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             outfiles = []

@@ -3,7 +3,7 @@ import shutil
 from Bio import SeqIO
 from pathlib import Path
 from collections import Counter
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, touch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, touch, set_complete
 from EukMetaSanity.tasks.dependencies.augustus.taxon_ids import augustus_taxon_ids
 
 
@@ -15,6 +15,7 @@ class AugustusIter(TaskList):
     ]
     
     class Augustus(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

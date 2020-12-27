@@ -5,10 +5,10 @@ from EukMetaSanity.utils.arg_parse import ArgParse
 
 
 boilerplate = """import os
-from EukMetaSanity import program_catch, prefix, touch
 from EukMetaSanity import Task, TaskList, DependencyInput
 from EukMetaSanity import ProcessExecutionError, CommandNotFound
 from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
+from EukMetaSanity import program_catch, prefix, touch, set_complete
 
 
 class {0}Iter(TaskList):
@@ -17,6 +17,7 @@ class {0}Iter(TaskList):
     depends = []
 
     class {0}(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {2}

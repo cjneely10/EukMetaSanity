@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from EukMetaSanity import ProcessExecutionError
+from EukMetaSanity import ProcessExecutionError, set_complete
 from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
 
 
@@ -10,6 +10,7 @@ class RepeatMaskerIter(TaskList):
     depends = [DependencyInput("repmod.repeat_modeler")]
     
     class RepeatMasker(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             data_files = []

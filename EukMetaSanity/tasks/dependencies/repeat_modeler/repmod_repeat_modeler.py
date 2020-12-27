@@ -1,7 +1,7 @@
 import os
 import glob
 import shutil
-from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput, set_complete
 
 
 class RepeatModelerIter(TaskList):
@@ -10,6 +10,7 @@ class RepeatModelerIter(TaskList):
     depends = [DependencyInput("repmod.build_database")]
 
     class RepeatModeler(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

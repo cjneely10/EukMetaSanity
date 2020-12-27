@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, prefix, set_complete
 
 
 class MetaEukIter(TaskList):
@@ -8,6 +8,7 @@ class MetaEukIter(TaskList):
     depends = []
     
     class MetaEuk(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
@@ -26,18 +27,19 @@ class MetaEukIter(TaskList):
                     db = db[2:]
                 db_prefix = prefix(db)
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
-                self.parallel(
-                    self.program[
-                        "easy-predict",
-                        str(self.dependency_input["fna"]),
-                        db,
-                        _outfile,
-                        os.path.join(self.wdir, "tmp"),
-                        "--threads", self.threads,
-                        (*self.added_flags),
-                        (*is_profile),
-                    ]
-                )
+                if not os.path.exists(_outfile + ".fas"):
+                    self.parallel(
+                        self.program[
+                            "easy-predict",
+                            str(self.dependency_input["fna"]),
+                            db,
+                            _outfile,
+                            os.path.join(self.wdir, "tmp"),
+                            "--threads", self.threads,
+                            (*self.added_flags),
+                            (*is_profile),
+                        ]
+                    )
                 # Convert to GFF3
                 self.single(
                     self.local["metaeuk-to-gff3.py"][

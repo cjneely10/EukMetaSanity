@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, set_complete
 
 
 class BuildDatabaseIter(TaskList):
@@ -8,6 +8,7 @@ class BuildDatabaseIter(TaskList):
     depends = []
     
     class BuildDatabase(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

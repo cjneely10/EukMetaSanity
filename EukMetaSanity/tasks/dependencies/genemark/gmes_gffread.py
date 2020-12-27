@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class GffReadIter(TaskList):
@@ -8,6 +8,7 @@ class GffReadIter(TaskList):
     depends = [DependencyInput("gmes.petap")]
     
     class GffRead(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

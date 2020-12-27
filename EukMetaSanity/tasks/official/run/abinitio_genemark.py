@@ -1,4 +1,4 @@
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class AbInitioGeneMarkIter(TaskList):
@@ -7,6 +7,7 @@ class AbInitioGeneMarkIter(TaskList):
     depends = [DependencyInput("gmes.gffread", "repeats")]
     
     class AbInitioGeneMark(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

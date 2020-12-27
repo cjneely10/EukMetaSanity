@@ -1,4 +1,4 @@
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class AbInitioAugustusIter(TaskList):
@@ -9,6 +9,7 @@ class AbInitioAugustusIter(TaskList):
     ]
     
     class AbInitioAugustus(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

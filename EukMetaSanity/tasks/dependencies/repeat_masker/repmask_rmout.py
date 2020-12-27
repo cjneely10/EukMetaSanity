@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput, set_complete
 
 
 class RepeatMaskerOutIter(TaskList):
@@ -10,6 +10,7 @@ class RepeatMaskerOutIter(TaskList):
     depends = [DependencyInput("repmask.process_repeats")]
 
     class RepeatModelerOut(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

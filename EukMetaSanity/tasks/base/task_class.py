@@ -50,6 +50,13 @@ def program_catch(f: Callable):
     return _add_try_except
 
 
+def set_complete(f: Callable):
+    def _check_if_complete(self, *args, **kwargs):
+        f(self, *args, **kwargs)
+        self.is_complete = self._set_is_complete()
+    return _check_if_complete
+
+
 class OutputResultsFileError(FileNotFoundError):
     """ Wrapper class for FileNotFoundError
 
@@ -97,7 +104,7 @@ class Task(ABC):
         # Check if task is set to be skipped in config file
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True
         # Store whether this task has been completed
-        self.is_complete = self._set_is_complete()
+        self.is_complete = False
         super().__init__()
 
     @abstractmethod
@@ -112,23 +119,11 @@ class Task(ABC):
         and is not already completed
 
         """
+        self.is_complete = self._set_is_complete()
         # If task is set to skip,return
         if self.is_skip:
             return
-        # Check if task has been completed
-        completed = None
-        for _path in self._output_paths.values():
-            # Currently only check all strings
-            if isinstance(_path, str):
-                if not os.path.exists(_path):
-                    # Only call function if missing path
-                    # Then move on
-                    completed = False
-                    break
-                else:
-                    completed = True
-        # Run if not completed (e.g. missing data)
-        if completed is not None and completed is True:
+        if self.is_complete:
             _str = "Is complete: {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
@@ -150,7 +145,11 @@ class Task(ABC):
         """
         for _path in self._output_paths.values():
             if isinstance(_path, str) and not os.path.exists(_path):
-                return False
+                if isinstance(_path, str):
+                    if not os.path.exists(_path):
+                        # Only call function if missing path
+                        # Then move on
+                        return False
         return True
 
     def results(self) -> Dict[str, object]:
@@ -559,14 +558,18 @@ class TaskList(ABC):
         as needed
 
         """
-        # Check if all tasks have been completed
-        if self._prerun_check():
-            return
         # Confirm that task is not meant to be skipped
+        is_skip = True
         for _task in self._tasks:
             if _task.is_skip is False:
                 print(colors.green & colors.bold | self._statement)
+                is_skip = False
                 break
+        if is_skip is True:
+            return
+        # Check if all tasks have been completed
+        if self._prerun_check() is True:
+            return
         # Log task beginning
         logging.info(self._statement)
         # Pass each Task to Dask scheduler
@@ -574,7 +577,7 @@ class TaskList(ABC):
         client = Client(n_workers=self._workers, threads_per_worker=1)
         # Run each future
         for _task in self._tasks:
-            futures.append(client.submit(_task.run_helper()))
+            futures.append(client.submit(_task.run_helper))
         # Wait for all futures to complete and end client
         wait(futures)
         client.close()

@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix
+from EukMetaSanity import Task, TaskList, program_catch, prefix, set_complete
 
 
 class FilterTaxSeqDBIter(TaskList):
@@ -8,6 +8,7 @@ class FilterTaxSeqDBIter(TaskList):
     depends = []
     
     class FilterTaxSeqDB(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

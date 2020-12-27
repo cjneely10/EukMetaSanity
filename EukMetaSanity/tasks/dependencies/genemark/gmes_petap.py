@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class GeneMarkPetapIter(TaskList):
@@ -8,6 +8,7 @@ class GeneMarkPetapIter(TaskList):
     depends = [DependencyInput("gmes.prothint")]
 
     class GeneMarkPetap(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

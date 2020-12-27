@@ -1,6 +1,6 @@
 import os
 from typing import List
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class EvidenceIter(TaskList):
@@ -17,6 +17,7 @@ class EvidenceIter(TaskList):
     ]
     
     class Evidence(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

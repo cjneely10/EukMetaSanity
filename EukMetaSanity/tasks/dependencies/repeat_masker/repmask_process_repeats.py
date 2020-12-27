@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput, set_complete
 
 
 class ProcessRepeatsIter(TaskList):
@@ -8,6 +8,7 @@ class ProcessRepeatsIter(TaskList):
     depends = [DependencyInput("repmask.repeat_masker")]
 
     class ProcessRepeats(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

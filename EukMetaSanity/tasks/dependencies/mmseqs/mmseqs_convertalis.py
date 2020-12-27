@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
+from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput, set_complete
 
 
 class ConvertAlisIter(TaskList):
@@ -11,6 +11,7 @@ class ConvertAlisIter(TaskList):
     ]
     
     class ConvertAlis(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
