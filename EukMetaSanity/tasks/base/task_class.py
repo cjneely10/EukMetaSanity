@@ -51,6 +51,12 @@ def program_catch(f: Callable):
 
 
 def set_complete(f: Callable):
+    """ Decorator function that checks whether a given task is completed. Check on Task object creation, but post-
+    child-class self.output update
+
+    :param f: Task class initializer method
+    :return: Decorated function, class object modified to store updated self.is_complete status
+    """
     def _check_if_complete(self, *args, **kwargs):
         f(self, *args, **kwargs)
         self.is_complete = self._set_is_complete()
