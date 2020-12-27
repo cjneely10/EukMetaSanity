@@ -123,6 +123,10 @@ evidence:
   time: "12:00:00"
   level: order
   dependencies:
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      data:
+        /path/to/ortho_db
     metaeuk:
       program: metaeuk
       data:

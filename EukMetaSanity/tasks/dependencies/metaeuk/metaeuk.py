@@ -1,11 +1,11 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch, prefix, set_complete
+from EukMetaSanity import Task, TaskList, program_catch, prefix, set_complete, DependencyInput
 
 
 class MetaEukIter(TaskList):
     name = "metaeuk"
     requires = []
-    depends = []
+    depends = [DependencyInput("mmseqs.filtertaxseqdb")]
     
     class MetaEuk(Task):
         @set_complete
@@ -18,7 +18,7 @@ class MetaEukIter(TaskList):
         @program_catch
         def run(self):
             out_results = []
-            for db in self.data:
+            for db in self.input["mmseqs.filtertaxseqdb"]["fastas"]:
                 if db == "":
                     continue
                 is_profile = []

@@ -148,6 +148,7 @@ class Task(ABC):
 
         :return: Boolean representing if task has all required output
         """
+        to_complete = None
         for _path in self._output_paths.values():
             if isinstance(_path, str) and not os.path.exists(_path):
                 if isinstance(_path, str):
@@ -155,6 +156,8 @@ class Task(ABC):
                         # Only call function if missing path
                         # Then move on
                         return False
+        if to_complete is None:
+            return False
         return True
 
     def results(self) -> Dict[str, object]:
