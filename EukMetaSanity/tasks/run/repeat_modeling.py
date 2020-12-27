@@ -104,7 +104,7 @@ class RepeatsIter(TaskList):
             if "data" in dir(self):
                 data_files += [_file for _file in self.data.split(",") if _file != ""]
             # Perform on optimal taxonomic identification
-            data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0]]
+            data_files += [TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0].lower()]
             if len(_file) > 0 and os.path.exists(_file[0]):
                 data_files.append(_file[0])
             for _search in data_files:
