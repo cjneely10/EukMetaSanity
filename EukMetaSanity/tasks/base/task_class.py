@@ -59,7 +59,7 @@ def set_complete(f: Callable):
     """
     def _check_if_complete(self, *args, **kwargs):
         f(self, *args, **kwargs)
-        self.is_complete = self._set_is_complete()
+        self.is_complete = self.set_is_complete()
     return _check_if_complete
 
 
@@ -125,7 +125,6 @@ class Task(ABC):
         and is not already completed
 
         """
-        self.is_complete = self._set_is_complete()
         # If task is set to skip,return
         if self.is_skip:
             return
@@ -144,7 +143,7 @@ class Task(ABC):
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
 
-    def _set_is_complete(self) -> bool:
+    def set_is_complete(self) -> bool:
         """ Check all required output data to see if any part of task need to be completed
 
         :return: Boolean representing if task has all required output
