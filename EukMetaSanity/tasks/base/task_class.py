@@ -148,17 +148,19 @@ class Task(ABC):
 
         :return: Boolean representing if task has all required output
         """
-        to_complete = None
+        is_complete = None
         for _path in self._output_paths.values():
-            if isinstance(_path, str) and not os.path.exists(_path):
-                if isinstance(_path, str):
-                    if not os.path.exists(_path):
-                        # Only call function if missing path
-                        # Then move on
-                        return False
-        if to_complete is None:
+            if isinstance(_path, str):
+                if not os.path.exists(_path):
+                    # Only call function if missing path
+                    # Then move on
+                    is_complete = False
+                    break
+                else:
+                    is_complete = True
+        if is_complete is None:
             return False
-        return True
+        return is_complete
 
     def results(self) -> Dict[str, object]:
         """ Check that all required datasets are fulfilled

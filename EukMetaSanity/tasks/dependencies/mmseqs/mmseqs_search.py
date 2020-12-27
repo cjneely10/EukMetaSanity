@@ -25,6 +25,7 @@ class SearchIter(TaskList):
 
         @program_catch
         def run(self):
+            # TODO: All mmseqs: Ensure that db subpath names are truly unique
             for outfile, db_path in zip(self.output["dbs"], self.data):
                 if not os.path.exists(outfile + ".index"):
                     # Run search

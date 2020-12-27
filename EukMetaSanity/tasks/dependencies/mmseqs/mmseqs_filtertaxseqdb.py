@@ -31,8 +31,7 @@ class FilterTaxSeqDBIter(TaskList):
         def run(self):
             # TODO: Remove hard-coding of order-level search
             tax = self.input["taxonomy"]["taxonomy"].order.tax_id
-            for db in self.data:
-                subset_db_outpath = os.path.join(self.wdir, self.record_id + "-tax-prots_%s" % prefix(db))
+            for db, subset_db_outpath, out_fasta in zip(self.data, self.output["dbs"], self.output["fastas"]):
                 self.parallel(
                     self.program[
                         "filtertaxseqdb",
@@ -48,13 +47,9 @@ class FilterTaxSeqDBIter(TaskList):
                     self.program[
                         "convert2fasta",
                         subset_db_outpath,
-                        self.output["fasta"],
+                        out_fasta,
                     ]
                 )
-                for file in os.listdir(self.wdir):
-                    file = os.path.join(self.wdir, file)
-                    if subset_db_outpath in file:
-                        self.local["rm"][file]()
             
     def __init__(self, *args, **kwargs):
         super().__init__(FilterTaxSeqDBIter.FilterTaxSeqDB, FilterTaxSeqDBIter.name, *args, **kwargs)
