@@ -8,12 +8,9 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 """
 
 import os
-import json
 import logging
-from pathlib import Path
+from typing import Tuple
 from signal import signal, SIGPIPE, SIG_DFL
-from typing import Generator, List, Tuple, Dict
-from Bio import SeqIO
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
@@ -49,21 +46,7 @@ def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineMan
     # Begin logging
     _initialize_logging(ap)
     # Gather list of files to analyze
-    # TODO: Handle loading from wdir all required input for specific pipeline
-    if is_continued:
-        # Gather from existing data
-        for f in (logging.info, print):
-            f("Getting files from last run...")
-        input_prefixes, input_files = _get_list_of_files(ap.args.fasta_directory)
-    else:
-        # Simplify FASTA files into working directory
-        pm.add_dirs("MAGS")
-        input_files = list(_file for _file in _files_iter(ap, pm.get_dir("MAGS")))
-        # List of prefixes for tracking each file's progress
-        input_prefixes = [os.path.basename(os.path.splitext(_file)[0]) for _file in input_files]
-        input_files = [{"root": {"fna": input_file}} for input_file in input_files]
-        # Create base dir for each file to analyze
-        all([pm.add_dirs(_file) for _file in input_prefixes])
+
 
     # # Begin task list
     tm = TaskManager(tpm, cfg, pm, input_files, input_prefixes, ap.args.debug, ap.args.command)

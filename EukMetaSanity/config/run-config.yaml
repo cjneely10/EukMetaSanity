@@ -3,10 +3,12 @@
 ###########################################
 ## Pipeline input section - do not modify!!
 INPUT:
-  collect: root
-  allowables:
+  base: root
+  expectations:
     fna:
-      fasta
+      base.fasta
+      base.fna
+
 ###########################################
 
 SLURM:

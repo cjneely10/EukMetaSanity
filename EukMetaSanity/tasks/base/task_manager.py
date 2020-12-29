@@ -100,7 +100,7 @@ class TaskManager:
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)
         # Collect items marked final from each completed task
-        output_data: Dict[str, object] = {}
+        output_data: Dict[str, Dict[str, object]] = {}
         for task_list in self.completed_tasks.values():
             output = task_list.output()
             i = 0
@@ -115,7 +115,7 @@ class TaskManager:
         pickle.dump(output_data, open(os.path.join(_final_output_dir, self.command + ".pkl"), "wb"))
 
     def _manage_output(self, output_directory: str, record_id: str, task_result: Dict[str, Union[object, Iterable]],
-                       task_name: str, completed_tasklist_idx: int) -> Dict[str, object]:
+                       task_name: str, completed_tasklist_idx: int) -> Dict[str, Dict[str, object]]:
         """ Create output subdirectory and copy output marked `final` to output directory
 
         :param output_directory: Pipeline's output directory path
@@ -151,5 +151,5 @@ class TaskManager:
             if isinstance(out_file, str):
                 if os.path.exists(out_file):
                     copy(out_file, _sub_out)
-        return final_output_paths
+        return {record_id: final_output_paths}
 
