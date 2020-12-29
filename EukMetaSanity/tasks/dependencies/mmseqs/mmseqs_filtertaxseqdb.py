@@ -29,6 +29,7 @@ class FilterTaxSeqDBIter(TaskList):
 
         @program_catch
         def run(self):
+            # TODO: All mmseqs: Ensure that db subpath names are truly unique
             tax = self.input["taxonomy"]["taxonomy"].assignment(self.config["level"]).tax_id
             for db, subset_db_outpath, out_fasta in zip(self.data, self.output["dbs"], self.output["fastas"]):
                 if not os.path.exists(out_fasta):

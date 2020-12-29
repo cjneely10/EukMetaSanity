@@ -1,5 +1,14 @@
 ---  # document start
 
+###########################################
+## Pipeline input section - do not modify!!
+INPUT:
+  collect: root
+  allowables:
+    fna:
+      fasta
+###########################################
+
 SLURM:
   ## Set to True if using SLURM
   USE_CLUSTER: false

@@ -18,6 +18,7 @@ class MetaEukIter(TaskList):
         @program_catch
         def run(self):
             out_results = []
+            # TODO: All mmseqs: Ensure that db subpath names are truly unique
             for db in self.input["mmseqs.filtertaxseqdb"]["fastas"]:
                 if db == "":
                     continue
