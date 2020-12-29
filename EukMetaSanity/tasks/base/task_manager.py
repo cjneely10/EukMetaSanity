@@ -91,7 +91,7 @@ class TaskManager:
         self._summarize(os.path.join(output_dir, "results", self.command), self.command)
 
     def _summarize(self, _final_output_dir: str, _name: str):
-        """ Summarize contents of pipeline - populate output files and summary .json paths file
+        """ Summarize contents of pipeline - populate output files and summary .pkl file
 
         :param _final_output_dir: Output directory
         :param _name: Name of pipeline

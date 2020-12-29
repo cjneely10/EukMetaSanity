@@ -6,8 +6,8 @@ Manages the config file, as well as arguments that are set for each part of the 
 import os
 from pathlib import Path
 from typing import List, Tuple, Dict, Union
-from plumbum import local, CommandNotFound
 import yaml
+from plumbum import local, CommandNotFound
 
 
 class InvalidPathError(FileExistsError):
@@ -34,6 +34,7 @@ class InvalidProtocolError(ValueError):
 
 class ConfigManager:
     SLURM = "SLURM"
+    INPUT = "INPUT"
     THREADS = "threads"
     WORKERS = "workers"
     MEMORY = "memory"

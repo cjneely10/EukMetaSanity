@@ -28,3 +28,4 @@ dependencies:
   - perl-parallel-forkmanager=2.02
   - perl-threaded=5.26.0
   - networkx=2.2
+  - pyyaml=5.3.1
