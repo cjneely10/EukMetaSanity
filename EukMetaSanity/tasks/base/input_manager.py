@@ -75,7 +75,8 @@ class InputManager:
 
     def get_input_files(self):
         _input_files = []
-        input_data = defaultdict(default_factory=defaultdict(default_factory=str))
+        # TODO: This is still buggy
+        input_data = defaultdict(default_factory=dict)
         for file in os.listdir(self.input_dir):
             for ext in self.extension_list:
                 if file.endswith(ext):
