@@ -9,11 +9,11 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 import os
 import logging
-from typing import Tuple
 from signal import signal, SIGPIPE, SIG_DFL
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
+from EukMetaSanity.tasks.base.input_manager import InputManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
@@ -32,7 +32,8 @@ def _initialize_logging(ap: ArgParse):
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
     print(
         "*" * 80, "",
-        "All log statements are redirected to %s" % log_file, "",
+        "Primary log statements are redirected to %s" % log_file,
+        "Task-level log statements are redirected to subdirectory log files", "",
         "*" * 80, "",
         "Displaying step summaries here:\n",
         sep="\n"
@@ -40,27 +41,22 @@ def _initialize_logging(ap: ArgParse):
 
 
 # # Driver logic
-def _main(ap: ArgParse, cfg: ConfigManager, is_continued: bool, tpm: PipelineManager):
+def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager):
     # Generate primary path manager
     pm = PathManager(ap.args.output)
     # Begin logging
     _initialize_logging(ap)
     # Gather list of files to analyze
-
-
+    im = InputManager(ap.args.output, ap.args.fasta_directory, pm, cfg, ap.args.extensions)
     # # Begin task list
-    tm = TaskManager(tpm, cfg, pm, input_files, input_prefixes, ap.args.debug, ap.args.command)
+    tm = TaskManager(tpm, cfg, pm, im.input_files, im.input_prefixes, ap.args.debug, ap.args.command)
     tm.run(ap.args.output)
 
 
 # Parse user arguments
-def _parse_args(ap: ArgParse, tm: PipelineManager) -> Tuple[ConfigManager, bool]:
+def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
-    is_continued = False
-    # A single file was provided - use this as input to run
-    if ap.args.fasta_directory is None:
-        is_continued = True
     # Ensure command is valid
     assert ap.args.command in tm.programs.keys()
     if ap.args.debug is True:
@@ -69,7 +65,7 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> Tuple[ConfigManager, bool]
         ap.args.debug = 1
     # Determine file extensions to keep
     ap.args.extensions = ap.args.extensions.split("/")
-    return ConfigManager(ap.args.config_file), is_continued
+    return ConfigManager(ap.args.config_file)
 
 
 if __name__ == "__main__":
@@ -97,7 +93,7 @@ if __name__ == "__main__":
         ),
         description="Run EukMetaSanity pipeline"
     )
-    _cfg, _is_cont = _parse_args(_ap, _tm)
-    _main(_ap, _cfg, _is_cont, _tm)
+    _cfg = _parse_args(_ap, _tm)
+    _main(_ap, _cfg, _tm)
     for func in (logging.info, print):
         func("\nEukMetaSanity %s pipeline complete!" % _ap.args.command)

@@ -12,6 +12,8 @@ class PathManager:
     Useful for keeping files organized
     :raises: AssertionError if base path does not exist
     """
+    MAGS = "MAGS"
+
     def __init__(self, base_path: str):
         assert base_path is not None
         self._wdir = "wdir"

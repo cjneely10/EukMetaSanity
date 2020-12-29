@@ -35,19 +35,6 @@ if __name__ == "__main_":
 """
 
 # TODO(1): Handle config file generation
-config_boilerplate = """[SLURM]
-# Set to True if using SLURM
-USE_CLUSTER = False
-## WORKERS on each config section will assign the number of jobs to run/MAGs to analyze simultaneously
-## THREADS on each config section set the number of cores to run for each job
-## MEMORY on each config section sets memory size requests. Make sure this matches mmseqs requested memory
-## Pass any flags you wish below
-## DO NOT PASS the following: --nodes, --ntasks, --mem
---qos = unlim
---job-name = EukMS
-user-id = uid
-
-"""
 
 
 def create_class_file(file_path: str, class_name: str, cfg_name: str):
@@ -55,27 +42,6 @@ def create_class_file(file_path: str, class_name: str, cfg_name: str):
     fp.write(boilerplate.format(class_name, cfg_name, """{
                 
             }"""))
-    fp.close()
-
-
-def update_config_file(cfg_path: str, cfg_name: str):
-    cfg_path = str(Path(cfg_path).resolve())
-    if not os.path.exists(cfg_path):
-        fp = open(cfg_path, "w")
-        fp.write(config_boilerplate)
-        fp.close()
-    fp = open(cfg_path, "a")
-    fp.write("""
-[{}]
-# # Required options
-WORKERS = 1
-THREADS = 1
-MEMORY = 10G
-TIME = 1:00:00
-# # Additional options
-FLAGS = ''
-
-""".format(cfg_name))
     fp.close()
 
 
@@ -94,5 +60,3 @@ if __name__ == "__main__":
         description="Create new EukMetaSanity class"
     )
     create_class_file(ap.args.path, ap.args.class_name, ap.args.config_name)
-    if ap.args.config_path is not None:
-        update_config_file(ap.args.config_path, ap.args.config_name)

@@ -45,6 +45,7 @@ class ConfigManager:
     PROGRAM = "program"
     FLAGS = "FLAGS"
     DATA = "data"
+    BASE = "base"
 
     def __init__(self, config_path: str):
         self._config = yaml.load(open(str(Path(config_path).resolve()), "r"), Loader=yaml.FullLoader)
