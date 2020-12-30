@@ -1,3 +1,6 @@
+from typing import Optional, Dict
+
+
 class DependencyInput:
     """ Class handles parsing input for dependency requirements
 
@@ -11,9 +14,9 @@ class DependencyInput:
         """
         self._name = name
         self._input = primary_input
-        self.id_mapping = None
-        if id_mapping is not None and isinstance(id_mapping, dict):
-            self.id_mapping = id_mapping
+        self._id_mapping = None
+        if id_mapping is not None:
+            self._id_mapping = id_mapping
 
     @property
     def name(self) -> str:
@@ -30,3 +33,11 @@ class DependencyInput:
         :return: Parsed input object string as tuple
         """
         return self._input
+
+    @property
+    def id_mapping(self) -> Optional[Dict[str, str]]:
+        """ Get mapping to generic-level dependency input
+
+        :return: Mapping provided at Task level
+        """
+        return self._id_mapping

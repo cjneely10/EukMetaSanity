@@ -5,7 +5,7 @@ Module contains TaskManager class
 import os
 import pickle
 from shutil import copy
-from typing import List, Dict, Tuple, Iterable, Union
+from typing import List, Dict, Tuple, Iterable, Union, Optional
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
@@ -27,6 +27,7 @@ class TaskManager:
     All dictionary data will also be serialized into a final "task.json" file for loading into other pipelines
 
     """
+
     def __init__(self, pm: PipelineManager, cfg: ConfigManager, pam: PathManager,
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
         self.dep_graph = DependencyGraph(pm.programs[command])
@@ -47,7 +48,8 @@ class TaskManager:
         # Generate first task from class object
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
-            [{} for _ in range(len(self.input_files))], [self.input_files[k][ConfigManager.ROOT] for k in range(len(self.input_files))])
+            [{} for _ in range(len(self.input_files))],
+            [TaskManager._incorporate_key_overrides(self.task_list[0][3], self.input_files[k][ConfigManager.ROOT]) for k in range(len(self.input_files))])
         # Run and store results
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
@@ -75,12 +77,11 @@ class TaskManager:
                 # Dependency input will either come from root or will be collected from a task that has already run
                 # TODO parse dependency keys to match the more-generic data types used in self.dependency_input calls
                 if self.task_list[i][2] != ConfigManager.ROOT:
-                    expected_input.append(
-                        self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
-                    )
+                    output = self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
                 else:
-                    expected_input.append(self.input_files[k][ConfigManager.ROOT])
-            # Generate next task based on input fromrequired dependencies/requirements
+                    output = self.input_files[k][ConfigManager.ROOT]
+                expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
+            # Generate next task based on input from required dependencies/requirements
             task = self.task_list[i][0](
                 self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1],
                 to_add, expected_input)
@@ -114,6 +115,13 @@ class TaskManager:
                 i += 1
         # Serialize output to file
         pickle.dump(output_data, open(os.path.join(_final_output_dir, self.command + ".pkl"), "wb"))
+
+    @staticmethod
+    def _incorporate_key_overrides(override_tuple: Optional[List[Tuple]], output: Dict) -> Dict:
+        for key, val in override_tuple or {}:
+            output[val] = output[key]
+        return output
+
 
     def _manage_output(self, output_directory: str, record_id: str, task_result: Dict[str, Union[object, Iterable]],
                        task_name: str, completed_tasklist_idx: int) -> Dict[str, Dict[str, object]]:
