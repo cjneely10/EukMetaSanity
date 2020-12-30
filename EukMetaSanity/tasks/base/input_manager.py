@@ -83,8 +83,9 @@ class InputManager:
             for ext in self.extension_list:
                 if file.endswith(ext):
                     record_id = prefix(file)
-                    if record_id not in self.data.keys():
-                        self.data[record_id] = {}
+                    if record_id in self.data.keys():
+                        raise AttributeError("Input directory has multiple files with the same basename - exiting")
+                    self.data[record_id] = {}
                     self.data[record_id]["fasta"] = InputManager._simplify_fasta(file, record_id, self.input_dir, ext)
                     self.pm.add_dirs(record_id)
 
