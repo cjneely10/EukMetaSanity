@@ -16,7 +16,7 @@ class DependencyInput:
         self._input = primary_input
         self._id_mapping = None
         if id_mapping is not None:
-            self._id_mapping = id_mapping
+            self._id_mapping = tuple(id_mapping)
 
     @property
     def name(self) -> str:
