@@ -98,7 +98,7 @@ if __name__ == "__main__":
         ),
         description="Run EukMetaSanity pipeline"
     )
-    _cfg = _parse_args(_ap, _tm)
+    _cfg: ConfigManager = _parse_args(_ap, _tm)
     # Generate primary path manager
     _pm = PathManager(_ap.args.output)
     # Gather list of files to analyze

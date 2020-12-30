@@ -66,13 +66,14 @@ class TaskManager:
                 for req_str in self.task_list[i][0].requires:
                     inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
                 # Dependencies are stored at task scope level, but may also be from task's scope's scope
-                for req_str in self.task_list[i][0].depends:
-                    inner_add[req_str.name] = self.completed_tasks[
-                        (req_str.name, task.scope) if (req_str.name, task.scope) in self.completed_tasks.keys()
-                        else (req_str.name, task.name)
+                for req in self.task_list[i][0].depends:
+                    inner_add[req.name] = self.completed_tasks[
+                        (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
+                        else (req.name, task.name)
                     ].tasks[k].output
                 to_add.append(inner_add)
                 # Dependency input will either come from root or will be collected from a task that has already run
+                # TODO parse dependency keys to match the more-generic data types used in self.dependency_input calls
                 if self.task_list[i][2] != ConfigManager.ROOT:
                     expected_input.append(
                         self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
