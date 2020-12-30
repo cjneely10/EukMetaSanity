@@ -18,12 +18,10 @@ from EukMetaSanity.tasks.base.config_manager import ConfigManager
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 
-# Logging initialize
 def _initialize_logging(ap: ArgParse):
-    """
+    """ Logging initialize
 
-    :param ap:
-    :return:
+    :param ap: ArgParse object
     """
     # Initialize logging
     log_file = os.path.join(ap.args.output, "%s-eukmetasanity.log" % ap.args.command)
@@ -40,8 +38,13 @@ def _initialize_logging(ap: ArgParse):
     )
 
 
-# # Driver logic
 def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager):
+    """ Driver logic
+
+    :param ap: ArgParse object
+    :param cfg: Loaded config file manager
+    :param tpm: Loaded pipeline manager
+    """
     # Generate primary path manager
     pm = PathManager(ap.args.output)
     # Begin logging
@@ -55,6 +58,12 @@ def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager):
 
 # Parse user arguments
 def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
+    """ Parse file paths. Ensure pipeline requested by user is a valid pipeline
+
+    :param ap: ArgParse object
+    :param tm: PipelineManager object
+    :return: Successfully loaded ConfigManager object
+    """
     # Confirm path existence
     assert os.path.exists(ap.args.config_file)
     # Ensure command is valid

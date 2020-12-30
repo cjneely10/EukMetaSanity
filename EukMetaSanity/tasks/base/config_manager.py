@@ -33,6 +33,8 @@ class InvalidProtocolError(ValueError):
 
 
 class ConfigManager:
+    EXPECTED_RESULTS_DIR = "results"
+    ROOT = "root"
     SLURM = "SLURM"
     INPUT = "INPUT"
     THREADS = "threads"

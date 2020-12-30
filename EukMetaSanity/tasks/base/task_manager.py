@@ -47,7 +47,7 @@ class TaskManager:
         # Generate first task from class object
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
-            [{} for _ in range(len(self.input_files))], [self.input_files[k]["root"] for k in range(len(self.input_files))])
+            [{} for _ in range(len(self.input_files))], [self.input_files[k][ConfigManager.ROOT] for k in range(len(self.input_files))])
         # Run and store results
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
@@ -73,12 +73,12 @@ class TaskManager:
                     ].tasks[k].output
                 to_add.append(inner_add)
                 # Dependency input will either come from root or will be collected from a task that has already run
-                if self.task_list[i][2] != "root":
+                if self.task_list[i][2] != ConfigManager.ROOT:
                     expected_input.append(
                         self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
                     )
                 else:
-                    expected_input.append(self.input_files[k]["root"])
+                    expected_input.append(self.input_files[k][ConfigManager.ROOT])
             # Generate next task based on input fromrequired dependencies/requirements
             task = self.task_list[i][0](
                 self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1],
@@ -88,7 +88,7 @@ class TaskManager:
             self.completed_tasks[(task.name, task.scope)] = task
             i += 1
         # Summarize final results based on requested `final` labels
-        self._summarize(os.path.join(output_dir, "results", self.command), self.command)
+        self._summarize(os.path.join(output_dir, ConfigManager.EXPECTED_RESULTS_DIR, self.command), self.command)
 
     def _summarize(self, _final_output_dir: str, _name: str):
         """ Summarize contents of pipeline - populate output files and summary .pkl file
@@ -152,4 +152,3 @@ class TaskManager:
                 if os.path.exists(out_file):
                     copy(out_file, _sub_out)
         return {record_id: final_output_paths}
-

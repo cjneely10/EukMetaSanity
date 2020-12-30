@@ -3,11 +3,8 @@
 ###########################################
 ## Pipeline input section - do not modify!!
 INPUT:
-  base: root
-  expectations:
-    fna:
-      base.fasta
-      base.fna
+  base:
+    root
 
 ###########################################
 

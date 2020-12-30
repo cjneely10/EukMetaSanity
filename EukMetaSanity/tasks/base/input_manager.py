@@ -1,31 +1,21 @@
+"""
+Module holds InputManager class
+"""
+
 import os
 import pickle
-from collections import defaultdict
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Optional
 from Bio import SeqIO
 from EukMetaSanity import prefix
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
 
 
-# Get program-needed list of files for this step in pipeline
-def _get_list_of_files(summary_file: str) -> Tuple[List[str], List[Dict[str, Dict[str, object]]]]:
-    data = pickle.load(open(summary_file, "rb"))
-    out_ids = sorted(list(data.keys()))
-    out_dict_list = []
-    for _id in out_ids:
-        to_add = {"root": {}}
-        for key, val in data[_id].items():
-            if isinstance(val, dict):
-                to_add["root"][key] = val
-            else:
-                to_add[key] = val
-        out_dict_list.append(to_add)
-    return out_ids, out_dict_list
-
-
-# TODO: Handle loading from wdir all required input for specific pipeline
 class InputManager:
+    """ InputManager converts input passed at the user-level with the existing project structure
+    and requested input at config level into single input dict for each task
+
+    """
     def __init__(self, output_dir: str, input_dir: Optional[str], pm: PathManager, cfg: ConfigManager,
                  extension_list: List[str]):
         """ Generate object using existing pipeline directory structure and
@@ -40,8 +30,16 @@ class InputManager:
         self.output_dir = output_dir
         self.extension_list = extension_list
         self.data: Dict[str, Dict[str, object]] = {}
-        self.get_input_files()
-        self.base = cfg.config[ConfigManager.INPUT][ConfigManager.BASE]
+        self.bases = cfg.config[ConfigManager.INPUT][ConfigManager.BASE].split(" ")
+        for base in self.bases:
+            if base == ConfigManager.ROOT:
+                # Load input files from command line level
+                self._get_input_files()
+            else:
+                # Load additional input based on existing data, if requested
+                self._get_files_from_project_dir(os.path.join(
+                    output_dir, ConfigManager.EXPECTED_RESULTS_DIR, base, base + ".pkl"
+                ))
         self.record_ids = sorted(list(self.data.keys()))
 
     @staticmethod
@@ -62,9 +60,25 @@ class InputManager:
         SeqIO.write(SeqIO.parse(fasta_file, "fasta"), out_file, "fasta")
         return out_file
 
-    def get_input_files(self):
-        _input_files = []
-        # TODO: This is still buggy
+    def _get_files_from_project_dir(self, summary_file: str):
+        """ Parse existing project directory, if it exists, for input data requested at the config
+        file level
+
+        :param summary_file: Path to summary file, if it exists
+        :return:
+        """
+        if not os.path.exists(summary_file):
+            return
+        data: Dict[str, Dict[str, object]] = pickle.load(open(summary_file, "rb"))
+        for record_id in data.keys():
+            if record_id not in self.data.keys():
+                self.data[record_id] = {}
+            self.data[record_id].update(data[record_id])
+
+    def _get_input_files(self):
+        """ Load input files from passed input directory at command-line level
+
+        """
         for file in os.listdir(self.input_dir):
             for ext in self.extension_list:
                 if file.endswith(ext):
@@ -74,13 +88,18 @@ class InputManager:
                     self.data[record_id][ext] = InputManager._simplify_fasta(file, record_id, self.input_dir, ext)
                     self.pm.add_dirs(record_id)
 
-    def _parse_results_dir_for_needed_data(self):
-        pass
-
     @property
-    def input_files(self):
-        return [{self.base: self.data[record_id]} for record_id in self.record_ids]
+    def input_prefixes(self) -> List[str]:
+        """ List of record_ids identified after parsing input directory and existing results directory
 
-    @property
-    def input_prefixes(self):
+        :return: List of record_ids
+        """
         return self.record_ids
+
+    @property
+    def input_files(self) -> List[Dict[str, Dict[str, object]]]:
+        """ List of input files (parsed into dictionary)
+
+        :return: List of input files in order based on self.record_ids
+        """
+        return [{ConfigManager.ROOT: self.data[record_id]} for record_id in self.record_ids]
