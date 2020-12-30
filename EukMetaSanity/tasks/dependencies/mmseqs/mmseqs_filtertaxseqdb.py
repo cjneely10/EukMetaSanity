@@ -12,14 +12,14 @@ class FilterTaxSeqDBIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             out_results = []
-            for db in self.data:
+            for i, db in enumerate(self.data):
                 if db == "":
                     continue
                 is_profile = []
                 if "p:" in db:
                     is_profile.append("--slice-search")
                     db = db[2:]
-                db_prefix = prefix(db)
+                db_prefix = prefix(db) + str(i)
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
                 out_results.append(_outfile)
             self.output = {
@@ -29,7 +29,6 @@ class FilterTaxSeqDBIter(TaskList):
 
         @program_catch
         def run(self):
-            # TODO: All mmseqs: Ensure that db subpath names are truly unique
             tax = self.input["taxonomy"]["taxonomy"].assignment(self.config["level"]).tax_id
             for db, subset_db_outpath, out_fasta in zip(self.data, self.output["dbs"], self.output["fastas"]):
                 if not os.path.exists(out_fasta):

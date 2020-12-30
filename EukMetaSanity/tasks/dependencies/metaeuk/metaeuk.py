@@ -18,15 +18,14 @@ class MetaEukIter(TaskList):
         @program_catch
         def run(self):
             out_results = []
-            # TODO: All mmseqs: Ensure that db subpath names are truly unique
-            for db in self.input["mmseqs.filtertaxseqdb"]["fastas"]:
+            for i, db in enumerate(self.input["mmseqs.filtertaxseqdb"]["fastas"]):
                 if db == "":
                     continue
                 is_profile = []
                 if "p:" in db:
                     is_profile.append("--slice-search")
                     db = db[2:]
-                db_prefix = prefix(db)
+                db_prefix = prefix(db) + str(i)
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
                 if not os.path.exists(_outfile + ".fas"):
                     self.parallel(

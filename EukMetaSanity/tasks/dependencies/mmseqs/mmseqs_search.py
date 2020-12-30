@@ -12,12 +12,12 @@ class SearchIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             outfiles = []
-            for db in self.data:
+            for i, db in enumerate(self.data):
                 if db == "":
                     continue
                 if "p:" in db:
                     db = db[2:]
-                _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, prefix(db)))
+                _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, prefix(db) + str(i)))
                 outfiles.append(_outfile)
             self.output = {
                 "dbs": outfiles
@@ -25,7 +25,6 @@ class SearchIter(TaskList):
 
         @program_catch
         def run(self):
-            # TODO: All mmseqs: Ensure that db subpath names are truly unique
             for outfile, db_path in zip(self.output["dbs"], self.data):
                 if not os.path.exists(outfile + ".index"):
                     # Run search
