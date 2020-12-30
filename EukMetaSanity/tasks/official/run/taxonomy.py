@@ -26,7 +26,7 @@ class TaxonomyIter(TaskList):
                 "taxonomy": TaxonomyIter.Taxonomy.get_taxonomy(
                     str(self.input["mmseqs.taxonomy"]["tax-report"]),
                     float(self.config["cutoff"])),
-                "final": ["mmseqs.taxonomy.tax-report"]
+                "final": ["mmseqs.taxonomy.tax-report", "taxonomy"]
             }
             
         @program_catch
