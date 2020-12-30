@@ -38,19 +38,15 @@ def _initialize_logging(ap: ArgParse):
     )
 
 
-def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager):
+def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager, pm: PathManager, im: InputManager):
     """ Driver logic
 
     :param ap: ArgParse object
     :param cfg: Loaded config file manager
     :param tpm: Loaded pipeline manager
     """
-    # Generate primary path manager
-    pm = PathManager(ap.args.output)
     # Begin logging
     _initialize_logging(ap)
-    # Gather list of files to analyze
-    im = InputManager(ap.args.output, ap.args.fasta_directory, pm, cfg, ap.args.extensions)
     # # Begin task list
     tm = TaskManager(tpm, cfg, pm, im.input_files, im.input_prefixes, ap.args.debug, ap.args.command)
     tm.run(ap.args.output)
@@ -103,6 +99,12 @@ if __name__ == "__main__":
         description="Run EukMetaSanity pipeline"
     )
     _cfg = _parse_args(_ap, _tm)
-    _main(_ap, _cfg, _tm)
+    # Generate primary path manager
+    _pm = PathManager(_ap.args.output)
+    # Gather list of files to analyze
+    _im = InputManager(_ap.args.output, _ap.args.fasta_directory, _pm, _cfg, _ap.args.extensions)
+    # Run main program logic
+    _main(_ap, _cfg, _tm, _pm, _im)
+    # Display final output line
     for func in (logging.info, print):
         func("\nEukMetaSanity %s pipeline complete!" % _ap.args.command)
