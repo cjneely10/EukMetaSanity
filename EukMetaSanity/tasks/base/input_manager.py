@@ -85,7 +85,7 @@ class InputManager:
                     record_id = prefix(file)
                     if record_id not in self.data.keys():
                         self.data[record_id] = {}
-                    self.data[record_id][ext] = InputManager._simplify_fasta(file, record_id, self.input_dir, ext)
+                    self.data[record_id]["fasta"] = InputManager._simplify_fasta(file, record_id, self.input_dir, ext)
                     self.pm.add_dirs(record_id)
 
     @property
