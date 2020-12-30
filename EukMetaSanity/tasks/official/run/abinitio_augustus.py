@@ -4,9 +4,7 @@ from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_co
 class AbInitioAugustusIter(TaskList):
     name = "abinitio.augustus"
     requires = ["repeats"]
-    depends = [
-        DependencyInput("augustus", "repeats")
-    ]
+    depends = [DependencyInput("augustus", "repeats")]
     
     class AbInitioAugustus(Task):
         @set_complete

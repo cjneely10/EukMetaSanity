@@ -273,7 +273,7 @@ class Task(ABC):
 
         Example:
         self.input["root"] accesses all available input.
-        Some available input: self.input["root"]["fna"], self.input["root"]["prot"], self.input["root"]["nr-gff3"]
+        Some available input: self.input["root"]["fasta"], self.input["root"]["prot"], self.input["root"]["nr-gff3"]
         This will depend on the pipeline you are using and/or writing
 
         A task may contain dependencies that must run prior to itself. The output of all of these dependencies

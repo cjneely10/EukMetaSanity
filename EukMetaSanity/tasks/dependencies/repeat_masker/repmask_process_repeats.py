@@ -19,7 +19,7 @@ class ProcessRepeatsIter(TaskList):
 
         @program_catch
         def run(self):
-            _basename = os.path.basename(str(self.input["root"]["fna"]))
+            _basename = os.path.basename(str(self.input["root"]["fasta"]))
             cat_files = []
             for rep_dir in self.input["repmask.repeat_masker"]["libraries"]:
                 _file = os.path.join(rep_dir[1], "".join((_basename, ".cat.gz")))
@@ -49,7 +49,7 @@ class ProcessRepeatsIter(TaskList):
                     self.program[
                         # Input taxonomy from OrthoDB search
                         "-species", self.input["taxonomy"]["taxonomy"].family.value,
-                        "-maskSource", str(self.input["root"]["fna"]),
+                        "-maskSource", str(self.input["root"]["fasta"]),
                         final_out,
                     ]
                 )

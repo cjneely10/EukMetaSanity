@@ -49,7 +49,8 @@ class TaskManager:
         task = self.task_list[0][0](
             self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
             [{} for _ in range(len(self.input_files))],
-            [TaskManager._incorporate_key_overrides(self.task_list[0][3], self.input_files[k][ConfigManager.ROOT]) for k in range(len(self.input_files))])
+            [TaskManager._incorporate_key_overrides(self.task_list[0][3], self.input_files[k][ConfigManager.ROOT])
+             for k in range(len(self.input_files))])
         # Run and store results
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
@@ -75,7 +76,6 @@ class TaskManager:
                     ].tasks[k].output
                 to_add.append(inner_add)
                 # Dependency input will either come from root or will be collected from a task that has already run
-                # TODO parse dependency keys to match the more-generic data types used in self.dependency_input calls
                 if self.task_list[i][2] != ConfigManager.ROOT:
                     output = self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
                 else:
@@ -121,7 +121,6 @@ class TaskManager:
         for key, val in override_tuple or {}:
             output[val] = output[key]
         return output
-
 
     def _manage_output(self, output_directory: str, record_id: str, task_result: Dict[str, Union[object, Iterable]],
                        task_name: str, completed_tasklist_idx: int) -> Dict[str, Dict[str, object]]:

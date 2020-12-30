@@ -32,7 +32,7 @@ class EvidenceIter(TaskList):
             EvidenceIter.Evidence.merge(
                 self, [str(self.input["metaeuk"]["gff3"]),
                        self.input["abinitio.augustus"]["ab-gff3"], self.input["abinitio.genemark"]["ab-gff3"]],
-                str(self.input["root"]["fna"]),
+                str(self.input["root"]["fasta"]),
                 os.path.join(self.wdir, self.record_id),
             )
 
