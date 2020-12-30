@@ -1,4 +1,4 @@
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class KoFamScanIter(TaskList):
@@ -10,9 +10,10 @@ class KoFamScanIter(TaskList):
     """
     name = "kofamscan"
     requires = []
-    depends = ["kofamscan.exec_annotation"]
+    depends = [DependencyInput("kofamscan.exec_annotation")]
     
     class KoFamScan(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

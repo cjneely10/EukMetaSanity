@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, set_complete
 
 
 class EMapperIter(TaskList):
@@ -8,6 +8,7 @@ class EMapperIter(TaskList):
     depends = []
 
     class EMapper(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
@@ -19,7 +20,7 @@ class EMapperIter(TaskList):
             self.parallel(
                 self.local[self.config["python"]][
                     self.config["program"],
-                    "-i", self.input["root"]["prot"],
+                    "-i", self.dependency_input["prot"],
                     "--output", os.path.join(self.wdir, self.record_id),
                     "--cpu", self.threads,
                     (*self.added_flags),

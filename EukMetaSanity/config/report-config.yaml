@@ -1,5 +1,14 @@
 ---  # document start
 
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    root
+    run
+
+###########################################
+
 SLURM:
   ## Set to True if using SLURM
   USE_CLUSTER: false

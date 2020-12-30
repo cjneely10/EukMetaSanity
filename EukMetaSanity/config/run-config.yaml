@@ -1,9 +1,9 @@
 ---  # document start
 
 ###########################################
-## Pipeline input section - do not modify!!
+## Pipeline input section
 INPUT:
-  base:
+  base:  # List pipelines containing input data
     root
 
 ###########################################

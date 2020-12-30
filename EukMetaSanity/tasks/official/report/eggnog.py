@@ -1,4 +1,4 @@
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class EggNogMapperIter(TaskList):
@@ -10,9 +10,10 @@ class EggNogMapperIter(TaskList):
     """
     name = "eggnog"
     requires = []
-    depends = ["emapper"]
+    depends = [DependencyInput("emapper")]
 
     class EggNogMapper(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {

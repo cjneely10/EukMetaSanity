@@ -1,5 +1,5 @@
 import os
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, set_complete
 
 
 class ExecAnnotationIter(TaskList):
@@ -8,6 +8,7 @@ class ExecAnnotationIter(TaskList):
     depends = []
 
     class ExecAnnotation(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
@@ -23,7 +24,7 @@ class ExecAnnotationIter(TaskList):
                     (*self.added_flags),
                     "-o", self.output["kegg"],
                     "--tmp-dir", os.path.join(self.wdir, "tmp"),
-                    self.input["root"]["prot"],
+                    self.dependency_input["prot"],
                 ]
             )
 

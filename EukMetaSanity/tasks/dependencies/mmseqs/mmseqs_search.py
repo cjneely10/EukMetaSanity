@@ -28,6 +28,10 @@ class SearchIter(TaskList):
             for outfile, db_path in zip(self.output["dbs"], self.data):
                 if not os.path.exists(outfile + ".index"):
                     # Run search
+                    is_profile = []
+                    if "p:" in db_path:
+                        is_profile.append("--slice-search")
+                        db_path = db_path[2:]
                     self.parallel(
                         self.program[
                             self.config["subname"],
@@ -36,6 +40,7 @@ class SearchIter(TaskList):
                             outfile,  # Output db
                             os.path.join(self.wdir, "tmp"),
                             (*self.added_flags),
+                            (*is_profile),
                             "--threads", self.threads,
                         ]
                     )
