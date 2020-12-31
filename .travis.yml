@@ -4,4 +4,4 @@ python:
 install:
   ./INSTALL.sh
 script:
-  cat complete!
+  echo complete!
