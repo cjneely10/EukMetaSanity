@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.com/cjneely10/EukMetaSanity.svg?token=M4ut94Kepv6qucNU1mEy&branch=master)](https://www.travis-ci.com/cjneely10/EukMetaSanity)
+
 # EukMetaSanity
 
 ## About
