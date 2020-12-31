@@ -10,6 +10,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
 from dask.distributed import Client, wait
+# pylint: disable=no-member
 from plumbum import colors, local, BG
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
@@ -20,45 +21,45 @@ from EukMetaSanity.tasks.base.dependency_input import DependencyInput
 from EukMetaSanity.tasks.base.config_manager import ConfigManager, MissingDataError
 
 
-def program_catch(f: Callable):
+def program_catch(func: Callable):
     """ Decorator function checks for ProcessExecutionErrors and FileExistErrors when running an executable
     Logging info recorded and printed to stdout
 
-    :param f: Function to test and whose exceptions to catch
+    :param func: Function to test and whose exceptions to catch
     :return: Decorated function
     """
 
     def _add_try_except(self, *args, **kwargs):
         try:
-            return f(self, *args, **kwargs)
-        except ProcessExecutionError as e:
-            logging.info(e)
-            with open(os.path.join(self.wdir, "task.err"), "a") as w:
-                w.write(str(e))
-            print(colors.warn | str(e))
-        except FileExistsError as e:
-            logging.info(e)
-            with open(os.path.join(self.wdir, "task.err"), "a") as w:
-                w.write(str(e))
-            print(colors.warn | str(e))
-        except ValueError as e:
-            logging.info(e)
-            with open(os.path.join(self.wdir, "task.err"), "a") as w:
-                w.write(str(e))
-            print(colors.warn | str(e))
+            return func(self, *args, **kwargs)
+        except ProcessExecutionError as err:
+            logging.info(err)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
+                w_out.write(str(err))
+            print(colors.warn | str(err))
+        except FileExistsError as err:
+            logging.info(err)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
+                w_out.write(str(err))
+            print(colors.warn | str(err))
+        except ValueError as err:
+            logging.info(err)
+            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
+                w_out.write(str(err))
+            print(colors.warn | str(err))
 
     return _add_try_except
 
 
-def set_complete(f: Callable):
+def set_complete(func: Callable):
     """ Decorator function that checks whether a given task is completed. Check on Task object creation, but post-
     child-class self.output update
 
-    :param f: Task class initializer method
+    :param func: Task class initializer method
     :return: Decorated function, class object modified to store updated self.is_complete status
     """
     def _check_if_complete(self, *args, **kwargs):
-        f(self, *args, **kwargs)
+        func(self, *args, **kwargs)
         self.is_complete = self.set_is_complete()
     return _check_if_complete
 
@@ -70,6 +71,8 @@ class OutputResultsFileError(FileNotFoundError):
     pass
 
 
+# pylint: disable=too-many-public-methods
+# pylint: disable=invalid-name
 class Task(ABC):
     """ Task is an abstract base class that API writers will overwrite to handle Task functionality
 
@@ -78,6 +81,18 @@ class Task(ABC):
                  record_id: str, db_name: str, mode: int, scope: str,
                  requested_input_data: Dict[str, Dict[str, object]],
                  expected_input: Dict[str, object]):
+        """ Instantiate subclass of Task
+
+        :param input_data: Data dict parsed into self.input
+        :param cfg: Reference to global config manager
+        :param pm: Reference to global path manager
+        :param record_id: Task record id (e.g. basename of input file)
+        :param db_name: Tasks scope "_" name
+        :param mode: Run/debug mode, set at command line level
+        :param scope: Outer scope. If not present, Task is outer-level task. Else, is a dependency
+        :param requested_input_data: Additional data requested from Task depends and requires lists
+        :param expected_input: Input data passed as dependency_input to Task dependencies
+        """
         # Set name of task
         self._name = db_name
         # Store input data and update passed/requested data
@@ -122,7 +137,7 @@ class Task(ABC):
 
     def run_helper(self) -> None:
         """ Helper method to determine if Task needs is scheduled to run (e.g. not is_skip)
-        and is not already completed
+        and is not already completed. Prints completion status to stdout
 
         """
         # If task is set to skip,return
@@ -156,16 +171,15 @@ class Task(ABC):
                     # Then move on
                     is_complete = False
                     break
-                else:
-                    is_complete = True
+                is_complete = True
         if is_complete is None:
             return False
         return is_complete
 
     def results(self) -> Dict[str, object]:
-        """ Check that all required datasets are fulfilled
-        Alert if data output is provided, but does not exist
+        """ Check that all required output is created
 
+        :raises: OutputResultsFileError if a file is expected to have generated but didn't
         :return: Results dictionary that was set in Task __init__
         """
         for _path in self._output_paths.values():
@@ -215,7 +229,7 @@ class Task(ABC):
     def added_flags(self) -> List[str]:
         """ Get additional flags that user provided in config file
 
-        Example: self.local["ls"][(\*self.added_flags("ls"))]
+        Example: self.local["ls"][(*self.added_flags("ls"))]
 
         :return: List of arguments to pass to calling program
         """
@@ -353,6 +367,7 @@ class Task(ABC):
 
         :param cmd: plumbum LocalCommand object to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
+        :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
         if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is True:
@@ -468,9 +483,9 @@ class Task(ABC):
         """
         if _time > 3600 * 24:
             return _time / (3600 * 24), "d"
-        elif _time > 3600:
+        if _time > 3600:
             return _time / 3600, "h"
-        elif _time > 60:
+        if _time > 60:
             return _time / 60, "m"
         return _time, "s"
 
@@ -483,7 +498,7 @@ class TaskList(ABC):
     """
     @property
     @abstractmethod
-    def requires(cls) -> List[str]:
+    def requires(self) -> List[str]:
         """ Requirements to run a given TaskList
 
         :return: List of task class names that must run before this task
@@ -492,7 +507,7 @@ class TaskList(ABC):
 
     @property
     @abstractmethod
-    def depends(cls) -> List[DependencyInput]:
+    def depends(self) -> List[DependencyInput]:
         """ Dependencies used to run task
 
         :return: List of dependencies and the task output to use as its input.
@@ -506,6 +521,20 @@ class TaskList(ABC):
                  pm: PathManager, record_ids: List[str], mode: int,
                  scope: str, requested_input_data: List[Dict[str, Dict[str, object]]],
                  expected_input_list: List[Dict[str, object]]):
+        """ Instantiate child class of TaskList with provided Task type and name. Pass additional input
+        requested at Task Level
+
+        :param new_task: Task type for each task in this TaskList collection
+        :param name: Name of Task as specified in config file
+        :param cfg: Reference to ConfigManager
+        :param input_paths: List of input data/path data needed for each Task
+        :param pm: Reference to PathManager
+        :param record_ids: List of record_ids associated with stored list of tasks
+        :param mode: Run/debug mode
+        :param scope: Outer scope of Task, may be "" if Task is at outer scope
+        :param requested_input_data: List of requested input data for Task that is fed to each Task
+        :param expected_input_list: List of dependency input data needed for dependency-level input
+        """
         # Name of TaskList
         self.name = name
         # Store workers, threads, and scope
@@ -605,13 +634,9 @@ class TaskList(ABC):
     def output(self) -> Tuple[List[Dict[str, object]], List[str]]:
         """ Get output and record_id that is generated by all Tasks in TaskList
 
-        :return:
+        :return: List of output from all Tasks in TaskList and their accompanying record_ids
         """
         return (
             [task.results() for task in self._tasks],
             [task.record_id for task in self._tasks],
         )
-
-
-if __name__ == "__main__":
-    pass
