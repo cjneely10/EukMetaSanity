@@ -4,7 +4,6 @@ from typing import List, Type, Tuple, Dict
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.dependencies import dependencies
 
-# TODO: Incorporate id_mapping here!
 Node = namedtuple("Node", ("name", "scope", "dependency_input", "id_mapping"))
 
 

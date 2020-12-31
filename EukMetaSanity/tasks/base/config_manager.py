@@ -33,6 +33,9 @@ class InvalidProtocolError(ValueError):
 
 
 class ConfigManager:
+    """ ConfigManager handles parsing user-passed config file
+
+    """
     EXPECTED_RESULTS_DIR = "results"
     ROOT = "root"
     SLURM = "SLURM"
@@ -50,19 +53,29 @@ class ConfigManager:
     BASE = "base"
 
     def __init__(self, config_path: str):
+        """ Create ConfigManager object
+
+        :param config_path: Path to .yaml config file
+        """
         self._config = yaml.load(open(str(Path(config_path).resolve()), "r"), Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
         self._validate()
 
     @property
     def config(self) -> Dict[str, Dict[str, Union[str, dict]]]:
-        return self._config
+        """ Get config file parsed to dict
 
-    def get(self, key: str) -> Dict[str, Dict[str, Union[str, dict]]]:
-        pass
+        :return: config file parsed to dict
+        """
+        return self._config
 
     # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate(self):
+        """ Confirm that data and dependency paths provided in file are all valid.
+
+        Raises MissingDataError
+
+        """
         for task_name, task_dict in self.config.items():
             if "data" in task_dict.keys() and ("skip" not in task_dict.keys() or task_dict["skip"] is not True):
                 for _val in task_dict["data"].split(","):
@@ -79,6 +92,7 @@ class ConfigManager:
                         try:
                             local[prog_data]
                         except CommandNotFound:
+                            # pylint: disable=raise-missing-from
                             raise MissingDataError(
                                 "Dependency %s (provided: %s) is not present in your system's path!" % (
                                     prog_name, prog_data))
@@ -86,6 +100,7 @@ class ConfigManager:
                     elif isinstance(prog_data, dict):
                         try:
                             if "program" not in prog_data:
+                                # pylint: disable=raise-missing-from
                                 raise InvalidPathError(
                                     "Dependency %s is improperly configured in your config file!" % prog_name
                                 )
@@ -96,16 +111,22 @@ class ConfigManager:
                                     prog_name, prog_data["program"]))
 
     def get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
+        """ Get SLURM arguments from file
+
+        :return: SLURM arguments parsed to input list
+        """
         return [
             (key, str(val)) for key, val in self.config["SLURM"].items()
             if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         ]
 
     def get_slurm_userid(self):
+        """ Get user id from slurm section.
+
+        Raises MissingDataError if not present
+
+        :return: user-id provided in config file
+        """
         if "user-id" not in self.config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]
-
-
-if __name__ == "__main__":
-    pass
