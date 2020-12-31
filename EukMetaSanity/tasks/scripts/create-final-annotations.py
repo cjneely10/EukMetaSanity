@@ -1,28 +1,52 @@
 #!/usr/bin/env python3
+
+# pylint: disable=invalid-name
+"""
+Script handles collecting results from all gene predictors and parsing into final output results
+"""
+
 import os
 import re
 import sys
-from Bio import SeqIO
-from Bio.Seq import Seq
 from io import StringIO
 from datetime import datetime
 from operator import itemgetter
-from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
-from EukMetaSanity.utils.arg_parse import ArgParse
 from typing import List, Dict, Tuple, Generator, Optional, Set
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from EukMetaSanity.utils.arg_parse import ArgParse
 
 
 class Gene:
+    """
+    Class holds the data describing a given gene region. Merges ab-initio skeleton exons with evidence-based exons
+    """
     def __init__(self, ab_initio_data: List, strand: str, term_exons: List):
+        """ Create Gene using base ab-initio skeleton on a given strand. Define terminal exons in
+        skeleton.
+
+        :param ab_initio_data: List of initial exons
+        :param strand: Strand of DNA
+        :param term_exons: List of terminal exons
+        """
         self.exons: List = ab_initio_data
         self.strand: str = strand
         self.num_ab_initio: int = len(ab_initio_data)
+        # Number of ab-initio exons removed after confirming with evidence
         self.trimmed_ab_initio: int = len(ab_initio_data)
+        # Number of additional exons found at evidence level
         self.added_evidence: int = 0
+        # Set of terminal exons
         self.terminal_exons = set(term_exons)
 
+    # pylint: disable=too-many-branches
     def add_evidence(self, evidence_data: List):
+        """ Add list of exons from protein/transcriptomic-based evidence
+
+        :param evidence_data: List of evidence-derived exons
+        """
         if len(self.exons) == 0:
             return
         _len_ev, _len_ex = len(evidence_data), self.num_ab_initio
@@ -79,21 +103,44 @@ class Gene:
         else:
             self.exons.sort(key=itemgetter(0), reverse=True)
 
-    # Returns if part of query coord overlaps target coord
     @staticmethod
     def in_exon(query_coord: Tuple[int, int, int], target_coord: Tuple[int, int, int]) -> bool:
+        """ Returns if part of query coord overlaps target coord
+
+        :param query_coord: Tuple for query location
+        :param target_coord: Tuple for target location
+        :return: Boolean if two regions overlap
+        """
         return max(query_coord[0], target_coord[0]) <= min(query_coord[1], target_coord[1])
 
 
 class GffReader:
+    """
+    Class reads a Gff file
+    """
     def __init__(self, gff3_path: str):
+        """ Open gff3 file
+
+        :param gff3_path: Path to file
+        :raises: AssertionError if gff3 file path does not exist
+        """
+        assert os.path.exists(gff3_path)
         self.fp = open(gff3_path, "r")
         self._count = 0
 
     def __iter__(self):
+        """ Create iterator of genes in file
+
+        :return: Iterator
+        """
         return self.next_gene()
 
+    # pylint: disable=stop-iteration-return
     def next_gene(self) -> Generator[defaultdict, None, None]:
+        """ Get next gene in file
+
+        :return: Generator over genes present in each section of gff3 file
+        """
         _line: str
         line: List[str]
         line = next(self.fp).rstrip("\r\n").split("\t")
@@ -145,11 +192,25 @@ class GffReader:
 
 
 class GffMerge:
+    """
+    Class loads all levels of evidence together and allows Gene class to merge together
+    """
     def __init__(self, gff3_path: str, fasta_path: str):
+        """ Open gff3 file and fasta file. Load fasta data into memory
+
+        :param gff3_path: Path
+        :param fasta_path: Path
+        :raises: AssertionError if either path does not exist
+        """
+        assert os.path.exists(gff3_path) and os.path.exists(fasta_path)
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
 
     def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
+        """ Merge together genes from gff3 file with existing ab-initio skeleton
+
+        :return: Iterator over merged genes
+        """
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
@@ -163,6 +224,12 @@ class GffMerge:
             yield (gene_data, *self.create_cds(gene_data, gene))
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+        """ Create CDS from gene data in region
+
+        :param gene_data: Gene metadata
+        :param gene: Gene object to translate
+        :return: CDS/protein records and list of offsets
+        """
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
         out_cds: List[str] = []
@@ -208,6 +275,11 @@ class GffMerge:
 
     @staticmethod
     def longest_orf(sequence: str) -> str:
+        """ Find longest ORF in a sequence
+
+        :param sequence: Str sequence to search
+        :return: Longest ORF in sequence
+        """
         longest = ""
         possible_starts = ("ATG", "CCA", "CTG", "CAG")
         for start in possible_starts:
@@ -221,6 +293,15 @@ class GffMerge:
 
     @staticmethod
     def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, k: int, start: int) -> str:
+        """ Recursive helper to search most possible combinations of codons in a string
+
+        :param sequence: Sequence to search
+        :param idx: Set of coordinates already searched
+        :param out: CDS string being build from underlying region
+        :param k: Offset to search
+        :param start: Start position to search
+        :return: Longest ORF
+        """
         possible_ends = ("TAG", "TAA", "TGA")
         for offset in range(k):
             if start + offset + k <= len(sequence):
@@ -236,14 +317,27 @@ class GffMerge:
         return out.getvalue()
 
 
+# pylint: disable=too-few-public-methods
 class GffWriter:
+    """
+    Class writes results of merging all data and evidence
+    """
     def __init__(self, in_gff3_path: str, fasta_file: str, output_prefix: str):
+        """ Create write object based on input data
+
+        :param in_gff3_path: Initial gff3 file
+        :param fasta_file: FASTA file associated with gff3 file
+        :param output_prefix: Out prefix to write
+        """
         self.in_fp = open(in_gff3_path, "r")
         self.base = output_prefix
         self.out_fp = open(self.base + ".nr.gff3", "w")
         self.merger = GffMerge(in_gff3_path, fasta_file)
 
     def write(self):
+        """ Write parsed results in gff3 format
+
+        """
         self.out_fp.write("# EukMetaSanity annotations generated %s\n" % datetime.now().strftime("%Y/%m/%d %H:%M"))
         out_prots: List[SeqRecord] = []
         out_cds: List[SeqRecord] = []
@@ -262,8 +356,15 @@ class GffWriter:
         SeqIO.write(out_prots, self.base + ".faa", "fasta")
         SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
 
+    # pylint: disable=inconsistent-return-statements
     @staticmethod
     def _gene_dict_to_string(gene_data: Dict, offsets: List[int]) -> Optional[str]:
+        """ Convert data in gene dict to string format
+
+        :param gene_data: Collected gene data
+        :param offsets: Offsets associated with each CDS region
+        :return: String of gene data, if any is present
+        """
         gene_data["transcripts"].sort(key=itemgetter(0))
         gene_id = gene_data["geneid"]
         mrna_id = gene_id + "-mRNA"

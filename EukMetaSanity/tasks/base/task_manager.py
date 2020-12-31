@@ -13,6 +13,7 @@ from EukMetaSanity.tasks.base.dependency_graph import DependencyGraph
 from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 
 
+# pylint: disable=invalid-name
 class TaskManager:
     """ Class interfaces stored pipelines and input data from users.
 
@@ -34,14 +35,16 @@ class TaskManager:
         all dependencies from their respective modules and ensuring that required input (e.g. from different tasks or
         pipelines) is loaded into all tasks prior to instantiation and run
 
-        :param pm:
-        :param cfg:
-        :param pam:
-        :param input_files:
-        :param input_prefixes:
-        :param debug:
-        :param command:
+        :param pm: Reference to PipelineManager
+        :param cfg: Reference to global ConfigManager
+        :param pam: Reference to PathManager
+        :param input_files: List of input data to pass to each input file
+        :param input_prefixes: Associated input prefixes/record ids
+        :param debug: Run/debug mode
+        :param command: Name of pipeline to run
+        :raises: AssertionError if an improper command is passed
         """
+        assert command in pm.programs.keys()
         self.dep_graph = DependencyGraph(pm.programs[command])
         self.task_list = self.dep_graph.sorted_tasks
         self.completed_tasks: Dict[Tuple[str, str], TaskList] = {}
@@ -55,21 +58,21 @@ class TaskManager:
     def __repr__(self) -> str:
         """ REPR view of task
 
-        :return:
+        :return: List of tasks parsed for viewing
         """
         return "\n".join((" ".join(task_list) for task_list in self.task_list))
 
     def __str__(self) -> str:
-        """
+        """ Call REPR and return string
 
-        :return:
+        :return: List of tasks parsed for viewing
         """
         return self.__repr__()
 
     def run(self, output_dir: str):
         """ Run pipeline!
 
-        :param output_dir: Directory to write final result file
+        :param output_dir: Directory to write final results
         """
         # Generate first task from class object
         task = self.task_list[0][0](
@@ -143,8 +146,14 @@ class TaskManager:
         pickle.dump(output_data, open(os.path.join(_final_output_dir, self.command + ".pkl"), "wb"))
 
     @staticmethod
-    def _incorporate_key_overrides(override_tuple: Optional[List[Tuple]], output: Dict) -> Dict:
-        for key, val in override_tuple or {}:
+    def _incorporate_key_overrides(override_tuples: Optional[List[Tuple]], output: Dict) -> Dict:
+        """ Use tuple of new_key: old_key data to update dictionary keys for passing to dependencies
+
+        :param override_tuples: List of new_key: old_key values to incorporate into output dict
+        :param output: Dict to modify
+        :return: Reference to updated dict
+        """
+        for key, val in override_tuples or []:
             output[val] = output[key]
         return output
 
@@ -157,7 +166,7 @@ class TaskManager:
         :param task_result: Output of task (from calling output())
         :param task_name: Name/class name assigned to task
         :param completed_tasklist_idx: Position in self.completed_tasks containing this record id's data
-        :return:
+        :return: Output dictionary of record_id: file collection
         """
         final_output_paths: Dict[str, object] = {}
         _sub_out = os.path.join(output_directory, record_id)

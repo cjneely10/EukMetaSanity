@@ -1,3 +1,7 @@
+"""
+Module holds simple logic for passing taxonomy assignment/information between tasks
+"""
+
 from collections import namedtuple
 from typing import Optional
 
@@ -9,6 +13,9 @@ class TaxonomyAssignment:
     Assignment = namedtuple("Assignment", ("value", "tax_id", "score"))
 
     def __init__(self):
+        """ Create empty assignment
+
+        """
         self.kingdom: Optional[TaxonomyAssignment.Assignment] = None
         self.phylum: Optional[TaxonomyAssignment.Assignment] = None
         self._class: Optional[TaxonomyAssignment.Assignment] = None
@@ -27,7 +34,11 @@ class TaxonomyAssignment:
         """
         return getattr(self, level, None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """ Return string representation of assignment
+
+        :return: Assignment as string
+        """
         return "TaxonomyAssignment(kingdom={}, phylum={}, class={}, order={}, superfamily={}, family={}, genus={}, " \
                "species={})".format(
             *[

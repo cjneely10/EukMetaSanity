@@ -1,3 +1,7 @@
+"""
+Module describe outer-most Tasks to complete for a given pipeline
+"""
+
 from typing import Dict, List, Type
 # General imports
 from EukMetaSanity.tasks.base.task_class import TaskList
@@ -14,6 +18,7 @@ from EukMetaSanity.tasks.official.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.official.report.stats import StatsIter
 
 
+# pylint: disable=too-few-public-methods
 class PipelineManager:
     """ Class handles ordering of tasks to complete
 
@@ -24,6 +29,9 @@ class PipelineManager:
 
     """
     def __init__(self):
+        """ Load available pipeline data
+
+        """
         self.programs: Dict[str, List[Type[TaskList]]] = {
             "run": [
                 EvidenceIter,
