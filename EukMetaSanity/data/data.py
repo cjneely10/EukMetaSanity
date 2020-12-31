@@ -1,7 +1,12 @@
+"""
+Module contains logic to automate data download process on EukMetaSanity installation
+"""
+
 from typing import Dict
 from collections import namedtuple
 
 
+# pylint: disable=pointless-string-statement
 """ NamedTuple consisting of options for downloading/unpackaging data
 Logic is present within download-data.py script to handle these specific types:
 tar, gz, and the flags passed to them
@@ -38,7 +43,3 @@ def data_urls() -> Dict[str, UrlInfo]:
             type="profile"
         )
     }
-
-
-if __name__ == "__main__":
-    pass

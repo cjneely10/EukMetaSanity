@@ -1,5 +1,5 @@
 """
-Module contains TaskManager class
+Module contains logic to generate a TaskList from a provided pipeline name
 """
 
 import os
@@ -16,7 +16,7 @@ from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
 class TaskManager:
     """ Class interfaces stored pipelines and input data from users.
 
-    Dependency graph created using pipeline TaskList class object `requires` members, and this graph is
+    Dependency graph created using pipeline TaskList class object `requires` and `depends` members, and this graph is
     output in topologically-sorted order to run pipeline
 
     Output of each task is automatically parsed into other tasks that depend on its output
@@ -24,12 +24,24 @@ class TaskManager:
     At the end of a pipeline, any task that contains a "final" key in its `output` member will have valid member
     paths copied into a final results directory.
 
-    All dictionary data will also be serialized into a final "task.json" file for loading into other pipelines
+    All dictionary data will also be serialized into a final "task.pkl" file for loading into other pipelines
 
     """
 
     def __init__(self, pm: PipelineManager, cfg: ConfigManager, pam: PathManager,
                  input_files: List[Dict[str, Dict[str, object]]], input_prefixes: List[str], debug: bool, command: str):
+        """ Create TaskManager that parses requested program pipeline and generates DependencyGraphs. Manages loading
+        all dependencies from their respective modules and ensuring that required input (e.g. from different tasks or
+        pipelines) is loaded into all tasks prior to instantiation and run
+
+        :param pm:
+        :param cfg:
+        :param pam:
+        :param input_files:
+        :param input_prefixes:
+        :param debug:
+        :param command:
+        """
         self.dep_graph = DependencyGraph(pm.programs[command])
         self.task_list = self.dep_graph.sorted_tasks
         self.completed_tasks: Dict[Tuple[str, str], TaskList] = {}
@@ -39,6 +51,20 @@ class TaskManager:
         self.command = command
         self.input_files = input_files
         self.input_prefixes = input_prefixes
+
+    def __repr__(self) -> str:
+        """ REPR view of task
+
+        :return:
+        """
+        return "\n".join((" ".join(task_list) for task_list in self.task_list))
+
+    def __str__(self) -> str:
+        """
+
+        :return:
+        """
+        return self.__repr__()
 
     def run(self, output_dir: str):
         """ Run pipeline!
