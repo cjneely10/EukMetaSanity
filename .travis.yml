@@ -3,3 +3,5 @@ python:
   - "3.6"      # current default Python on Travis CI
 install:
   ./INSTALL.sh
+script:
+  cat complete!
