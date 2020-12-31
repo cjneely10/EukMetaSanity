@@ -1,6 +1,10 @@
-import networkx as nx
+"""
+Module contains logic for generating dependency DAGs
+"""
+
 from collections import namedtuple
 from typing import List, Type, Tuple, Dict
+import networkx as nx
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.dependencies import dependencies
 
@@ -16,7 +20,7 @@ class DependencyGraphGenerationError(BaseException):
 
 
 class DependencyGraph:
-    """ Class takes list of tasks and creates dependency graph of data
+    """ Class takes list of tasks and creates dependency DAG of data
     Topological sort outputs order in which tasks can be completed
 
     All tasks are assumed to require (at least) a root task to complete
@@ -26,6 +30,10 @@ class DependencyGraph:
     """
 
     def __init__(self, tasks: List[TaskList]):
+        """ Create DAG from list of TaskList class objects
+
+        :param tasks: List of TaskList class objects
+        """
         self.idx: Dict[str, TaskList] = {task.name: task for task in tasks}
         self.idx.update(dependencies)
         self.graph = nx.DiGraph()
@@ -38,6 +46,10 @@ class DependencyGraph:
             )
 
     def _build_dependency_graph(self, tasks: List[TaskList]):
+        """ Create dependency graph using provided task list
+
+        :param tasks: List of TaskList class objects
+        """
         root = Node(name="root", scope="", dependency_input="root", id_mapping=None)
         self.graph.add_node(root)
         # Add dependencies stored in TaskList object's .requires member
@@ -56,6 +68,14 @@ class DependencyGraph:
 
     def _add_requirements_within_dependencies(self, graph: nx.DiGraph, node: Node, task_node: Node, attr: str,
                                               scope: str):
+        """ Search dependency's own depends/requires list for additional dependencies/requirements
+
+        :param graph: DAG to search
+        :param node: Current node to add to DAG
+        :param task_node: Connecting node within DAG
+        :param attr: depends/requires to search
+        :param scope: Scope of task - can be at outer level, or within a given outer task
+        """
         for requirement in getattr(self.idx[node.name], attr):
             if attr == "depends":
                 new_node = Node(
@@ -69,7 +89,14 @@ class DependencyGraph:
             graph.add_edge(new_node, task_node)
             self._add_requirements_within_dependencies(graph, new_node, task_node, attr, scope)
 
-    def _get_dependencies_at_level(self, task: TaskList) -> List[Tuple[Type[TaskList], str, str, List[Tuple[str, str]]]]:
+    def _get_dependencies_at_level(self, task: TaskList) -> \
+            List[Tuple[Type[TaskList], str, str, List[Tuple[str, str]]]]:
+        """ Look up dependencies for a given task and return an object to add to the final task_list. Dependency DAG
+        generated to provide ordering or tasks
+
+        :param task: Task with dependencies to integrate.
+        :return: List of (dependency tasks, scope, dependency_input, and id_mapping)
+        """
         graph = nx.DiGraph()
         task_node = Node(name=task.name, scope="", dependency_input="root", id_mapping=None)
         graph.add_node(task_node)

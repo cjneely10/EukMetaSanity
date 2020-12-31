@@ -69,7 +69,6 @@ class ConfigManager:
         """
         return self._config
 
-    # Ensure DATA section is valid for all needed databases - mmseqs, etc.
     def _validate(self):
         """ Confirm that data and dependency paths provided in file are all valid.
 
@@ -86,29 +85,38 @@ class ConfigManager:
                             task_name, _val
                         ))
             if "dependencies" in task_dict.keys():
-                for prog_name, prog_data in task_dict["dependencies"].items():
-                    # Simple - is only a path with no ability to pass flags
-                    if isinstance(prog_data, str):
-                        try:
-                            local[prog_data]
-                        except CommandNotFound:
-                            # pylint: disable=raise-missing-from
-                            raise MissingDataError(
-                                "Dependency %s (provided: %s) is not present in your system's path!" % (
-                                    prog_name, prog_data))
-                    # Provided as dict with program path and FLAGS
-                    elif isinstance(prog_data, dict):
-                        try:
-                            if "program" not in prog_data:
-                                # pylint: disable=raise-missing-from
-                                raise InvalidPathError(
-                                    "Dependency %s is improperly configured in your config file!" % prog_name
-                                )
-                            bool(prog_data["program"])
-                        except CommandNotFound:
-                            raise MissingDataError(
-                                "Dependency %s (provided: %s) is not present in your system's path!" % (
-                                    prog_name, prog_data["program"]))
+                ConfigManager._check_dependencies(task_dict)
+
+    @staticmethod
+    def _check_dependencies(task_dict: Dict):
+        """ Check dependencies section of config file section
+
+        :param task_dict: dictionary section for task
+        """
+        for prog_name, prog_data in task_dict["dependencies"].items():
+            # Simple - is only a path with no ability to pass flags
+            if isinstance(prog_data, str):
+                try:
+                    local[prog_data]
+                except CommandNotFound:
+                    # pylint: disable=raise-missing-from
+                    raise MissingDataError(
+                        "Dependency %s (provided: %s) is not present in your system's path!" % (
+                            prog_name, prog_data))
+            # Provided as dict with program path and FLAGS
+            elif isinstance(prog_data, dict):
+                try:
+                    if "program" not in prog_data:
+                        # pylint: disable=raise-missing-from
+                        raise InvalidPathError(
+                            "Dependency %s is improperly configured in your config file!" % prog_name
+                        )
+                    bool(prog_data["program"])
+                except CommandNotFound:
+                    # pylint: disable=raise-missing-from
+                    raise MissingDataError(
+                        "Dependency %s (provided: %s) is not present in your system's path!" % (
+                            prog_name, prog_data["program"]))
 
     def get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
         """ Get SLURM arguments from file
