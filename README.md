@@ -1,4 +1,4 @@
-[![Build Status](https://www.travis-ci.com/cjneely10/EukMetaSanity.svg?token=M4ut94Kepv6qucNU1mEy&branch=master)](https://www.travis-ci.com/cjneely10/EukMetaSanity)
+[![Build Status](https://travis-ci.com/cjneely10/EukMetaSanity.svg?token=M4ut94Kepv6qucNU1mEy&branch=dependency-graph)](https://travis-ci.com/cjneely10/EukMetaSanity)
 
 # EukMetaSanity
 
