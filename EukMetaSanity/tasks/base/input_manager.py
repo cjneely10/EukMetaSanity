@@ -24,8 +24,8 @@ class InputManager:
         :param input_dir:
         :param extension_list:
         """
-        self.pm = pm
-        self.pm.add_dirs(self.pm.MAGS)
+        self.path_manager = pm
+        self.path_manager.add_dirs(self.path_manager.MAGS)
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.extension_list = extension_list
@@ -78,6 +78,7 @@ class InputManager:
     def _get_input_files(self):
         """ Load input files from passed input directory at command-line level
 
+        :raises: AttributeError if identical record_ids are found
         """
         for file in os.listdir(self.input_dir):
             for ext in self.extension_list:
@@ -87,7 +88,7 @@ class InputManager:
                         raise AttributeError("Input directory has multiple files with the same basename - exiting")
                     self.data[record_id] = {}
                     self.data[record_id]["fasta"] = InputManager._simplify_fasta(file, record_id, self.input_dir, ext)
-                    self.pm.add_dirs(record_id)
+                    self.path_manager.add_dirs(record_id)
 
     @property
     def input_prefixes(self) -> List[str]:

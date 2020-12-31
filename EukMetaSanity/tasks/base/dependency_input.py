@@ -1,6 +1,11 @@
-from typing import Optional, Dict
+"""
+Module holds DependencyInput `struct` that is used to in TaskList.depends member
+"""
+
+from typing import Optional, Tuple
 
 
+# pylint: disable=too-few-public-methods
 class DependencyInput:
     """ Class handles parsing input for dependency requirements
 
@@ -10,7 +15,7 @@ class DependencyInput:
 
         :param name: Name of dependency, example mmseqs.createdb
         :param primary_input: Input to use, default is root.fna
-        :param id_mapping:
+        :param id_mapping: Specific key:values to override within implementation
         """
         self._name = name
         self._input = primary_input
@@ -35,7 +40,7 @@ class DependencyInput:
         return self._input
 
     @property
-    def id_mapping(self) -> Optional[Dict[str, str]]:
+    def id_mapping(self) -> Optional[Tuple]:
         """ Get mapping to generic-level dependency input
 
         :return: Mapping provided at Task level

@@ -19,6 +19,7 @@ class DependencyGraphGenerationError(BaseException):
     pass
 
 
+# pylint: disable=too-few-public-methods
 class DependencyGraph:
     """ Class takes list of tasks and creates dependency DAG of data
     Topological sort outputs order in which tasks can be completed
@@ -33,6 +34,7 @@ class DependencyGraph:
         """ Create DAG from list of TaskList class objects
 
         :param tasks: List of TaskList class objects
+        :raises: DependencyGraphGenerationError
         """
         self.idx: Dict[str, TaskList] = {task.name: task for task in tasks}
         self.idx.update(dependencies)
@@ -52,7 +54,7 @@ class DependencyGraph:
         """
         root = Node(name="root", scope="", dependency_input="root", id_mapping=None)
         self.graph.add_node(root)
-        # Add dependencies stored in TaskList object's .requires member
+        # Add dependencies stored in TaskList object's .requires and .depends members
         for task_list in tasks:
             task_node = Node(name=task_list.name, scope="", dependency_input="root", id_mapping=None)
             self.graph.add_edge(root, task_node)

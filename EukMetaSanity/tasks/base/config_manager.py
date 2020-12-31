@@ -72,7 +72,7 @@ class ConfigManager:
     def _validate(self):
         """ Confirm that data and dependency paths provided in file are all valid.
 
-        Raises MissingDataError
+        :raises: MissingDataError
 
         """
         for task_name, task_dict in self.config.items():
@@ -92,6 +92,7 @@ class ConfigManager:
         """ Check dependencies section of config file section
 
         :param task_dict: dictionary section for task
+        :raises: MissingDataError for poorly formed or missing data
         """
         for prog_name, prog_data in task_dict["dependencies"].items():
             # Simple - is only a path with no ability to pass flags
@@ -131,7 +132,7 @@ class ConfigManager:
     def get_slurm_userid(self):
         """ Get user id from slurm section.
 
-        Raises MissingDataError if not present
+        :raises: MissingDataError if not present
 
         :return: user-id provided in config file
         """

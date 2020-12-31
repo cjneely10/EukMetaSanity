@@ -1,10 +1,11 @@
+"""
+Module contains PathManager that manages directory tree focused on using record_ids as subdirectories
+"""
+
 import os
 from typing import List
 from pathlib import Path
 from plumbum import local
-
-# Reference to `mkdir` command on system
-mkdir = local["mkdir"]
 
 
 class PathManager:
@@ -62,13 +63,13 @@ class PathManager:
         """
         assert record_id is not None
         # Record base dir
-        mkdir["-p", os.path.join(self.wdir, str(record_id))]()
+        local["mkdir"]["-p", os.path.join(self.wdir, str(record_id))]()
         # Additional dirs, if needed
         if _subdirs is not None:
             assert isinstance(_subdirs, list)
             for _subd in _subdirs:
                 added_path = os.path.join(self.wdir, str(record_id), _subd)
-                mkdir["-p", added_path]()
+                local["mkdir"]["-p", added_path]()
                 self._dbs[_subd] = added_path
 
     # Get record directory in wdir
@@ -95,9 +96,9 @@ class PathManager:
     # Generate initial directory tree
     def _generate_directory_tree(self):
         # Base output directory
-        mkdir["-p", self._base]()
+        local["mkdir"]["-p", self._base]()
         # Working directory
-        mkdir["-p", os.path.join(self._base, self._wdir)]()
+        local["mkdir"]["-p", os.path.join(self._base, self._wdir)]()
 
 
 if __name__ == "__main__":
