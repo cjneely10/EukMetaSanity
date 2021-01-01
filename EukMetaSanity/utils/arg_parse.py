@@ -1,9 +1,16 @@
+"""
+Module holds functionality to wrap Python's argparse module
+"""
+
 import argparse
 from argparse import RawTextHelpFormatter
 
 
+# pylint: disable=too-few-public-methods
 class ArgParse:
-
+    """
+    ArgParse holds python argparse package with a few simple method wrappers
+    """
     def __init__(self, arguments_list, description, *args, **kwargs):
         """ Class for handling parsing of arguments and error handling
 
@@ -39,10 +46,7 @@ class ArgParse:
         # Add all arguments stored in self.arguments_list
         self._parse_arguments()
         # Parse arguments
-        try:
-            self.args = self.parser.parse_args()
-        except:
-            exit(1)
+        self.args = self.parser.parse_args()
 
     def _parse_arguments(self):
         """ Protected method for adding all arguments stored in self.arguments_list
@@ -59,7 +63,8 @@ class ArgParse:
         :param header_line:
         :param help_dict:
         :param flag_dict:
-        :return:
+        :raises: AssertionError if flag/dict combos do not match
+        :return: Description
         """
         assert set(help_dict.keys()) == set(flag_dict.keys()), "Program names do not match in key/help dictionaries"
         to_return = header_line + "\n\nAvailable Programs:\n\n"
@@ -69,7 +74,3 @@ class ArgParse:
                          "\t(Flags: {})".format(" --" + " --".join(flag_dict[program])) + "\n"
         to_return += "\n"
         return to_return
-
-
-if __name__ == "__main__":
-    pass
