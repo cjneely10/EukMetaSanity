@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-import os
-import sqlite3
-from collections import defaultdict
 
-from Bio import SeqIO
+"""
+Module compiles results of mmseqs, eggnog, and kofamscan searches into single output file and SQLite3 database file
+"""
+
+import os
+import sys
+import sqlite3
 from decimal import Decimal
+from collections import defaultdict
 from typing import List, Tuple, Generator
+from Bio import SeqIO
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 
@@ -51,7 +56,7 @@ def _parse_args(_ap: ArgParse) -> List[Tuple[str, str]]:
         _ap.args.max_evalue = Decimal(_ap.args.max_evalue)
     except ValueError as e:
         print(e)
-        exit(1)
+        sys.exit(1)
     # Convert annotation string to tuple of (file_type, path)
     annot: str
     f_string: List[str]
