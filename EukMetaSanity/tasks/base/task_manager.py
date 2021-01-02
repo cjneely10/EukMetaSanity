@@ -129,7 +129,7 @@ class TaskManager:
         :param _final_output_dir: Output directory
         :param _name: Name of pipeline
         """
-        print(colors.yellow & colors.bold | "\nPreparing output directory")
+        print(colors.green & colors.bold | "\nPreparing output directory")
         # Create results directory
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)

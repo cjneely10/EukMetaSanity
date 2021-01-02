@@ -33,7 +33,7 @@ def _initialize_logging(ap: ArgParse):
                   "Task-level log statements are redirected to subdirectory log files", "",
                   "*" * 80, "",
                   "Displaying step summaries here:\n"):
-        print(colors.blue & colors.bold | _line)
+        print(colors.yellow & colors.bold | _line)
 
 
 def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager, pm: PathManager, im: InputManager):
@@ -103,4 +103,4 @@ if __name__ == "__main__":
     # Run main program logic
     _main(_ap, _cfg, _tm, _pm, _im)
     # Display final output line
-    print(colors.blue & colors.bold | "\nEukMetaSanity %s pipeline complete!" % _ap.args.command)
+    print(colors.yellow & colors.bold | "\nEukMetaSanity %s pipeline complete!" % _ap.args.command)
