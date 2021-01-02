@@ -32,10 +32,6 @@ class {0}Iter(TaskList):
 
     def __init__(self, *args, **kwargs):
         super().__init__({0}Iter.{0}, {0}Iter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass
 """
 
 # TODO(1): Handle config file generation
