@@ -7,9 +7,9 @@ TaskList: Collection of Task objects that calls run function on each
 import os
 import time
 import logging
+import concurrent.futures
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
-from dask.distributed import Client, wait
 # pylint: disable=no-member
 from plumbum import colors, local, BG
 from plumbum.commands.processes import ProcessExecutionError
@@ -611,15 +611,10 @@ class TaskList(ABC):
             return
         # Log task beginning
         logging.info(self._statement)
-        # Pass each Task to Dask scheduler
-        futures = []
-        client = Client(n_workers=self._workers, threads_per_worker=1)
-        # Run each future
-        for _task in self._tasks:
-            futures.append(client.submit(_task.run_helper))
-        # Wait for all futures to complete and end client
-        wait(futures)
-        client.close()
+        # Run each task in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self._workers) as executor:
+            output_futures = [executor.submit(_task.run_helper) for _task in self._tasks]
+            concurrent.futures.wait(output_futures)
 
     def _prerun_check(self) -> bool:
         """ Check if each task has been completed.

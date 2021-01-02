@@ -127,6 +127,7 @@ class TaskManager:
         :param _final_output_dir: Output directory
         :param _name: Name of pipeline
         """
+        print("\nGenerating %s/results summary directory" % _final_output_dir)
         # Create results directory
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)

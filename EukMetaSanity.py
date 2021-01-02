@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-
 """
 EukMetaSanity.py
 ===============================================
 EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 
 """
-
 import os
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
