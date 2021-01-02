@@ -6,6 +6,8 @@ import os
 import pickle
 from shutil import copy
 from typing import List, Dict, Tuple, Iterable, Union, Optional
+# pylint: disable=no-member
+from plumbum import colors
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
@@ -127,7 +129,7 @@ class TaskManager:
         :param _final_output_dir: Output directory
         :param _name: Name of pipeline
         """
-        print("\nGenerating %s/results summary directory" % _final_output_dir)
+        print(colors.yellow & colors.bold | "\nPreparing output directory")
         # Create results directory
         if not os.path.exists(_final_output_dir):
             os.makedirs(_final_output_dir)

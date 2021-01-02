@@ -8,6 +8,8 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 import os
 import logging
 from signal import signal, SIGPIPE, SIG_DFL
+# pylint: disable=no-member
+from plumbum import colors
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
@@ -26,14 +28,12 @@ def _initialize_logging(ap: ArgParse):
     if os.path.exists(log_file):
         os.remove(log_file)
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
-    print(
-        "*" * 80, "",
-        "Primary log statements are redirected to %s" % log_file,
-        "Task-level log statements are redirected to subdirectory log files", "",
-        "*" * 80, "",
-        "Displaying step summaries here:\n",
-        sep="\n"
-    )
+    for _line in ("", "*" * 80, "",
+                  "Primary log statements are redirected to %s" % log_file,
+                  "Task-level log statements are redirected to subdirectory log files", "",
+                  "*" * 80, "",
+                  "Displaying step summaries here:\n"):
+        print(colors.blue & colors.bold | _line)
 
 
 def _main(ap: ArgParse, cfg: ConfigManager, tpm: PipelineManager, pm: PathManager, im: InputManager):
@@ -103,5 +103,4 @@ if __name__ == "__main__":
     # Run main program logic
     _main(_ap, _cfg, _tm, _pm, _im)
     # Display final output line
-    for func in (logging.info, print):
-        func("\nEukMetaSanity %s pipeline complete!" % _ap.args.command)
+    print(colors.blue & colors.bold | "\nEukMetaSanity %s pipeline complete!" % _ap.args.command)
