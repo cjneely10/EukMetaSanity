@@ -39,8 +39,12 @@ class GMapBuildIter(TaskList):
             Instantiate class with given output
             """
             super().__init__(*args, **kwargs)
+            if self.is_skip:
+                db = []
+            else:
+                db = os.path.join(self.wdir, self.record_id + "_db")
             self.output = {
-                "db": os.path.join(self.wdir, self.record_id + "_db")
+                "db": db
             }
 
         @program_catch

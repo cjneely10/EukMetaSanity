@@ -38,8 +38,12 @@ class GMapIter(TaskList):
             Instantiate class with given output
             """
             super().__init__(*args, **kwargs)
+            if self.is_skip:
+                sams = []
+            else:
+                sams = [os.path.join(self.wdir, prefix(transcript)) + ".sam" for transcript in self.get_transcripts()]
             self.output = {
-                "sams": [os.path.join(self.wdir, prefix(transcript)) + ".sam" for transcript in self.get_transcripts()]
+                "sams": sams
             }
 
         @program_catch
@@ -68,6 +72,8 @@ class GMapIter(TaskList):
 
             :return: List of transcriptomes
             """
+            if self.developer_mode:
+                return []
             _path = str(Path(self.config["transcriptome"]).resolve())
             if not os.path.exists(_path):
                 raise MissingDataError("Input transcriptome mapping file not found!")

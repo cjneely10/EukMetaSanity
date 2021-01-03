@@ -17,8 +17,8 @@ from EukMetaSanity.tasks.official.report.eggnog import EggNogMapperIter
 from EukMetaSanity.tasks.official.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.official.report.stats import StatsIter
 # # Refine imports
-from EukMetaSanity.tasks.official.refine.rnaseq import RNASeqIter
-from EukMetaSanity.tasks.official.refine.transcriptomes import TranscriptomeIter
+from EukMetaSanity.tasks.official.refine.mapping import MappingIter
+from EukMetaSanity.tasks.official.refine.filtering import FilteringIter
 
 
 # pylint: disable=too-few-public-methods
@@ -50,7 +50,7 @@ class PipelineManager:
                 MMseqsIter,
             ],
             "refine": [
-                RNASeqIter,
-                TranscriptomeIter
+                MappingIter,
+                FilteringIter
             ]
         }

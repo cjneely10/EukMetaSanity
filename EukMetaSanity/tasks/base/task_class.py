@@ -347,6 +347,10 @@ class Task(ABC):
         """
         return self._pm
 
+    @property
+    def developer_mode(self) -> bool:
+        return bool(self._mode) is False
+
     def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)

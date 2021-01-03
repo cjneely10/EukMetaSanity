@@ -36,8 +36,12 @@ class Hisat2Iter(TaskList):
             Instantiate class with given output
             """
             super().__init__(*args, **kwargs)
+            if self.is_skip:
+                sams = []
+            else:
+                sams = [os.path.join(self.wdir, prefix(pair[0])) for pair in self.get_rna_read_pairs()]
             self.output = {
-                "sams": [os.path.join(self.wdir, prefix(pair[0])) for pair in self.get_rna_read_pairs()]
+                "sams": sams
             }
 
         @program_catch
@@ -68,6 +72,8 @@ class Hisat2Iter(TaskList):
 
             :return: List of read pairs
             """
+            if self.developer_mode:
+                return []
             _path = str(Path(self.config["rnaseq"]).resolve())
             if not os.path.exists(_path):
                 raise MissingDataError("Input rna_seq mapping file not found!")
