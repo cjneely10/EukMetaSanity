@@ -73,10 +73,10 @@ class Task(ABC):
     """ Task is an abstract base class that API writers will overwrite to handle Task functionality
 
     """
-    def __init__(self, input_data: Dict[str, Dict[str, object]], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_data: Dict[str, Dict[str, Union[object, Iterable]]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, scope: str,
-                 requested_input_data: Dict[str, Dict[str, object]],
-                 expected_input: Dict[str, object]):
+                 requested_input_data: Dict[str, Dict[str, Union[object, Iterable]]],
+                 expected_input: Dict[str, Union[object, Iterable]]):
         """ Instantiate subclass of Task
 
         :param input_data: Data dict parsed into self.input
@@ -260,7 +260,7 @@ class Task(ABC):
         return self._output_paths
 
     @output.setter
-    def output(self, v: Dict[str, object]):
+    def output(self, v: Dict[str, Union[object, Iterable]]):
         """ Dict of data that is output by this task
 
         :param v: Dict of str: object that will output when the task successfully completes
@@ -268,7 +268,7 @@ class Task(ABC):
         self._output_paths = v
 
     @property
-    def dependency_input(self) -> Dict[str, object]:
+    def dependency_input(self) -> Dict[str, Union[object, Iterable]]:
         """ Input to a dependency. Used to run a dependency using the output of a separate abstract
         Task output
 
@@ -512,10 +512,10 @@ class TaskList(ABC):
         pass
 
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
-                 input_paths: List[Dict[str, Dict[str, object]]],
+                 input_paths: List[Dict[str, Dict[str, Union[object, Iterable]]]],
                  pm: PathManager, record_ids: List[str], mode: int,
-                 scope: str, requested_input_data: List[Dict[str, Dict[str, object]]],
-                 expected_input_list: List[Dict[str, object]]):
+                 scope: str, requested_input_data: List[Dict[str, Dict[str, Union[object, Iterable]]]],
+                 expected_input_list: List[Dict[str, Union[object, Iterable]]]):
         """ Instantiate child class of TaskList with provided Task type and name. Pass additional input
         requested at Task Level
 

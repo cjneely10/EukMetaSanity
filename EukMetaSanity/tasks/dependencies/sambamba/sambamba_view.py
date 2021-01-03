@@ -3,10 +3,8 @@ Module holds sambamba.view build functionality
 """
 
 import os
-from EukMetaSanity import Task, TaskList, DependencyInput
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
-from EukMetaSanity import program_catch, prefix, touch, set_complete
+from EukMetaSanity import Task, TaskList
+from EukMetaSanity import program_catch, prefix, set_complete
 
 
 class SambambaViewIter(TaskList):
@@ -18,7 +16,7 @@ class SambambaViewIter(TaskList):
 
     depends:
 
-    output:
+    output: bams
 
     final:
 
@@ -38,7 +36,7 @@ class SambambaViewIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "bams": [os.path.join(self.wdir, prefix(db) + ".bam") for db in self.dependency_input["sams"]]
             }
 
         @program_catch
@@ -46,7 +44,16 @@ class SambambaViewIter(TaskList):
             """
             Run sambamba.view
             """
-            pass
+            for bam_file in self.output["bams"]:
+                self.parallel(
+                    self.program[
+                        "view",
+                        "-S", os.path.basename(bam_file) + ".sam",
+                        "-f", "bam",
+                        "-t", self.threads,
+                        "-o", bam_file,
+                    ]
+                )
 
     def __init__(self, *args, **kwargs):
         """

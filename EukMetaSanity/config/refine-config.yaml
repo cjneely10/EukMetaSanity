@@ -34,7 +34,20 @@ rnaseq:
       rnaseq: /path/to/rnaseq-mapping-file
       FLAGS:
         ""
-    sambamba:
+
+file_management:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    sambamba.view:
       program: sambamba
+      FLAGS:
+        ""
+    sambamba.sort:
+      program: sambamba
+      FLAGS:
+        ""
 
 ...  # document end
