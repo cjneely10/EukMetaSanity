@@ -27,7 +27,7 @@ class AbInitioAugustusIter(TaskList):
         """
         Class calls augustus on input fna
         """
-        @set_complete
+        # @set_complete
         def __init__(self, *args, **kwargs):
             """
             Create Augustus Task

@@ -10,7 +10,7 @@ class AbInitioGeneMarkIter(TaskList):
     depends = [DependencyInput("gmes.gffread", "repeats")]
     
     class AbInitioGeneMark(Task):
-        @set_complete
+        # @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
