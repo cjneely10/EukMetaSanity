@@ -53,6 +53,7 @@ transcriptomes:
         -B 5
         --input-buffer-size 1000000
         --output-buffer-size 1000000
+        -f samse
 
 file_management:
   workers: 1

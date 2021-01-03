@@ -66,7 +66,7 @@ class Hisat2Iter(TaskList):
         def get_rna_read_pairs(self) -> List[Tuple[str, ...]]:
             """ Parse rna_seq file into list of rna pairs to analyze
 
-            :return: List of tuple pairs
+            :return: List of read pairs
             """
             _path = str(Path(self.config["rnaseq"]).resolve())
             if not os.path.exists(_path):
