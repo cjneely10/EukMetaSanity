@@ -22,7 +22,7 @@ class TranscriptomeIter(TaskList):
     """
     name = "transcriptomes"
     requires = []
-    depends = [DependencyInput("sambamba.sort")]
+    depends = [DependencyInput("gmap"), DependencyInput("sambamba.sort", "gmap")]
 
     class Transcriptome(Task):
         """

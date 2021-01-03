@@ -22,7 +22,7 @@ class RNASeqIter(TaskList):
     """
     name = "rnaseq"
     requires = []
-    depends = [DependencyInput("sambamba.sort")]
+    depends = [DependencyInput("hisat2"), DependencyInput("sambamba.sort", "hisat2")]
 
     class RNASeq(Task):
         """
