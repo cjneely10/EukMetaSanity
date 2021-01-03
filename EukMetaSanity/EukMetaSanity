@@ -7,6 +7,7 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 """
 import os
 import logging
+from art import tprint
 from pathlib import Path
 from signal import signal, SIGPIPE, SIG_DFL
 # pylint: disable=no-member
@@ -29,7 +30,7 @@ def _initialize_logging(ap: ArgParse):
     if os.path.exists(log_file):
         os.remove(log_file)
     logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
-    for _line in ("", "*" * 80, "",
+    for _line in ("*" * 80, "",
                   "Primary log statements are redirected to %s" % log_file,
                   "Task-level log statements are redirected to subdirectory log files", "",
                   "*" * 80, "",
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     # Gather list of files to analyze
     _im = InputManager(_ap.args.output, _ap.args.fasta_directory, _pm, _cfg, _ap.args.extensions)
     # Run main program logic
+    tprint("EukMetaSanity", font="smslant")
     _main(_ap, _cfg, _tm, _pm, _im)
     # Display final output line
     print(colors.yellow & colors.bold | "\nEukMetaSanity %s pipeline complete!" % _ap.args.command)

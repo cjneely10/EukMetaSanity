@@ -2,6 +2,7 @@ name: EukMS
 channels:
   - bioconda
   - conda-forge
+  - sepandhaghighi
 dependencies:
   - python=3.6.9
   - augustus=3.3.3
@@ -28,3 +29,4 @@ dependencies:
   - perl-threaded=5.26.0
   - networkx=2.2
   - pyyaml=5.3.1
+  - art=5.1
