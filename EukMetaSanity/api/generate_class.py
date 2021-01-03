@@ -8,7 +8,11 @@ import os
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 
-BOILERPLATE = '''import os
+BOILERPLATE = '''"""
+Module holds {1} build functionality
+"""
+
+import os
 from EukMetaSanity import Task, TaskList, DependencyInput
 from EukMetaSanity import ProcessExecutionError, CommandNotFound
 from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
@@ -16,9 +20,9 @@ from EukMetaSanity import program_catch, prefix, touch, set_complete
 
 
 class {0}Iter(TaskList):
-    """
+    """ TaskList class iterates over {1} tasks
 
-    name:
+    name: {1}
 
     requires:
 
@@ -35,7 +39,7 @@ class {0}Iter(TaskList):
 
     class {0}(Task):
         """
-
+        Task class handles {1} task
         """
         @set_complete
         def __init__(self, *args, **kwargs):
@@ -48,7 +52,7 @@ class {0}Iter(TaskList):
         @program_catch
         def run(self):
             """
-
+            Run {1}
             """
             pass
 

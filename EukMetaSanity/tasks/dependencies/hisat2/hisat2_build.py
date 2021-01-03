@@ -8,10 +8,9 @@ from EukMetaSanity import program_catch, set_complete
 
 
 class Hisat2BuildIter(TaskList):
-    """
-    TaskList class iterates over Hisat2-build tasks
+    """ TaskList class iterates over Hisat2-build tasks
 
-    name: hisat2-build
+    name: hisat2.build
 
     requires: None
 
@@ -22,7 +21,7 @@ class Hisat2BuildIter(TaskList):
     final: None
 
     """
-    name = "hisat2-build"
+    name = "hisat2.build"
     requires = []
     depends = []
 

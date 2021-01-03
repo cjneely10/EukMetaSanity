@@ -24,14 +24,16 @@ rnaseq:
   memory: 40G
   time: "8:00:00"
   skip: true
-  # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
-  rnaseq: /path/to/rnaseq-mapping-file
   dependencies:
-    hisat2-build:
+    hisat2.build:
       program: hisat2-build
     hisat2:
       program: hisat2
+      # Should be in format (excluding spaces around tab):
+      # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+      rnaseq: /path/to/rnaseq-mapping-file
+      FLAGS:
+        ""
     sambamba:
       program: sambamba
 
