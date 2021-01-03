@@ -31,12 +31,14 @@ class StatsIter(TaskList):
         def run(self):
             # Determine the prefixes to assign to each file based on type
             # Run summary script
-            self.local["summarize_annotations.py"][
-                "-f", str(self.input["root"]["prot"]),
-                "-a", (*self.parse_input()),
-                "-o", os.path.join(self.wdir, self.record_id),
-                "-e", self.config["evalue"],
-            ]()
+            self.single(
+                self.local["summarize_annotations.py"][
+                    "-f", str(self.input["root"]["prot"]),
+                    "-a", (*self.parse_input()),
+                    "-o", os.path.join(self.wdir, self.record_id),
+                    "-e", self.config["evalue"],
+                ]
+            )
 
         def parse_input(self) -> List[str]:
             _out = []

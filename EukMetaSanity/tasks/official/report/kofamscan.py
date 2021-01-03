@@ -17,7 +17,8 @@ class KoFamScanIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "final": ["kofamscan.exec_annotation.kegg"]
+                "kegg": self.input["kofamscan.exec_annotation"]["kegg"],
+                "final": ["kegg"]
             }
             
         @program_catch

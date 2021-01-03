@@ -43,11 +43,6 @@ def program_catch(func: Callable):
             with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
                 w_out.write(str(err))
             print(colors.warn | str(err))
-        except ValueError as err:
-            logging.info(err)
-            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
-                w_out.write(str(err))
-            print(colors.warn | str(err))
 
     return _add_try_except
 
