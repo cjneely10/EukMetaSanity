@@ -1,8 +1,8 @@
 import os
 import logging
 from abc import ABC
+import concurrent.futures
 from plumbum import local, BG
-from dask.distributed import Client, wait
 from EukMetaSanity.tasks.manager.data import Data
 from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.utils.path_manager import PathManager
@@ -269,13 +269,10 @@ class TaskList(ABC):
                 task.run()
         # Threaded
         else:
-            futures = []
-            client = Client(n_workers=self._workers, threads_per_worker=1)
-            # Run each future
-            for _task in self._tasks:
-                futures.append(client.submit(_task.run))
-            wait(futures)
-            client.close()
+            # Run each task in parallel
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self._workers) as executor:
+                output_futures = [executor.submit(_task.run) for _task in self._tasks]
+                concurrent.futures.wait(output_futures)
 
     def output(self) -> Tuple[ConfigManager, List[List[object]], PathManager, List[str], int]:
         # Run task list
