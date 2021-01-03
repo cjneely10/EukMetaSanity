@@ -24,7 +24,7 @@ eggnog:
   threads: 1
   memory: 40G
   time: "8:00:00"
-  skip: false
+  skip: true
   dependencies:
     emapper:
       program: /path/to/emapper.py
@@ -38,7 +38,7 @@ kofamscan:
   threads: 1
   memory: 40G
   time: "8:00:00"
-  skip: false
+  skip: true
   dependencies:
     kofamscan.exec_annotation:
       program: /path/to/kofamscan/exec_annotation
@@ -57,7 +57,6 @@ mmseqs:
     mmseqs.search:
       data:
         /path/to/ortho_db
-        /path/to/rfam_db
       program: mmseqs
       subname: search
       FLAGS:
