@@ -8,7 +8,7 @@ import os
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 
-BOILERPLATE = """import os
+BOILERPLATE = '''import os
 from EukMetaSanity import Task, TaskList, DependencyInput
 from EukMetaSanity import ProcessExecutionError, CommandNotFound
 from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
@@ -16,23 +16,48 @@ from EukMetaSanity import program_catch, prefix, touch, set_complete
 
 
 class {0}Iter(TaskList):
+    """
+
+    name:
+
+    requires:
+
+    depends:
+
+    output:
+
+    final:
+
+    """
     name = "{1}"
     requires = []
     depends = []
 
     class {0}(Task):
+        """
+
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
+            """
+            Instantiate class with given output
+            """
             super().__init__(*args, **kwargs)
             self.output = {2}
 
         @program_catch
         def run(self):
+            """
+
+            """
             pass
 
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__({0}Iter.{0}, {0}Iter.name, *args, **kwargs)
-"""
+'''
 
 # TODO(1): Handle config file generation
 
