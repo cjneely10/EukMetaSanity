@@ -25,7 +25,7 @@ class SambambaSortIter(TaskList):
     """
     name = "sambamba.sort"
     requires = []
-    depends = ["sambamba.view"]
+    depends = [DependencyInput("sambamba.view")]
 
     class SambambaSort(Task):
         """
