@@ -16,16 +16,16 @@ class SambambaSortIter(TaskList):
 
     requires:
 
-    depends:
+    depends: sambamba.view
 
-    output:
+    output: sorted.bams
 
     final:
 
     """
     name = "sambamba.sort"
     requires = []
-    depends = []
+    depends = ["sambamba.view"]
 
     class SambambaSort(Task):
         """
@@ -38,7 +38,7 @@ class SambambaSortIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "sorted.bams": [os.path.join(self.wdir, prefix(db) + ".sorted.bam") for db in self.dependency_input["bams"]]
             }
 
         @program_catch
@@ -46,7 +46,17 @@ class SambambaSortIter(TaskList):
             """
             Run sambamba.sort
             """
-            pass
+            for bam_file in self.output["sorted.bams"]:
+                out_prefix = os.path.splitext(bam_file)[0]
+                self.parallel(
+                    self.program[
+                        "sort",
+                        "-t", self.threads,
+                        "-o", out_prefix + ".sorted.bam",
+                        bam_file,
+                        (*self.added_flags)
+                    ]
+                )
 
     def __init__(self, *args, **kwargs):
         """

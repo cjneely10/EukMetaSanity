@@ -44,10 +44,10 @@ file_management:
     sambamba.view:
       program: sambamba
       FLAGS:
-        ""
+        -f bam
     sambamba.sort:
       program: sambamba
       FLAGS:
-        ""
+        -m 10G
 
 ...  # document end

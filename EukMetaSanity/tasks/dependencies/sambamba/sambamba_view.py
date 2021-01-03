@@ -48,10 +48,10 @@ class SambambaViewIter(TaskList):
                 self.parallel(
                     self.program[
                         "view",
-                        "-S", os.path.basename(bam_file) + ".sam",
-                        "-f", "bam",
+                        "-S", os.path.splitext(bam_file)[0] + ".sam",
                         "-t", self.threads,
                         "-o", bam_file,
+                        (*self.added_flags)
                     ]
                 )
 

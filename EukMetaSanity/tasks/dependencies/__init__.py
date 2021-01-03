@@ -11,6 +11,7 @@ from EukMetaSanity.tasks.dependencies.kofamscan import *
 from EukMetaSanity.tasks.dependencies.hisat2 import *
 
 # Populate dependencies for easy loading
+# TODO: Add `expects` to docstrings for all dependencies
 dependencies = {
     dep.name: dep for name, dep in inspect.getmembers(sys.modules[__name__])
     if isinstance(dep, type) and "EukMetaSanity" in repr(dep)
