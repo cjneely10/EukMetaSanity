@@ -108,7 +108,10 @@ class TaskManager:
                 to_add.append(inner_add)
                 # Dependency input will either come from root or will be collected from a task that has already run
                 if self.task_list[i][2] != ConfigManager.ROOT:
-                    output = self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output
+                    output = self.completed_tasks[
+                        (self.task_list[i][2], "") if (self.task_list[i][2], "") in self.completed_tasks
+                        else (self.task_list[i][2], self.task_list[i][0].scope)
+                    ].tasks[k].output
                 else:
                     output = self.input_files[k][ConfigManager.ROOT]
                 expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
