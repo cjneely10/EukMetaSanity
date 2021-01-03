@@ -7,10 +7,9 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 """
 import os
 import logging
-from art import tprint
 from pathlib import Path
-from signal import signal, SIGPIPE, SIG_DFL
 # pylint: disable=no-member
+from art import tprint
 from plumbum import colors
 from EukMetaSanity.utils.arg_parse import ArgParse
 from EukMetaSanity.tasks.base.path_manager import PathManager
@@ -77,8 +76,6 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
 
 
 if __name__ == "__main__":
-    # Redirect dask nanny errors
-    signal(SIGPIPE, SIG_DFL)
     DEFAULT_EXTS = ".fna/.fasta/.fa"
     _tm = PipelineManager()
     _ap = ArgParse(

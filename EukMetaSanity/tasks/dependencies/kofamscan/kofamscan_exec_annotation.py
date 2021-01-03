@@ -25,6 +25,8 @@ class ExecAnnotationIter(TaskList):
                     "-o", self.output["kegg"],
                     "--tmp-dir", os.path.join(self.wdir, "tmp"),
                     self.dependency_input["prot"],
+                    "-p", self.config["profiles"],
+                    "-k", self.config["kolist"]
                 ]
             )
 

@@ -5,6 +5,7 @@ TaskList: Collection of Task objects that calls run function on each
 """
 
 import os
+import sys
 import time
 import logging
 import concurrent.futures
@@ -630,7 +631,7 @@ class TaskList(ABC):
 
         :return: List of output from all Tasks in TaskList and their accompanying record_ids
         """
-        return (
-            [task.results() for task in self._tasks],
-            [task.record_id for task in self._tasks],
-        )
+        try:
+            return [task.results() for task in self._tasks], [task.record_id for task in self._tasks]
+        except OutputResultsFileError:
+            sys.exit()

@@ -19,7 +19,7 @@ class EMapperIter(TaskList):
         def run(self):
             self.parallel(
                 self.local[self.config["python"]][
-                    self.config["program"],
+                    self.program,
                     "-i", self.dependency_input["prot"],
                     "--output", os.path.join(self.wdir, self.record_id),
                     "--cpu", self.threads,
