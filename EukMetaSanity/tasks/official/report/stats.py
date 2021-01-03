@@ -35,7 +35,7 @@ class StatsIter(TaskList):
                 "-f", str(self.input["root"]["prot"]),
                 "-a", (*self.parse_input()),
                 "-o", os.path.join(self.wdir, self.record_id),
-                "-e", self.max_evalue,
+                "-e", self.config["evalue"],
             ]()
 
         def parse_input(self) -> List[str]:

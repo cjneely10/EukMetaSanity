@@ -21,7 +21,6 @@ class ExecAnnotationIter(TaskList):
                 self.program[
                     "--cpu", self.threads,
                     "--format", "detail",
-                    (*self.added_flags),
                     "-o", self.output["kegg"],
                     "--tmp-dir", os.path.join(self.wdir, "tmp"),
                     self.dependency_input["prot"],
