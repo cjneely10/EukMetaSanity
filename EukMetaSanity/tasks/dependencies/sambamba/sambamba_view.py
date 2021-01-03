@@ -16,6 +16,8 @@ class SambambaViewIter(TaskList):
 
     depends:
 
+    expects: sams
+
     output: bams
 
     final:

@@ -18,6 +18,8 @@ class Hisat2BuildIter(TaskList):
 
     output: db
 
+    expects: fasta
+
     final: None
 
     """
@@ -44,7 +46,7 @@ class Hisat2BuildIter(TaskList):
             """
             Run hisat2-build
             """
-            self.parallel(
+            self.single(
                 self.program[
                     self.dependency_input["fasta"],
                     self.output["db"]

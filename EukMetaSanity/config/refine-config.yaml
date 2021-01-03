@@ -35,6 +35,25 @@ rnaseq:
       FLAGS:
         ""
 
+transcriptomes:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: true
+  dependencies:
+    gmap.build:
+      program: gmapindex
+    gmap:
+      program: gmap
+      # Should be in format (excluding spaces around tab):
+      # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+      transcriptome: /path/to/transcriptome-mapping-file
+      FLAGS:
+        -B 5
+        --input-buffer-size 1000000
+        --output-buffer-size 1000000
+
 file_management:
   workers: 1
   threads: 1

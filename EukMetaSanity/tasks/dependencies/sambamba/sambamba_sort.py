@@ -4,9 +4,7 @@ Module holds sambamba.sort build functionality
 
 import os
 from EukMetaSanity import Task, TaskList, DependencyInput
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
-from EukMetaSanity import program_catch, prefix, touch, set_complete
+from EukMetaSanity import program_catch, prefix, set_complete
 
 
 class SambambaSortIter(TaskList):
@@ -38,7 +36,8 @@ class SambambaSortIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "sorted.bams": [os.path.join(self.wdir, prefix(db) + ".sorted.bam") for db in self.dependency_input["bams"]]
+                "sorted.bams": [os.path.join(self.wdir, prefix(db) + ".sorted.bam")
+                                for db in self.input["sambamba.view"]["bams"]]
             }
 
         @program_catch
