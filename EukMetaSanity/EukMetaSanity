@@ -7,6 +7,7 @@ EukMetaSanity - Generate structural/functional annotations for Eukaryotes
 """
 import os
 import logging
+from pathlib import Path
 from signal import signal, SIGPIPE, SIG_DFL
 # pylint: disable=no-member
 from plumbum import colors
@@ -59,9 +60,12 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
     :return: Successfully loaded ConfigManager object
     """
     # Confirm path existence
-    assert os.path.exists(ap.args.config_file)
+    ap.args.config_file = str(Path(ap.args.config_file).resolve())
+    if not os.path.exists(ap.args.config_file):
+        raise FileNotFoundError(ap.args.config_file)
     # Ensure command is valid
-    assert ap.args.command in tm.programs.keys()
+    if ap.args.command not in tm.programs.keys():
+        raise KeyError("'%s' pipeline is not implemented!" % ap.args.command)
     if ap.args.debug is True:
         ap.args.debug = 0
     else:

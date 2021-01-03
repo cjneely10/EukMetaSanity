@@ -59,7 +59,7 @@ mmseqs:
         /path/to/ortho_db
         /path/to/rfam_db
       program: mmseqs
-      subname: linsearch
+      subname: search
       FLAGS:
         --split-memory-limit 12G
         -s 7
