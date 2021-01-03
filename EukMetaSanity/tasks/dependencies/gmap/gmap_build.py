@@ -3,10 +3,8 @@ Module holds gmap.build build functionality
 """
 
 import os
-from EukMetaSanity import Task, TaskList, DependencyInput
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
-from EukMetaSanity import program_catch, prefix, touch, set_complete
+from EukMetaSanity import Task, TaskList
+from EukMetaSanity import program_catch, set_complete
 
 
 class GMapBuildIter(TaskList):
