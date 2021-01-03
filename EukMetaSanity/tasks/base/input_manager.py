@@ -3,9 +3,12 @@ Module holds InputManager class
 """
 
 import os
+import sys
 import pickle
 from typing import List, Dict, Optional
 from Bio import SeqIO
+# pylint: disable=no-member
+from plumbum import colors
 from EukMetaSanity import prefix
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
@@ -41,6 +44,9 @@ class InputManager:
                     output_dir, ConfigManager.EXPECTED_RESULTS_DIR, base, base + ".pkl"
                 ))
         self.record_ids = sorted(list(self.data.keys()))
+        if len(self.record_ids) == 0:
+            print(colors.bold & colors.warn | "No input files were found, exiting")
+            sys.exit()
 
     @staticmethod
     def _simplify_fasta(fasta_file: str, record_id: str, storage_dir: str, extension: str) -> str:
@@ -68,7 +74,9 @@ class InputManager:
         :return:
         """
         if not os.path.exists(summary_file):
-            return
+            print(colors.bold & colors.warn |
+                  "Config file requested input files, but metadata file '%s' is not present" % summary_file)
+            sys.exit()
         data: Dict[str, Dict[str, object]] = pickle.load(open(summary_file, "rb"))
         for record_id in data.keys():
             if record_id not in self.data.keys():
@@ -80,6 +88,10 @@ class InputManager:
 
         :raises: AttributeError if identical record_ids are found
         """
+        if self.input_dir is None:
+            print(colors.bold & colors.warn |
+                  "Config file requested input files at the command-line, but none were found")
+            sys.exit()
         for file in os.listdir(self.input_dir):
             for ext in self.extension_list:
                 if file.endswith(ext):

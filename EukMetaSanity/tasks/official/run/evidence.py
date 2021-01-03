@@ -15,7 +15,7 @@ class EvidenceIter(TaskList):
     depends = [DependencyInput("metaeuk", "repeats")]
 
     class Evidence(Task):
-        # @set_complete
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
