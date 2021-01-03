@@ -22,7 +22,7 @@ class TranscriptomeIter(TaskList):
     """
     name = "transcriptomes"
     requires = []
-    depends = [DependencyInput("gmap")]
+    depends = [DependencyInput("sambamba.sort")]
 
     class Transcriptome(Task):
         """
@@ -35,7 +35,7 @@ class TranscriptomeIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "sams": self.input["gmap"]["sams"]
+                "bams": self.input["gmap"]["bams"]
             }
 
         @program_catch

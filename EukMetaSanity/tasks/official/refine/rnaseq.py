@@ -22,7 +22,7 @@ class RNASeqIter(TaskList):
     """
     name = "rnaseq"
     requires = []
-    depends = [DependencyInput("hisat2")]
+    depends = [DependencyInput("sambamba.sort")]
 
     class RNASeq(Task):
         """
@@ -35,7 +35,7 @@ class RNASeqIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "sams": self.input["hisat2"]["sams"]
+                "bams": self.input["sambamba.sort"]["bams"]
             }
 
         @program_catch

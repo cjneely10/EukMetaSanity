@@ -15,7 +15,7 @@ class DependencyInput:
 
         :param name: Name of dependency, example mmseqs.createdb
         :param primary_input: Input to use, default is root.fna
-        :param id_mapping: Specific key:values to override within implementation
+        :param id_mapping: Specific expected_key:available_key to override within implementation
         """
         self._name = name
         self._input = primary_input

@@ -34,6 +34,14 @@ rnaseq:
       rnaseq: /path/to/rnaseq-mapping-file
       FLAGS:
         ""
+    sambamba.view:
+      program: sambamba
+      FLAGS:
+        -f bam
+    sambamba.sort:
+      program: sambamba
+      FLAGS:
+        -m 10G
 
 transcriptomes:
   workers: 1
@@ -54,13 +62,6 @@ transcriptomes:
         --input-buffer-size 1000000
         --output-buffer-size 1000000
         -f samse
-
-file_management:
-  workers: 1
-  threads: 1
-  memory: 40G
-  time: "8:00:00"
-  dependencies:
     sambamba.view:
       program: sambamba
       FLAGS:
