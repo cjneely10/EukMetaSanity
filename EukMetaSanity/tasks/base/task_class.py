@@ -397,8 +397,7 @@ class Task(ABC):
                     w.write(str(out))
 
     def single(self, cmd: LocalCommand):
-        """ Launch a command that uses a single thread
-        For SLURM users, this method will launch a given command on the node on which EukMetaSanity is launched.
+        """ Launch a command that uses a single thread.
 
         The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
 
