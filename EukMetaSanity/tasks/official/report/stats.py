@@ -1,6 +1,6 @@
 import os
 from typing import List
-from EukMetaSanity import Task, TaskList, program_catch
+from EukMetaSanity import Task, TaskList, program_catch, set_complete
 
 
 class StatsIter(TaskList):
@@ -15,12 +15,9 @@ class StatsIter(TaskList):
     depends = []
     
     class Stats(Task):
+        @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            for _f in (os.path.join(self.wdir, self.record_id + ".db"),
-                       os.path.join(self.wdir, self.record_id + ".summary")):
-                if os.path.exists(_f):
-                    os.remove(_f)
             self.output = {
                 "summary-db": os.path.join(self.wdir, self.record_id + ".db"),
                 "summary": os.path.join(self.wdir, self.record_id + ".summary"),

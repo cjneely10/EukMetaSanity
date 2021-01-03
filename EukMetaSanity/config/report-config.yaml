@@ -4,7 +4,6 @@
 ## Pipeline input section
 INPUT:
   base:  # List pipelines containing input data
-    root
     run
 
 ###########################################
