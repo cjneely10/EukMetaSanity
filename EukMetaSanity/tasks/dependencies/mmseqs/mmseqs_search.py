@@ -15,8 +15,6 @@ class SearchIter(TaskList):
             for i, db in enumerate(self.data):
                 if db == "":
                     continue
-                if "p:" in db:
-                    db = db[2:]
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, prefix(db) + str(i)))
                 outfiles.append(_outfile)
             self.output = {
@@ -27,11 +25,6 @@ class SearchIter(TaskList):
         def run(self):
             for outfile, db_path in zip(self.output["dbs"], self.data):
                 if not os.path.exists(outfile + ".index"):
-                    # Run search
-                    is_profile = []
-                    if "p:" in db_path:
-                        is_profile.append("--slice-search")
-                        db_path = db_path[2:]
                     self.parallel(
                         self.program[
                             self.config["subname"],
@@ -40,7 +33,6 @@ class SearchIter(TaskList):
                             outfile,  # Output db
                             os.path.join(self.wdir, "tmp"),
                             (*self.added_flags),
-                            (*is_profile),
                             "--threads", self.threads,
                         ]
                     )
