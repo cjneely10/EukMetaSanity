@@ -38,18 +38,18 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately.
 
-### Installing GeneMark
+### Configuring GeneMark
 
-*(Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
-may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`)*
+Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
+may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
 
 Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
 
 The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
 
-### Installing RepeatMasker libraries and scripts
-**RepeatMasker** incorporates additional DFam updates. [Install these](http://www.repeatmasker.org/RMDownload.html)
-in your conda installation directory. We recommend installing all updated repeat library files. 
+### Configuring RepeatMasker libraries and scripts
+**RepeatMasker** incorporates additional DFam updates. 
+
 Make sure your `EukMS` conda environment is still active prior to updating. Here, we assume that you have used 
 `miniconda`, and that it is located in your home directory. You will want to adjust the path for the following commands 
 according to your system: 
@@ -84,38 +84,6 @@ sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNA
 **The `download-data.py` script** is provided to download all other required base data. Run the script to download the 
 required databases, and include the `-x` flag if you wish to generate pre-computed search indices (results in a speed 
 up on search time, but takes a lot of storage space):
-
-After running `download-data.py`, config files will be available in the database
-directory. These can be edited to fit your needs. Make sure that all `DATA` and `PATH` sections reference valid
-locations on your system.
-
-If the `download-data.py` script was not used, then the default config files will be available in this repo's 
-`config` directory.
-
-```
-usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
-                        [-o OUTPUT] [-d]
-                        command
-
-Run EukMetaSanity pipeline
-
-positional arguments:
-  command               Select from run/report/refine
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -f FASTA_DIRECTORY, --fasta_directory FASTA_DIRECTORY
-                        Directory of FASTA files to annotate, or paths_summary.tsv for report step
-  -c CONFIG_FILE, --config_file CONFIG_FILE
-                        Config file
-  -x EXTENSIONS, --extensions EXTENSIONS
-                        Gather files matching list of extensions separated by '/', default .fna/.fasta/.fa
-  -o OUTPUT, --output OUTPUT
-                        Output directory, default out
-  -d, --debug           Developer mode: display all commands on single thread, default False
-```
-
-Example usage:
 
 ```
 cd /path/to/EukMetaSanity

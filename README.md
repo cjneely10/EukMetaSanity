@@ -35,6 +35,36 @@ for detailed installation instructions.
 
 ## Usage
 
+After running `download-data.py`, config files will be available in the database
+directory. These can be edited to fit your needs. Make sure that all `DATA` and `PATH` sections reference valid
+locations on your system.
+
+If the `download-data.py` script was not used, then the default config files will be available in this repo's 
+`config` directory.
+
+```
+usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
+                        [-o OUTPUT] [-d]
+                        command
+
+Run EukMetaSanity pipeline
+
+positional arguments:
+  command               Select from run/report/refine
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FASTA_DIRECTORY, --fasta_directory FASTA_DIRECTORY
+                        Directory of FASTA files to annotate, or paths_summary.tsv for report step
+  -c CONFIG_FILE, --config_file CONFIG_FILE
+                        Config file
+  -x EXTENSIONS, --extensions EXTENSIONS
+                        Gather files matching list of extensions separated by '/', default .fna/.fasta/.fa
+  -o OUTPUT, --output OUTPUT
+                        Output directory, default out
+  -d, --debug           Developer mode: display all commands on single thread, default False
+```
+
 ### Example usage
 
 #### Run
