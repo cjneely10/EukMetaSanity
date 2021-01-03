@@ -8,19 +8,28 @@ environment. Then, run the following commands:
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
-conda activate EukMS
-```
-
-Update your `PATH` and `PYTHONPATH` variables in your .bashrc file. Create a link to a directory on your PATH to make 
-**EukMetaSanity** more easily callable:
-
-```
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
-echo export PYTHONPATH="$(pwd)"/:'$PYTHONPATH' >> ~/.bashrc
-ln -s $(pwd)/EukMetaSanity.py ~/bin/EukMetaSanity
 ```
 
 You may need to restart your shell for these changes to take effect.
+
+Activate your conda environment:
+
+```
+conda activate EukMS
+```
+
+Use `pip` to complete the installation:
+
+```
+pip install .
+```
+
+If this command fails, then try:
+
+```
+python -m pip install .
+```
 
 ## Installing dependencies
 
@@ -75,6 +84,38 @@ sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNA
 **The `download-data.py` script** is provided to download all other required base data. Run the script to download the 
 required databases, and include the `-x` flag if you wish to generate pre-computed search indices (results in a speed 
 up on search time, but takes a lot of storage space):
+
+After running `download-data.py`, config files will be available in the database
+directory. These can be edited to fit your needs. Make sure that all `DATA` and `PATH` sections reference valid
+locations on your system.
+
+If the `download-data.py` script was not used, then the default config files will be available in this repo's 
+`config` directory.
+
+```
+usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
+                        [-o OUTPUT] [-d]
+                        command
+
+Run EukMetaSanity pipeline
+
+positional arguments:
+  command               Select from run/report/refine
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FASTA_DIRECTORY, --fasta_directory FASTA_DIRECTORY
+                        Directory of FASTA files to annotate, or paths_summary.tsv for report step
+  -c CONFIG_FILE, --config_file CONFIG_FILE
+                        Config file
+  -x EXTENSIONS, --extensions EXTENSIONS
+                        Gather files matching list of extensions separated by '/', default .fna/.fasta/.fa
+  -o OUTPUT, --output OUTPUT
+                        Output directory, default out
+  -d, --debug           Developer mode: display all commands on single thread, default False
+```
+
+Example usage:
 
 ```
 cd /path/to/EukMetaSanity
