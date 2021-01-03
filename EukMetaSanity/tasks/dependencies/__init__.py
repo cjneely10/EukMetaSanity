@@ -8,6 +8,7 @@ from EukMetaSanity.tasks.dependencies.genemark import *
 from EukMetaSanity.tasks.dependencies.metaeuk import *
 from EukMetaSanity.tasks.dependencies.emapper import *
 from EukMetaSanity.tasks.dependencies.kofamscan import *
+from EukMetaSanity.tasks.dependencies.hisat2 import *
 
 # Populate dependencies for easy loading
 dependencies = {

@@ -16,6 +16,8 @@ from EukMetaSanity.tasks.official.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.official.report.eggnog import EggNogMapperIter
 from EukMetaSanity.tasks.official.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.official.report.stats import StatsIter
+# # Refine imports
+from EukMetaSanity.tasks.official.refine.rnaseq import RnaSeqIter
 
 
 # pylint: disable=too-few-public-methods
@@ -46,4 +48,7 @@ class PipelineManager:
                 EggNogMapperIter,
                 MMseqsIter,
             ],
+            "refine": [
+                RnaSeqIter
+            ]
         }
