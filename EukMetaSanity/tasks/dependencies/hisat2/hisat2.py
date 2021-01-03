@@ -4,7 +4,7 @@ Module holds logic to run Hisat2
 import os
 from pathlib import Path
 from typing import List, Tuple
-from EukMetaSanity import Task, TaskList, MissingDataError
+from EukMetaSanity import Task, TaskList, MissingDataError, DependencyInput
 from EukMetaSanity import program_catch, prefix, set_complete
 
 
@@ -24,7 +24,7 @@ class Hisat2Iter(TaskList):
     """
     name = "hisat2"
     requires = []
-    depends = ["hisat2.build"]
+    depends = [DependencyInput("hisat2.build")]
 
     class Hisat2(Task):
         """

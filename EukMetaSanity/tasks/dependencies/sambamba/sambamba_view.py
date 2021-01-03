@@ -38,7 +38,7 @@ class SambambaViewIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "bams": [os.path.join(self.wdir, prefix(db) + ".bam") for db in self.dependency_input["sams"]]
+                "bams": []
             }
 
         @program_catch
@@ -46,7 +46,7 @@ class SambambaViewIter(TaskList):
             """
             Run sambamba.view
             """
-            for bam_file in self.output["bams"]:
+            for bam_file in [os.path.join(self.wdir, prefix(db) + ".bam") for db in self.dependency_input["sams"]]:
                 self.parallel(
                     self.program[
                         "view",

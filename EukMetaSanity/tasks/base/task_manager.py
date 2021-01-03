@@ -100,20 +100,21 @@ class TaskManager:
                 for req_str in self.task_list[i][0].requires:
                     inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
                 # Dependencies are stored at task scope level, but may also be from task's scope's scope
+                output = {}
                 for req in self.task_list[i][0].depends:
                     inner_add[req.name] = self.completed_tasks[
                         (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
                         else (req.name, task.name)
                     ].tasks[k].output
+                    # Dependency input will either come from root or will be collected from a task that has already run
+                    if req.input != ConfigManager.ROOT:
+                        output.update(self.completed_tasks[
+                            (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
+                            else (req.name, task.name)
+                        ].tasks[k].output)
+                    else:
+                        output.update(self.input_files[k][ConfigManager.ROOT])
                 to_add.append(inner_add)
-                # Dependency input will either come from root or will be collected from a task that has already run
-                if self.task_list[i][2] != ConfigManager.ROOT:
-                    output = self.completed_tasks[
-                        (self.task_list[i][2], "") if (self.task_list[i][2], "") in self.completed_tasks
-                        else (self.task_list[i][2], self.task_list[i][0].scope)
-                    ].tasks[k].output
-                else:
-                    output = self.input_files[k][ConfigManager.ROOT]
                 expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
             # Generate next task based on input from required dependencies/requirements
             task = self.task_list[i][0](
