@@ -17,9 +17,9 @@ class GMapIter(TaskList):
 
     requires:
 
-    depends:
+    depends: gmap.build
 
-    output:
+    output: sams
 
     final:
 

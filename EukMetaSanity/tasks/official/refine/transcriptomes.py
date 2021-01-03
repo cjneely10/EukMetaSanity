@@ -13,9 +13,9 @@ class TranscriptomeIter(TaskList):
 
     requires:
 
-    depends:
+    depends: gmap
 
-    output:
+    output: sams
 
     final:
 
