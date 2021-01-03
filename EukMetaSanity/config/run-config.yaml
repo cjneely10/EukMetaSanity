@@ -5,6 +5,7 @@
 INPUT:
   base:  # List pipelines containing input data
     root
+    run
 
 ###########################################
 

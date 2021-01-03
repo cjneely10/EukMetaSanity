@@ -286,13 +286,13 @@ class GffMerge:
             start_pos = (m.start() for m in re.finditer(start, sequence))
             for pos in start_pos:
                 idx = set()
-                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
+                orf = GffMerge.l_orf_helper(sequence, idx, "", 3, pos)
                 if len(orf) > len(longest):
                     longest = orf
         return longest
 
     @staticmethod
-    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, k: int, start: int) -> str:
+    def l_orf_helper(sequence: str, idx: Set[int], out: str, k: int, start: int) -> str:
         """ Recursive helper to search most possible combinations of codons in a string
 
         :param sequence: Sequence to search
@@ -310,11 +310,11 @@ class GffMerge:
                 pos = start + offset
                 idx.add(pos)
                 s = sequence[pos: pos + k]
-                out.write(s)
+                out += s
                 if s in possible_ends:
-                    return out.getvalue()
+                    return out
                 return GffMerge.l_orf_helper(sequence, idx, out, k, pos + k)
-        return out.getvalue()
+        return out
 
 
 # pylint: disable=too-few-public-methods
