@@ -13,7 +13,7 @@ class EvidenceIter(TaskList):
     name = "evidence"
     requires = ["abinitio.augustus", "abinitio.genemark"]
     depends = [DependencyInput("metaeuk", "repeats")]
-    
+
     class Evidence(Task):
         # @set_complete
         def __init__(self, *args, **kwargs):
@@ -25,13 +25,13 @@ class EvidenceIter(TaskList):
                 "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
                 "final": ["metaeuk.gff3", "nr-gff3", "prot", "cds", "all_gff3"]
             }
-            
+
         @program_catch
         def run(self):
             # Merge final results
-            EvidenceIter.Evidence.merge(
-                self, [str(self.input["metaeuk"]["gff3"]),
-                       self.input["abinitio.augustus"]["ab-gff3"], self.input["abinitio.genemark"]["ab-gff3"]],
+            self.merge(
+                [str(self.input["metaeuk"]["gff3"]),
+                 self.input["abinitio.augustus"]["ab-gff3"], self.input["abinitio.genemark"]["ab-gff3"]],
                 str(self.input["root"]["fasta"]),
                 os.path.join(self.wdir, self.record_id),
             )
@@ -62,7 +62,7 @@ class EvidenceIter(TaskList):
                 out_prefix + ".all.cds.fna",
                 out_prefix + ".cds.fna"
             )
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(EvidenceIter.Evidence, EvidenceIter.name, *args, **kwargs)
 
