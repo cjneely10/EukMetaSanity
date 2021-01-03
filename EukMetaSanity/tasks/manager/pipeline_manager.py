@@ -18,6 +18,7 @@ from EukMetaSanity.tasks.official.report.mmseqs import MMseqsIter
 from EukMetaSanity.tasks.official.report.stats import StatsIter
 # # Refine imports
 from EukMetaSanity.tasks.official.refine.rnaseq import RNASeqIter
+from EukMetaSanity.tasks.official.refine.transcriptomes import TranscriptomeIter
 
 
 # pylint: disable=too-few-public-methods
@@ -49,6 +50,7 @@ class PipelineManager:
                 MMseqsIter,
             ],
             "refine": [
-                RNASeqIter
+                RNASeqIter,
+                TranscriptomeIter
             ]
         }

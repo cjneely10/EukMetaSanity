@@ -3,13 +3,11 @@ Module holds gmap build functionality
 """
 
 import os
-from pathlib import Path
 from typing import List
-
+from pathlib import Path
 from EukMetaSanity import Task, TaskList, DependencyInput
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
-from EukMetaSanity import program_catch, prefix, touch, set_complete
+from EukMetaSanity import MissingDataError
+from EukMetaSanity import program_catch, prefix, set_complete
 
 
 class GMapIter(TaskList):
@@ -72,10 +70,10 @@ class GMapIter(TaskList):
             """
             _path = str(Path(self.config["transcriptome"]).resolve())
             if not os.path.exists(_path):
-                return []
-            fp = open(_path, "r")
+                raise MissingDataError("Input transcriptome mapping file not found!")
+            file_ptr = open(_path, "r")
             _id = self.record_id.replace("-mask", "")
-            for line in fp:
+            for line in file_ptr:
                 if _id in line:
                     return line.rstrip("\r\n").split("\t")[1].split(",")
             return []
