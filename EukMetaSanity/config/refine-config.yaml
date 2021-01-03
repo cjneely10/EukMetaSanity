@@ -1,0 +1,38 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    run
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+rnaseq:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: true
+  # Should be in format (excluding spaces around tab):
+  # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+  rnaseq: /path/to/rnaseq-mapping-file
+  dependencies:
+    hisat2-build:
+      program: hisat2-build
+    hisat2:
+      program: hisat2
+    sambamba:
+      program: sambamba
+
+...  # document end
