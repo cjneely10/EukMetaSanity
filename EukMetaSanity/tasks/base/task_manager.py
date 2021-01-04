@@ -12,7 +12,7 @@ from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
 from EukMetaSanity.tasks.base.dependency_graph import DependencyGraph
-from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
+from EukMetaSanity.tasks.pipeline_manager import PipelineManager
 
 
 # pylint: disable=invalid-name

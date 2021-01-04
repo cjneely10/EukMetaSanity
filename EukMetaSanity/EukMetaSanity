@@ -16,7 +16,7 @@ from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
 from EukMetaSanity.tasks.base.input_manager import InputManager
 from EukMetaSanity.tasks.base.config_manager import ConfigManager
-from EukMetaSanity.tasks.manager.pipeline_manager import PipelineManager
+from EukMetaSanity.tasks.pipeline_manager import PipelineManager
 
 
 def _initialize_logging(ap: ArgParse):
