@@ -21,7 +21,7 @@ class BuildDatabaseIter(TaskList):
                 self.single(
                     self.program[
                         "-name", os.path.join(self.wdir, self.record_id),
-                        str(self.dependency_input),
+                        str(self.dependency_input["fasta"]),
                     ]
                 )
             
