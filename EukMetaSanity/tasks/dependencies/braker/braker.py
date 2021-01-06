@@ -102,7 +102,7 @@ class BrakerIter(TaskList):
                             (*_files),
                             "--merge", "-G", "-S",
                             "-o", os.path.join(self.wdir, self.record_id + ".gff3"),
-                            "-g", self.input[2],
+                            "-g", self.input["root"]["fna"],
                             "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
                             "-y", os.path.join(self.wdir, self.record_id + ".faa"),
                         ]
