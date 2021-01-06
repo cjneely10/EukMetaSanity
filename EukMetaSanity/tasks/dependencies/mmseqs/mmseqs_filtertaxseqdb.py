@@ -15,9 +15,7 @@ class FilterTaxSeqDBIter(TaskList):
             for i, db in enumerate(self.data):
                 if db == "":
                     continue
-                is_profile = []
                 if "p:" in db:
-                    is_profile.append("--slice-search")
                     db = db[2:]
                 db_prefix = prefix(db) + str(i)
                 _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))

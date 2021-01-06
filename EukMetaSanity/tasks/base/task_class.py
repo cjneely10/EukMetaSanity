@@ -10,7 +10,7 @@ import time
 import logging
 import concurrent.futures
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable
+from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable, Sized
 # pylint: disable=no-member
 from plumbum import colors, local, BG
 from plumbum.commands.processes import ProcessExecutionError
@@ -67,16 +67,19 @@ class OutputResultsFileError(FileNotFoundError):
     pass
 
 
+InputType = Union[object, Iterable, Sized]
+
+
 # pylint: disable=too-many-public-methods
 # pylint: disable=invalid-name
 class Task(ABC):
     """ Task is an abstract base class that API writers will overwrite to handle Task functionality
 
     """
-    def __init__(self, input_data: Dict[str, Dict[str, Union[object, Iterable]]], cfg: ConfigManager, pm: PathManager,
+    def __init__(self, input_data: Dict[str, Dict[str, InputType]], cfg: ConfigManager, pm: PathManager,
                  record_id: str, db_name: str, mode: int, scope: str,
-                 requested_input_data: Dict[str, Dict[str, Union[object, Iterable]]],
-                 expected_input: Dict[str, Union[object, Iterable]]):
+                 requested_input_data: Dict[str, Dict[str, InputType]],
+                 expected_input: Dict[str, InputType]):
         """ Instantiate subclass of Task
 
         :param input_data: Data dict parsed into self.input
@@ -172,7 +175,7 @@ class Task(ABC):
             return False
         return is_complete
 
-    def results(self) -> Dict[str, object]:
+    def results(self) -> Dict[str, InputType]:
         """ Check that all required output is created
 
         :raises: OutputResultsFileError if a file is expected to have generated but didn't
@@ -250,7 +253,7 @@ class Task(ABC):
         return self.config[ConfigManager.DATA].split(" ")
 
     @property
-    def output(self) -> Dict[str, Union[Iterable, object]]:
+    def output(self) -> Dict[str, InputType]:
         """ Expected output objects from a successful run
         Output also contains keys that consist of output objects to copy to final results directory
 
@@ -260,7 +263,7 @@ class Task(ABC):
         return self._output_paths
 
     @output.setter
-    def output(self, v: Dict[str, Union[object, Iterable]]):
+    def output(self, v: Dict[str, InputType]):
         """ Dict of data that is output by this task
 
         :param v: Dict of str: object that will output when the task successfully completes
@@ -268,7 +271,7 @@ class Task(ABC):
         self._output_paths = v
 
     @property
-    def dependency_input(self) -> Dict[str, Union[object, Iterable]]:
+    def dependency_input(self) -> Dict[str, InputType]:
         """ Input to a dependency. Used to run a dependency using the output of a separate abstract
         Task output
 
@@ -277,7 +280,7 @@ class Task(ABC):
         return self._dep_input
 
     @property
-    def input(self) -> Dict[str, Dict[str, Union[Iterable, object]]]:
+    def input(self) -> Dict[str, Dict[str, InputType]]:
         """ Dictionary of files available as input to this task.
         By default, available input consists of all files that were passed as input to EukMetaSanity:
 
@@ -516,10 +519,10 @@ class TaskList(ABC):
         pass
 
     def __init__(self, new_task: type, name: str, cfg: ConfigManager,
-                 input_paths: List[Dict[str, Dict[str, Union[object, Iterable]]]],
+                 input_paths: List[Dict[str, Dict[str, InputType]]],
                  pm: PathManager, record_ids: List[str], mode: int,
-                 scope: str, requested_input_data: List[Dict[str, Dict[str, Union[object, Iterable]]]],
-                 expected_input_list: List[Dict[str, Union[object, Iterable]]]):
+                 scope: str, requested_input_data: List[Dict[str, Dict[str, InputType]]],
+                 expected_input_list: List[Dict[str, InputType]]):
         """ Instantiate child class of TaskList with provided Task type and name. Pass additional input
         requested at Task Level
 

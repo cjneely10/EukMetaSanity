@@ -65,4 +65,41 @@ filtering:
       FLAGS:
         -m 10G
 
+taxonomy:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "12:00:00"
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
+  dependencies:
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.taxonomy:
+      program: mmseqs
+      data:
+        /path/to/ortho_db
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 7
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
+        --split-memory-limit 12G
+
+evidence:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    braker:
+      program: braker.pl
+      level: order
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      level: order
+      data:
+        /path/to/ortho_db
+
 ...  # document end
