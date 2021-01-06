@@ -248,22 +248,22 @@ class AbInitioIter(TaskList):
                 subset_db_outpath,
                 _fasta_output,
             ]()
-            try:
-                # Run prothint
-                self.log_and_run(
-                    self.program_prothint[
-                        self.input[0],
-                        _fasta_output,
-                        "--workdir", self.wdir,
-                        "--threads", self.threads,
-                    ]
-                )
-            except ProcessExecutionError as e:
-                pass
+            # try:
+            #     # Run prothint
+            #     self.log_and_run(
+            #         self.program_prothint[
+            #             self.input[0],
+            #             _fasta_output,
+            #             "--workdir", self.wdir,
+            #             "--threads", self.threads,
+            #         ]
+            #     )
+            # except ProcessExecutionError as e:
+            #     pass
             ev_vals = ["--ES"]
-            if os.path.exists(os.path.join(self.wdir, "prothint.gff")):
-                ev_vals = ["--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
-                           "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/")]
+            # if os.path.exists(os.path.join(self.wdir, "prothint.gff")):
+            #     ev_vals = ["--EP", os.path.join(self.wdir, "prothint.gff").replace("/", "\/"),
+            #                "--evidence", os.path.join(self.wdir, "evidence.gff").replace("/", "\/")]
             # Edit in proper locations
             self.local["sed"][
                 "-i", "s/%s/%s/g" % (
