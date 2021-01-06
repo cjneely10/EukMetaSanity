@@ -110,7 +110,7 @@ repeats:
     repmask.rmout:
       program: rmOutToGFF3.pl
 
-evidence:
+combined-evidence:
   workers: 1
   threads: 1
   memory: 40G
