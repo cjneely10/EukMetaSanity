@@ -87,6 +87,29 @@ taxonomy:
         --cov-mode 0
         --split-memory-limit 12G
 
+repeats:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    repmod.build_database:
+      program: BuildDatabase
+    repmod.repeat_modeler:
+      program: RepeatModeler
+      skip: false
+    repmask.repeat_masker:
+      level: family
+      program: RepeatMasker
+      data:
+        "" # Comma-separated list of repeat models to incorporate
+      FLAGS:
+        -nolow
+    repmask.process_repeats:
+      program: ProcessRepeats
+    repmask.rmout:
+      program: rmOutToGFF3.pl
+
 evidence:
   workers: 1
   threads: 1
@@ -95,6 +118,7 @@ evidence:
   dependencies:
     braker:
       program: braker.pl
+      program_gffread: gffread
       level: order
     mmseqs.filtertaxseqdb:
       program: mmseqs
