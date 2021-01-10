@@ -123,7 +123,7 @@ class RepeatsIter(TaskList):
                     self.log_and_run(
                         self.program_masker[
                             "-pa", self.threads,
-                            (*self.added_flags),
+                            "-nolow", "-xsmall",
                             (*search),
                             "-dir", self.pm.get_dir(self.record_id, _dir),
                             input_file,
@@ -146,6 +146,8 @@ class RepeatsIter(TaskList):
             ])
             # Combine results into single file
             final_out = os.path.join(self.pm.get_dir(self.record_id, "repeats_final"), "mask.final.cat")
+            if os.path.exists(final_out):
+                os.remove(final_out)
             touch(final_out)
             all([
                 (self.local["cat"][os.path.join(rep_dir, "".join((_basename, ".cat")))] >> final_out)()
@@ -153,12 +155,15 @@ class RepeatsIter(TaskList):
             ])
             if os.path.getsize(final_out) > 0:
                 # Run ProcessRepeats
-                self.program_process_repeats[
-                    # Input taxonomy from OrthoDB search
-                    "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
-                    "-maskSource", input_file,
-                    final_out,
-                ]()
+                self.log_and_run(
+                    self.program_process_repeats[
+                        # Input taxonomy from OrthoDB search
+                        "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
+                        "-nolow", "-xsmall",
+                        "-maskSource", input_file,
+                        final_out,
+                    ]
+                )
             if os.path.exists(input_file + ".masked"):
                 # Rename output file
                 os.replace(
