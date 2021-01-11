@@ -10,7 +10,7 @@ from operator import itemgetter
 from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
 from EukMetaSanity.utils.arg_parse import ArgParse
-from typing import List, Dict, Tuple, Generator, Optional
+from typing import List, Dict, Tuple, Generator, Optional, Set
 
 
 class Gene:
@@ -213,24 +213,28 @@ class GffMerge:
         for start in possible_starts:
             start_pos = (m.start() for m in re.finditer(start, sequence))
             for pos in start_pos:
-                orf = GffMerge.l_orf_helper(sequence, "", pos)
+                idx = set()
+                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), pos)
                 if len(orf) > len(longest):
                     longest = orf
         return longest
 
     @staticmethod
-    def l_orf_helper(sequence: str, out: str, start: int) -> str:
+    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, start: int) -> str:
         k = 3
         possible_ends = ("TAG", "TAA", "TGA")
         for offset in range(k):
             if start + offset + k <= len(sequence):
+                if start + offset in idx:
+                    continue
                 pos = start + offset
+                idx.add(pos)
                 s = sequence[pos: pos + k]
-                out += s
+                out.write(s)
                 if s in possible_ends:
-                    return s
-                return GffMerge.l_orf_helper(sequence, out, pos + k)
-        return out
+                    return out.getvalue()
+                return GffMerge.l_orf_helper(sequence, idx, out, pos + k)
+        return out.getvalue()
 
 
 class GffWriter:

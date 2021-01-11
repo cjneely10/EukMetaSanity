@@ -123,7 +123,7 @@ class RepeatsIter(TaskList):
                     self.log_and_run(
                         self.program_masker[
                             "-pa", self.threads,
-                            "-nolow", "-xsmall",
+                            "-nolow",
                             (*search),
                             "-dir", self.pm.get_dir(self.record_id, _dir),
                             input_file,
@@ -159,7 +159,7 @@ class RepeatsIter(TaskList):
                     self.program_process_repeats[
                         # Input taxonomy from OrthoDB search
                         "-species", TaxonomyIter.Taxonomy.get_taxonomy(self.input[2], 0.0, "family")[0],
-                        "-nolow", "-xsmall",
+                        "-nolow",
                         "-maskSource", input_file,
                         final_out,
                     ]
