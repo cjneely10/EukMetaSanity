@@ -285,16 +285,18 @@ class GffMerge:
         for start in possible_starts:
             start_pos = (m.start() for m in re.finditer(start, sequence))
             for pos in start_pos:
-                orf = GffMerge.l_orf_helper(sequence, "", 3, pos)
+                idx = set()
+                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
                 if len(orf) > len(longest):
                     longest = orf
         return longest
 
     @staticmethod
-    def l_orf_helper(sequence: str, out: str, k: int, start: int) -> str:
+    def l_orf_helper(sequence: str, idx: Set[int], out: StringIO, k: int, start: int) -> str:
         """ Recursive helper to search most possible combinations of codons in a string
 
         :param sequence: Sequence to search
+        :param idx: Set of coordinates already searched
         :param out: CDS string being build from underlying region
         :param k: Offset to search
         :param start: Start position to search
@@ -303,13 +305,16 @@ class GffMerge:
         possible_ends = ("TAG", "TAA", "TGA")
         for offset in range(k):
             if start + offset + k <= len(sequence):
+                if start + offset in idx:
+                    continue
                 pos = start + offset
+                idx.add(pos)
                 s = sequence[pos: pos + k]
-                out += s
+                out.write(s)
                 if s in possible_ends:
-                    return out
-                return GffMerge.l_orf_helper(sequence, out, k, pos + k)
-        return out
+                    return out.getvalue()
+                return GffMerge.l_orf_helper(sequence, idx, out, k, pos + k)
+        return out.getvalue()
 
 
 # pylint: disable=too-few-public-methods
