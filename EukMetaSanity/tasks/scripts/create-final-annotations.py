@@ -221,7 +221,7 @@ class GffMerge:
                     gene.add_evidence(gene_data["transcripts"][val])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
-            yield gene_data, *self.create_cds(gene_data, gene)
+            yield (gene_data, *self.create_cds(gene_data, gene))
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         """ Create CDS from gene data in region
@@ -413,10 +413,18 @@ if __name__ == "__main__":
             (("-f", "--fasta_file"),
              {"help": "FASTA file", "required": True}),
             (("-o", "--output_prefix"),
-             {"help": "Output prefix, default is path/prefix of gff3_file"})
+             {"help": "Output prefix, default is path/prefix of gff3_file"}),
+            (("-t", "--tier"),
+             {"help": "Tiered output, select from 1,2,3,4, default is 4", "default": 4}),
         ),
         description="GFF3 output final annotations as <prefix>.nr.gff3"
     )
+    try:
+        ap.args.tier = int(ap.args.tier)
+    except ValueError as e:
+        print("Tier must be integer")
+        sys.exit(1)
+    assert ap.args.tier in range(1, 5)
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file
     if ap.args.output_prefix is None:
