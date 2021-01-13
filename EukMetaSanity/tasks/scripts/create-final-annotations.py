@@ -221,7 +221,7 @@ class GffMerge:
                     gene.add_evidence(gene_data["transcripts"][val])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
-            yield (gene_data, *self.create_cds(gene_data, gene))
+            yield gene_data, *self.create_cds(gene_data, gene)
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         """ Create CDS from gene data in region
