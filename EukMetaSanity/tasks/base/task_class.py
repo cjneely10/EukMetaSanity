@@ -10,7 +10,7 @@ import time
 import logging
 import concurrent.futures
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable, Sized
+from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable, Sized, Sequence
 # pylint: disable=no-member
 from plumbum import colors, local, BG
 from plumbum.commands.processes import ProcessExecutionError
@@ -67,7 +67,7 @@ class OutputResultsFileError(FileNotFoundError):
     pass
 
 
-InputType = Union[object, Iterable, Sized]
+InputType = Union[object, Iterable, Sized, Sequence]
 
 
 # pylint: disable=too-many-public-methods
