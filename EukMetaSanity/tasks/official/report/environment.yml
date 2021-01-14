@@ -1,0 +1,16 @@
+name: EukMS_report
+channels:
+  - bioconda
+  - conda-forge
+  - sepandhaghighi
+dependencies:
+  - python=3.6.9
+  - mmseqs2=12.113e3
+  - sqlite=3.33
+  - bcbio-gff=0.6.6
+  - biopython=1.76
+  - plumbum=1.6.6
+  - networkx=2.2
+  - pyyaml=5.3.1
+  - art=5.1
+  - busco=4.1.4

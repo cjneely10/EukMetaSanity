@@ -1,5 +1,7 @@
 #!/bin/bash
-conda env create -f environment.yml
+conda env create -f EukMetaSanity/tasks/official/run/environment.yml
+conda env create -f EukMetaSanity/tasks/official/report/environment.yml
+conda env create -f EukMetaSanity/tasks/official/refine/environment.yml
 mkdir -p bin
 cd bin || return
 wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz
