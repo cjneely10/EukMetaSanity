@@ -13,24 +13,6 @@ echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
 
 You may need to restart your shell for these changes to take effect.
 
-Activate your conda environment:
-
-```
-conda activate EukMS
-```
-
-Use `pip` to complete the installation:
-
-```
-pip install .
-```
-
-If this command fails, then try:
-
-```
-python -m pip install .
-```
-
 ## Installing dependencies
 
 **EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
@@ -55,7 +37,7 @@ Make sure your `EukMS` conda environment is still active prior to updating. Here
 according to your system: 
 
 ```
-cd ~/miniconda/envs/EukMS/share/RepeatMasker/Libraries/
+cd ~/miniconda/envs/EukMS_run/share/RepeatMasker/Libraries/
 wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
 gunzip Dfam.h5.gz && cd ..
 perl ./configure
@@ -75,7 +57,9 @@ cp util/rmOutToGFF3.pl ./
 The conda version of AUGUSTUS is missing one needed element:
 
 ```
-cd /path/to/miniconda/envs/EukMS/bin
+cd /path/to/miniconda/envs/EukMS_run/bin
+sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
+cd /path/to/miniconda/envs/EukMS_refine/bin
 sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
 ```
 
