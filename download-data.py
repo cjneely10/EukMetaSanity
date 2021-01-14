@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
+"""
+Module downloads requisite data for official pipelines in EukMetaSanity
+"""
 import os
 import shutil
 from typing import List
 from pathlib import Path
 from plumbum import local
+from plumbum.machines.local import LocalCommand
 from EukMetaSanity.data.data import data_urls
 from EukMetaSanity.utils.arg_parse import ArgParse
-
-"""
-Download required ODB dataset for Run pipeline
-
-"""
 
 # Dependencies
 cp = local["cp"]
@@ -21,12 +20,24 @@ gunzip = local["gunzip"]
 mmseqs = local["mmseqs"]
 
 
-def _print_and_run(cmd):
+def _print_and_run(cmd: LocalCommand):
+    """ Display bash command and run
+
+    :param cmd: Plumbum command to run
+    :raises: plumbum.commands.processes.ProcessExecutionError for failed commands
+    """
     print(cmd)
     cmd()
 
 
-def _parse_args(ap: ArgParse):
+def _parse_args(ap: ArgParse) -> ArgParse:
+    """ Confirm valid types for command-line arguments
+
+    :param ap: Passed arguments
+    :raises: AssertionError if attempt to index without building database
+    :raises: ValueError for improper type of threads or negative number
+    :return: Reference to modified ArgParse object
+    """
     if ap.args.index:
         assert ap.args.build, "Build must be set in order to index!"
     try:
@@ -34,11 +45,18 @@ def _parse_args(ap: ArgParse):
     except ValueError as e:
         print(e)
         exit(1)
+    if ap.args.threads < 1:
+        raise ValueError
     return ap
 
 
-# Download all data with wget from the data.py script - Part of API
 def run(ap: ArgParse, out_dir: str):
+    """ Download all data with wget from the data.py script - Part of API
+
+    :param ap: Parsed arguments
+    :param out_dir: Directory in which to write all downloaded data
+    :raises: plumbum.commands.processes.ProcessExecutionError
+    """
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     # Download each URL to folder
@@ -110,10 +128,17 @@ def run(ap: ArgParse, out_dir: str):
                         "--remove-tmp-files",
                     ]
                 )
-    _generate_config_files(out, ids, ap.args.threads, ap.args.path)
+    _generate_config_files(out, ids, ap.args.path)
 
 
-def _generate_config_files(_file_names: List[str], _replace_strings: List[str], _threads: int, _outdir: str):
+def _generate_config_files(_file_names: List[str], _replace_strings: List[str], _outdir: str):
+    """ Copy base config files to install directory and add in proper data path locations
+
+    :param _file_names: List of files to modify
+    :param _replace_strings: String replacements
+    :param _outdir: Output directory to generate output
+    :raises: plumbum.commands.processes.ProcessExecutionError
+    """
     _config_directory = os.path.join(os.path.dirname(__file__), "EukMetaSanity/config")
     for _config_file in os.listdir(_config_directory):
         _new_file = os.path.join(_outdir, os.path.basename(_config_file))
@@ -129,6 +154,11 @@ def _generate_config_files(_file_names: List[str], _replace_strings: List[str], 
 
 
 def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
+    """ Generate NCBI taxonomy mappings from generated .lookup file
+
+    :param mmseqs_db_path: Path to generated mmseqs database
+    :param outfile: Output path for parsed orthodb mapping file
+    """
     output_p = open(outfile, "w")
     mmseqs_input_fp = open(mmseqs_db_path + ".lookup", "r")
     for line in mmseqs_input_fp:
@@ -138,6 +168,12 @@ def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
 
 
 def _create_tax_db(_out: str, out_dir: str):
+    """ Create taxonomy database from NCBI current taxdump
+
+    :param _out: Expected database (e.g. orthodb, etc.)
+    :param out_dir: Directory in which to generate taxonomy database
+    :raises: plumbum.commands.processes.ProcessExecutionError
+    """
     # Create mmseqs input file
     if "ortho" in _out:
         _odb_tax_parse(_out, os.path.join(out_dir, "mmseqs.input"))
@@ -160,10 +196,6 @@ def _create_tax_db(_out: str, out_dir: str):
     )
 
 
-def main(ap: ArgParse, storage_dir: str):
-    run(ap, storage_dir)
-
-
 if __name__ == "__main__":
     _ap = ArgParse(
         (
@@ -184,4 +216,4 @@ if __name__ == "__main__":
         ),
         description="Download required data and build MMseqs2 databases"
     )
-    main(_parse_args(_ap), _ap.args.path)
+    run(_parse_args(_ap), _ap.args.path)
