@@ -23,14 +23,16 @@ class Gene:
     """
     Class holds the data describing a given gene region. Merges ab-initio skeleton exons with evidence-based exons
     """
-    def __init__(self, ab_initio_data: List, strand: str, term_exons: List):
+    def __init__(self, ab_initio_data: List, strand: str, term_exons: List, _tier: int):
         """ Create Gene using base ab-initio skeleton on a given strand. Define terminal exons in
         skeleton.
 
         :param ab_initio_data: List of initial exons
         :param strand: Strand of DNA
         :param term_exons: List of terminal exons
+        :raises: AssertionError if t < 1 or t > 4
         """
+        assert _tier in range(1, 5)
         self.exons: List = ab_initio_data
         self.strand: str = strand
         self.num_ab_initio: int = len(ab_initio_data)
@@ -41,7 +43,25 @@ class Gene:
         # Set of terminal exons
         self.terminal_exons = set(term_exons)
         # Set tier quality of gene
-        self.tier = len(ab_initio_data)
+        self._tier = _tier
+
+    @property
+    def tier(self) -> int:
+        """ Get current tier of gene
+
+        :return: Current tier stored, default is length of data initially passed
+        """
+        return self._tier
+
+    @tier.setter
+    def tier(self, t: int):
+        """ Set current tier of gene
+
+        :param t: Tier value
+        :raises: AssertionError if t < 1 or t > 4
+        """
+        assert t in range(1, 5)
+        self._tier = t
 
     # pylint: disable=too-many-branches
     def tier4(self, evidence_data: List):
@@ -218,11 +238,23 @@ class GffMerge:
         gene_data: Dict
         for gene_data in self.reader:
             # Generate initial exon structure
-            gene = Gene(gene_data["transcripts"]["ab-initio"], gene_data["strand"], gene_data["terminal_exons"])
-            # Keep exons with evidence, add exons missed by ab-initio
-            for val in gene_data["transcripts"].keys():
-                if val != "ab-initio":
-                    gene.tier4(gene_data["transcripts"][val])
+            gene = Gene(
+                gene_data["transcripts"]["ab-initio"],
+                gene_data["strand"],
+                gene_data["terminal_exons"],
+                len(gene_data["transcripts"])
+            )
+            # Tier 4 is conservative pairing of exons, removing exons without evidence and incorporating
+            # exons that were not identified in ab initio predictions
+            if gene.tier == 4:
+                # Keep exons with evidence, add exons missed by ab-initio
+                for val in gene_data["transcripts"].keys():
+                    if val != "ab-initio":
+                        gene.tier4(gene_data["transcripts"][val])
+            else:
+                # Add filter to genes that do not occur within user-defined threshold
+                if gene.tier >= self.tier:
+                    pass
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
             yield (gene_data, *self.create_cds(gene_data, gene))

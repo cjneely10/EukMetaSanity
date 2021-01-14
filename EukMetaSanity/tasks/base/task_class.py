@@ -67,6 +67,7 @@ class OutputResultsFileError(FileNotFoundError):
     pass
 
 
+# Type alias for allowable input types to task input and dependency_input data members
 InputType = Union[object, Iterable, Sized, Sequence]
 
 
