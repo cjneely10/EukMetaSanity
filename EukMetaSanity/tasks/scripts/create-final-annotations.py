@@ -463,9 +463,34 @@ class GffWriter:
         return ss.getvalue()
 
 
+def parse_args(ap: ArgParse):
+    """ Confirm input arguments are valid types and within valid ranges
+
+    :param ap: ArgParse object
+    :raises: AssertionError for improperly formatted data
+    """
+    try:
+        ap.args.tier = int(ap.args.tier)
+    except ValueError:
+        print("Tier must be integer")
+        raise AssertionError
+    assert ap.args.tier >= 0, "Tier must be positive"
+
+    try:
+        ap.args.recursion_limit = int(ap.args.recursion_limit)
+    except ValueError:
+        print("Recursion limit must be integer")
+        raise AssertionError
+    assert ap.args.recursion_limit >= 0, "Recursion limit must be positive"
+
+    for _file in (ap.args.gff3_file, ap.args.fasta_file):
+        assert os.path.exists(_file), _file
+    if ap.args.output_prefix is None:
+        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0]
+
+
 if __name__ == "__main__":
-    sys.setrecursionlimit(2000000)
-    ap = ArgParse(
+    _ap = ArgParse(
         (
             (("-g", "--gff3_file"),
              {"help": ".all.gff3 file", "required": True}),
@@ -475,20 +500,13 @@ if __name__ == "__main__":
              {"help": "Output prefix, default is path/prefix of gff3_file"}),
             (("-t", "--tier"),
              {"help": "Tiered output, any value greater than 1, default is 0 for owned parsing", "default": 0}),
+            (("-r", "--recursion_limit"),
+             {"help": "Override python's default recursion limit, default 2000000", "default": "2000000"}),
         ),
         description="GFF3 output final annotations as <prefix>.nr.gff3"
     )
 
-    try:
-        ap.args.tier = int(ap.args.tier)
-    except ValueError as e:
-        print("Tier must be integer")
-        sys.exit(1)
-    assert ap.args.tier >= 0
-    for _file in (ap.args.gff3_file, ap.args.fasta_file):
-        assert os.path.exists(_file), _file
-    if ap.args.output_prefix is None:
-        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0]
-
-    writer = GffWriter(ap.args.gff3_file, ap.args.fasta_file, ap.args.output_prefix, ap.args.tier)
+    parse_args(_ap)
+    sys.setrecursionlimit(_ap.args.recursion_limit)
+    writer = GffWriter(_ap.args.gff3_file, _ap.args.fasta_file, _ap.args.output_prefix, _ap.args.tier)
     writer.write()
