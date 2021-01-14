@@ -40,9 +40,11 @@ class Gene:
         self.added_evidence: int = 0
         # Set of terminal exons
         self.terminal_exons = set(term_exons)
+        # Set tier quality of gene
+        self.tier = len(ab_initio_data)
 
     # pylint: disable=too-many-branches
-    def add_evidence(self, evidence_data: List):
+    def tier4(self, evidence_data: List):
         """ Add list of exons from protein/transcriptomic-based evidence
 
         :param evidence_data: List of evidence-derived exons
@@ -195,16 +197,18 @@ class GffMerge:
     """
     Class loads all levels of evidence together and allows Gene class to merge together
     """
-    def __init__(self, gff3_path: str, fasta_path: str):
+    def __init__(self, gff3_path: str, fasta_path: str, tier: int):
         """ Open gff3 file and fasta file. Load fasta data into memory
 
         :param gff3_path: Path
         :param fasta_path: Path
+        :param tier: Parsing tier
         :raises: AssertionError if either path does not exist
         """
         assert os.path.exists(gff3_path) and os.path.exists(fasta_path)
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
+        self.tier = tier
 
     def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
         """ Merge together genes from gff3 file with existing ab-initio skeleton
@@ -218,7 +222,7 @@ class GffMerge:
             # Keep exons with evidence, add exons missed by ab-initio
             for val in gene_data["transcripts"].keys():
                 if val != "ab-initio":
-                    gene.add_evidence(gene_data["transcripts"][val])
+                    gene.tier4(gene_data["transcripts"][val])
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
             yield (gene_data, *self.create_cds(gene_data, gene))
@@ -322,17 +326,18 @@ class GffWriter:
     """
     Class writes results of merging all data and evidence
     """
-    def __init__(self, in_gff3_path: str, fasta_file: str, output_prefix: str):
+    def __init__(self, in_gff3_path: str, fasta_file: str, output_prefix: str, tier: int):
         """ Create write object based on input data
 
         :param in_gff3_path: Initial gff3 file
         :param fasta_file: FASTA file associated with gff3 file
         :param output_prefix: Out prefix to write
+        :param tier: Tiered output to pass to GffMerge object
         """
         self.in_fp = open(in_gff3_path, "r")
         self.base = output_prefix
         self.out_fp = open(self.base + ".nr.gff3", "w")
-        self.merger = GffMerge(in_gff3_path, fasta_file)
+        self.merger = GffMerge(in_gff3_path, fasta_file, tier)
 
     def write(self):
         """ Write parsed results in gff3 format
@@ -419,6 +424,7 @@ if __name__ == "__main__":
         ),
         description="GFF3 output final annotations as <prefix>.nr.gff3"
     )
+
     try:
         ap.args.tier = int(ap.args.tier)
     except ValueError as e:
@@ -429,5 +435,6 @@ if __name__ == "__main__":
         assert os.path.exists(_file), _file
     if ap.args.output_prefix is None:
         ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0]
-    writer = GffWriter(ap.args.gff3_file, ap.args.fasta_file, ap.args.output_prefix)
+
+    writer = GffWriter(ap.args.gff3_file, ap.args.fasta_file, ap.args.output_prefix, ap.args.tier)
     writer.write()
