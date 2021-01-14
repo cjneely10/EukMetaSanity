@@ -264,7 +264,6 @@ class GffMerge:
             # exons that were not identified in ab initio predictions
             # TODO: Squash ab-initio exon tracks to single skeleton set
             if self.tier == 0:
-
                 # Keep exons with evidence, add exons missed by ab-initio
                 for val in gene_data["transcripts"].keys():
                     if val not in ABINITIO_IDENTIFIERS:
@@ -274,9 +273,9 @@ class GffMerge:
             else:
                 # Add filter to genes that do not occur within user-defined threshold
                 gene.filter(self.tier)
+                # TODO: Calculate longest ORF if gene passes filter
                 # TODO: At end, only return valid gene_data dict metadata with associated longest ORF CDS/AA
                 gene_data["transcripts"] = gene.exons
-                # Return data to write and output FASTA records
                 yield (gene_data, *self.create_cds(gene_data, gene))
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
