@@ -18,6 +18,9 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from EukMetaSanity.utils.arg_parse import ArgParse
 
+# Current identifiers that signify an abinitio-based prediction
+ABINITIO_IDENTIFIERS = {"augustus", "GeneMark.hmm", "ab-initio"}
+
 
 class Gene:
     """
@@ -58,6 +61,21 @@ class Gene:
         :param t: Tier value
         """
         self._tier = t
+
+    def filter(self, tier: int):
+        """ Remove genes that do not have sufficient level of evidence. Set all gene-level metadata to 0 or empty
+        collections
+
+        :param tier: Minimum (inclusive) tier to keep in output
+        :raises: AssertionError for 0 or negative-valued tier values
+        """
+        assert tier > 0
+        if self._tier < tier:
+            self.exons = []
+            self.num_ab_initio = 0
+            self.trimmed_ab_initio = 0
+            self.added_evidence = 0
+            self.terminal_exons = {}
 
     # pylint: disable=too-many-branches
     def tier0(self, evidence_data: List):
@@ -192,13 +210,14 @@ class GffReader:
             data = defaultdict(list)
             terminal_exons = []
             for transcript in transcripts:
-                # TODO: Prevent early merging of multiple lines of ab-initio evidence
                 data[transcript[0]].extend(transcript[-1])
-                if transcript[0] == "ab-initio" and len(transcript[-1]) > 1:
+                # Track the locations of terminal exons - e.g. these may have stop codons that will may need adjustment
+                if transcript[0] in ABINITIO_IDENTIFIERS and len(transcript[-1]) > 1:
                     if gene_data["strand"] == "+":
                         terminal_exons.append(transcript[-1][-1])
                     else:
                         terminal_exons.append(transcript[-1][0])
+            # Sort transcripts by position (and strand)
             for transcript in data.keys():
                 if gene_data["strand"] == "+":
                     data[transcript].sort(key=itemgetter(0))
@@ -243,15 +262,18 @@ class GffMerge:
             )
             # Tier 4 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
+            # TODO: Implement cds_creation within each tier level to allow for identifying longest ORF via different protocols
+            # TODO: At end, only return valid gene_data dict metadata with associated longest ORF CDS/AA
             if self.tier == 0:
+                # TODO: Squash ab-initio exon tracks to single skeleton set
+
                 # Keep exons with evidence, add exons missed by ab-initio
                 for val in gene_data["transcripts"].keys():
-                    if val != "ab-initio":
+                    if val not in ABINITIO_IDENTIFIERS:
                         gene.tier0(gene_data["transcripts"][val])
             else:
                 # Add filter to genes that do not occur within user-defined threshold
-                if gene.tier >= self.tier:
-                    pass
+                gene.filter(self.tier)
             gene_data["transcripts"] = gene.exons
             # Return data to write and output FASTA records
             yield (gene_data, *self.create_cds(gene_data, gene))
