@@ -262,21 +262,22 @@ class GffMerge:
             )
             # Tier 4 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
-            # TODO: Implement cds_creation within each tier level to allow for identifying longest ORF via different protocols
-            # TODO: At end, only return valid gene_data dict metadata with associated longest ORF CDS/AA
+            # TODO: Squash ab-initio exon tracks to single skeleton set
             if self.tier == 0:
-                # TODO: Squash ab-initio exon tracks to single skeleton set
 
                 # Keep exons with evidence, add exons missed by ab-initio
                 for val in gene_data["transcripts"].keys():
                     if val not in ABINITIO_IDENTIFIERS:
                         gene.tier0(gene_data["transcripts"][val])
+                gene_data["transcripts"] = gene.exons
+                yield (gene_data, *self.create_cds(gene_data, gene))
             else:
                 # Add filter to genes that do not occur within user-defined threshold
                 gene.filter(self.tier)
-            gene_data["transcripts"] = gene.exons
-            # Return data to write and output FASTA records
-            yield (gene_data, *self.create_cds(gene_data, gene))
+                # TODO: At end, only return valid gene_data dict metadata with associated longest ORF CDS/AA
+                gene_data["transcripts"] = gene.exons
+                # Return data to write and output FASTA records
+                yield (gene_data, *self.create_cds(gene_data, gene))
 
     def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         """ Create CDS from gene data in region
@@ -285,6 +286,8 @@ class GffMerge:
         :param gene: Gene object to translate
         :return: CDS/protein records and list of offsets
         """
+        if len(gene_data["transcripts"]) == 0:
+            return None, None, []
         orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
         strand = gene_data["strand"]
         out_cds: List[str] = []
