@@ -30,9 +30,7 @@ class Gene:
         :param ab_initio_data: List of initial exons
         :param strand: Strand of DNA
         :param term_exons: List of terminal exons
-        :raises: AssertionError if t < 1 or t > 4
         """
-        assert _tier in range(1, 5)
         self.exons: List = ab_initio_data
         self.strand: str = strand
         self.num_ab_initio: int = len(ab_initio_data)
@@ -58,13 +56,11 @@ class Gene:
         """ Set current tier of gene
 
         :param t: Tier value
-        :raises: AssertionError if t < 1 or t > 4
         """
-        assert t in range(1, 5)
         self._tier = t
 
     # pylint: disable=too-many-branches
-    def tier4(self, evidence_data: List):
+    def tier0(self, evidence_data: List):
         """ Add list of exons from protein/transcriptomic-based evidence
 
         :param evidence_data: List of evidence-derived exons
@@ -196,6 +192,7 @@ class GffReader:
             data = defaultdict(list)
             terminal_exons = []
             for transcript in transcripts:
+                # TODO: Prevent early merging of multiple lines of ab-initio evidence
                 data[transcript[0]].extend(transcript[-1])
                 if transcript[0] == "ab-initio" and len(transcript[-1]) > 1:
                     if gene_data["strand"] == "+":
@@ -246,11 +243,11 @@ class GffMerge:
             )
             # Tier 4 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
-            if gene.tier == 4:
+            if self.tier == 0:
                 # Keep exons with evidence, add exons missed by ab-initio
                 for val in gene_data["transcripts"].keys():
                     if val != "ab-initio":
-                        gene.tier4(gene_data["transcripts"][val])
+                        gene.tier0(gene_data["transcripts"][val])
             else:
                 # Add filter to genes that do not occur within user-defined threshold
                 if gene.tier >= self.tier:
@@ -452,7 +449,7 @@ if __name__ == "__main__":
             (("-o", "--output_prefix"),
              {"help": "Output prefix, default is path/prefix of gff3_file"}),
             (("-t", "--tier"),
-             {"help": "Tiered output, select from 1,2,3,4, default is 4", "default": 4}),
+             {"help": "Tiered output, any value greater than 1, default is 0 for owned parsing", "default": 0}),
         ),
         description="GFF3 output final annotations as <prefix>.nr.gff3"
     )
@@ -462,7 +459,7 @@ if __name__ == "__main__":
     except ValueError as e:
         print("Tier must be integer")
         sys.exit(1)
-    assert ap.args.tier in range(1, 5)
+    assert ap.args.tier >= 0
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file
     if ap.args.output_prefix is None:

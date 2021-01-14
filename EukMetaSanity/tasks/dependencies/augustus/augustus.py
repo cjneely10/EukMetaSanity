@@ -137,7 +137,7 @@ class AugustusIter(TaskList):
                     if line[2] == "transcript":
                         out_fp.write("\t".join((
                             line[0],
-                            "ab-initio",
+                            "augustus",
                             *line[2:-1],
                             "ID=gene%i\n" % i
                         )))
@@ -148,7 +148,7 @@ class AugustusIter(TaskList):
                         while line[2] != "transcript":
                             out_fp.write("\t".join((
                                 line[0],
-                                "ab-initio",
+                                "augustus",
                                 *line[2:-1],
                                 "Parent=gene%i\n" % i
                             )))
