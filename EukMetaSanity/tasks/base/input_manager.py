@@ -5,6 +5,7 @@ Module holds InputManager class
 import os
 import sys
 import pickle
+from pathlib import Path
 from typing import List, Dict, Optional
 from Bio import SeqIO
 # pylint: disable=no-member
@@ -58,7 +59,7 @@ class InputManager:
         :return: Path to simplified FASTA file
         """
         # Get path to file
-        out_file = os.path.join(storage_dir, record_id + extension)
+        out_file = str(Path(os.path.join(storage_dir, record_id + extension)).resolve())
         # Do not overwrite if file already present
         if os.path.exists(out_file):
             return out_file
