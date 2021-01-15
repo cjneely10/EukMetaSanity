@@ -8,8 +8,8 @@ from typing import List
 from pathlib import Path
 from plumbum import local
 from plumbum.machines.local import LocalCommand
-from EukMetaSanity.data.data import data_urls
 from EukMetaSanity.utils.arg_parse import ArgParse
+from EukMetaSanity.data.data import data_urls, instructions
 
 # Dependencies
 cp = local["cp"]
@@ -71,7 +71,7 @@ def run(ap: ArgParse, out_dir: str):
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         _file = os.path.join(new_dir, os.path.basename(url.url))
-        _out = os.path.join(new_dir, _id + "_db")
+        _out = os.path.join(new_dir, _id)
         out.append(_out)
         ids.append(_id)
         if not os.path.exists(_out):
@@ -105,13 +105,6 @@ def run(ap: ArgParse, out_dir: str):
                     mmseqs["msa2profile", _msa_db, _out, "--match-mode", "1"]
                 )
             os.remove(_file)
-            # Handle merge instructions
-            # TODO: Refactor to be more modularized
-            if url.instructions is not None:
-                if "merge" in url.instructions:
-                    _, merge_db, out_db = url.instructions.split("|")
-                    _handle_merge(_out, merge_db, out_db)
-                    _out = out_db
             if ap.args.build and url.type != "profile":
                 # Generate linear index
                 _print_and_run(
@@ -136,6 +129,20 @@ def run(ap: ArgParse, out_dir: str):
                         "--remove-tmp-files",
                     ]
                 )
+    # Handle merge instructions
+    for new_db, _instructions in instructions():
+        if _instructions is not None:
+            if "merge" in _instructions:
+                _, merge_db1, merge_db2 = _instructions.split("|")
+                _handle_merge(merge_db1, merge_db2, new_db)
+                new_dir = os.path.join(out_dir, merge_db1)
+                if ap.args.rewrite and os.path.exists(new_dir):
+                    shutil.rmtree(new_dir)
+                if not os.path.exists(new_dir):
+                    os.makedirs(new_dir)
+                _out = os.path.join(new_dir, merge_db1)
+                out = [_o if _o != new_dir else _out for _o in out]
+
     _generate_config_files(out, ids, ap.args.path)
 
 

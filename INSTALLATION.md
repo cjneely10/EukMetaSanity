@@ -75,7 +75,7 @@ cd /path/to/EukMetaSanity
 ```
 
 This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate for use when running **EukMetaSanity**. 
+automatically generate for use when running **EukMetaSanity**.
 
 
 ## **Your installation is complete!**
