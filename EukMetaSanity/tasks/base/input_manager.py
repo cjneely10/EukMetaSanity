@@ -118,3 +118,27 @@ class InputManager:
         :return: List of input files in order based on self.record_ids
         """
         return [{ConfigManager.ROOT: self.data[record_id]} for record_id in self.record_ids]
+
+    def summarize_input(self) -> str:
+        """ Method provides a summary of all input files that are provided to the run.
+
+        Meant to be called at outer level as a means of displaying for user the files that will/may be
+        involved in analysis
+
+        :return: Str of input
+        """
+        input_keys = set()
+        for data_dict in self.input_files:
+            for key in data_dict.keys():
+                if key != ConfigManager.ROOT:
+                    input_keys.add(key)
+        return "\n".join((
+            f"Number of unique records gathered: {len(self.input_prefixes)}",
+            "",
+            "\n".join((
+                f"{record_id}: {len(self.input_files[i][ConfigManager.ROOT])} file(s) from command line\n"
+                f"{len(self.input_files[i][input_key])} file(s) from {input_key}"
+                for i, record_id in enumerate(self.input_prefixes)
+                for input_key in input_keys
+            ))
+        ))
