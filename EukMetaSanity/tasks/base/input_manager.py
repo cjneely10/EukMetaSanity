@@ -133,12 +133,11 @@ class InputManager:
                 if key != ConfigManager.ROOT:
                     input_keys.add(key)
         return "\n".join((
-            f"Number of unique records gathered: {len(self.input_prefixes)}",
+            f"\nNumber of unique records gathered: {len(self.input_prefixes)}",
             "",
             "\n".join((
-                f"{record_id}: {len(self.input_files[i][ConfigManager.ROOT])} file(s) from command line\n"
-                f"{len(self.input_files[i][input_key])} file(s) from {input_key}"
+                f"{record_id}: {len(self.input_files[i][ConfigManager.ROOT])} file(s) from command line, "
+                f"{sum([len(self.input_files[i][key]) for key in input_keys])} file(s) from internal pipelines"
                 for i, record_id in enumerate(self.input_prefixes)
-                for input_key in input_keys
             ))
         ))
