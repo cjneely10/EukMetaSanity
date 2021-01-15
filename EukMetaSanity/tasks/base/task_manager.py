@@ -109,11 +109,13 @@ class TaskManager:
                     # Dependency input will either come from root or will be collected from a task that has already run
                     if req.input != ConfigManager.ROOT:
                         output.update(self.completed_tasks[
-                            (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
+                            (req.name, req.input) if (req.name, req.input) in self.completed_tasks.keys()
                             else (req.name, task.name)
                         ].tasks[k].output)
                     else:
                         output.update(self.input_files[k][ConfigManager.ROOT])
+                if output == {}:
+                    output = self.input_files[k][ConfigManager.ROOT]
                 to_add.append(inner_add)
                 expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
             # Generate next task based on input from required dependencies/requirements
@@ -160,7 +162,9 @@ class TaskManager:
         :param output: Dict to modify
         :return: Reference to updated dict
         """
-        for key, val in override_tuples or []:
+        if override_tuples is None:
+            return output
+        for key, val in override_tuples:
             output[val] = output[key]
         return output
 
