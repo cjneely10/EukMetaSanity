@@ -15,7 +15,6 @@ FASTA and mmseqs profile databases
 UrlInfo = namedtuple("UrlInfo", ("url", "tar", "flags", "gz", "type"))
 
 
-# TODO: Include odb-mmetsp download and install
 def data_urls() -> Dict[str, UrlInfo]:
     """ Return dictionary of config_replacement_string: instructions for unpackaging data
 

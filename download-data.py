@@ -66,7 +66,7 @@ def run(ap: ArgParse, out_dir: str):
     for _id, url in data_urls().items():
         # Download
         new_dir = os.path.join(out_dir, _id)
-        if ap.args.rewrite and os.path.exists(new_dir):
+        if os.path.exists(new_dir):
             shutil.rmtree(new_dir)
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
@@ -134,13 +134,13 @@ def run(ap: ArgParse, out_dir: str):
         if _instructions is not None:
             if "merge" in _instructions:
                 _, merge_db1, merge_db2 = _instructions.split("|")
-                _handle_merge(merge_db1, merge_db2, new_db)
                 new_dir = os.path.join(out_dir, merge_db1)
-                if ap.args.rewrite and os.path.exists(new_dir):
+                if os.path.exists(new_dir):
                     shutil.rmtree(new_dir)
                 if not os.path.exists(new_dir):
                     os.makedirs(new_dir)
                 _out = os.path.join(new_dir, merge_db1)
+                _handle_merge(_out, os.path.join(new_dir, merge_db2), os.path.join(new_dir, new_db))
                 out = [_o if _o != new_dir else _out for _o in out]
 
     _generate_config_files(out, ids, ap.args.path)
@@ -239,8 +239,6 @@ if __name__ == "__main__":
             (("-x", "--index"),
              {"help": "Generate search index (recommended, but takes a lot of space), default False",
               "default": False, "action": "store_true"}),
-            (("-r", "--rewrite"),
-             {"help": "Rewrite existing directory, default False", "default": False, "action": "store_true"}),
             (("-t", "--threads"),
              {"help": "Number of threads to use in database generation, default 1", "default": "1"}),
             (("-m", "--max_mem"),
