@@ -41,6 +41,19 @@ def data_urls() -> Dict[str, UrlInfo]:
             flags="",
             tar=False,
             gz=False,
-            type="profile"
-        )
+            type="profile",
+        ),
+        "mmetsp_db": UrlInfo(
+            url="https://wwwuser.gwdg.de/~compbiol/metaeuk/2019_11/TAX_DBs/MMETSP/TaxDB_MMETSP.tar.gz",
+            flags="-xzf",
+            tar=True,
+            gz=False,
+            type="FASTA",
+        ),
+    }
+
+
+def instructions():
+    return {
+        "odb-mmetsp_db": "merge|ortho_db|mmetsp_db"
     }

@@ -50,6 +50,7 @@ def _parse_args(ap: ArgParse) -> ArgParse:
     return ap
 
 
+# TODO: Entire function needs modularity to pass review
 def run(ap: ArgParse, out_dir: str):
     """ Download all data with wget from the data.py script - Part of API
 
@@ -104,6 +105,13 @@ def run(ap: ArgParse, out_dir: str):
                     mmseqs["msa2profile", _msa_db, _out, "--match-mode", "1"]
                 )
             os.remove(_file)
+            # Handle merge instructions
+            # TODO: Refactor to be more modularized
+            if url.instructions is not None:
+                if "merge" in url.instructions:
+                    _, merge_db, out_db = url.instructions.split("|")
+                    _handle_merge(_out, merge_db, out_db)
+                    _out = out_db
             if ap.args.build and url.type != "profile":
                 # Generate linear index
                 _print_and_run(
@@ -192,6 +200,23 @@ def _create_tax_db(_out: str, out_dir: str):
             "tmp",
             "--ncbi-tax-dump", out_dir,
             "--tax-mapping-file", os.path.join(out_dir, "mmseqs.input")
+        ]
+    )
+
+
+def _handle_merge(db_name: str, merge_db_name: str, output_name: str):
+    """ Merge db_name and merge_db_name into output_name
+
+    :param db_name: First db
+    :param merge_db_name: Second db
+    :param output_name: New mmseqs db name to create from first two databases
+    """
+    _print_and_run(
+        mmseqs[
+            "mergedbs",
+            db_name,
+            output_name,
+            merge_db_name
         ]
     )
 
