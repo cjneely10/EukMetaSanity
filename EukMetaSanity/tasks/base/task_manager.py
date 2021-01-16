@@ -218,7 +218,7 @@ class TaskManager:
             i += 1
         self.completed_tasks = {}
         return "\n".join((
-            f"{record_id} needs {to_complete} tasks to complete this pipeline"
+            f"{record_id}: {to_complete} task(s) to complete this pipeline"
             for record_id, to_complete in needs_completing.items()
         ))
 
