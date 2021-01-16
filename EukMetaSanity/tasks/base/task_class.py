@@ -15,7 +15,6 @@ from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable, Sized
 from plumbum import colors, local, BG
 from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
-from EukMetaSanity.tasks.utils.helpers import touch
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
 from EukMetaSanity.tasks.base.dependency_input import DependencyInput
@@ -187,7 +186,7 @@ class Task(ABC):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
                     continue
-                elif not self.is_skip:
+                if not self.is_skip:
                     print(colors.red & colors.bold | "Missing file: %s" % _path)
                     raise OutputResultsFileError(_path)
         return self._output_paths
@@ -353,7 +352,22 @@ class Task(ABC):
 
     @property
     def developer_mode(self) -> bool:
+        """ Return if running in developer mode - only run through metadata, do not run actual methods
+
+        :return: True if in developer_mode
+        """
         return bool(self._mode) is False
+
+    @developer_mode.setter
+    def developer_mode(self, mode: bool):
+        """ Set developer mode (True) or regular run mode (False
+
+        :param mode: True to set developer mode, False otherwise
+        """
+        # 0 is developer, 1 is user
+        # True is False = 0 for developer
+        # False is False = 1 for user
+        self._mode = int(mode is False)
 
     def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses multiple threads

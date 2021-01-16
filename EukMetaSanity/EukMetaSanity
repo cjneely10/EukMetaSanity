@@ -62,7 +62,7 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
     return ConfigManager(ap.args.config_file)
 
 
-# TODO: Soft-run to display tasks, proposed HPC time, etc.
+# TODO: Soft-run to display proposed HPC time
 if __name__ == "__main__":
     DEFAULT_EXTS = ".fna/.fasta/.fa"
     _tm = PipelineManager()
