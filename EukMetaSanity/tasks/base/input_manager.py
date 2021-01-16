@@ -127,11 +127,7 @@ class InputManager:
 
         :return: Str of input
         """
-        input_keys = set()
-        for data_dict in self.input_files:
-            for key in data_dict.keys():
-                if key != ConfigManager.ROOT:
-                    input_keys.add(key)
+        input_keys = {key for data_dict in self.input_files for key in data_dict.keys() if key != ConfigManager.ROOT}
         return "\n".join((
             f"\nNumber of unique records gathered: {len(self.input_prefixes)}",
             "",

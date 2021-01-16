@@ -186,7 +186,7 @@ class Task(ABC):
             if isinstance(_path, str) and not os.path.exists(_path):
                 # Write dummy file if in developer mode
                 if self._mode == 0:
-                    touch(_path)
+                    continue
                 elif not self.is_skip:
                     print(colors.red & colors.bold | "Missing file: %s" % _path)
                     raise OutputResultsFileError(_path)

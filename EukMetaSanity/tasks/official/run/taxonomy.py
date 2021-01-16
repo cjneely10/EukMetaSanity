@@ -23,7 +23,7 @@ class TaxonomyIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "taxonomy": TaxonomyIter.Taxonomy.get_taxonomy(
+                "taxonomy": self.get_taxonomy(
                     str(self.input["mmseqs.taxonomy"]["tax-report"]),
                     float(self.config["cutoff"])),
                 "final": ["mmseqs.taxonomy.tax-report", "taxonomy"]
@@ -33,8 +33,9 @@ class TaxonomyIter(TaskList):
         def run(self):
             pass
 
-        @staticmethod
-        def get_taxonomy(tax_results_file: str, cutoff: float) -> TaxonomyAssignment:
+        def get_taxonomy(self, tax_results_file: str, cutoff: float) -> TaxonomyAssignment:
+            if self.developer_mode:
+                return TaxonomyAssignment()
             tax_assignment_out = TaxonomyAssignment()
             tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
             taxonomy = {key: None for key in tax_levels}
