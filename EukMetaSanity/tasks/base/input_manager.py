@@ -129,7 +129,8 @@ class InputManager:
         """
         input_keys = {key for data_dict in self.input_files for key in data_dict.keys() if key != ConfigManager.ROOT}
         return "\n".join((
-            (colors.reset | "") + (colors.bold & colors.blue | f"\nNumber of unique records gathered: {len(self.input_prefixes)}"),
+            (colors.reset | "") +
+                (colors.bold & colors.blue | f"\nNumber of unique records gathered: {len(self.input_prefixes)}"),
             colors.reset | "",
             colors.bold & colors.blue | "\n".join((
                 f"{record_id}: {len(self.input_files[i][ConfigManager.ROOT])} file(s) from command line, "

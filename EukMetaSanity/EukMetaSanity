@@ -96,21 +96,23 @@ if __name__ == "__main__":
     # Run main program logic
     tprint("EukMetaSanity", font="smslant")
 
-    print(colors.yellow & colors.bold | "Gathering files...")
-    print(colors.yellow & colors.bold | "------------------")
-    print(colors.yellow & colors.bold | _im.summarize_input())
-    if not _ap.args.skip_summary and input("\nDoes this look correct? [Y/n] ").upper() != "Y":
-        print(colors.warn & colors.bold | "Exiting...")
-        sys.exit()
-    # Generate TaskManager and run task-completion check
-    print(colors.yellow & colors.bold | "\nChecking for completed dependencies...")
-    tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
-    print(colors.yellow & colors.bold | "--------------------------------------")
-    print(colors.yellow & colors.bold | "\n" + tm.prerun_summarize())
-    if not _ap.args.skip_summary and input("\nDoes this look correct? [Y/n] ").upper() != "Y":
-        print(colors.warn & colors.bold | "Exiting...")
-        sys.exit()
-    print(colors.green & colors.bold | "\n--------------------------------------\n")
+    if not _ap.args.skip_summary:
+        print(colors.yellow & colors.bold | "Gathering files...")
+        print(colors.yellow & colors.bold | "------------------")
+        print(colors.yellow & colors.bold | _im.summarize_input())
+        if input("\nDoes this look correct? [Y/n] ").upper() != "Y":
+            print(colors.warn & colors.bold | "Exiting...")
+            sys.exit()
+        # Generate TaskManager and run task-completion check
+        print(colors.yellow & colors.bold | "\nChecking for completed dependencies...")
+        tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
+        print(colors.yellow & colors.bold | "--------------------------------------")
+        print(colors.yellow & colors.bold | "\n" + tm.prerun_summarize())
+        if input("\nDoes this look correct? [Y/n] ").upper() != "Y":
+            print(colors.warn & colors.bold | "Exiting...")
+            sys.exit()
+    else:
+        tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
 
     # Begin logging
     _initialize_logging(_ap)
