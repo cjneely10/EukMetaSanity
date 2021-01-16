@@ -72,6 +72,18 @@ class TaskManager:
         """
         return self.__repr__()
 
+    def _generate_task(self, task_index: int, data_to_add: dict, dependency_input: dict):
+        """ Create TaskList object from stored task_list
+
+        :param task_index:
+        :param data_to_add:
+        :param dependency_input:
+        :return:
+        """
+        return self.task_list[task_index][0](
+            self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
+            data_to_add, dependency_input)
+
     def run(self, output_dir: str):
         """ Run pipeline!
 
