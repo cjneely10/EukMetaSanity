@@ -110,6 +110,8 @@ if __name__ == "__main__":
     if not _ap.args.skip_summary and input("\nDoes this look correct? [Y/n] ").upper() != "Y":
         print(colors.warn & colors.bold | "Exiting...")
         sys.exit()
+    print(colors.green & colors.bold | "\n--------------------------------------\n")
+
     # Begin logging
     _initialize_logging(_ap)
     # # Begin task list

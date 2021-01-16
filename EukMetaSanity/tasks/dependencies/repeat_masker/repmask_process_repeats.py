@@ -50,6 +50,7 @@ class ProcessRepeatsIter(TaskList):
                         # Input taxonomy from OrthoDB search
                         "-species", self.input["taxonomy"]["taxonomy"].family.value,
                         "-maskSource", str(self.input["root"]["fasta"]),
+                        (*self.added_flags),
                         final_out,
                     ]
                 )

@@ -60,6 +60,8 @@ repeats:
         -nolow
     repmask.process_repeats:
       program: ProcessRepeats
+      FLAGS:
+        -nolow
     repmask.rmout:
       program: rmOutToGFF3.pl
 

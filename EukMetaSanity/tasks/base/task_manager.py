@@ -72,16 +72,16 @@ class TaskManager:
         """
         return self.__repr__()
 
-    def _generate_task(self, task_index: int, data_to_add: dict, dependency_input: dict):
+    def _generate_task(self, task_index: int, debug_level: int, data_to_add: List[dict], dependency_input: List[dict]):
         """ Create TaskList object from stored task_list
 
-        :param task_index:
-        :param data_to_add:
-        :param dependency_input:
-        :return:
+        :param task_index: Index in stored task_list
+        :param data_to_add: List of input data to generate inner Task objects
+        :param dependency_input: List of input data to use at dependency_input level
+        :return: Created TaskList object
         """
         return self.task_list[task_index][0](
-            self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
+            self.cfg, self.input_files, self.pm, self.input_prefixes, debug_level, self.task_list[task_index][1],
             data_to_add, dependency_input)
 
     def run(self, output_dir: str):
@@ -90,11 +90,11 @@ class TaskManager:
         :param output_dir: Directory to write final results
         """
         # Generate first task from class object
-        task = self.task_list[0][0](
-            self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[0][1],
-            [{} for _ in range(len(self.input_files))],
-            [TaskManager._incorporate_key_overrides(self.task_list[0][3], self.input_files[k][ConfigManager.ROOT])
-             for k in range(len(self.input_files))])
+        task = self._generate_task(0, self.debug,
+                                   [{} for _ in range(len(self.input_files))],
+                                   [TaskManager._incorporate_key_overrides(self.task_list[0][3],
+                                                                           self.input_files[k][ConfigManager.ROOT])
+                                    for k in range(len(self.input_files))])
         # Run and store results
         task.run()
         self.completed_tasks[(task.name, task.scope)] = task
