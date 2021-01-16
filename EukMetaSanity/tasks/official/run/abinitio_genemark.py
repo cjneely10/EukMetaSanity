@@ -7,7 +7,7 @@ from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_co
 class AbInitioGeneMarkIter(TaskList):
     name = "abinitio.genemark"
     requires = ["taxonomy", "repeats"]
-    depends = [DependencyInput("gmes.gffread", "repeats")]
+    depends = [DependencyInput("gmes.gffread", "repeats", id_mapping=[("fasta", "mask-fna")])]
     
     class AbInitioGeneMark(Task):
         @set_complete

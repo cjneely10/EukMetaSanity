@@ -50,7 +50,7 @@ class RepeatMaskerIter(TaskList):
                         (*self.added_flags),
                         (*search),
                         "-dir", _dir,
-                        self.input["root"]["fasta"],
+                        self.dependency_input["fasta"],
                     ],
                     "%s.sh" % os.path.basename(_dir)
                 )

@@ -21,7 +21,7 @@ class AbInitioAugustusIter(TaskList):
     """
     name = "abinitio.augustus"
     requires = ["repeats"]
-    depends = [DependencyInput("augustus", "repeats")]
+    depends = [DependencyInput("augustus", "repeats", id_mapping=[("fasta", "mask-fna")])]
 
     class AbInitioAugustus(Task):
         """

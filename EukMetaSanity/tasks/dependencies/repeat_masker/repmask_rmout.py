@@ -15,7 +15,7 @@ class RepeatMaskerOutIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "mask-gff3": os.path.join(self.wdir, "mask.final.gff3"),
-                "fna": os.path.join(self.wdir, self.record_id + ".mask.fna")
+                "mask-fna": os.path.join(self.wdir, self.record_id + ".mask.fna")
             }
 
         @program_catch
@@ -35,7 +35,7 @@ class RepeatMaskerOutIter(TaskList):
             else:
                 touch(str(self.output["mask-gff3"]))
                 shutil.copyfile(
-                    str(self.dependency_input),
+                    str(self.dependency_input["fasta"]),
                     str(self.output["mask-fna"])
                 )
 
