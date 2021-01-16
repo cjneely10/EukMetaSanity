@@ -72,7 +72,8 @@ class TaskManager:
         """
         return self.__repr__()
 
-    def _generate_task(self, task_index: int, debug_level: int, data_to_add: List[dict], dependency_input: List[dict]):
+    def _generate_task(self, task_index: int, debug_level: int, data_to_add: List[dict],
+                       dependency_input: List[dict]) -> TaskList:
         """ Create TaskList object from stored task_list
 
         :param task_index: Index in stored task_list
@@ -84,14 +85,50 @@ class TaskManager:
             self.cfg, self.input_files, self.pm, self.input_prefixes, debug_level, self.task_list[task_index][1],
             data_to_add, dependency_input)
 
+    def _build_input_dict_list(self, i: int, old_task: TaskList, task: TaskList) -> Tuple[List[Dict], List[Dict]]:
+        """ Helper method to build input data for task that includes output from old_task
+
+        :param i: Position in task_list
+        :param task: Completed task
+        :return: Tuple of the two built input lists
+        """
+        # Collect input data that requirements and dependencies request
+        to_add = []
+        # Collect `dependency_input` dict from completed task list
+        expected_input = []
+        for k in range(len(old_task.output()[1])):
+            inner_add = {}
+            # Requirements are stored at outermost scope
+            for req_str in self.task_list[i][0].requires:
+                inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
+            # Dependencies are stored at task scope level, but may also be from task's scope's scope
+            output = {}
+            for req in self.task_list[i][0].depends:
+                inner_add[req.name] = self.completed_tasks[
+                    (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
+                    else (req.name, task.name)
+                ].tasks[k].output
+                # Dependency input will either come from root or will be collected from a task that has already run
+                if req.input != ConfigManager.ROOT:
+                    output.update(self.completed_tasks[
+                                      (req.name, req.input) if (req.name, req.input) in self.completed_tasks.keys()
+                                      else (req.name, task.scope)
+                                  ].tasks[k].output)
+                else:
+                    output.update(self.input_files[k][ConfigManager.ROOT])
+            if output == {}:
+                output = self.input_files[k][ConfigManager.ROOT]
+            to_add.append(inner_add)
+            expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
+        return to_add, expected_input
+
     def run(self, output_dir: str):
         """ Run pipeline!
 
         :param output_dir: Directory to write final results
         """
         # Generate first task from class object
-        task = self._generate_task(0, self.debug,
-                                   [{} for _ in range(len(self.input_files))],
+        task = self._generate_task(0, self.debug, [{} for _ in range(len(self.input_files))],
                                    [TaskManager._incorporate_key_overrides(self.task_list[0][3],
                                                                            self.input_files[k][ConfigManager.ROOT])
                                     for k in range(len(self.input_files))])
@@ -103,38 +140,9 @@ class TaskManager:
         while i < len(self.task_list):
             # Create reference to prior task
             old_task = task
-            # Collect input data that requirements and dependencies request
-            to_add = []
-            # Collect `dependency_input` dict from completed task list
-            expected_input = []
-            for k in range(len(old_task.output()[1])):
-                inner_add = {}
-                # Requirements are stored at outermost scope
-                for req_str in self.task_list[i][0].requires:
-                    inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
-                # Dependencies are stored at task scope level, but may also be from task's scope's scope
-                output = {}
-                for req in self.task_list[i][0].depends:
-                    inner_add[req.name] = self.completed_tasks[
-                        (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
-                        else (req.name, task.name)
-                    ].tasks[k].output
-                    # Dependency input will either come from root or will be collected from a task that has already run
-                    if req.input != ConfigManager.ROOT:
-                        output.update(self.completed_tasks[
-                            (req.name, req.input) if (req.name, req.input) in self.completed_tasks.keys()
-                            else (req.name, task.name)
-                        ].tasks[k].output)
-                    else:
-                        output.update(self.input_files[k][ConfigManager.ROOT])
-                if output == {}:
-                    output = self.input_files[k][ConfigManager.ROOT]
-                to_add.append(inner_add)
-                expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
+            to_add, expected_input = self._build_input_dict_list(i, old_task, task)
             # Generate next task based on input from required dependencies/requirements
-            task = self.task_list[i][0](
-                self.cfg, self.input_files, self.pm, self.input_prefixes, self.debug, self.task_list[i][1],
-                to_add, expected_input)
+            task = self._generate_task(i, self.debug, to_add, expected_input)
             # Run task and store object in completed task list
             task.run()
             self.completed_tasks[(task.name, task.scope)] = task
@@ -187,60 +195,26 @@ class TaskManager:
         :return: Str of contents of pipeline
         """
         needs_completing = defaultdict(int)
-        i = 1
-        task = self.task_list[0][0](
-            self.cfg, self.input_files, self.pm, self.input_prefixes, 0, self.task_list[0][1],
-            [{} for _ in range(len(self.input_files))],
-            [TaskManager._incorporate_key_overrides(self.task_list[0][3], self.input_files[k][ConfigManager.ROOT])
-             for k in range(len(self.input_files))])
+        # Generate first task from class object
+        task = self._generate_task(0, 0, [{} for _ in range(len(self.input_files))],
+                                   [TaskManager._incorporate_key_overrides(self.task_list[0][3],
+                                                                           self.input_files[k][ConfigManager.ROOT])
+                                    for k in range(len(self.input_files))])
         self.completed_tasks[(task.name, task.scope)] = task
-
         for _task in task.tasks:
             if not _task.is_complete:
                 needs_completing[_task.record_id] += 1
-
+        i = 1
         # Run each task in list
         while i < len(self.task_list):
             # Create reference to prior task
             old_task = task
-            # Collect input data that requirements and dependencies request
-            to_add = []
-            # Collect `dependency_input` dict from completed task list
-            expected_input = []
-            for k in range(len(old_task.output()[1])):
-                inner_add = {}
-                # Requirements are stored at outermost scope
-                for req_str in self.task_list[i][0].requires:
-                    inner_add[req_str] = self.completed_tasks[(req_str, "")].tasks[k].output
-                # Dependencies are stored at task scope level, but may also be from task's scope's scope
-                output = {}
-                for req in self.task_list[i][0].depends:
-                    inner_add[req.name] = self.completed_tasks[
-                        (req.name, task.scope) if (req.name, task.scope) in self.completed_tasks.keys()
-                        else (req.name, task.name)
-                    ].tasks[k].output
-                    # Dependency input will either come from root or will be collected from a task that has already run
-                    if req.input != ConfigManager.ROOT:
-                        output.update(self.completed_tasks[
-                                          (req.name, req.input) if (req.name, req.input) in self.completed_tasks.keys()
-                                          else (req.name, task.scope)
-                                      ].tasks[k].output)
-                    else:
-                        output.update(self.input_files[k][ConfigManager.ROOT])
-                if output == {}:
-                    output = self.input_files[k][ConfigManager.ROOT]
-                to_add.append(inner_add)
-                expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
             # Generate next task based on input from required dependencies/requirements
-            task = self.task_list[i][0](
-                self.cfg, self.input_files, self.pm, self.input_prefixes, 0, self.task_list[i][1],
-                to_add, expected_input)
+            task = self._generate_task(i, 0, *self._build_input_dict_list(i, old_task, task))
             self.completed_tasks[(task.name, task.scope)] = task
-
             for _task in task.tasks:
                 if not _task.is_complete:
                     needs_completing[_task.record_id] += 1
-
             i += 1
         self.completed_tasks = {}
         return "\n".join((
