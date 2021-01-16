@@ -72,7 +72,9 @@ class AugustusIter(TaskList):
             for out_g in out_gffs:
                 (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
             # Combine files
-            self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"]()
+            self.single(
+                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"]
+            )
             # Make ids unique
             self._make_unique(out_gff)
             # Remove intermediary files
@@ -103,24 +105,30 @@ class AugustusIter(TaskList):
                 shutil.rmtree(config_dir)
             # Parse to genbank
             out_gb = os.path.join(self.wdir, AugustusIter.Augustus._out_path(_file, ".%i.gb" % _round))
-            self.local["gff2gbSmallDNA.pl"][
-                out_gff,
-                _file,
-                "1000",
-                out_gb
-            ]()
+            self.single(
+                self.local["gff2gbSmallDNA.pl"][
+                    out_gff,
+                    _file,
+                    "1000",
+                    out_gb
+                ]
+            )
 
             species_config_prefix = self.record_id + str(_round)
             # Write new species config file
-            self.local["new_species.pl"][
-                "--species=%s" % species_config_prefix,
-                out_gb
-            ]()
+            self.single(
+                self.local["new_species.pl"][
+                    "--species=%s" % species_config_prefix,
+                    out_gb
+                ]
+            )
             # Run training
-            self.local["etraining"][
-                "--species=%s" % species_config_prefix,
-                out_gb
-            ]()
+            self.single(
+                self.local["etraining"][
+                    "--species=%s" % species_config_prefix,
+                    out_gb
+                ]
+            )
             return out_gff
 
         @staticmethod
