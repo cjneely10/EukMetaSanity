@@ -5,6 +5,9 @@ Module holds logic to generate TaskList/Task class stub and associated config fi
 """
 
 import os
+import yaml
+from typing import Optional, List
+
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 
@@ -63,7 +66,56 @@ class {0}Iter(TaskList):
         super().__init__({0}Iter.{0}, {0}Iter.name, *args, **kwargs)
 '''
 
+CONFIG_OUTER_LEVEL = {
+    "workers": 1,
+    "threads": 1,
+    "memory": "16G",
+    "time": "1:00:00",
+    "dependencies": {}
+}
+
+CONFIG_INNER_LEVEL = {
+    "program": "",
+    "data": "",
+    "FLAGS": []
+}
+
+NEW_CONFIG_DATA = {
+    "INPUT": {
+        "base": "root"
+    },
+    "SLURM": {
+        "USE_CLUSTER": "false",
+        "--qos": "unlim",
+        "--job-name": "EukMS",
+        "user-id": "uid"
+    }
+}
+
+
 # TODO(1): Handle config file generation
+def update_config_file(file_path: str, cfg_name: str, existing_sections: Optional[List[str]] = None):
+    """ Add the newly-created class base config section at either root or within existing section
+
+    :param file_path: Config file path
+    :param cfg_name: Name of section to generate
+    :param existing_sections: List of sections to add to if a dependency or None if this is an outer-level abstract task
+    """
+    if not os.path.exists:
+        existing_data = NEW_CONFIG_DATA
+    else:
+        existing_data = yaml.load(open(file_path, "r"), Loader=yaml.FullLoader)
+        if existing_sections is not None:
+            for section in existing_sections:
+                assert section in existing_data.keys()
+    # No sections to update - set as base level
+    if existing_sections is None:
+        existing_data[cfg_name] = CONFIG_OUTER_LEVEL
+    # Else add to each section requested
+    else:
+        for section in existing_sections:
+            existing_data[section]["dependencies"].update(CONFIG_INNER_LEVEL)
+    yaml.dump(open(file_path + ".tmp", "w"), Dumper=yaml.Dumper)
 
 
 def create_class_file(file_path: str, class_name: str, cfg_name: str):
@@ -92,7 +144,12 @@ if __name__ == "__main__":
              {"help": "Location to generate, default current directory", "default": os.getcwd()}),
             (("-c", "--config_path"),
              {"help": "Update existing base config file to include new class, or create fresh config file"}),
+            (("-s", "--config_sections"),
+             {"help": "List all sections in existing config file to update. If not provided, will be added at "
+                      "outer task level", "nargs": "+"})
         ),
         description="Create new EukMetaSanity class"
     )
     create_class_file(ap.args.path, ap.args.class_name, ap.args.config_name)
+    if ap.args.config_path is not None:
+        update_config_file(ap.args.config_path, ap.args.config_name, ap.args.config_sections)

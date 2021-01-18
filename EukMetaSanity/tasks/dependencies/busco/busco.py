@@ -17,7 +17,7 @@ class BuscoIter(TaskList):
 
     depends:
 
-    output:
+    output: results
 
     final:
 

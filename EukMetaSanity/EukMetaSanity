@@ -99,7 +99,9 @@ if __name__ == "__main__":
     if not _ap.args.skip_summary:
         print(colors.yellow & colors.bold | "Gathering files...")
         print(colors.yellow & colors.bold | "------------------")
+        # Gather input files and display for user
         print(colors.yellow & colors.bold | _im.summarize_input())
+        # Confirm valid
         if input("\nDoes this look correct? [Y/n] ").upper() != "Y":
             print(colors.warn & colors.bold | "Exiting...")
             sys.exit()
@@ -107,6 +109,7 @@ if __name__ == "__main__":
         print(colors.yellow & colors.bold | "\nChecking for completed dependencies...")
         tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
         print(colors.yellow & colors.bold | "--------------------------------------")
+        # Confirm valid
         print("\n" + tm.prerun_summarize())
         if input("\nDoes this look correct? [Y/n] ").upper() != "Y":
             print(colors.warn & colors.bold | "Exiting...")
