@@ -53,4 +53,5 @@ class PipelineManager:
                 MappingIter,
                 FilteringIter
             ]
+            # Add any user-created pipelines here!
         }

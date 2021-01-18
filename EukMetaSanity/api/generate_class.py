@@ -93,7 +93,6 @@ NEW_CONFIG_DATA = {
 }
 
 
-# TODO(1): Handle config file generation
 def update_config_file(file_path: str, cfg_name: str, existing_sections: Optional[List[str]] = None):
     """ Add the newly-created class base config section at either root or within existing section
 
