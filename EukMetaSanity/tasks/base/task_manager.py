@@ -221,6 +221,7 @@ class TaskManager:
                     needs_completing[_task.record_id] += 1
             i += 1
         self.completed_tasks = {}
+        print(colors.blue & colors.bold | f"{self.command} pipeline pre-run summary:")
         return "\n".join((
             colors.green & colors.bold | f"{record_id}: {to_complete} task(s) to complete this pipeline"
             if to_complete == 0 else colors.yellow & colors.bold | f"{record_id}: {to_complete} task(s) to complete this pipeline"
