@@ -107,7 +107,7 @@ if __name__ == "__main__":
         print(colors.yellow & colors.bold | "\nChecking for completed dependencies...")
         tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
         print(colors.yellow & colors.bold | "--------------------------------------")
-        print(colors.yellow & colors.bold | "\n" + tm.prerun_summarize())
+        print("\n" + tm.prerun_summarize())
         if input("\nDoes this look correct? [Y/n] ").upper() != "Y":
             print(colors.warn & colors.bold | "Exiting...")
             sys.exit()
