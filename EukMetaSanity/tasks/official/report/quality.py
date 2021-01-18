@@ -25,7 +25,7 @@ class QualityIter(TaskList):
     """
     name = "quality"
     requires = []
-    depends = []
+    depends = [DependencyInput("busco", id_mapping=[("prot", "fasta")])]
 
     class Quality(Task):
         """
@@ -38,7 +38,8 @@ class QualityIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "results": self.input["busco"]["results"],
+                "final": ["results"]
             }
 
         @program_catch
