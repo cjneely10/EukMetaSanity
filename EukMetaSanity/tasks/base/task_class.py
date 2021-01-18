@@ -157,6 +157,16 @@ class Task(ABC):
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
 
+    def is_non_file_output(self) -> bool:
+        """ Checks if task outputs and output files at all or is simply some wrapper task
+
+        :return: True if no string value is present in task's output
+        """
+        for _path in self._output_paths.values():
+            if isinstance(_path, str):
+                return False
+        return True
+
     def set_is_complete(self) -> bool:
         """ Check all required output data to see if any part of task need to be completed
 

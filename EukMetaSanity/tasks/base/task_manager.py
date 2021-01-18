@@ -202,7 +202,9 @@ class TaskManager:
                                     for k in range(len(self.input_files))])
         self.completed_tasks[(task.name, task.scope)] = task
         for _task in task.tasks:
-            if not _task.is_complete:
+            # Only track tasks that are not complete and that are not non-file tasks
+            # (e.g. have some expected path as output)
+            if not _task.is_complete and not _task.is_non_file_output():
                 needs_completing[_task.record_id] += 1
         i = 1
         # Run each task in list
@@ -218,7 +220,8 @@ class TaskManager:
             i += 1
         self.completed_tasks = {}
         return "\n".join((
-            f"{record_id}: {to_complete} task(s) to complete this pipeline"
+            colors.green & colors.bold | f"{record_id}: {to_complete} task(s) to complete this pipeline"
+            if to_complete == 0 else colors.yellow & colors.bold | f"{record_id}: {to_complete} task(s) to complete this pipeline"
             for record_id, to_complete in needs_completing.items()
         ))
 
