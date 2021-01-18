@@ -215,7 +215,9 @@ class TaskManager:
             task = self._generate_task(i, 0, *self._build_input_dict_list(i, old_task, task))
             self.completed_tasks[(task.name, task.scope)] = task
             for _task in task.tasks:
-                if not _task.is_complete:
+                if _task.is_non_file_output():
+                    needs_completing[_task.record_id] += 0
+                elif not _task.is_complete:
                     needs_completing[_task.record_id] += 1
             i += 1
         self.completed_tasks = {}
