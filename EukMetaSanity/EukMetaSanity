@@ -62,7 +62,6 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
     return ConfigManager(ap.args.config_file)
 
 
-# TODO: Soft-run to display proposed HPC time
 if __name__ == "__main__":
     DEFAULT_EXTS = ".fna/.fasta/.fa"
     _tm = PipelineManager()
@@ -107,19 +106,21 @@ if __name__ == "__main__":
             sys.exit()
         # Generate TaskManager and run task-completion check
         print(colors.yellow & colors.bold | "\nChecking for completed dependencies...")
-        tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
+        task_manager = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug,
+                                   _ap.args.command)
         print(colors.yellow & colors.bold | "--------------------------------------")
         # Confirm valid
-        print("\n" + tm.prerun_summarize())
+        print("\n" + task_manager.prerun_summarize())
         if input("\nDoes this look correct? [Y/n] ").upper() != "Y":
             print(colors.warn & colors.bold | "Exiting...")
             sys.exit()
     else:
-        tm = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug, _ap.args.command)
+        task_manager = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug,
+                                   _ap.args.command)
 
     # Begin logging
     _initialize_logging(_ap)
     # # Begin task list
-    tm.run(_ap.args.output)
+    task_manager.run(_ap.args.output)
     # Display final output line
     print(colors.yellow & colors.bold | "\nEukMetaSanity %s pipeline complete!" % _ap.args.command)

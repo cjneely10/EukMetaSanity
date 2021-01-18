@@ -260,7 +260,7 @@ class GffMerge:
                 gene_data["transcripts"]["ab-initio"],
                 gene_data["strand"],
                 gene_data["terminal_exons"],
-                len(gene_data["transcripts"])
+                len(gene_data["transcripts"]["ab-initio"]) + len(list(gene_data["transcripts"].keys())) - 1
             )
             # Tier 0 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions

@@ -485,15 +485,15 @@ class Task(ABC):
 
         :param cmds: List of LocalCommand objects to run in parallel
         """
+        write_string = f"  Running {len(cmds)} commands similar to {str(cmds[0])}"
+        print(write_string)
+        logging.info(write_string)
         for i in range(0, len(cmds), int(self.threads)):
             running = []
             # Run up to `threads` tasks at a time
             for j in range(i, i + int(self.threads)):
                 if j >= len(cmds):
                     break
-                # Logging info
-                print("  " + str(cmds[j]))
-                logging.info(str(cmds[j]))
                 if self._mode == 1:
                     f = cmds[j] & BG
                     running.append(f)
