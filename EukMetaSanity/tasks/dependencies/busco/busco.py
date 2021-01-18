@@ -3,10 +3,9 @@ Module holds busco build functionality
 """
 
 import os
-from EukMetaSanity import Task, TaskList, DependencyInput
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
-from EukMetaSanity import program_catch, prefix, touch, set_complete
+import glob
+from EukMetaSanity import Task, TaskList
+from EukMetaSanity import program_catch, set_complete
 
 
 class BuscoIter(TaskList):
@@ -38,7 +37,7 @@ class BuscoIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "results": os.path.join(self.wdir, self.record_id, "short_summary.txt")
             }
 
         @program_catch
@@ -46,7 +45,21 @@ class BuscoIter(TaskList):
             """
             Run busco
             """
-            pass
+            results_directory = os.path.dirname(str(self.output["results"]))
+            self.parallel(
+                self.program[
+                    "-i", self.dependency_input["fasta"],
+                    "-o", results_directory,
+                    "-m", self.config["mode"],
+                    "-l", self.config["lineage"],
+                    (*self.added_flags)
+                ]
+            )
+            # Change name of output file
+            os.replace(
+                glob.glob(os.path.join(results_directory, "short_summary*.txt")),
+                str(self.output["results"])
+            )
 
     def __init__(self, *args, **kwargs):
         """
