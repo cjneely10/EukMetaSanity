@@ -26,6 +26,7 @@ class Gene:
     """
     Class holds the data describing a given gene region. Merges ab-initio skeleton exons with evidence-based exons
     """
+    # TODO: Parse in ab initio as List[List[exons]]
     def __init__(self, ab_initio_data: List, strand: str, term_exons: List, _tier: int):
         """ Create Gene using base ab-initio skeleton on a given strand. Define terminal exons in
         skeleton.
