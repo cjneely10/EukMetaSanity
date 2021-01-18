@@ -195,9 +195,10 @@ class GffReader:
             transcripts = []
             line = next(self.fp).rstrip("\r\n").split("\t")
             while line[2] != "locus":
-                # Read in transcript info
+                # Read in transcript info - first line is a transcript: source,tstart,tend
+                # Replace sources with `ab-initio`
                 transcripts.append(
-                    [line[1].replace("GeneMark.hmm", "ab-initio"), []]  # First line is a transcript: source,tstart,tend
+                    [(line[1].replace(val, "ab-initio") for val in ABINITIO_IDENTIFIERS), []]
                 )
                 line = next(self.fp).rstrip("\r\n").split("\t")
                 # Add exon to current info

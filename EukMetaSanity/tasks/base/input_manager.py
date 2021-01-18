@@ -101,7 +101,11 @@ class InputManager:
                     if record_id in self.data.keys():
                         raise AttributeError("Input directory has multiple files with the same basename - exiting")
                     self.data[record_id] = {}
-                    self.data[record_id]["fasta"] = InputManager._simplify_fasta(file, record_id, self.input_dir, ext)
+                    self.data[record_id]["fasta"] = InputManager._simplify_fasta(os.path.join(self.input_dir, file),
+                                                                                 record_id,
+                                                                                 self.path_manager.get_dir(
+                                                                                     self.path_manager.MAGS),
+                                                                                 ext)
                     self.path_manager.add_dirs(record_id)
 
     @property
