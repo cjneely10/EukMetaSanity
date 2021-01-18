@@ -1,4 +1,4 @@
-name: EukMS_run
+name: EukMS_base
 channels:
   - bioconda
   - conda-forge
