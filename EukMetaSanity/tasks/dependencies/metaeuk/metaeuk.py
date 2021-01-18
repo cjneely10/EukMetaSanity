@@ -12,7 +12,7 @@ class MetaEukIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "gff3": os.path.join(self.wdir, self.record_id + ".gff3")
+                "gff3": os.path.join(self.wdir, self.record_id + ".evidence.gff3")
             }
             
         @program_catch

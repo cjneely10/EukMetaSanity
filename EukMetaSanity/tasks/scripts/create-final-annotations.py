@@ -260,7 +260,7 @@ class GffMerge:
                 gene_data["terminal_exons"],
                 len(gene_data["transcripts"])
             )
-            # Tier 4 is conservative pairing of exons, removing exons without evidence and incorporating
+            # Tier 0 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
             # TODO: Squash ab-initio exon tracks to single skeleton set
             if self.tier == 0:

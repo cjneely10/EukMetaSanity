@@ -52,6 +52,7 @@ class BuscoIter(TaskList):
                     "-o", results_directory,
                     "-m", self.config["mode"],
                     "-l", self.config["lineage"],
+                    "--cpu", self.threads,
                     (*self.added_flags)
                 ]
             )
