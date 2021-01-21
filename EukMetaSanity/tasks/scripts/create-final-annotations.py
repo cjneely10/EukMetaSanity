@@ -9,7 +9,6 @@ import os
 import re
 import sys
 from io import StringIO
-import concurrent.futures
 from datetime import datetime
 from operator import itemgetter
 from collections import defaultdict
@@ -261,7 +260,7 @@ class GffMerge:
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
         self.tier = tier
 
-    def merge(self, threads: int) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
+    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
         """ Merge together genes from gff3 file with existing ab-initio skeleton
 
         :return: Iterator over merged genes
