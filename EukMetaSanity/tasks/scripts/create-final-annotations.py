@@ -46,6 +46,8 @@ class Gene:
         self.terminal_exons = set(term_exons)
         # Set tier quality of gene
         self._tier = _tier
+        # Passed will refer to status of gene after filter
+        self._passed = True
 
     @property
     def tier(self) -> int:
@@ -72,11 +74,24 @@ class Gene:
         """
         assert tier > 0
         if self._tier < tier:
-            self.exons = []
-            self.num_ab_initio = 0
-            self.trimmed_ab_initio = 0
-            self.added_evidence = 0
-            self.terminal_exons = {}
+            self._passed = False
+
+    @property
+    def passed(self) -> bool:
+        """ Return current passed status of gene
+
+        :return: Status if this gene has passed specified filter
+        """
+        return self._passed
+
+    @passed.setter
+    def passed(self, status: bool):
+        """ Set passed status of gene
+
+        :param status: Status to assign to passed status of Gene object
+        :return:
+        """
+        self._passed = status
 
     # pylint: disable=too-many-branches
     def tier0(self, evidence_data: List):
@@ -255,32 +270,101 @@ class GffMerge:
         """
         gene_data: Dict
         for gene_data in self.reader:
-            # Generate initial exon structure
-            gene = Gene(
-                gene_data["transcripts"]["ab-initio"],
-                gene_data["strand"],
-                gene_data["terminal_exons"],
-                len(gene_data["transcripts"]["ab-initio"]) + len(list(gene_data["transcripts"].keys())) - 1
-            )
             # Tier 0 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
             # TODO: Squash ab-initio exon tracks to single skeleton set
             if self.tier == 0:
+                # Generate initial exon structure
+                gene = Gene(
+                    gene_data["transcripts"]["ab-initio"],
+                    gene_data["strand"],
+                    gene_data["terminal_exons"],
+                    len(gene_data["transcripts"]["ab-initio"]) + len(list(gene_data["transcripts"].keys())) - 1
+                )
                 # Keep exons with evidence, add exons missed by ab-initio
                 for val in gene_data["transcripts"].keys():
                     if val not in ABINITIO_IDENTIFIERS:
                         gene.tier0(gene_data["transcripts"][val])
                 gene_data["transcripts"] = gene.exons
-                yield (gene_data, *self.create_cds(gene_data, gene))
+                yield (gene_data, *self.create_tier0_cds(gene_data, gene))
             else:
+                gene = Gene(
+                    gene_data["transcripts"],
+                    gene_data["strand"],
+                    gene_data["terminal_exons"],
+                    len(gene_data["transcripts"]["ab-initio"]) + len(list(gene_data["transcripts"].keys())) - 1
+                )
                 # Add filter to genes that do not occur within user-defined threshold
                 gene.filter(self.tier)
                 # TODO: Calculate longest ORF if gene passes filter
                 # TODO: At end, only return valid gene_data dict metadata with associated longest ORF CDS/AA
                 gene_data["transcripts"] = gene.exons
-                yield (gene_data, *self.create_cds(gene_data, gene))
+                yield (gene_data, *self.create_tiered_cds(gene_data, gene))
 
-    def create_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+    def create_tiered_cds(self, gene_data: dict, gene:Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+        """ Find the longest ORF from each line of evidence given gene_data and a gene that has passed the tier filter
+
+        :param gene_data: Consists of all data embedded within parsing stage - e.g. strand, etc.
+        :param gene: Gene object with parsed exons and filtered data matching specified tier level
+        :return:
+        """
+        if len(gene_data["transcripts"]) == 0:
+            return None, None, []
+        orig_seq = str(self.fasta_dict[gene_data["fasta-id"]].seq)
+        strand = gene_data["strand"]
+        longest_cds = Seq("")
+        offsets = []
+        for transcript in gene_data["transcripts"]:
+            out_cds: List[str] = []
+            _offsets: List[int] = []
+            for exon in transcript:
+                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
+                if strand == "-":
+                    record = record.reverse_complement()
+                out_cds.append(str(record.seq))
+                _offsets.append(exon[2])
+            if strand == "-":
+                _offsets.reverse()
+            cds = Seq(GffMerge.longest_orf("".join(out_cds)))
+            if len(cds) > longest_cds:
+                longest_cds = cds
+                offsets = _offsets
+        return GffMerge.gene_dict_data_to_seqrecords(longest_cds, gene, gene_data, offsets)
+
+    @staticmethod
+    def gene_dict_data_to_seqrecords(longest_cds: Seq, gene: Gene, gene_data: dict, offsets: list) -> \
+            Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+        _prot_seq = longest_cds.translate()
+        _stats = "|".join(map(str, (
+            gene.num_ab_initio,
+            gene.trimmed_ab_initio,
+            gene.added_evidence,
+            len(gene.exons),
+            len(_prot_seq),
+        )))
+        descr = "contig=%s strand=%s %s" % (
+            gene_data["fasta-id"],
+            gene_data["strand"],
+            _stats
+        )
+        gene_data["stats"] = _stats
+        return (
+            SeqRecord(
+                id=gene_data["geneid"],
+                name="",
+                description=descr,
+                seq=_prot_seq
+            ),
+            SeqRecord(
+                id=gene_data["geneid"],
+                name="",
+                description=descr,
+                seq=longest_cds
+            ),
+            offsets
+        )
+
+    def create_tier0_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         """ Create CDS from gene data in region
 
         :param gene_data: Gene metadata
@@ -301,36 +385,8 @@ class GffMerge:
             offsets.append(exon[2])
         if strand == "-":
             offsets.reverse()
-        cds = Seq(GffMerge.longest_orf("".join(out_cds)))
-        _prot_seq = cds.translate()
-        _stats = "|".join(map(str, (
-            gene.num_ab_initio,
-            gene.trimmed_ab_initio,
-            gene.added_evidence,
-            len(gene.exons),
-            len(_prot_seq),
-        )))
-        descr = "contig=%s strand=%s %s" % (
-            gene_data["fasta-id"],
-            strand,
-            _stats
-        )
-        gene_data["stats"] = _stats
-        return (
-            SeqRecord(
-                id=gene_data["geneid"],
-                name="",
-                description=descr,
-                seq=_prot_seq
-            ),
-            SeqRecord(
-                id=gene_data["geneid"],
-                name="",
-                description=descr,
-                seq=cds
-            ),
-            offsets
-        )
+        return GffMerge.gene_dict_data_to_seqrecords(Seq(GffMerge.longest_orf("".join(out_cds))), gene,
+                                                     gene_data, offsets)
 
     @staticmethod
     def longest_orf(sequence: str) -> str:
