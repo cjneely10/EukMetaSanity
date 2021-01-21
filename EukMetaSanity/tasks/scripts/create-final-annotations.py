@@ -9,6 +9,7 @@ import os
 import re
 import sys
 from io import StringIO
+import concurrent.futures
 from datetime import datetime
 from operator import itemgetter
 from collections import defaultdict
@@ -260,7 +261,7 @@ class GffMerge:
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
         self.tier = tier
 
-    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
+    def merge(self, threads: int) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
         """ Merge together genes from gff3 file with existing ab-initio skeleton
 
         :return: Iterator over merged genes
@@ -559,7 +560,9 @@ def parse_args(ap: ArgParse):
         sys.exit(1)
 
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
-        assert os.path.exists(_file), _file
+        if not os.path.exists(_file):
+            print("Invalid file path", _file)
+            sys.exit(1)
     if ap.args.output_prefix is None:
         ap.args.output_prefix = os.path.splitext(ap.args.fasta_file)[0] + ".%i" % ap.args.tier
 
