@@ -26,7 +26,6 @@ class Gene:
     """
     Class holds the data describing a given gene region. Merges ab-initio skeleton exons with evidence-based exons
     """
-    # TODO: Parse in ab initio as List[List[exons]]
     def __init__(self, ab_initio_data: List, strand: str, term_exons: List, _tier: int):
         """ Create Gene using base ab-initio skeleton on a given strand. Define terminal exons in
         skeleton.
@@ -212,9 +211,7 @@ class GffReader:
             while line[2] != "locus":
                 # Read in transcript info - first line is a transcript: source,tstart,tend
                 # Replace sources with `ab-initio`
-                transcripts.append(
-                    [(line[1].replace(val, "ab-initio") for val in ABINITIO_IDENTIFIERS), []]
-                )
+                transcripts.append([line[1], []])
                 line = next(self.fp).rstrip("\r\n").split("\t")
                 # Add exon to current info
                 while line[2] not in ("transcript", "locus", "gene"):
@@ -272,11 +269,14 @@ class GffMerge:
         for gene_data in self.reader:
             # Tier 0 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
-            # TODO: Squash ab-initio exon tracks to single skeleton set
             if self.tier == 0:
                 # Generate initial exon structure
+                tx = []
+                for ident in ABINITIO_IDENTIFIERS:
+                    for val in gene_data["transcripts"][ident]:
+                        tx.append(val)
                 gene = Gene(
-                    gene_data["transcripts"]["ab-initio"],
+                    tx,
                     gene_data["strand"],
                     gene_data["terminal_exons"],
                     len(gene_data["transcripts"]["ab-initio"]) + len(list(gene_data["transcripts"].keys())) - 1
@@ -292,16 +292,16 @@ class GffMerge:
                     gene_data["transcripts"],
                     gene_data["strand"],
                     gene_data["terminal_exons"],
-                    len(gene_data["transcripts"]["ab-initio"]) + len(list(gene_data["transcripts"].keys())) - 1
+                    len(gene_data["transcripts"].keys())
                 )
                 # Add filter to genes that do not occur within user-defined threshold
                 gene.filter(self.tier)
-                # TODO: Calculate longest ORF if gene passes filter
-                # TODO: At end, only return valid gene_data dict metadata with associated longest ORF CDS/AA
-                gene_data["transcripts"] = gene.exons
-                yield (gene_data, *self.create_tiered_cds(gene_data, gene))
+                if gene.passed:
+                    gene_data["transcripts"] = gene.exons
+                    yield (gene_data, *self.create_tiered_cds(gene_data, gene))
 
-    def create_tiered_cds(self, gene_data: dict, gene:Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+    def create_tiered_cds(self, gene_data: dict, gene: Gene) \
+            -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         """ Find the longest ORF from each line of evidence given gene_data and a gene that has passed the tier filter
 
         :param gene_data: Consists of all data embedded within parsing stage - e.g. strand, etc.
@@ -372,7 +372,8 @@ class GffMerge:
             offsets
         )
 
-    def create_tier0_cds(self, gene_data: dict, gene: Gene) -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+    def create_tier0_cds(self, gene_data: dict, gene: Gene) \
+            -> Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
         """ Create CDS from gene data in region
 
         :param gene_data: Gene metadata
@@ -538,15 +539,19 @@ def parse_args(ap: ArgParse):
         ap.args.tier = int(ap.args.tier)
     except ValueError:
         print("Tier must be integer")
-        raise AssertionError
-    assert ap.args.tier >= 0, "Tier must be positive"
+        sys.exit(1)
+    if ap.args.tier < 0:
+        print("Tier must be positive")
+        sys.exit(1)
 
     try:
         ap.args.recursion_limit = int(ap.args.recursion_limit)
     except ValueError:
         print("Recursion limit must be integer")
-        raise AssertionError
-    assert ap.args.recursion_limit >= 0, "Recursion limit must be positive"
+        sys.exit(1)
+    if ap.args.recursion_limit < 1:
+        print("Recursion limit must be positive")
+        sys.exit(1)
 
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file
