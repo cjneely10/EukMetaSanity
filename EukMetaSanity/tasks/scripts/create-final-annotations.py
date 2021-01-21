@@ -314,7 +314,8 @@ class GffMerge:
         strand = gene_data["strand"]
         longest_cds = Seq("")
         offsets = []
-        for transcript in gene_data["transcripts"]:
+        transcripts = []
+        for name, transcript in gene_data["transcripts"].items():
             out_cds: List[str] = []
             _offsets: List[int] = []
             for exon in transcript:
@@ -326,9 +327,13 @@ class GffMerge:
             if strand == "-":
                 _offsets.reverse()
             cds = Seq(GffMerge.longest_orf("".join(out_cds)))
-            if len(cds) > longest_cds:
+            if len(cds) > len(longest_cds):
                 longest_cds = cds
                 offsets = _offsets
+                transcripts = []
+                for exon in transcript:
+                    transcripts.append(exon)
+        gene_data["transcripts"] = transcripts
         return GffMerge.gene_dict_data_to_seqrecords(longest_cds, gene, gene_data, offsets)
 
     @staticmethod
@@ -556,7 +561,7 @@ def parse_args(ap: ArgParse):
     for _file in (ap.args.gff3_file, ap.args.fasta_file):
         assert os.path.exists(_file), _file
     if ap.args.output_prefix is None:
-        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0]
+        ap.args.output_prefix = os.path.splitext(ap.args.fasta_file)[0] + ".%i" % ap.args.tier
 
 
 if __name__ == "__main__":
