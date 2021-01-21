@@ -334,6 +334,14 @@ class GffMerge:
     @staticmethod
     def gene_dict_data_to_seqrecords(longest_cds: Seq, gene: Gene, gene_data: dict, offsets: list) -> \
             Tuple[Optional[SeqRecord], Optional[SeqRecord], List[int]]:
+        """ Convert parsed gene and gene_data with the longest_cds found into Biopython SeqRecords for writing
+
+        :param longest_cds: Longest identified CDS to write
+        :param gene: Gene data containing parsed metadata
+        :param gene_data: Dictionary of fasta id, strand, etc. from GffReader
+        :param offsets: Offsets identified for writing output
+        :return: Tuple of parsed SeqRecords and the associated offsets of the records
+        """
         _prot_seq = longest_cds.translate()
         _stats = "|".join(map(str, (
             gene.num_ab_initio,
