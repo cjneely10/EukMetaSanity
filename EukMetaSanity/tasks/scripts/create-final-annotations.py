@@ -563,7 +563,7 @@ def parse_args(ap: ArgParse):
             print("Invalid file path", _file)
             sys.exit(1)
     if ap.args.output_prefix is None:
-        ap.args.output_prefix = os.path.splitext(ap.args.fasta_file)[0] + ".%i" % ap.args.tier
+        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0] + ".%i" % ap.args.tier
 
 
 if __name__ == "__main__":
