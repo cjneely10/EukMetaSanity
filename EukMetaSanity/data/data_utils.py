@@ -88,7 +88,7 @@ class CreateTaxDB(DataUtil):
         self._id_mapping_files = id_mapping_files
         self.wdir = wdir
 
-    def __call__(self) -> Optional[object]:
+    def __call__(self):
         """
         Generate taxonomy database
         """
@@ -107,19 +107,5 @@ class CreateTaxDB(DataUtil):
                             database,
                             "tmp",
                             "--ncbi-tax-dump", self.wdir,
-                            "--tax-mapping-file", database
+                            "--tax-mapping-file", file
                         ])
-        return
-
-
-def instructions(working_dir: str):
-    """ Run all data utilities needed for official EukMS pipelines
-
-    :return:
-    """
-    fxns = [
-        Merge("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
-        CreateTaxDB("mmseqs.input", working_dir, ["ortho_db"])
-    ]
-    for fxn in fxns:
-        fxn()
