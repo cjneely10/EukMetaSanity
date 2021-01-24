@@ -1,7 +1,6 @@
 """
 Module holds logic to generate MMseqs database indices
 """
-# pylint: disable=useless-super-delegation
 from typing import Sequence
 from abc import abstractmethod
 from plumbum import local
@@ -20,7 +19,7 @@ class Index(DataUtil):
         """
         pass
 
-    def __init__(self, threads: int, split_mem_limit: str, generate: bool, databases: Sequence[str]):
+    def __init__(self, threads: int, split_mem_limit: str, databases: Sequence[str]):
         """ Create mmseqs lin/index base class
 
         :param threads: Number of system threads
@@ -31,14 +30,11 @@ class Index(DataUtil):
         super().__init__(databases)
         self._threads = threads
         self._mem_limit = split_mem_limit
-        self._generate = generate
 
     def __call__(self):
         """
         Run subprogram to create lin/index
         """
-        if not self._generate:
-            return
         for database in self.databases:
             self.run(local["mmseqs"][
                 self.command(),
@@ -54,12 +50,6 @@ class CreateIndex(Index):
     """
     Child class object will create mmseqs index
     """
-    def __init__(self, *args, **kwargs):
-        """
-        Create index child class
-        """
-        super().__init__(*args, **kwargs)
-
     def command(self) -> str:
         """ MMseqs index subcommand
 
@@ -72,12 +62,6 @@ class CreateLinIndex(Index):
     """
     Child class object will create mmseqs linear index
     """
-    def __init__(self, *args, **kwargs):
-        """
-        Create linindex child class
-        """
-        super().__init__(*args, **kwargs)
-
     def command(self) -> str:
         """ MMseqs linear index subcommand
 

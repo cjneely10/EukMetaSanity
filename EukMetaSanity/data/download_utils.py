@@ -46,7 +46,7 @@ def download_data(working_dir: str) -> Generator:
 
 
 def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex: bool,
-                           threads: int, split_mem_limit: str, generate: bool) -> Generator:
+                           threads: int, split_mem_limit: str) -> Generator:
     """ Generate data utilities functors. Consumer should call each object in sequence.
 
     Current implementation:
@@ -64,8 +64,8 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
         Merge("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
     ]
     if create_index:
-        fxns.append(CreateIndex(threads, split_mem_limit, generate, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
+        fxns.append(CreateIndex(threads, split_mem_limit, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
     if create_linindex:
-        fxns.append(CreateLinIndex(threads, split_mem_limit, generate, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
+        fxns.append(CreateLinIndex(threads, split_mem_limit, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
     for fxn in fxns:
         yield fxn
