@@ -9,7 +9,7 @@ from EukMetaSanity.data.download_utils import download_data, manage_downloaded_d
 
 
 class DataDownloader(cli.Application):
-    _working_dir: Path = os.path.join(os.getcwd(), "data")
+    _working_dir: str = str(Path(os.path.join(os.getcwd(), "data")).resolve())
     _index: bool = False
     _threads: int = 1
     _max_mem: str = "8G"
@@ -26,24 +26,30 @@ class DataDownloader(cli.Application):
 
     @cli.switch(["-m", "--max-mem"], str, help="Set max memory per split. E.g. 800B, 5K, 10M, 1G; default 8G")
     def set_max_memory(self, max_memory):
+        if max_memory[-1] not in ("B", "K", "M", "G", "T"):
+            raise ValueError("Memory string must be specific format - see help menu")
         self._max_mem = max_memory
 
     def main(self):
         # Generate working directory
-        if not self._working_dir.exists():
+        if not os.path.exists(self._working_dir):
             os.makedirs(self._working_dir)
 
         # Download data
         downloaded_databases = []
-        for db_download in download_data(str(self._working_dir)):
+        for db_download in download_data(self._working_dir):
             downloaded_databases.append(db_download())
 
+        # TODO
         # Create any needed lookup files
 
         # Run database utility protocols
-        for util_instruction in manage_downloaded_data(str(self._working_dir), self._index, True, self._threads,
+        for util_instruction in manage_downloaded_data(self._working_dir, self._index, True, self._threads,
                                                        self._max_mem):
             util_instruction()
+
+        # TODO
+        # Generate base config files
 
 
 def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
