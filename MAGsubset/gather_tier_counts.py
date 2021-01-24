@@ -19,16 +19,23 @@ class TierCounter(cli.Application):
             for feature in rec.features:
                 if feature.type == "locus":
                     tier = set()
+                    assignments = set()
                     for qualifier in feature.qualifiers["transcripts"]:
+                        # metaeuk
                         if qualifier.startswith("gene"):
                             tier.add(1)
-                            assignment_values["metaeuk"] += 1
+                            assignments.add(1)
+                        # GeneMark
                         if qualifier.endswith("_t"):
                             tier.add(2)
-                            assignment_values["genemark"] += 1
+                            assignments.add(2)
                         if len(tier) == 2:
                             break
                     tier_values[len(tier)] += 1
+                    if 1 in assignments:
+                        assignment_values["metaeuk"] += 1
+                    if 2 in assignments:
+                        assignment_values["genemark"] += 1
         file.close()
         return tier_values, assignment_values
 
