@@ -2,8 +2,30 @@
 Module houses functionality to use in EukMS installation to download all required data dependencies for
 official EukMS pipelines
 """
-from typing import Iterator
+from typing import Iterator, Generator
+from EukMetaSanity.data.data import Fasta, MMSeqsDB
 from EukMetaSanity.data.data_utils import Merge, CreateTaxDB
+
+
+def download_data(wdir: str) -> Generator:
+    database_downloads = [
+        Fasta(
+            config_identifier="ortho_db",
+            data_url="https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
+            wdir=wdir,
+            expected="odb10v1_all_og_fasta.tab",
+            unzip_command_args=["gunzip"],
+        ),
+        MMSeqsDB(
+            config_identifier="mmetsp_db",
+            data_url="https://wwwuser.gwdg.de/~compbiol/metaeuk/2019_11/TAX_DBs/MMETSP/TaxDB_MMETSP.tar.gz",
+            wdir=wdir,
+            expected="MMETSP",
+            unzip_command_args=["tar", "-xzf", "-C", wdir],
+        ),
+    ]
+    for db in database_downloads:
+        yield db
 
 
 def instructions(working_dir: str) -> Iterator:

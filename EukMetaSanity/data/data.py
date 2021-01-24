@@ -4,7 +4,7 @@ parsing functions like mmseqs createseqtaxdb
 """
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 from plumbum import local
 
 
@@ -13,7 +13,8 @@ class Data:
     Base class for data downloaded. Provides functor to unzip data with provided command
     """
 
-    def __init__(self, config_identifier: str, data_url: str, wdir: str, unzip_command_args: Optional[List[str]] = None):
+    def __init__(self, config_identifier: str, data_url: str, wdir: str, expected: str,
+                 unzip_command_args: Optional[List[str]] = None):
         """ Base class constructor handles creating references to common member data
 
         Per API, this should mimic the following:
@@ -23,32 +24,44 @@ class Data:
         :param config_identifier: Name assigned in config file, like mmetsp_db
         :param data_url: url/ftp link for data download
         :param wdir: Working directory, if not provided defaults to os.getcwd()
+        :param expected: Download name for wget
         :param unzip_command_args: List of program name and arguments to run to unzip, ex. ["tar", "-xzf"]
         """
         self._config_identifier = config_identifier
         self._data_path = data_url
+        self._wdir = Path(wdir).resolve()
+        self._data = os.path.join(self._wdir, expected)
+        self._unzip_data(unzip_command_args)
+        # Download data
+        local["wget", data_url, "-O", self._data]()
+
+    def __call__(self, *args, **kwargs):
+        """ Default implementation of functor does nothing
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return
+
+    def _unzip_data(self, unzip_command_args: Optional[List[str]]):
+        """ Run command to unzip data based on list of passed strings
+
+        :param unzip_command_args: Command strings to use to unzip data
+        """
         if unzip_command_args is not None:
             local[unzip_command_args[0]]["", (*unzip_command_args[1:])]()
             self._unzipped = True
         else:
             self._unzipped = False
-        self._wdir = Path(wdir).resolve()
 
     @property
     def wdir(self) -> Path:
-        """ Working directory
+        """ Get working directory
 
-        :return: Path to working directory
+        :return: Working directory
         """
         return self._wdir
-
-    @property
-    def config_name(self) -> str:
-        """ Get database name assigned in config file.
-
-        :return: Database name
-        """
-        return self._config_identifier
 
     @property
     def url(self) -> str:
@@ -58,24 +71,25 @@ class Data:
         """
         return self._data_path
 
-    def data(self, expected: Optional[str] = None) -> Path:
+    @property
+    def db_name(self) -> str:
+        """ Get database name with working directory as joined path
+
+        :return: Database name with working directory as joined path
+        """
+        return os.path.join(self._wdir, self._config_identifier)
+
+    @property
+    def data(self) -> Path:
         """ Get expected file path after unzipping
 
-        :param expected: Provide expected file name, or will attempt to guess
         :raises: FileExistsError if unable to properly guess output data
         :return: Path to downloaded, possibly extracted, data
         """
         # Provided data, use expected name and working directory
-        if expected is not None:
-            output_path = os.path.join(self._wdir, expected)
-        else:
-            # Not provided - "guess" by removing extension of provided file and .tar
-            output_path = os.path.join(self._wdir or os.getcwd(), os.path.basename(self._data_path))
-            if self._unzipped:
-                output_path = os.path.splitext(output_path)[0].replace(".tar", "")
-        if not os.path.exists(output_path):
-            raise FileNotFoundError(output_path)
-        return Path(output_path).resolve()
+        if not os.path.exists(self._data):
+            raise FileNotFoundError(self._data)
+        return Path(self._data).resolve()
 
 
 class Fasta(Data):
@@ -83,59 +97,52 @@ class Fasta(Data):
     Class represents a FASTA file data type download
     """
 
-    def __init__(self, create_index: bool, create_linindex: bool, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """ FASTA format will be input into mmseqs createdb
 
         :param fasta_file: Path to FASTA file downloaded
-        :param create_index: Set if a database index should be created
-        :param create_linindex: Set if a database linindex should be created
         :param args: Args to pass to superclass
         :param kwargs: kwargs to pass to superclass
         """
         super().__init__(*args, **kwargs)
-        self._index = create_index
-        self._linindex = create_linindex
-        self._fasta_file = ""
 
     def __call__(self, *args, **kwargs):
         """
         Generate mmseqs database from a FASTA file
         """
-        local["mmseqs"]["createdb", self.data(), self.config_name]()
+        local["mmseqs"]["createdb", self.data, self.db_name]()
 
 
-def data_urls() -> Dict[str, UrlInfo]:
-    """ Return dictionary of config_replacement_string: instructions for unpackaging data
-
-    Upon first installation, all config files in the EukMetaSanity/config directory will have
-    values corresponding to keys of the dictionary returned by this function replaced with their
-    respective paths post-installation.
-
-    This allows seamless linking of downloading required data for new pipelines in new
-    installations
-
-    :return: dict of str: UrlInfo consisting of replacement_string: instructions to follow to unpackage data
+class MMSeqsDB(Data):
     """
-    return {
-        "ortho_db": UrlInfo(
-            url="https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
-            flags="",
-            tar=False,
-            gz=True,
-            type="FASTA",
-        ),
-        "rfam_db": UrlInfo(
-            url="ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.seed.gz",
-            flags="",
-            tar=False,
-            gz=False,
-            type="profile",
-        ),
-        "mmetsp_db": UrlInfo(
-            url="https://wwwuser.gwdg.de/~compbiol/metaeuk/2019_11/TAX_DBs/MMETSP/TaxDB_MMETSP.tar.gz",
-            flags="-xzf",
-            tar=True,
-            gz=False,
-            type="FASTA",
-        ),
-    }
+    Class represents an MMSEQs database download
+    """
+
+    def __init__(self, *args, **kwargs):
+        """ Database will simply be extracted, default functor used
+
+        :param args: Args to pass to superclass
+        :param kwargs: kwargs to pass to superclass
+        """
+        super().__init__(*args, **kwargs)
+
+
+class MSA(Data):
+    """
+    Class represents a MSA to convert to MMseqs profile format
+    """
+    def __init__(self, *args, **kwargs):
+        """ Format is FASTA and will convert to MMseqs profile
+
+        :param args: Args to pass to superclass
+        :param kwargs: kwargs to pass to superclass
+        """
+        super().__init__(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        """
+        Overrides default call operator to create profile format
+        """
+        local["mmseqs"]["convertmsa", self.data, self.db_name + "-msa"]()
+        local["mmseqs"]["msa2profile", self.db_name + "-msa", self.db_name]()
+
