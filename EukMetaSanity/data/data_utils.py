@@ -3,7 +3,7 @@ Module holds functionality for downloading prerequisite data in official EukMeta
 """
 import os
 from pathlib import Path
-from typing import Iterable, Set, Optional, Sequence
+from typing import Set, Optional, Sequence
 from abc import abstractmethod
 from plumbum import local
 from plumbum.machines.local import LocalCommand
@@ -15,8 +15,8 @@ class DataUtil:
 
     databases: set of database names under operation
     """
-    def __init__(self, databases: Iterable[str]):
-        """
+    def __init__(self, databases: Sequence[str]):
+        """ Generate base class with member data
 
         :param databases: Databases under operation
         """
@@ -49,9 +49,11 @@ class DataUtil:
 
 class Merge(DataUtil):
     """
-    Combine two mmseqs2 databases into new database given path `new_db_name`
+    Combine two mmseqs2 databases into new database
+
+    new_db_name: database name to create using all in list
     """
-    def __init__(self, new_db_name: str, databases: Iterable[str]):
+    def __init__(self, new_db_name: str, databases: Sequence[str]):
         """ Merge databases into new_db_name
 
         :param new_db_name: Path/name for new database to generate
@@ -60,7 +62,7 @@ class Merge(DataUtil):
         super().__init__(databases)
         self._new_db_name = new_db_name
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self):
         """
         Merge databases
         """
@@ -70,11 +72,15 @@ class Merge(DataUtil):
 class CreateTaxDB(DataUtil):
     """
     Create taxonomy database using id mapping file
+
+    _id_mapping_file: Path to file with proper id to ncbitaxonomy mapping (see mmseqs documentation)
+    wdir: Working directory for download options
     """
     def __init__(self, id_mapping_files: Sequence[Path], wdir: str, databases: Sequence[str]):
         """ Create taxonomy database for each database in databases using files in id_mapping_files
 
         :param id_mapping_files: List of files to use in building taxonomy databases
+        :param wdir: Working directory into which to download current ncbi taxonomy dump
         :param databases: List of databases to merge
         """
         super().__init__(databases)
@@ -104,3 +110,16 @@ class CreateTaxDB(DataUtil):
                             "--tax-mapping-file", database
                         ])
         return
+
+
+def instructions(working_dir: str):
+    """ Run all data utilities needed for official EukMS pipelines
+
+    :return:
+    """
+    fxns = [
+        Merge("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
+        CreateTaxDB("mmseqs.input", working_dir, ["ortho_db"])
+    ]
+    for fxn in fxns:
+        fxn()
