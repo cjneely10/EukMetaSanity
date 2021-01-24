@@ -1,5 +1,5 @@
 """
-Module holds functionality for downloading prerequisite data in official EukMetaSanity pipeline
+Module holds functionality for manipulating downloaded databases from initial format into mmseqs databases
 """
 import os
 from pathlib import Path
