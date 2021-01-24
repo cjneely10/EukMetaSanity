@@ -1,9 +1,12 @@
 """
 Module holds functionality for downloading prerequisite data in official EukMetaSanity pipeline
 """
-from typing import Iterable, Set, Optional
+import os
+from pathlib import Path
+from typing import Iterable, Set, Optional, Sequence
 from abc import abstractmethod
 from plumbum import local
+from plumbum.machines.local import LocalCommand
 
 
 class DataUtil:
@@ -34,6 +37,15 @@ class DataUtil:
         """
         return self._databases
 
+    @staticmethod
+    def run(cmd: LocalCommand) -> Optional[object]:
+        """ Print and run local command
+
+        :param cmd: Local plumbum command
+        """
+        print(cmd)
+        return cmd()
+
 
 class Merge(DataUtil):
     """
@@ -50,12 +62,45 @@ class Merge(DataUtil):
 
     def __call__(self, *args, **kwargs):
         """
-        Functor will call merge operation
-        """
-        return self.merge()
-
-    def merge(self):
-        """
         Merge databases
         """
-        pass
+        return self.run(local["mmseqs"]["mergedbs", (*self.databases), self._new_db_name])
+
+
+class CreateTaxDB(DataUtil):
+    """
+    Create taxonomy database using id mapping file
+    """
+    def __init__(self, id_mapping_files: Sequence[Path], wdir: str, databases: Sequence[str]):
+        """ Create taxonomy database for each database in databases using files in id_mapping_files
+
+        :param id_mapping_files: List of files to use in building taxonomy databases
+        :param databases: List of databases to merge
+        """
+        super().__init__(databases)
+        assert len(id_mapping_files) == len(self._databases)
+        self._id_mapping_files = id_mapping_files
+        self.wdir = wdir
+
+    def __call__(self) -> Optional[object]:
+        """
+        Generate taxonomy database
+        """
+        # Download tax info
+        self.run(local["wget"][
+                     "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz",
+                     "-O", os.path.join(self.wdir, "taxdump.tar.gz")
+                 ])
+        self.run(local["tar"][
+                     "xzvf", os.path.join(self.wdir, "taxdump.tar.gz"), "-C", self.wdir
+                 ])
+        # Generate tax db
+        for database, file in zip(self.databases, self._id_mapping_files):
+            self.run(local["mmseqs"][
+                            "createtaxdb",
+                            database,
+                            "tmp",
+                            "--ncbi-tax-dump", self.wdir,
+                            "--tax-mapping-file", database
+                        ])
+        return

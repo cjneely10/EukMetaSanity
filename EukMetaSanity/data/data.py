@@ -4,7 +4,7 @@ Module contains logic to automate data download process on EukMetaSanity install
 
 from typing import Dict, List, Type
 from collections import namedtuple
-from EukMetaSanity.data.data_utils import DataUtil, Merge
+from EukMetaSanity.data.data_utils import Merge, CreateTaxDB
 
 
 # pylint: disable=pointless-string-statement
@@ -53,11 +53,14 @@ def data_urls() -> Dict[str, UrlInfo]:
     }
 
 
-def instructions() -> List[DataUtil]:
-    """ Function returns simple
+def instructions(working_dir: str):
+    """ Run all data utilities needed for official EukMS pipelines
 
     :return:
     """
-    return [
-        Merge(["ortho_db", "mmetsp_db"], "odb-mmetsp_db"),
+    fxns = [
+        Merge("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
+        CreateTaxDB("mmseqs.input", working_dir, ["ortho_db"])
     ]
+    for fxn in fxns:
+        fxn()
