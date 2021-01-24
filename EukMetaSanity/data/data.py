@@ -2,8 +2,9 @@
 Module contains logic to automate data download process on EukMetaSanity installation
 """
 
-from typing import Dict
+from typing import Dict, List, Type
 from collections import namedtuple
+from EukMetaSanity.data.data_utils import DataUtil, Merge
 
 
 # pylint: disable=pointless-string-statement
@@ -52,7 +53,11 @@ def data_urls() -> Dict[str, UrlInfo]:
     }
 
 
-def instructions():
-    return {
-        "odb-mmetsp_db": "merge|ortho_db|mmetsp_db"
-    }
+def instructions() -> List[DataUtil]:
+    """ Function returns simple
+
+    :return:
+    """
+    return [
+        Merge(["ortho_db", "mmetsp_db"], "odb-mmetsp_db"),
+    ]
