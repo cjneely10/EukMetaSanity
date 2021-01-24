@@ -3,7 +3,7 @@ Module holds functionality for manipulating downloaded databases from initial fo
 """
 import os
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Sequence
 from plumbum import local
 from EukMetaSanity.data.data import DataUtil
 
@@ -70,11 +70,3 @@ class CreateTaxDB(DataUtil):
                             "--ncbi-tax-dump", self.wdir,
                             "--tax-mapping-file", file
                         ])
-
-
-class ConvertMSA(DataUtil):
-    def __init__(self, databases: Sequence[str]):
-        super().__init__(databases)
-
-    def __call__(self) -> Optional[object]:
-        pass

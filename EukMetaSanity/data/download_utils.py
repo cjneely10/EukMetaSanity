@@ -1,12 +1,12 @@
 """
 Module houses functionality to use in EukMS installation to download all required data dependencies for
-official EukMS pipelines
+official EukMS pipelines and run any merge/index generation steps needed for use in EukMS
 """
 import os
-from pathlib import Path
-from typing import Iterator, Generator
+from typing import Generator
 from EukMetaSanity.data.data_types import Fasta, MMSeqsDB
 from EukMetaSanity.data.mmseqs_types import Merge, CreateTaxDB
+from EukMetaSanity.data.mmseqs_index_types import CreateIndex, CreateLinIndex
 
 
 def download_data(working_dir: str) -> Generator:
@@ -41,11 +41,12 @@ def download_data(working_dir: str) -> Generator:
             unzip_command_args=["tar", "-xzf", "-C", working_dir],
         ),
     )
-    for db in database_downloads:
-        yield db
+    for database in database_downloads:
+        yield database
 
 
-def instructions(working_dir: str) -> Iterator:
+def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex: bool,
+                           threads: int, split_mem_limit: str, generate: bool) -> Generator:
     """ Generate data utilities functors. Consumer should call each object in sequence.
 
     Current implementation:
@@ -58,9 +59,13 @@ def instructions(working_dir: str) -> Iterator:
     """
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
-    fxns = (
+    fxns = [
         CreateTaxDB("mmseqs.input", working_dir, ["ortho_db"]),
         Merge("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
-    )
+    ]
+    if create_index:
+        fxns.append(CreateIndex(threads, split_mem_limit, generate, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
+    if create_linindex:
+        fxns.append(CreateLinIndex(threads, split_mem_limit, generate, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
     for fxn in fxns:
         yield fxn

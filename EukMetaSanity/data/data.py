@@ -1,7 +1,7 @@
 """
-Functionality to download and extract databases. Provide additional instructions for generating input files needed in
-parsing functions like mmseqs createseqtaxdb
+Base classes in use
 """
+# pylint: disable=too-few-public-methods
 import os
 from pathlib import Path
 from abc import abstractmethod
@@ -10,7 +10,21 @@ from plumbum import local
 from plumbum.machines import LocalCommand
 
 
-class Data:
+class Command:
+    """
+    Class holds simple print-and-run command-line functionality
+    """
+    @staticmethod
+    def run(cmd: LocalCommand) -> Optional[object]:
+        """ Print and run local command
+
+        :param cmd: Local plumbum command
+        """
+        print(cmd)
+        return cmd()
+
+
+class Data(Command):
     """
     Base class for data downloaded. Provides functor to unzip data with provided command
     """
@@ -35,7 +49,8 @@ class Data:
         self._data = os.path.join(self._wdir, expected)
         self._unzip_data(unzip_command_args)
         # Download data
-        local["wget", data_url, "-O", self._data]()
+        if not os.path.exists(self._data):
+            local["wget", data_url, "-O", self._data]()
 
     def __call__(self, *args, **kwargs):
         """ Default implementation of functor does nothing
@@ -52,7 +67,7 @@ class Data:
         :param unzip_command_args: Command strings to use to unzip data
         """
         if unzip_command_args is not None:
-            local[unzip_command_args[0]]["", (*unzip_command_args[1:])]()
+            self.run(local[unzip_command_args[0]]["", (*unzip_command_args[1:])])
             self._unzipped = True
         else:
             self._unzipped = False
@@ -94,7 +109,7 @@ class Data:
         return Path(self._data).resolve()
 
 
-class DataUtil:
+class DataUtil(Command):
     """
     Parent class to all mmseqs data utilities. Defines functor that will handle specific utility operation.
 
@@ -108,7 +123,7 @@ class DataUtil:
         self._databases: Set[str] = set(databases)
 
     @abstractmethod
-    def __call__(self) -> Optional[object]:
+    def __call__(self):
         """
         Child class implementation should perform given operation on stored database(s)
         """
@@ -121,12 +136,3 @@ class DataUtil:
         :return: Set of stored database path/names
         """
         return self._databases
-
-    @staticmethod
-    def run(cmd: LocalCommand) -> Optional[object]:
-        """ Print and run local command
-
-        :param cmd: Local plumbum command
-        """
-        print(cmd)
-        return cmd()

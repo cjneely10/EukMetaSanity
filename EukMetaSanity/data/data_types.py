@@ -1,3 +1,6 @@
+"""
+Module holds functionality for downloading various data types and converting them to MMseqs format
+"""
 from plumbum import local
 from EukMetaSanity.data.data import Data
 
@@ -20,7 +23,7 @@ class Fasta(Data):
         """
         Generate mmseqs database from a FASTA file
         """
-        local["mmseqs"]["createdb", self.data, self.db_name]()
+        self.run(local["mmseqs"]["createdb", self.data, self.db_name])
 
 
 class MMSeqsDB(Data):
@@ -51,7 +54,7 @@ class MSA(Data):
 
     def __call__(self, *args, **kwargs):
         """
-        Overrides default call operator to create profile format
+        Create profile format
         """
-        local["mmseqs"]["convertmsa", self.data, self.db_name + "-msa"]()
-        local["mmseqs"]["msa2profile", self.db_name + "-msa", self.db_name]()
+        self.run(local["mmseqs"]["convertmsa", self.data, self.db_name + "-msa"])
+        self.run(local["mmseqs"]["msa2profile", self.db_name + "-msa", self.db_name])
