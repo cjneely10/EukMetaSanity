@@ -36,6 +36,7 @@ class EvidenceIter(TaskList):
                 os.path.join(self.wdir, self.record_id),
             )
 
+        # TODO: Needs running and renaming of each possible tier
         def merge(self, input_list: List[str], fasta_file: str, out_prefix: str):
             # Convert to gff3 file
             self.single(
