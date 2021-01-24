@@ -3,7 +3,6 @@
 Module downloads requisite data for official pipelines in EukMetaSanity
 """
 import os
-from typing import List
 from pathlib import Path
 from plumbum import cli, local
 from EukMetaSanity.data.download_utils import download_data, manage_downloaded_data
@@ -29,33 +28,15 @@ class DataDownloader(cli.Application):
     def set_max_memory(self, max_memory):
         self._max_mem = max_memory
 
-    def _generate_config_files(self, _file_names: List[str], _replace_strings: List[str], _outdir: str):
-        """ Copy base config files to install directory and add in proper data path locations
-
-        :param _file_names: List of files to modify
-        :param _replace_strings: String replacements
-        :param _outdir: Output directory to generate output
-        :raises: plumbum.commands.processes.ProcessExecutionError
-        """
-        _config_directory = os.path.join(os.path.dirname(__file__), "EukMetaSanity/config")
-        for _config_file in os.listdir(_config_directory):
-            _new_file = os.path.join(_outdir, os.path.basename(_config_file))
-            local["cp"][os.path.join(_config_directory, _config_file), _new_file]()
-            for _file_name, _replace_string in zip(_file_names, _replace_strings):
-                _file_name = str(Path(_file_name).resolve()).replace("/", "\/")
-                local["sed"][
-                        "-i", "s/\/path\/to\/%s/%s/g" % (_replace_string, _file_name),
-                        _new_file
-                    ]()
-
     def main(self):
         # Generate working directory
         if not self._working_dir.exists():
             os.makedirs(self._working_dir)
 
         # Download data
+        downloaded_databases = []
         for db_download in download_data(str(self._working_dir)):
-            db_download()
+            downloaded_databases.append(db_download())
 
         # Create any needed lookup files
 

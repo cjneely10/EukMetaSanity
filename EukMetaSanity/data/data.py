@@ -52,14 +52,15 @@ class Data(Command):
         if not os.path.exists(self._data):
             local["wget", data_url, "-O", self._data]()
 
-    def __call__(self, *args, **kwargs):
-        """ Default implementation of functor does nothing
+    def __call__(self, *args, **kwargs) -> str:
+        """ Parent class implementation of functor returns assigned db name. Should be returned by child class
+        implementation
 
         :param args:
         :param kwargs:
         :return:
         """
-        return
+        return self.db_name
 
     def _unzip_data(self, unzip_command_args: Optional[List[str]]):
         """ Run command to unzip data based on list of passed strings
