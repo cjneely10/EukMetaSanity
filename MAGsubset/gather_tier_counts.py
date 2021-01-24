@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import os
 from pathlib import Path
-from typing import Dict
-
 from BCBio import GFF
 from plumbum import cli
 from Bio.SeqRecord import SeqRecord
@@ -36,8 +34,11 @@ class TierCounter(cli.Application):
 
     def main(self):
         _in = Path(input()).resolve()
+        print("ID", "Tier1", "Tier2", "GeneMark", "MetaEuk")
         while _in is not None:
-            print(os.path.basename(_in), TierCounter.get_tier_values(_in))
+            tier_values, assignment_values = TierCounter.get_tier_values(_in)
+            print(os.path.basename(_in), tier_values[1], tier_values[2], assignment_values["genemark"],
+                  assignment_values["metaeuk"])
             _in = Path(input()).resolve()
 
 
