@@ -4,8 +4,10 @@ parsing functions like mmseqs createseqtaxdb
 """
 import os
 from pathlib import Path
-from typing import List, Optional
+from abc import abstractmethod
+from typing import List, Optional, Set, Sequence
 from plumbum import local
+from plumbum.machines import LocalCommand
 
 
 class Data:
@@ -92,57 +94,39 @@ class Data:
         return Path(self._data).resolve()
 
 
-class Fasta(Data):
+class DataUtil:
     """
-    Class represents a FASTA file data type download
+    Parent class to all mmseqs data utilities. Defines functor that will handle specific utility operation.
+
+    databases: set of database names under operation
     """
+    def __init__(self, databases: Sequence[str]):
+        """ Generate base class with member data
 
-    def __init__(self, *args, **kwargs):
-        """ FASTA format will be input into mmseqs createdb
-
-        :param fasta_file: Path to FASTA file downloaded
-        :param args: Args to pass to superclass
-        :param kwargs: kwargs to pass to superclass
+        :param databases: Databases under operation
         """
-        super().__init__(*args, **kwargs)
+        self._databases: Set[str] = set(databases)
 
-    def __call__(self, *args, **kwargs):
+    @abstractmethod
+    def __call__(self) -> Optional[object]:
         """
-        Generate mmseqs database from a FASTA file
+        Child class implementation should perform given operation on stored database(s)
         """
-        local["mmseqs"]["createdb", self.data, self.db_name]()
+        pass
 
+    @property
+    def databases(self) -> Set[str]:
+        """ Get reference to set of stored databases
 
-class MMSeqsDB(Data):
-    """
-    Class represents an MMSEQs database download
-    """
-
-    def __init__(self, *args, **kwargs):
-        """ Database will simply be extracted, default functor used
-
-        :param args: Args to pass to superclass
-        :param kwargs: kwargs to pass to superclass
+        :return: Set of stored database path/names
         """
-        super().__init__(*args, **kwargs)
+        return self._databases
 
+    @staticmethod
+    def run(cmd: LocalCommand) -> Optional[object]:
+        """ Print and run local command
 
-class MSA(Data):
-    """
-    Class represents a MSA to convert to MMseqs profile format
-    """
-    def __init__(self, *args, **kwargs):
-        """ Format is FASTA and will convert to MMseqs profile
-
-        :param args: Args to pass to superclass
-        :param kwargs: kwargs to pass to superclass
+        :param cmd: Local plumbum command
         """
-        super().__init__(*args, **kwargs)
-
-    def __call__(self, *args, **kwargs):
-        """
-        Overrides default call operator to create profile format
-        """
-        local["mmseqs"]["convertmsa", self.data, self.db_name + "-msa"]()
-        local["mmseqs"]["msa2profile", self.db_name + "-msa", self.db_name]()
-
+        print(cmd)
+        return cmd()

@@ -3,48 +3,9 @@ Module holds functionality for manipulating downloaded databases from initial fo
 """
 import os
 from pathlib import Path
-from typing import Set, Optional, Sequence
-from abc import abstractmethod
+from typing import Optional, Sequence
 from plumbum import local
-from plumbum.machines.local import LocalCommand
-
-
-class DataUtil:
-    """
-    Parent class to all mmseqs data utilities. Defines functor that will handle specific utility operation.
-
-    databases: set of database names under operation
-    """
-    def __init__(self, databases: Sequence[str]):
-        """ Generate base class with member data
-
-        :param databases: Databases under operation
-        """
-        self._databases: Set[str] = set(databases)
-
-    @abstractmethod
-    def __call__(self) -> Optional[object]:
-        """
-        Child class implementation should perform given operation on stored database(s)
-        """
-        pass
-
-    @property
-    def databases(self) -> Set[str]:
-        """ Get reference to set of stored databases
-
-        :return: Set of stored database path/names
-        """
-        return self._databases
-
-    @staticmethod
-    def run(cmd: LocalCommand) -> Optional[object]:
-        """ Print and run local command
-
-        :param cmd: Local plumbum command
-        """
-        print(cmd)
-        return cmd()
+from EukMetaSanity.data.data import DataUtil
 
 
 class Merge(DataUtil):
@@ -109,3 +70,11 @@ class CreateTaxDB(DataUtil):
                             "--ncbi-tax-dump", self.wdir,
                             "--tax-mapping-file", file
                         ])
+
+
+class ConvertMSA(DataUtil):
+    def __init__(self, databases: Sequence[str]):
+        super().__init__(databases)
+
+    def __call__(self) -> Optional[object]:
+        pass
