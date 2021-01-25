@@ -106,8 +106,17 @@ class BuscoN50TierGrapher(cli.Application):
         tier_ratios = np.array(tier_ratios)
         n50s = np.array(n50s)
 
-        plt.plot(buscos, tier_ratios, label="BUSCO scores", color="bx")
-        plt.plot(n50s, tier_ratios, label="Assembly N50", color="ro")
+        fig, ax1 = plt.subplots()
+        ax1.set_xlabel("BUSCO percent complete")
+        ax1.set_ylabel("Tier2:Tier1 ratio")
+        ax1.plot(buscos, tier_ratios, label="BUSCO scores")
+        ax1.tick_params(axis="x", labelcolor="blue")
+
+        ax2 = ax1.twiny()
+
+        ax2.set_xlabel("Assembly N50")
+        ax2.plot(n50s, tier_ratios, label="Assembly N50")
+        ax2.tick_params(axis="x", labelcolor="red")
 
         plt.savefig("TiervBuscoN50.png")
 
