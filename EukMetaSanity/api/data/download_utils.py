@@ -4,9 +4,9 @@ official EukMS pipelines and run any merge/index generation steps needed for use
 """
 import os
 from typing import Generator
-from EukMetaSanity.data.data_types import Fasta, MMSeqsDB
-from EukMetaSanity.data.mmseqs_types import Merge, CreateTaxDB
-from EukMetaSanity.data.mmseqs_index_types import CreateIndex, CreateLinIndex
+from EukMetaSanity.api.data.data_types import Fasta, MMSeqsDB
+from EukMetaSanity.api.data.mmseqs_types import Merge, CreateTaxDB
+from EukMetaSanity.api.data import CreateIndex, CreateLinIndex
 
 
 def download_data(working_dir: str) -> Generator:

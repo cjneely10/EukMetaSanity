@@ -2,7 +2,7 @@
 Module holds functionality for downloading various data types and converting them to MMseqs format
 """
 from plumbum import local
-from EukMetaSanity.data.data import Data
+from EukMetaSanity.api.data.data import Data
 
 
 class Fasta(Data):

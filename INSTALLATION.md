@@ -9,6 +9,7 @@ environment. Then, run the following commands:
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
+echo export PYTHONPATH="$(pwd)"/:'$PYTHONPATH' >> ~/.bashrc
 ```
 
 You may need to restart your shell for these changes to take effect.

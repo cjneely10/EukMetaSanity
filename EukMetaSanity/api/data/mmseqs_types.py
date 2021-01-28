@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Sequence
 from plumbum import local
-from EukMetaSanity.data.data import DataUtil
+from EukMetaSanity.api.data.data import DataUtil
 
 
 class Merge(DataUtil):

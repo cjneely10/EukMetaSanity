@@ -4,7 +4,7 @@ Module holds logic to generate MMseqs database indices
 from typing import Sequence
 from abc import abstractmethod
 from plumbum import local
-from EukMetaSanity.data.data import DataUtil
+from EukMetaSanity.api.data.data import DataUtil
 
 
 class Index(DataUtil):
