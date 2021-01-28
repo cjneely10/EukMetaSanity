@@ -12,6 +12,8 @@ class TaxonomyAssignment:
     """
     Assignment = namedtuple("Assignment", ("value", "tax_id", "score"))
 
+    _tax_order = ["kingdom", "phylum", "_class", "order", "superfamily", "family", "genus", "species"]
+
     def __init__(self):
         """ Create empty assignment
 
@@ -32,7 +34,12 @@ class TaxonomyAssignment:
         :param level: Taxonomy level string (e.g. kingdom, order, _class, etc.)
         :return: Assignment object or None
         """
-        return getattr(self, level, None)
+        idx = TaxonomyAssignment._tax_order.index(level)
+        _level = None
+        while idx > 0 and _level is None:
+            _level = getattr(self, TaxonomyAssignment._tax_order[idx], None)
+            idx -= 1
+        return _level
 
     def __repr__(self) -> str:
         """ Return string representation of assignment
