@@ -33,7 +33,7 @@ The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both 
 ### Configuring RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. 
 
-Make sure your `EukMS` conda environment is still active prior to updating. Here, we assume that you have used 
+Make sure your `EukMS_run` conda environment is still active prior to updating. Here, we assume that you have used 
 `miniconda`, and that it is located in your home directory. You will want to adjust the path for the following commands 
 according to your system: 
 
@@ -45,7 +45,7 @@ perl ./configure
 ```
 
 The configure script should ask you to confirm the location of your installation, as well as to select your search 
-engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS/bin/` when requested 
+engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS_run/bin/` when requested 
 (substituting for the proper path on your system).
 
 Finally, due to a small bug in the conda `RepeatMasker` conda environment, run the following command:

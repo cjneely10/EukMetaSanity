@@ -105,7 +105,7 @@ class Data(Command):
         # Provided data, use expected name and working directory
         if not os.path.exists(self._data):
             raise FileNotFoundError(self._data)
-        return Path(self._data).resolve()
+        return Path(self._data.replace(".gz", "").replace(".tar", "")).resolve()
 
 
 class DataUtil(Command):

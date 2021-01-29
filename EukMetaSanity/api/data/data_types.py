@@ -19,7 +19,7 @@ class Fasta(Data):
         """
         super().__init__(*args, **kwargs)
 
-    def __call__(self, *args, **kwargs) -> str:
+    def __call__(self, *args, **kwargs):
         """
         Generate mmseqs database from a FASTA file
         """
@@ -53,7 +53,7 @@ class MSA(Data):
         """
         super().__init__(*args, **kwargs)
 
-    def __call__(self, *args, **kwargs) -> str:
+    def __call__(self, *args, **kwargs):
         """
         Create profile format
         """
