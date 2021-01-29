@@ -36,15 +36,18 @@ class DataDownloader(cli.Application):
             os.makedirs(self._working_dir)
 
         # Download data
+        print("Downloading data")
         downloaded_databases = []
         for db_download in download_data(self._working_dir):
             downloaded_databases.append(db_download())
 
         # Parse any required download data
+        print("Generating taxonomy lookup files")
         for parsing_operation in parsing_operations(self._working_dir):
             parsing_operation()
 
         # Run database utility protocols
+        print("Running MMseqs utility functions on data")
         for util_instruction in manage_downloaded_data(self._working_dir,
                                                        self._index,
                                                        True,
