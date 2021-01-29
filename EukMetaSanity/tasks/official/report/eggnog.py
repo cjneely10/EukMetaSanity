@@ -1,3 +1,6 @@
+"""
+Module holds logic to call eggnog annotation
+"""
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
@@ -13,6 +16,9 @@ class EggNogMapperIter(TaskList):
     depends = [DependencyInput("emapper")]
 
     class EggNogMapper(Task):
+        """
+        Run emapper
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)

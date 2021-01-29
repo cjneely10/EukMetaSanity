@@ -1,3 +1,6 @@
+"""
+Module holds logic to identify repetitive regions in a genome/MAG
+"""
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
@@ -15,8 +18,11 @@ class RepeatsIter(TaskList):
         DependencyInput("repmask.rmout"),
         DependencyInput("repmask.process_repeats")
     ]
-    
+
     class Repeats(Task):
+        """
+        Run repeats task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -30,12 +36,18 @@ class RepeatsIter(TaskList):
                     "repmask.rmout.mask-gff3"
                 ]
             }
-            
+
         @program_catch
         def run(self):
+            """
+            Run
+            """
             pass
-            
+
     def __init__(self, *args, **kwargs):
+        """
+        Generate task list
+        """
         super().__init__(RepeatsIter.Repeats, RepeatsIter.name, *args, **kwargs)
 
 

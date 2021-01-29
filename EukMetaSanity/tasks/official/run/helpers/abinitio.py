@@ -1,8 +1,14 @@
+"""
+Module holds helper functions for parsing ab initio data
+"""
 from typing import Dict
 
 
-# All available AUGUSTUS taxon ids
 def augustus_taxon_ids() -> Dict[str, str]:
+    """ Get all available AUGUSTUS taxon ids
+
+    :return: Dictionary of taxonomy ids and their augustus values
+    """
     tax_ids = """9606
 7227
 3702
@@ -122,4 +128,5 @@ E_coli_K12
 s_aureus
 volvox
 """.split()
+    # pylint: disable=unnecessary-comprehension
     return {key: val for key, val in zip(tax_ids, identifiers)}

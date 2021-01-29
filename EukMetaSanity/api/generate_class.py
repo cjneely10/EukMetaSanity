@@ -5,8 +5,8 @@ Module holds logic to generate TaskList/Task class stub and associated config fi
 """
 
 import os
-import yaml
 from typing import Optional, List
+import yaml
 
 from EukMetaSanity.utils.arg_parse import ArgParse
 

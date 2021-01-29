@@ -313,7 +313,7 @@ class GffMerge:
         longest_cds = Seq("")
         offsets = []
         transcripts = []
-        for name, transcript in gene_data["transcripts"].items():
+        for _, transcript in gene_data["transcripts"].items():
             out_cds: List[str] = []
             _offsets: List[int] = []
             for exon in transcript:

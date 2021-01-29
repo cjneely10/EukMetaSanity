@@ -37,9 +37,7 @@ class EvidenceIter(TaskList):
             Instantiate class with given output
             """
             super().__init__(*args, **kwargs)
-            self.output = {
-                
-            }
+            self.output = {}
 
         @program_catch
         def run(self):

@@ -1,6 +1,6 @@
 # Installation
 
-`awk`, `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda` should be on your PATH.
+`sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, and `git` should be on your PATH.
 
 Ensure you have `conda`4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda 
 environment. Then, run the following commands:
@@ -21,21 +21,12 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately.
 
-### Configuring GeneMark
-
-Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
-may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
-
-Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
-
-The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
-
 ### Configuring RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. 
 
 Make sure your `EukMS_run` conda environment is still active prior to updating. Here, we assume that you have used 
 `miniconda`, and that it is located in your home directory. You will want to adjust the path for the following commands 
-according to your system: 
+according to your system:
 
 ```
 cd ~/miniconda/envs/EukMS_run/share/RepeatMasker/Libraries/
@@ -58,11 +49,20 @@ cp util/rmOutToGFF3.pl ./
 The conda version of AUGUSTUS is missing one needed element:
 
 ```
-cd /path/to/miniconda/envs/EukMS_run/bin
+cd ~/miniconda/envs/EukMS_run/bin
 sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-cd /path/to/miniconda/envs/EukMS_refine/bin
+cd ~/miniconda/envs/EukMS_refine/bin
 sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
 ```
+
+### Configuring GeneMark
+
+Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
+may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
+
+Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
+
+The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
 
 ### Installing required databases
 

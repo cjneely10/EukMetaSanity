@@ -37,14 +37,18 @@ def download_data(working_dir: str) -> Generator:
             data_url="https://wwwuser.gwdg.de/~compbiol/metaeuk/2019_11/TAX_DBs/MMETSP/TaxDB_MMETSP.tar.gz",
             wdir=working_dir,
             expected="TaxDB_MMETSP.tar.gz",
-            unzip_command_args=["tar", "-xzf", "-C", os.path.join(working_dir, "TaxDB_MMETSP.tar.gz")],
+            unzip_command_args=["tar", "-xzf"],
         ),
     )
     for database in database_downloads:
         yield database
 
 
-def parsing_operations(working_dir: str):
+def parsing_operations(working_dir: str) -> Generator:
+    """ Parse downloaded data, if needed, to create any mapping files that are used to build taxonomy databases
+
+    :param working_dir: Directory containing downloaded data
+    """
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
     parsing_fxns = (

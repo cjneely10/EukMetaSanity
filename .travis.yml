@@ -7,4 +7,5 @@ install:
   - source "$HOME/miniconda/etc/profile.d/conda.sh"
   - conda env create -f EukMetaSanity/api/environment.yml
 script:
-  echo complete!
+  - pylint EukMetaSanity/ --ignore-patterns=__init__.py
+  - pytest --cov=EukMetaSanity tests/

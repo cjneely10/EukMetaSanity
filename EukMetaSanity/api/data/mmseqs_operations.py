@@ -85,7 +85,7 @@ class CreateTaxDBs(DataUtil):
                      "-O", os.path.join(self.wdir, "taxdump.tar.gz")
                  ])
         self.run(local["tar"][
-                     "xzvf", os.path.join(self.wdir, "taxdump.tar.gz"), "-C", self.wdir
+                     "xzvf", os.path.join(self.wdir, "taxdump.tar.gz")
                  ])
         # Generate tax db
         for database in self.databases:

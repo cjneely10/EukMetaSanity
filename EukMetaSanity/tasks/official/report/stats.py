@@ -1,3 +1,6 @@
+"""
+Module holds logic to gather summary statistics for final annotation
+"""
 import os
 from typing import List
 from EukMetaSanity import Task, TaskList, program_catch, set_complete
@@ -13,8 +16,11 @@ class StatsIter(TaskList):
     name = "stats"
     requires = ["eggnog", "kofamscan", "mmseqs"]
     depends = []
-    
+
     class Stats(Task):
+        """
+        Run summarizer
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -23,11 +29,12 @@ class StatsIter(TaskList):
                 "summary": os.path.join(self.wdir, self.record_id + ".summary"),
                 "final": ["summary-db", "summary"]
             }
-            
+
         @program_catch
         def run(self):
-            # Determine the prefixes to assign to each file based on type
-            # Run summary script
+            """
+            Run
+            """
             self.single(
                 self.local["summarize_annotations.py"][
                     "-f", str(self.input["root"]["prot"]),
@@ -38,6 +45,9 @@ class StatsIter(TaskList):
             )
 
         def parse_input(self) -> List[str]:
+            """
+            Parse all input files from annotation into summary database
+            """
             _out = []
             for _file in (
                 str(self.input["emapper"]["emapper"]),
@@ -54,7 +64,7 @@ class StatsIter(TaskList):
                         continue
                     _out.append("%s=%s" % (_db_name, _file))
             return _out
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(StatsIter.Stats, StatsIter.name, *args, **kwargs)
 

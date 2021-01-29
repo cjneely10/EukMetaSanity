@@ -1,3 +1,6 @@
+"""
+Module holds logic to identify taxonomy of a genome/MAG
+"""
 from EukMetaSanity import TaxonomyAssignment
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
@@ -17,8 +20,11 @@ class TaxonomyIter(TaskList):
     name = "taxonomy"
     requires = []
     depends = [DependencyInput("mmseqs.taxonomy")]
-    
+
     class Taxonomy(Task):
+        """
+        Predict taxonomy
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -28,12 +34,21 @@ class TaxonomyIter(TaskList):
                     float(self.config["cutoff"])),
                 "final": ["mmseqs.taxonomy.tax-report", "taxonomy"]
             }
-            
+
         @program_catch
         def run(self):
+            """
+            Run
+            """
             pass
 
         def get_taxonomy(self, tax_results_file: str, cutoff: float) -> TaxonomyAssignment:
+            """ Parse taxonomy results into TaxonomyAssignment object for downstream use
+
+            :param tax_results_file: File containing MMseqs taxonomy output summary results
+            :param cutoff: Minimum percent of reads to allow for parsing a taxonomic level
+            :return: TaxonomyAssignment object containing results
+            """
             if self.developer_mode:
                 return TaxonomyAssignment()
             tax_assignment_out = TaxonomyAssignment()
@@ -60,7 +75,7 @@ class TaxonomyIter(TaskList):
                 else:
                     setattr(tax_assignment_out, level, assignment)
             return tax_assignment_out
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, TaxonomyIter.name, *args, **kwargs)
 

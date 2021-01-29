@@ -1,3 +1,6 @@
+"""
+Module holds logic to generate protein-based evidence and to merge together
+"""
 import os
 from typing import List
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
@@ -15,6 +18,9 @@ class EvidenceIter(TaskList):
     depends = [DependencyInput("metaeuk", "repeats")]
 
     class Evidence(Task):
+        """
+        Evidence class handles merging all lines of evidence (ab initio and protein-based)
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -28,7 +34,9 @@ class EvidenceIter(TaskList):
 
         @program_catch
         def run(self):
-            # Merge final results
+            """
+            Merge final results
+            """
             self.merge(
                 [str(self.input["metaeuk"]["gff3"]),
                  self.input["abinitio.augustus"]["ab-gff3"], self.input["abinitio.genemark"]["ab-gff3"]],
@@ -36,9 +44,13 @@ class EvidenceIter(TaskList):
                 os.path.join(self.wdir, self.record_id),
             )
 
-        # TODO: Needs running and renaming of each possible tier
         def merge(self, input_list: List[str], fasta_file: str, out_prefix: str):
-            # Convert to gff3 file
+            """  Convert to final non-redundant tiered gff3 files
+
+            :param input_list: List of files to merge
+            :param fasta_file: FASTA file with masked data
+            :param out_prefix: Output prefix for files
+            """
             self.single(
                 self.local["gffread"][
                     (*input_list), "-G", "--merge",
@@ -65,6 +77,9 @@ class EvidenceIter(TaskList):
             )
 
     def __init__(self, *args, **kwargs):
+        """
+        Generate task iterator
+        """
         super().__init__(EvidenceIter.Evidence, EvidenceIter.name, *args, **kwargs)
 
 

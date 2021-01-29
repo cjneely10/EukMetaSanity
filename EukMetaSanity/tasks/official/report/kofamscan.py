@@ -1,3 +1,6 @@
+"""
+Module holds logic to run kofamscan from `report` level
+"""
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
@@ -11,8 +14,11 @@ class KoFamScanIter(TaskList):
     name = "kofamscan"
     requires = []
     depends = [DependencyInput("kofamscan.exec_annotation")]
-    
+
     class KoFamScan(Task):
+        """
+        Run Kofamscan
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -20,11 +26,11 @@ class KoFamScanIter(TaskList):
                 "kegg": self.input["kofamscan.exec_annotation"]["kegg"],
                 "final": ["kegg"]
             }
-            
+
         @program_catch
         def run(self):
             pass
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(KoFamScanIter.KoFamScan, KoFamScanIter.name, *args, **kwargs)
 

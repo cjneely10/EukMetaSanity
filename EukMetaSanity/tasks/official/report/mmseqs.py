@@ -1,3 +1,6 @@
+"""
+Module holds logic to run `report`-level mmseqs task
+"""
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
@@ -11,19 +14,22 @@ class MMseqsIter(TaskList):
     name = "mmseqs"
     requires = []
     depends = [DependencyInput("mmseqs.search", id_mapping=[("prot", "fasta")])]
-    
+
     class MMseqs(Task):
+        """
+        MMseqs task class
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
                 "final": ["mmseqs.search.dbs"]
             }
-            
+
         @program_catch
         def run(self):
             pass
-            
+
     def __init__(self, *args, **kwargs):
         super().__init__(MMseqsIter.MMseqs, MMseqsIter.name, *args, **kwargs)
 
