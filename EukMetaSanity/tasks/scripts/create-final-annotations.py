@@ -247,20 +247,18 @@ class GffMerge:
     """
     Class loads all levels of evidence together and allows Gene class to merge together
     """
-    def __init__(self, gff3_path: str, fasta_path: str, tier: int):
+    def __init__(self, gff3_path: str, fasta_path: str):
         """ Open gff3 file and fasta file. Load fasta data into memory
 
         :param gff3_path: Path
         :param fasta_path: Path
-        :param tier: Parsing tier
         :raises: AssertionError if either path does not exist
         """
         assert os.path.exists(gff3_path) and os.path.exists(fasta_path)
         self.reader = GffReader(gff3_path)
         self.fasta_dict = SeqIO.to_dict(SeqIO.parse(fasta_path, "fasta"))
-        self.tier = tier
 
-    def merge(self) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
+    def merge(self, tier: int) -> Generator[Tuple[Dict, SeqRecord, SeqRecord, List[int]], None, None]:
         """ Merge together genes from gff3 file with existing ab-initio skeleton
 
         :return: Iterator over merged genes
@@ -269,7 +267,7 @@ class GffMerge:
         for gene_data in self.reader:
             # Tier 0 is conservative pairing of exons, removing exons without evidence and incorporating
             # exons that were not identified in ab initio predictions
-            if self.tier == 0:
+            if tier == 0:
                 # Generate initial exon structure
                 tx = []
                 for ident in ABINITIO_IDENTIFIERS:
@@ -295,7 +293,7 @@ class GffMerge:
                     len(gene_data["transcripts"].keys())
                 )
                 # Add filter to genes that do not occur within user-defined threshold
-                gene.filter(self.tier)
+                gene.filter(tier)
                 if gene.passed:
                     gene_data["transcripts"] = gene.exons
                     yield (gene_data, *self.create_tiered_cds(gene_data, gene))
@@ -462,7 +460,9 @@ class GffWriter:
         self.in_fp = open(in_gff3_path, "r")
         self.base = output_prefix
         self.out_fp = open(self.base + ".nr.gff3", "w")
-        self.merger = GffMerge(in_gff3_path, fasta_file, tier)
+        self.tier = tier
+        self.gff3_file = in_gff3_path
+        self.fasta_file = fasta_file
 
     def write(self):
         """ Write parsed results in gff3 format
@@ -472,19 +472,21 @@ class GffWriter:
         out_prots: List[SeqRecord] = []
         out_cds: List[SeqRecord] = []
         current_id = ""
-        for gene_dict, prot, cds, offsets in self.merger.merge():
-            if gene_dict["fasta-id"] != current_id:
-                current_id = gene_dict["fasta-id"]
-                self.out_fp.write("# Region %s\n" % current_id)
-            gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
-            if gene is not None:
-                self.out_fp.write(gene)
-            if prot and len(prot.seq) > 0:
-                out_prots.append(prot)
-            if cds and len(cds.seq) > 0:
-                out_cds.append(cds)
-        SeqIO.write(out_prots, self.base + ".faa", "fasta")
-        SeqIO.write(out_cds, self.base + ".cds.fna", "fasta")
+        for i in range(0, self.tier + 1):
+            merger = GffMerge(self.gff3_file, self.fasta_file)
+            for gene_dict, prot, cds, offsets in merger.merge(i):
+                if gene_dict["fasta-id"] != current_id:
+                    current_id = gene_dict["fasta-id"]
+                    self.out_fp.write("# Region %s\n" % current_id)
+                gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
+                if gene is not None:
+                    self.out_fp.write(gene)
+                if prot and len(prot.seq) > 0:
+                    out_prots.append(prot)
+                if cds and len(cds.seq) > 0:
+                    out_cds.append(cds)
+            SeqIO.write(out_prots, self.base + "%i.faa" % self.tier, "fasta")
+            SeqIO.write(out_cds, self.base + "%i.cds.fna" % self.tier, "fasta")
 
     # pylint: disable=inconsistent-return-statements
     @staticmethod
