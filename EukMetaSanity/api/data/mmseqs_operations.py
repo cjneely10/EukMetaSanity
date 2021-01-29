@@ -70,3 +70,9 @@ class CreateTaxDB(DataUtil):
                             "--ncbi-tax-dump", self.wdir,
                             "--tax-mapping-file", file
                         ])
+
+
+class CreateMappingFile(DataUtil):
+
+    def __call__(self):
+        pass

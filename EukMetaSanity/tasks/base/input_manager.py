@@ -65,7 +65,12 @@ class InputManager:
         if os.path.exists(out_file):
             return out_file
         # Write simplified version
-        SeqIO.write(SeqIO.parse(fasta_file, "fasta"), out_file, "fasta")
+        records = []
+        for record in SeqIO.parse(fasta_file, "fasta"):
+            record.description = ""
+            record.name = ""
+            records.append(record)
+        SeqIO.write(records, out_file, "fasta")
         return out_file
 
     def _get_files_from_project_dir(self, summary_file: str):
