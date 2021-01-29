@@ -53,10 +53,6 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
     # Ensure command is valid
     if ap.args.command not in tm.programs.keys():
         raise KeyError("'%s' pipeline is not implemented!" % ap.args.command)
-    if ap.args.debug is True:
-        ap.args.debug = 0
-    else:
-        ap.args.debug = 1
     # Determine file extensions to keep
     ap.args.extensions = ap.args.extensions.split("/")
     return ConfigManager(ap.args.config_file)
@@ -78,9 +74,6 @@ if __name__ == "__main__":
               "default": DEFAULT_EXTS}),
             (("-o", "--output"),
              {"help": "Output directory, default out", "default": "out"}),
-            (("-d", "--debug"),
-             {"help": "Developer mode: display all commands on single thread, default False", "default": False,
-              "action": "store_true"}),
             (("-s", "--skip_summary"),
              {"help": "Skip internal summary check and launch pipeline, default False", "default": False,
               "action": "store_true"})
@@ -106,8 +99,7 @@ if __name__ == "__main__":
             sys.exit()
         # Generate TaskManager and run task-completion check
         print(colors.yellow & colors.bold | "\nChecking for completed dependencies...")
-        task_manager = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug,
-                                   _ap.args.command)
+        task_manager = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, True, _ap.args.command)
         print(colors.yellow & colors.bold | "--------------------------------------")
         # Confirm valid
         print("\n" + task_manager.prerun_summarize())
@@ -115,8 +107,7 @@ if __name__ == "__main__":
             print(colors.warn & colors.bold | "Exiting...")
             sys.exit()
     else:
-        task_manager = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, _ap.args.debug,
-                                   _ap.args.command)
+        task_manager = TaskManager(_tm, _cfg, _pm, _im.input_files, _im.input_prefixes, True, _ap.args.command)
 
     # Begin logging
     _initialize_logging(_ap)

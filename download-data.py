@@ -5,7 +5,7 @@ Module downloads requisite data for official pipelines in EukMetaSanity
 import os
 from pathlib import Path
 from plumbum import cli
-from EukMetaSanity.api.data.download_utils import download_data, manage_downloaded_data
+from EukMetaSanity.tasks.official.download_utils import download_data, parsing_operations, manage_downloaded_data
 
 
 class DataDownloader(cli.Application):
@@ -40,8 +40,9 @@ class DataDownloader(cli.Application):
         for db_download in download_data(self._working_dir):
             downloaded_databases.append(db_download())
 
-        # TODO
-        # Create any needed lookup files
+        # Parse any required download data
+        for parsing_operation in parsing_operations(self._working_dir):
+            parsing_operation()
 
         # Run database utility protocols
         for util_instruction in manage_downloaded_data(self._working_dir,
@@ -53,20 +54,6 @@ class DataDownloader(cli.Application):
 
         # TODO
         # Generate base config files
-
-
-def _odb_tax_parse(mmseqs_db_path: str, outfile: str):
-    """ Generate NCBI taxonomy mappings from generated .lookup file
-
-    :param mmseqs_db_path: Path to generated mmseqs database
-    :param outfile: Output path for parsed orthodb mapping file
-    """
-    output_p = open(outfile, "w")
-    mmseqs_input_fp = open(mmseqs_db_path + ".lookup", "r")
-    for line in mmseqs_input_fp:
-        line = line.split()
-        output_p.write(line[1] + "\t" + line[1].split("_")[0] + "\n")
-    output_p.close()
 
 
 if __name__ == "__main__":

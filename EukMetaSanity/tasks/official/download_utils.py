@@ -5,8 +5,9 @@ official EukMS pipelines and run any merge/index generation steps needed for use
 import os
 from typing import Generator
 from EukMetaSanity.api.data.data_types import Fasta, MMSeqsDB
-from EukMetaSanity.api.data.mmseqs_operations import Merge, CreateTaxDB
 from EukMetaSanity.api.data.mmseqs_index_types import CreateIndex, CreateLinIndex
+from EukMetaSanity.tasks.official.download_parsing_functions import odb_tax_parse
+from EukMetaSanity.api.data.mmseqs_operations import MergeDBs, CreateTaxDBs, CreateMappingFiles
 
 
 def download_data(working_dir: str) -> Generator:
@@ -43,6 +44,20 @@ def download_data(working_dir: str) -> Generator:
         yield database
 
 
+def parsing_operations(working_dir: str):
+    if not os.path.exists(working_dir):
+        os.makedirs(working_dir)
+    parsing_fxns = (
+        CreateMappingFiles(
+            [odb_tax_parse],
+            working_dir,
+            ["ortho_db"]
+        ),
+    )
+    for parsing_fxn in parsing_fxns:
+        yield parsing_fxn
+
+
 def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex: bool,
                            threads: int, split_mem_limit: str) -> Generator:
     """ Generate data utilities functors. Consumer should call each object in sequence.
@@ -58,8 +73,8 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
     fxns = [
-        CreateTaxDB("mmseqs.input", working_dir, ["ortho_db"]),
-        Merge("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
+        CreateTaxDBs(working_dir, ["ortho_db"]),
+        MergeDBs("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
     ]
     if create_index:
         fxns.append(CreateIndex(threads, split_mem_limit, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
