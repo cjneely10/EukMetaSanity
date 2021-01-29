@@ -20,7 +20,7 @@ class RepeatMaskerOutIter(TaskList):
 
         @program_catch
         def run(self):
-            input_file = str(self.dependency_input) + ".masked"
+            input_file = str(self.dependency_input["fasta"]) + ".masked"
             if os.path.exists(input_file):
                 os.replace(
                     input_file,
