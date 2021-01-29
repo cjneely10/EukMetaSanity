@@ -24,7 +24,7 @@ class Fasta(Data):
         Generate mmseqs database from a FASTA file
         """
         self.run(local["mmseqs"]["createdb", self.data, self.db_name])
-        return super().__call__(*args, **kwargs)
+        super().__call__(*args, **kwargs)
 
 
 class MMSeqsDB(Data):
@@ -59,4 +59,4 @@ class MSA(Data):
         """
         self.run(local["mmseqs"]["convertmsa", self.data, self.db_name + "-msa"])
         self.run(local["mmseqs"]["msa2profile", self.db_name + "-msa", self.db_name])
-        return super().__call__(*args, **kwargs)
+        super().__call__(*args, **kwargs)

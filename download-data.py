@@ -37,9 +37,8 @@ class DataDownloader(cli.Application):
 
         # Download data
         print("Downloading data")
-        downloaded_databases = []
         for db_download in download_data(self._working_dir):
-            downloaded_databases.append(db_download())
+            db_download()
 
         # Parse any required download data
         print("Generating taxonomy lookup files")

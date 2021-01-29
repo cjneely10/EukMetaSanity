@@ -29,14 +29,14 @@ def download_data(working_dir: str) -> Generator:
             config_identifier="ortho_db",
             data_url="https://v101.orthodb.org/download/odb10v1_all_og_fasta.tab.gz",
             wdir=working_dir,
-            expected="odb10v1_all_og_fasta.tab",
+            expected="odb10v1_all_og_fasta.tab.gz",
             unzip_command_args=["gunzip"],
         ),
         MMSeqsDB(
             config_identifier="mmetsp_db",
             data_url="https://wwwuser.gwdg.de/~compbiol/metaeuk/2019_11/TAX_DBs/MMETSP/TaxDB_MMETSP.tar.gz",
             wdir=working_dir,
-            expected="MMETSP",
+            expected="TaxDB_MMETSP.tar.gz",
             unzip_command_args=["tar", "-xzf", "-C", working_dir],
         ),
     )

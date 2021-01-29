@@ -8,6 +8,7 @@ from abc import abstractmethod
 from typing import List, Optional, Set, Sequence
 from plumbum import local
 from plumbum.machines import LocalCommand
+from EukMetaSanity import touch
 
 
 class Command:
@@ -52,16 +53,15 @@ class Data(Command):
             self.run(local["wget"][data_url, "-O", self._data])
             # Unzip downloaded data
             self._unzip_data(unzip_command_args)
+            touch(self._data)
 
-    def __call__(self, *args, **kwargs) -> str:
-        """ Parent class implementation of functor returns assigned db name. Should be returned by child class
-        implementation
+    def __call__(self, *args, **kwargs):
+        """ Parent class implementation of functor
 
         :param args:
         :param kwargs:
         :return:
         """
-        return self.db_name
 
     def _unzip_data(self, unzip_command_args: Optional[List[str]]):
         """ Run command to unzip data based on list of passed strings
