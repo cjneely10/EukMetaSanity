@@ -15,13 +15,15 @@ class Command:
     Class holds simple print-and-run command-line functionality
     """
     @staticmethod
-    def run(cmd: LocalCommand) -> Optional[object]:
+    def run(cmd: LocalCommand, run: bool = True) -> Optional[object]:
         """ Print and run local command
 
         :param cmd: Local plumbum command
+        :param run: Run command (True) or simply display command (False)
         """
         print(cmd)
-        return cmd()
+        if run:
+            return cmd()
 
 
 class Data(Command):
@@ -50,7 +52,7 @@ class Data(Command):
         self._unzip_data(unzip_command_args)
         # Download data
         if not os.path.exists(self._data):
-            local["wget", data_url, "-O", self._data]()
+            self.run(local["wget"][data_url, "-O", self._data]())
 
     def __call__(self, *args, **kwargs) -> str:
         """ Parent class implementation of functor returns assigned db name. Should be returned by child class
@@ -68,7 +70,7 @@ class Data(Command):
         :param unzip_command_args: Command strings to use to unzip data
         """
         if unzip_command_args is not None:
-            self.run(local[unzip_command_args[0]]["", (*unzip_command_args[1:])])
+            self.run(local[unzip_command_args[0]][unzip_command_args[1:]])
             self._unzipped = True
         else:
             self._unzipped = False

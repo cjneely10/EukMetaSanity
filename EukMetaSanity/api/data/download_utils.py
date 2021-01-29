@@ -5,8 +5,8 @@ official EukMS pipelines and run any merge/index generation steps needed for use
 import os
 from typing import Generator
 from EukMetaSanity.api.data.data_types import Fasta, MMSeqsDB
-from EukMetaSanity.api.data.mmseqs_types import Merge, CreateTaxDB
-from EukMetaSanity.api.data import CreateIndex, CreateLinIndex
+from EukMetaSanity.api.data.mmseqs_operations import Merge, CreateTaxDB
+from EukMetaSanity.api.data.mmseqs_index_types import CreateIndex, CreateLinIndex
 
 
 def download_data(working_dir: str) -> Generator:
@@ -15,8 +15,6 @@ def download_data(working_dir: str) -> Generator:
     Current implementation:
 
     Download/generate mmseqs db for ODB
-
-    Download/generate mmseqs db for RFAM
 
     Download/generate mmseqs db for MMETSP
 

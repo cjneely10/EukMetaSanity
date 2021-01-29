@@ -44,7 +44,10 @@ class DataDownloader(cli.Application):
         # Create any needed lookup files
 
         # Run database utility protocols
-        for util_instruction in manage_downloaded_data(self._working_dir, self._index, True, self._threads,
+        for util_instruction in manage_downloaded_data(self._working_dir,
+                                                       self._index,
+                                                       True,
+                                                       self._threads,
                                                        self._max_mem):
             util_instruction()
 
