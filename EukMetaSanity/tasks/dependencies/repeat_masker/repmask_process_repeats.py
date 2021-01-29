@@ -40,11 +40,7 @@ class ProcessRepeatsIter(TaskList):
             if os.path.exists(final_out):
                 os.remove(final_out)
             touch(final_out)
-            all([
-                (self.local["cat"][os.path.splitext(_file)[0]] >> final_out)()
-                for _file in cat_files
-                if os.path.exists(os.path.splitext(_file)[0]) and os.path.getsize(os.path.splitext(_file)[0]) > 0
-            ])
+            all([(self.local["cat"][_file] >> final_out)() for _file in cat_files])
             if os.path.getsize(final_out) > 0:
                 # Run ProcessRepeats
                 self.single(
