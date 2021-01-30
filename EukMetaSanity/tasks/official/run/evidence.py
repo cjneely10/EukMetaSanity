@@ -24,13 +24,18 @@ class EvidenceIter(TaskList):
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.output = {
-                "nr-gff3": os.path.join(self.wdir, self.record_id + ".nr.gff3"),  # Non-redundant GFF
-                "prot": os.path.join(self.wdir, self.record_id + ".faa"),  # NR Proteins
-                "cds": os.path.join(self.wdir, self.record_id + ".cds.fna"),  # NR CDS
+            self.output = {}
+            for i in range(0, 4):
+                self.output.update({
+                    "nr-gff3.tier%i" % i: os.path.join(self.wdir, self.record_id + ".tier%i.nr.gff3" % i),  # NR GFF
+                    "prot.tier%i" % i: os.path.join(self.wdir, self.record_id + ".tier%i.faa" % i),  # NR Proteins
+                    "cds.tier%i" % i: os.path.join(self.wdir, self.record_id + ".tier%i.cds.fna" % i),  # NR CDS
+                })
+
+            self.output.update({
                 "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
                 "final": ["metaeuk.gff3", "nr-gff3", "prot", "cds", "all_gff3"]
-            }
+            })
 
         @program_catch
         def run(self):
@@ -57,25 +62,23 @@ class EvidenceIter(TaskList):
                     "-o", out_prefix + ".all.gff3"
                 ]
             )
-            for i in range(0, 4):
-                # Replace transcripts with gene identifier and write cds/aa sequences
-                self.single(
-                    self.local["create-final-annotations.py"][
-                        "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i
-                    ]
-                )
-                os.replace(
-                    out_prefix + ".all.nr.gff3",
-                    out_prefix + ".nr.gff3",
-                )
-                os.replace(
-                    out_prefix + ".all.faa",
-                    out_prefix + ".faa"
-                )
-                os.replace(
-                    out_prefix + ".all.cds.fna",
-                    out_prefix + ".cds.fna"
-                )
+            self.batch([self.local["create-final-annotations.py"][
+                            "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i]
+                        for i in range(0, 4)])
+            # Replace transcripts with gene identifier and write cds/aa sequences
+
+            # os.replace(
+            #     out_prefix + ".all.nr.gff3",
+            #     out_prefix + ".nr.gff3",
+            # )
+            # os.replace(
+            #     out_prefix + ".all.faa",
+            #     out_prefix + ".faa"
+            # )
+            # os.replace(
+            #     out_prefix + ".all.cds.fna",
+            #     out_prefix + ".cds.fna"
+            # )
 
     def __init__(self, *args, **kwargs):
         """

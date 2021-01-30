@@ -460,7 +460,7 @@ class GffWriter:
         """
         self.in_fp = open(in_gff3_path, "r")
         self.base = output_prefix
-        self.out_fp = open(self.base + ".nr.gff3", "w")
+        self.out_fp = open(self.base + ".tier%i.nr.gff3" % tier, "w")
         self.tier = tier
         self.gff3_file = in_gff3_path
         self.fasta_file = fasta_file
