@@ -30,9 +30,14 @@ class ConcatDBs(DataUtil):
         Merge databases
         """
         databases = [os.path.join(self.wdir, database) for database in self.databases]
-        return self.run(local["mmseqs"][
-                            "concatdbs", databases[0], (*databases[1:], os.path.join(self.wdir, self._new_db_name))
-                        ])
+        self.run(
+            local["mmseqs"]["concatdbs", databases[0], (*databases[1:], os.path.join(self.wdir, self._new_db_name))]
+        )
+        self.run(
+            local["mmseqs"]["concatdbs",
+                            (*[database + "_h" for database in databases]),
+                            os.path.join(self.wdir, self._new_db_name + "_h")]
+        )
 
 
 class CreateMappingFiles(DataUtil):
