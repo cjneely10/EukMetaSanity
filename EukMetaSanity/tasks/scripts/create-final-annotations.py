@@ -93,6 +93,7 @@ class Gene:
         self._passed = status
 
     # pylint: disable=too-many-branches
+    # TODO: Handle this for > 1 ab initio predictor
     def tier0(self, evidence_data: List):
         """ Add list of exons from protein/transcriptomic-based evidence
 
@@ -317,11 +318,7 @@ class GffMerge:
             out_cds: List[str] = []
             _offsets: List[int] = []
             for exon in transcript:
-                record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
-                if strand == "-":
-                    record = record.reverse_complement()
-                out_cds.append(str(record.seq))
-                _offsets.append(exon[2])
+                GffMerge.create_seq_record(orig_seq, exon, strand, out_cds, _offsets)
             if strand == "-":
                 _offsets.reverse()
             cds = Seq(GffMerge.longest_orf("".join(out_cds)))
@@ -333,6 +330,14 @@ class GffMerge:
                     transcripts.append(exon)
         gene_data["transcripts"] = transcripts
         return GffMerge.gene_dict_data_to_seqrecords(longest_cds, gene, gene_data, offsets)
+
+    @staticmethod
+    def create_seq_record(orig_seq, exon, strand, out_cds, _offsets):
+        record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
+        if strand == "-":
+            record = record.reverse_complement()
+        out_cds.append(str(record.seq))
+        _offsets.append(exon[2])
 
     @staticmethod
     def gene_dict_data_to_seqrecords(longest_cds: Seq, gene: Gene, gene_data: dict, offsets: list) -> \
@@ -390,11 +395,7 @@ class GffMerge:
         out_cds: List[str] = []
         offsets: List[int] = []
         for exon in gene_data["transcripts"]:
-            record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
-            if strand == "-":
-                record = record.reverse_complement()
-            out_cds.append(str(record.seq))
-            offsets.append(exon[2])
+            GffMerge.create_seq_record(orig_seq, exon, strand, out_cds, offsets)
         if strand == "-":
             offsets.reverse()
         return GffMerge.gene_dict_data_to_seqrecords(Seq(GffMerge.longest_orf("".join(out_cds))), gene,
@@ -472,21 +473,20 @@ class GffWriter:
         out_prots: List[SeqRecord] = []
         out_cds: List[SeqRecord] = []
         current_id = ""
-        for i in range(0, self.tier + 1):
-            merger = GffMerge(self.gff3_file, self.fasta_file)
-            for gene_dict, prot, cds, offsets in merger.merge(i):
-                if gene_dict["fasta-id"] != current_id:
-                    current_id = gene_dict["fasta-id"]
-                    self.out_fp.write("# Region %s\n" % current_id)
-                gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
-                if gene is not None:
-                    self.out_fp.write(gene)
-                if prot and len(prot.seq) > 0:
-                    out_prots.append(prot)
-                if cds and len(cds.seq) > 0:
-                    out_cds.append(cds)
-            SeqIO.write(out_prots, self.base + "%i.faa" % self.tier, "fasta")
-            SeqIO.write(out_cds, self.base + "%i.cds.fna" % self.tier, "fasta")
+        merger = GffMerge(self.gff3_file, self.fasta_file)
+        for gene_dict, prot, cds, offsets in merger.merge(self.tier):
+            if gene_dict["fasta-id"] != current_id:
+                current_id = gene_dict["fasta-id"]
+                self.out_fp.write("# Region %s\n" % current_id)
+            gene = GffWriter._gene_dict_to_string(gene_dict, offsets)
+            if gene is not None:
+                self.out_fp.write(gene)
+            if prot and len(prot.seq) > 0:
+                out_prots.append(prot)
+            if cds and len(cds.seq) > 0:
+                out_cds.append(cds)
+        SeqIO.write(out_prots, self.base + ".tier%i.faa" % self.tier, "fasta")
+        SeqIO.write(out_cds, self.base + ".tier%i.cds.fna" % self.tier, "fasta")
 
     # pylint: disable=inconsistent-return-statements
     @staticmethod
@@ -565,7 +565,7 @@ def parse_args(ap: ArgParse):
             print("Invalid file path", _file)
             sys.exit(1)
     if ap.args.output_prefix is None:
-        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0] + ".%i" % ap.args.tier
+        ap.args.output_prefix = os.path.splitext(ap.args.gff3_file)[0]
 
 
 if __name__ == "__main__":

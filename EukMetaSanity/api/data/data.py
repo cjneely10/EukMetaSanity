@@ -69,7 +69,10 @@ class Data(Command):
         :param unzip_command_args: Command strings to use to unzip data
         """
         if unzip_command_args is not None:
-            self.run(local[unzip_command_args[0]][(*unzip_command_args[1:]), self._data])
+            if unzip_command_args[0] != "tar":
+                self.run(local[unzip_command_args[0]][(*unzip_command_args[1:]), self._data])
+            else:
+                self.run(local[unzip_command_args[0]][unzip_command_args[1], self._data, (*unzip_command_args[2:])])
 
     @property
     def wdir(self) -> Path:

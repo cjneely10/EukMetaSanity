@@ -57,24 +57,25 @@ class EvidenceIter(TaskList):
                     "-o", out_prefix + ".all.gff3"
                 ]
             )
-            # Replace transcripts with gene identifier and write cds/aa sequences
-            self.single(
-                self.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", "3"
-                ]
-            )
-            os.replace(
-                out_prefix + ".all.nr.gff3",
-                out_prefix + ".nr.gff3",
-            )
-            os.replace(
-                out_prefix + ".all.faa",
-                out_prefix + ".faa"
-            )
-            os.replace(
-                out_prefix + ".all.cds.fna",
-                out_prefix + ".cds.fna"
-            )
+            for i in range(0, 4):
+                # Replace transcripts with gene identifier and write cds/aa sequences
+                self.single(
+                    self.local["create-final-annotations.py"][
+                        "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i
+                    ]
+                )
+                os.replace(
+                    out_prefix + ".all.nr.gff3",
+                    out_prefix + ".nr.gff3",
+                )
+                os.replace(
+                    out_prefix + ".all.faa",
+                    out_prefix + ".faa"
+                )
+                os.replace(
+                    out_prefix + ".all.cds.fna",
+                    out_prefix + ".cds.fna"
+                )
 
     def __init__(self, *args, **kwargs):
         """
