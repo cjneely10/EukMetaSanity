@@ -1,6 +1,7 @@
 """
 Module holds logic to generate MMseqs database indices
 """
+import os
 from typing import Sequence
 from abc import abstractmethod
 from plumbum import local
@@ -19,14 +20,16 @@ class Index(DataUtil):
         """
         pass
 
-    def __init__(self, threads: int, split_mem_limit: str, databases: Sequence[str]):
+    def __init__(self, threads: int, wdir: str, split_mem_limit: str, databases: Sequence[str]):
         """ Create mmseqs lin/index base class
 
         :param threads: Number of system threads
+        :param wdir: Directory containing built databases
         :param split_mem_limit: Maximum allowed memory
         :param databases: List of databases for which to generate indices
         """
         super().__init__(databases)
+        self.wdir = wdir
         self._threads = threads
         self._mem_limit = split_mem_limit
 
@@ -37,7 +40,7 @@ class Index(DataUtil):
         for database in self.databases:
             self.run(local["mmseqs"][
                 self.command(),
-                database,
+                os.path.join(self.wdir, database),
                 "tmp",
                 "--threads", self._threads,
                 "--split-memory-limit", self._mem_limit,

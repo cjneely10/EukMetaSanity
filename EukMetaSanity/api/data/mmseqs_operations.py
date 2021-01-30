@@ -8,7 +8,7 @@ from EukMetaSanity.api.data.data import DataUtil
 from EukMetaSanity.tasks.utils.helpers import prefix
 
 
-class MergeDBs(DataUtil):
+class ConcatDBs(DataUtil):
     """
     Combine two mmseqs2 databases into new database
 
@@ -31,7 +31,7 @@ class MergeDBs(DataUtil):
         """
         databases = [os.path.join(self.wdir, database) for database in self.databases]
         return self.run(local["mmseqs"][
-                            "mergedbs", databases[0], os.path.join(self.wdir, self._new_db_name), (*databases[1:])
+                            "concatdbs", databases[0], (*databases[1:], os.path.join(self.wdir, self._new_db_name))
                         ])
 
 
@@ -61,7 +61,7 @@ class CreateMappingFiles(DataUtil):
         Call parsing function on each database's lookup file
         """
         for parsing_function, database in zip(self._parsing_functions, self.databases):
-            parsing_function(database + ".lookup", os.path.join(self.wdir, prefix(database) + ".mapping"))
+            parsing_function(database + ".lookup", os.path.join(self.wdir, prefix(database) + ".input"))
 
 
 class CreateTaxDBs(DataUtil):

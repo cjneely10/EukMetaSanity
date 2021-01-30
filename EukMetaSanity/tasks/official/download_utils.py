@@ -7,7 +7,7 @@ from typing import Generator
 from EukMetaSanity.api.data.data_types import Fasta, MMSeqsDB
 from EukMetaSanity.api.data.mmseqs_index_types import CreateIndex, CreateLinIndex
 from EukMetaSanity.tasks.official.download_parsing_functions import odb_tax_parse
-from EukMetaSanity.api.data.mmseqs_operations import MergeDBs, CreateTaxDBs, CreateMappingFiles
+from EukMetaSanity.api.data.mmseqs_operations import ConcatDBs, CreateTaxDBs, CreateMappingFiles
 
 
 def download_data(working_dir: str) -> Generator:
@@ -78,11 +78,11 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
         os.makedirs(working_dir)
     fxns = [
         CreateTaxDBs(working_dir, ["ortho_db"]),
-        MergeDBs(working_dir, "odb-mmetsp_db", ["ortho_db", "MMETSP"]),
+        ConcatDBs(working_dir, "odb-mmetsp_db", ["ortho_db", "MMETSP"]),
     ]
     if create_index:
-        fxns.append(CreateIndex(threads, split_mem_limit, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
+        fxns.append(CreateIndex(threads, working_dir, split_mem_limit, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
     if create_linindex:
-        fxns.append(CreateLinIndex(threads, split_mem_limit, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
+        fxns.append(CreateLinIndex(threads, working_dir, split_mem_limit, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
     for fxn in fxns:
         yield fxn
