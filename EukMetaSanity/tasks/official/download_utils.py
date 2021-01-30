@@ -55,7 +55,7 @@ def parsing_operations(working_dir: str) -> Generator:
         CreateMappingFiles(
             [odb_tax_parse],
             working_dir,
-            [os.path.join(working_dir, "MMETSP")]
+            [os.path.join(working_dir, "ortho_db")]
         ),
     )
     for parsing_fxn in parsing_fxns:
