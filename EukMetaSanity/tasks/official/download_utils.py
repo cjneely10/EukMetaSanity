@@ -79,6 +79,7 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
     fxns = [
         CreateTaxDBs(working_dir, ["ortho_db"]),
         ConcatDBs(working_dir, "odb-mmetsp_db", ["ortho_db", "MMETSP"]),
+        CreateTaxDBs(working_dir, ["odb-mmetsp_db"]),
     ]
     if create_index:
         fxns.append(CreateIndex(threads, working_dir, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
