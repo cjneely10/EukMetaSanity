@@ -2,7 +2,7 @@
 Module holds functionality for manipulating downloaded databases from initial format into mmseqs databases
 """
 import os
-from typing import Sequence, Callable
+from typing import Sequence, Callable, List
 from plumbum import local
 from EukMetaSanity.api.data.data import DataUtil
 from EukMetaSanity.tasks.utils.helpers import prefix
@@ -104,5 +104,17 @@ class CreateTaxDBs(DataUtil):
                             os.path.join(self.wdir, database),
                             "tmp",
                             "--ncbi-tax-dump", self.wdir,
-                            "--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".input")
+                            (*self._get_tax_mapping_file(database))
                         ])
+
+    def _get_tax_mapping_file(self, database: str) -> List[str]:
+        """ Get path to generated taxonomy mapping file
+
+        :param database: Database name
+        :return: List to expand into plumbum command
+        """
+        tax_mapping = []
+        tax_file = os.path.join(self.wdir, prefix(database) + ".input")
+        if os.path.exists(tax_file):
+            tax_mapping = ["--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".input")]
+        return tax_mapping
