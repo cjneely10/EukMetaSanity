@@ -12,7 +12,6 @@ class DataDownloader(cli.Application):
     _working_dir: str = str(Path(os.path.join(os.getcwd(), "data")).resolve())
     _index: bool = False
     _threads: int = 1
-    _max_mem: str = "8G"
 
     @cli.switch(["-x", "--index"], help="Generate search index (optional, but takes a lot of space)")
     def set_index(self, _index):
@@ -23,12 +22,6 @@ class DataDownloader(cli.Application):
         if threads < 1:
             raise ValueError("Must pass positive number of threads")
         self._threads = threads
-
-    @cli.switch(["-m", "--max-mem"], str, help="Set max memory per split. E.g. 800B, 5K, 10M, 1G; default 8G")
-    def set_max_memory(self, max_memory):
-        if max_memory[-1] not in ("B", "K", "M", "G", "T"):
-            raise ValueError("Memory string must be specific format - see help menu")
-        self._max_mem = max_memory
 
     def main(self):
         # Generate working directory
@@ -50,8 +43,7 @@ class DataDownloader(cli.Application):
         for util_instruction in manage_downloaded_data(self._working_dir,
                                                        self._index,
                                                        True,
-                                                       self._threads,
-                                                       self._max_mem):
+                                                       self._threads):
             util_instruction()
 
         # TODO

@@ -99,5 +99,5 @@ class CreateTaxDBs(DataUtil):
                             os.path.join(self.wdir, database),
                             "tmp",
                             "--ncbi-tax-dump", self.wdir,
-                            "--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".mapping")
+                            "--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".input")
                         ])

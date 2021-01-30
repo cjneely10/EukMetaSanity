@@ -20,7 +20,7 @@ class Index(DataUtil):
         """
         pass
 
-    def __init__(self, threads: int, wdir: str, split_mem_limit: str, databases: Sequence[str]):
+    def __init__(self, threads: int, wdir: str, databases: Sequence[str]):
         """ Create mmseqs lin/index base class
 
         :param threads: Number of system threads
@@ -31,7 +31,6 @@ class Index(DataUtil):
         super().__init__(databases)
         self.wdir = wdir
         self._threads = threads
-        self._mem_limit = split_mem_limit
 
     def __call__(self):
         """
@@ -43,7 +42,6 @@ class Index(DataUtil):
                 os.path.join(self.wdir, database),
                 "tmp",
                 "--threads", self._threads,
-                "--split-memory-limit", self._mem_limit,
                 "--remove-tmp-files"
             ])
 
