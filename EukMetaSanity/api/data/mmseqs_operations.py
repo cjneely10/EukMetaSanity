@@ -14,20 +14,25 @@ class MergeDBs(DataUtil):
 
     new_db_name: database name to create using all in list
     """
-    def __init__(self, new_db_name: str, databases: Sequence[str]):
+    def __init__(self, wdir: str, new_db_name: str, databases: Sequence[str]):
         """ Merge databases into new_db_name
 
+        :param wdir: Working directory containing databases
         :param new_db_name: Path/name for new database to generate
         :param databases: List of databases to merge
         """
         super().__init__(databases)
         self._new_db_name = new_db_name
+        self.wdir = wdir
 
     def __call__(self):
         """
         Merge databases
         """
-        return self.run(local["mmseqs"]["mergedbs", (*self.databases), self._new_db_name])
+        databases = [os.path.join(self.wdir, database) for database in self.databases]
+        return self.run(local["mmseqs"][
+                            "mergedbs", databases[0], os.path.join(self.wdir, self._new_db_name), (*databases[1:])
+                        ])
 
 
 class CreateMappingFiles(DataUtil):
@@ -91,7 +96,7 @@ class CreateTaxDBs(DataUtil):
         for database in self.databases:
             self.run(local["mmseqs"][
                             "createtaxdb",
-                            database,
+                            os.path.join(self.wdir, database),
                             "tmp",
                             "--ncbi-tax-dump", self.wdir,
                             "--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".mapping")

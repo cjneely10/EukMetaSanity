@@ -78,11 +78,11 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
         os.makedirs(working_dir)
     fxns = [
         CreateTaxDBs(working_dir, ["ortho_db"]),
-        MergeDBs("odb-mmetsp_db", ["ortho_db", "mmetsp_db"]),
+        MergeDBs(working_dir, "odb-mmetsp_db", ["ortho_db", "MMETSP"]),
     ]
     if create_index:
-        fxns.append(CreateIndex(threads, split_mem_limit, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
+        fxns.append(CreateIndex(threads, split_mem_limit, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
     if create_linindex:
-        fxns.append(CreateLinIndex(threads, split_mem_limit, ["ortho_db", "mmetsp_db", "odb-mmetsp_db"]))
+        fxns.append(CreateLinIndex(threads, split_mem_limit, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
     for fxn in fxns:
         yield fxn
