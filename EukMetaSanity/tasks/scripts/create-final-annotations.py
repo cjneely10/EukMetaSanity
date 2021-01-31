@@ -93,7 +93,6 @@ class Gene:
         self._passed = status
 
     # pylint: disable=too-many-branches
-    # TODO: Handle this for > 1 ab initio predictor
     def tier0(self, evidence_data: List):
         """ Add list of exons from protein/transcriptomic-based evidence
 
