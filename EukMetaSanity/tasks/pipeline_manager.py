@@ -16,7 +16,6 @@ from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 from EukMetaSanity.tasks.official.report.kofamscan import KoFamScanIter
 from EukMetaSanity.tasks.official.report.eggnog import EggNogMapperIter
 from EukMetaSanity.tasks.official.report.mmseqs import MMseqsIter
-from EukMetaSanity.tasks.official.report.stats import StatsIter
 # # Refine imports
 from EukMetaSanity.tasks.official.refine.mapping import MappingIter
 from EukMetaSanity.tasks.official.refine.filtering import FilteringIter

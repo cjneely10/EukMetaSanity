@@ -59,7 +59,7 @@ class BuscoIter(TaskList):
             )
             # Change name of output file
             os.replace(
-                glob.glob(os.path.join(results_directory, "short_summary*.txt")),
+                glob.glob(os.path.join(results_directory, "*", "short_summary*.txt")),
                 str(self.output["results"])
             )
 

@@ -25,14 +25,44 @@ quality:
   threads: 1
   memory: 40G
   time: "8:00:00"
-  skip: true
+  skip: false
   dependencies:
     busco:
+      skip: false
       program: busco
       mode: prot
       lineage: eukaryota
       FLAGS:
-        ""
+        -f
+
+mmseqs:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    mmseqs.createdb:
+      skip: false
+      program: mmseqs
+    mmseqs.search:
+      skip: false
+      data:
+        /path/to/ortho_db
+      program: mmseqs
+      subname: search
+      FLAGS:
+        --split-memory-limit 12G
+        -s 7
+        -k 7
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+    mmseqs.convertalis:
+      skip: false
+      data:
+        /path/to/ortho_db
+      program: mmseqs
 
 eggnog:
   workers: 1
@@ -42,6 +72,7 @@ eggnog:
   skip: true
   dependencies:
     emapper:
+      skip: true
       program: /path/to/emapper.py
       python: /path/to/python2.7
       FLAGS:
@@ -56,34 +87,9 @@ kofamscan:
   skip: true
   dependencies:
     kofamscan.exec_annotation:
+      skip: true
       program: /path/to/kofamscan/exec_annotation
       kolist: /path/to/kofam/ko_list
       profiles: /path/to/profiles/eukaryote.hal
-
-mmseqs:
-  workers: 1
-  threads: 1
-  memory: 40G
-  time: "4:00:00"
-  skip: false
-  dependencies:
-    mmseqs.createdb:
-      program: mmseqs
-    mmseqs.search:
-      data:
-        /path/to/ortho_db
-      program: mmseqs
-      subname: search
-      FLAGS:
-        --split-memory-limit 12G
-        -s 7
-        -k 7
-        -c 0.3
-        --cov-mode 1
-        --remove-tmp-files
-    mmseqs.convertalis:
-      data:
-        /path/to/ortho_db
-      program: mmseqs
 
 ...  # document end
