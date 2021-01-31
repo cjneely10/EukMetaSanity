@@ -13,7 +13,7 @@ class MMseqsIter(TaskList):
     """
     name = "mmseqs"
     requires = []
-    depends = [DependencyInput("mmseqs.search", id_mapping=[("prot", "fasta")])]
+    depends = [DependencyInput("mmseqs.convertalis", id_mapping=[("prot", "fasta")])]
 
     class MMseqs(Task):
         """
@@ -23,7 +23,8 @@ class MMseqsIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "final": ["mmseqs.search.dbs"]
+                "results": self.input["mmseqs.convertalis"]["results_files"][0],
+                "final": ["results"]
             }
 
         @program_catch

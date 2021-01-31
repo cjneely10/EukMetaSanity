@@ -16,8 +16,8 @@ class ConvertAlisIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "results_files": [
-                    os.path.join(self.wdir, prefix(db) + ".m8")
-                    for db in self.input["mmseqs.search"]["dbs"]]
+                    os.path.join(self.wdir, prefix(db) + "_" + prefix(data) + ".m8")
+                    for data, db in zip(self.data, self.input["mmseqs.search"]["dbs"])]
             }
 
         @program_catch
