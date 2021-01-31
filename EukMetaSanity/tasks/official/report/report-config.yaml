@@ -5,6 +5,8 @@
 INPUT:
   base:  # List pipelines containing input data
     run
+  input:
+    prot: prot-tier1
 
 ###########################################
 
@@ -17,6 +19,12 @@ SLURM:
   --qos: unlim
   --job-name: EukMS
   user-id: uid
+
+collect:
+  workers: 1
+  threads: 1
+  memory: 8G
+  time: "1:00"
 
 quality:
   workers: 1

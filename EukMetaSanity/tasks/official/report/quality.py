@@ -11,7 +11,7 @@ class QualityIter(TaskList):
 
     name: quality
 
-    requires:
+    requires: collect
 
     depends:
 
@@ -21,7 +21,7 @@ class QualityIter(TaskList):
 
     """
     name = "quality"
-    requires = []
+    requires = ["collect"]
     depends = [DependencyInput("busco", id_mapping=[("prot", "fasta")])]
 
     class Quality(Task):

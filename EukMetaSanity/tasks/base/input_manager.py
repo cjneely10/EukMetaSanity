@@ -44,7 +44,7 @@ class InputManager:
                 # Load additional input based on existing data, if requested
                 self._get_files_from_project_dir(os.path.join(
                     output_dir, ConfigManager.EXPECTED_RESULTS_DIR, base, base + ".pkl"
-                ))
+                ), cfg)
         self.record_ids = sorted(list(self.data.keys()))
         if len(self.record_ids) == 0:
             print(colors.bold & colors.warn | "No input files were found, exiting")
@@ -73,7 +73,7 @@ class InputManager:
         SeqIO.write(records, out_file, "fasta")
         return out_file
 
-    def _get_files_from_project_dir(self, summary_file: str):
+    def _get_files_from_project_dir(self, summary_file: str, cfg: ConfigManager):
         """ Parse existing project directory, if it exists, for input data requested at the config
         file level
 
@@ -89,6 +89,10 @@ class InputManager:
             if record_id not in self.data.keys():
                 self.data[record_id] = {}
             self.data[record_id].update(data[record_id])
+            if "input" in cfg.config[ConfigManager.INPUT].keys():
+                input_adjust_dict = cfg.config[ConfigManager.INPUT]["input"]
+                self.data[record_id][list(input_adjust_dict.keys())[0]] = self.data[record_id][
+                    list(input_adjust_dict.values())[0]]
 
     def _get_input_files(self):
         """ Load input files from passed input directory at command-line level

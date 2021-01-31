@@ -39,7 +39,7 @@ class CollectInputIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                
+                "prot": []
             }
 
         @program_catch
@@ -47,7 +47,10 @@ class CollectInputIter(TaskList):
             """
             Run collect
             """
-            pass
+            for key, val in self.input.items():
+                if self.config["tier"] in key:
+                    self.output["prot"] = val
+                    return
 
     def __init__(self, *args, **kwargs):
         """

@@ -12,7 +12,7 @@ class EggNogMapperIter(TaskList):
 
     """
     name = "eggnog"
-    requires = []
+    requires = ["collect"]
     depends = [DependencyInput("emapper")]
 
     class EggNogMapper(Task):
