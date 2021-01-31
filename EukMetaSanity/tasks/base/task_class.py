@@ -244,8 +244,11 @@ class Task(ABC):
         """
         if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
             if ConfigManager.FLAGS in self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name].keys():
-                return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][
+                out = self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][
                     ConfigManager.FLAGS].split(" ")
+                while "" in out:
+                    out.remove("")
+                return out
         return []
 
     @property

@@ -86,11 +86,4 @@ mmseqs:
         /path/to/ortho_db
       program: mmseqs
 
-stats:
-  workers: 1
-  threads: 1
-  memory: 1G
-  time: "1:00:00"
-  evalue: "1e-5"
-
 ...  # document end

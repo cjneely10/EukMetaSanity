@@ -4,7 +4,7 @@ Module holds busco build functionality
 
 import os
 import glob
-from EukMetaSanity import Task, TaskList
+from EukMetaSanity import Task, TaskList, prefix
 from EukMetaSanity import program_catch, set_complete
 
 
@@ -49,7 +49,8 @@ class BuscoIter(TaskList):
             self.parallel(
                 self.program[
                     "-i", self.dependency_input["fasta"],
-                    "-o", results_directory,
+                    "--out_path", results_directory,
+                    "-o", prefix(str(self.dependency_input["fasta"])),
                     "-m", self.config["mode"],
                     "-l", self.config["lineage"],
                     "--cpu", self.threads,

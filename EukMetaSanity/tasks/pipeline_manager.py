@@ -6,6 +6,7 @@ from typing import Dict, List, Type
 # General imports
 from EukMetaSanity.tasks.base.task_class import TaskList
 # # Run imports
+from EukMetaSanity.tasks.official.report.quality import QualityIter
 from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
 from EukMetaSanity.tasks.official.run.abinitio_augustus import AbInitioAugustusIter
@@ -44,10 +45,10 @@ class PipelineManager:
                 RepeatsIter,
             ],
             "report": [
-                StatsIter,
                 KoFamScanIter,
                 EggNogMapperIter,
                 MMseqsIter,
+                QualityIter,
             ],
             "refine": [
                 MappingIter,
