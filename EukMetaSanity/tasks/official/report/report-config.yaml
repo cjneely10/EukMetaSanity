@@ -5,7 +5,7 @@
 INPUT:
   base:  # List pipelines containing input data
     run
-  input:
+  INPUT:
     prot: prot-tier1
 
 ###########################################
@@ -81,6 +81,10 @@ mmseqs:
         -c 0.3
         --cov-mode 1
         --remove-tmp-files
+    mmseqs.convertalis:
+      data:
+        /path/to/ortho_db
+      program: mmseqs
 
 stats:
   workers: 1

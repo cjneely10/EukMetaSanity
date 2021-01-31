@@ -89,8 +89,8 @@ class InputManager:
             if record_id not in self.data.keys():
                 self.data[record_id] = {}
             self.data[record_id].update(data[record_id])
-            if "input" in cfg.config[ConfigManager.INPUT].keys():
-                input_adjust_dict = cfg.config[ConfigManager.INPUT]["input"]
+            if ConfigManager.INPUT in cfg.config[ConfigManager.INPUT].keys():
+                input_adjust_dict = cfg.config[ConfigManager.INPUT][ConfigManager.INPUT]
                 self.data[record_id][list(input_adjust_dict.keys())[0]] = self.data[record_id][
                     list(input_adjust_dict.values())[0]]
 

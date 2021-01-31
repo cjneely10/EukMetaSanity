@@ -82,8 +82,8 @@ def _parse_args(_ap: ArgParse) -> List[Tuple[str, str]]:
     for annot in _ap.args.annotations:
         assert "=" in annot
         f_string = annot.split("=")
-        assert os.path.exists(f_string[1]), f_string[1]
-        annotation_files.append((f_string[0], f_string[1]))
+        if os.path.exists(f_string[1]) and os.path.getsize(f_string[1]) > 0:
+            annotation_files.append((f_string[0], f_string[1]))
     return annotation_files
 
 

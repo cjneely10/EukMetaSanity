@@ -243,7 +243,9 @@ class Task(ABC):
         :return: List of arguments to pass to calling program
         """
         if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
-            return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.FLAGS].split(" ")
+            if ConfigManager.FLAGS in self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name].keys():
+                return self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][
+                    ConfigManager.FLAGS].split(" ")
         return []
 
     @property
