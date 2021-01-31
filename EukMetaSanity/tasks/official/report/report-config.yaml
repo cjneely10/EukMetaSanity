@@ -20,12 +20,6 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-collect:
-  workers: 1
-  threads: 1
-  memory: 8G
-  time: "1:00"
-
 quality:
   workers: 1
   threads: 1

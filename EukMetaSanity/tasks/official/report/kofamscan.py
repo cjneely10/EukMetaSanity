@@ -12,7 +12,7 @@ class KoFamScanIter(TaskList):
 
     """
     name = "kofamscan"
-    requires = ["collect"]
+    requires = []
     depends = [DependencyInput("kofamscan.exec_annotation")]
 
     class KoFamScan(Task):
