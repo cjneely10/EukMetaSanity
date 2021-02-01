@@ -35,7 +35,7 @@ class PipelineManager:
         """ Load available pipeline data
 
         """
-        self.programs: Dict[str, List[Type[TaskList]]] = {
+        self._programs: Dict[str, List[Type[TaskList]]] = {
             "run": [
                 EvidenceIter,
                 TaxonomyIter,
@@ -55,3 +55,10 @@ class PipelineManager:
             ]
             # Add any user-created pipelines here!
         }
+
+    @property
+    def programs(self) -> Dict[str, List[Type[TaskList]]]:
+        """
+        Get pipeline programs available
+        """
+        return self._programs

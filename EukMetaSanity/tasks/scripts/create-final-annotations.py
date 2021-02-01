@@ -334,7 +334,15 @@ class GffMerge:
         return GffMerge.gene_dict_data_to_seqrecords(longest_cds, gene, gene_data, offsets)
 
     @staticmethod
-    def create_seq_record(orig_seq, exon, strand, out_cds, _offsets):
+    def create_seq_record(orig_seq: str, exon: Tuple, strand: str, out_cds: List, _offsets: List):
+        """ Create CDS sequence from gathered data
+
+        :param orig_seq: Original complete sequence
+        :param exon: Exon to incorporate
+        :param strand: Gene strand
+        :param out_cds: List of output CDS to build
+        :param _offsets: List of offsets
+        """
         record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
         if strand == "-":
             record = record.reverse_complement()
