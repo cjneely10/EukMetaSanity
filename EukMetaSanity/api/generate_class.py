@@ -93,7 +93,6 @@ NEW_CONFIG_DATA = {
 }
 
 
-# TODO: Test
 def update_config_file(file_path: str, cfg_name: str, existing_sections: Optional[List[str]] = None):
     """ Add the newly-created class base config section at either root or within existing section
 
@@ -115,7 +114,7 @@ def update_config_file(file_path: str, cfg_name: str, existing_sections: Optiona
     else:
         for section in existing_sections:
             existing_data[section]["dependencies"].update(CONFIG_INNER_LEVEL)
-    yaml.dump(open(file_path + ".tmp", "w"), Dumper=yaml.Dumper)
+    yaml.dump(existing_data, open(file_path + ".tmp", "w"), Dumper=yaml.Dumper)
 
 
 def create_class_file(file_path: str, class_name: str, cfg_name: str):
