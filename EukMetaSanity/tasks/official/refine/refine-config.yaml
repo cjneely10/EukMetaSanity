@@ -77,7 +77,7 @@ taxonomy:
     mmseqs.taxonomy:
       program: mmseqs
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       # Pass any flags to mmseqs required
       FLAGS:
         --remove-tmp-files
@@ -124,6 +124,6 @@ combined-evidence:
       program: mmseqs
       level: order
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
 
 ...  # document end

@@ -5,6 +5,7 @@ Module downloads requisite data for official pipelines in EukMetaSanity
 import os
 from pathlib import Path
 from plumbum import cli
+from EukMetaSanity.tasks.official.config_generation_utils import update_config_files
 from EukMetaSanity.tasks.official.download_utils import download_data, parsing_operations, manage_downloaded_data
 
 
@@ -46,9 +47,10 @@ class DataDownloader(cli.Application):
                                                        self._threads):
             util_instruction()
 
-        # TODO
-        # Generate base config files
+        # Generate system-specific config files
+        update_config_files(self._working_dir)
 
 
 if __name__ == "__main__":
-    DataDownloader.run()
+    update_config_files(os.path.join(os.getcwd(), "data"))
+    # DataDownloader.run()

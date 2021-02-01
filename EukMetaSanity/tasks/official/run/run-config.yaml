@@ -30,7 +30,7 @@ taxonomy:
     mmseqs.taxonomy:
       program: mmseqs
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       # Pass any flags to mmseqs required
       FLAGS:
         --remove-tmp-files
@@ -80,7 +80,7 @@ abinitio.augustus:
       program: mmseqs
     mmseqs.search:
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       program: mmseqs
       subname: search  # Can use `linsearch` if linear index is present for database
       FLAGS:
@@ -91,7 +91,7 @@ abinitio.augustus:
         --remove-tmp-files
     mmseqs.convertalis:
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       program: mmseqs
       FLAGS:
         --format-output query,target,pident,taxid,taxname,taxlineage
@@ -122,7 +122,7 @@ abinitio.genemark:
       program: mmseqs
       level: order
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
     gmes.gffread:
       program: gffread
       FLAGS:
@@ -138,11 +138,11 @@ evidence:
       program: mmseqs
       level: order
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
     metaeuk:
       program: metaeuk
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       # Pass any flags to metaeuk required
       FLAGS:
         --min-length 30

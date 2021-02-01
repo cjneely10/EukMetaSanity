@@ -45,7 +45,7 @@ mmseqs:
       program: mmseqs
     mmseqs.search:
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       program: mmseqs
       subname: search
       FLAGS:
@@ -57,7 +57,7 @@ mmseqs:
         --remove-tmp-files
     mmseqs.convertalis:
       data:
-        /path/to/ortho_db
+        /path/to/data/odb-mmetsp_db
       program: mmseqs
 
 eggnog:

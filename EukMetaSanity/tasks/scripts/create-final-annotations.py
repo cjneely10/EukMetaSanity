@@ -270,9 +270,12 @@ class GffMerge:
             if tier == 0:
                 # Generate initial exon structure
                 tx = []
+                total_len = 0
                 for ident in ABINITIO_IDENTIFIERS:
-                    for val in gene_data["transcripts"][ident]:
-                        tx.append(val)
+                    total = sum([v[1] - v[0] for v in gene_data["transcripts"][ident]])
+                    if total > total_len:
+                        total_len = total
+                        tx = gene_data["transcripts"][ident]
                 gene = Gene(
                     tx,
                     gene_data["strand"],

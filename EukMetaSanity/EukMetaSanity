@@ -58,6 +58,7 @@ def _parse_args(ap: ArgParse, tm: PipelineManager) -> ConfigManager:
     return ConfigManager(ap.args.config_file)
 
 
+# TODO: Clean method for subdirectories in pipelines
 if __name__ == "__main__":
     DEFAULT_EXTS = ".fna/.fasta/.fa"
     _tm = PipelineManager()
