@@ -102,7 +102,7 @@ class CreateTaxDBs(DataUtil):
             self.run(local["mmseqs"][
                             "createtaxdb",
                             os.path.join(self.wdir, database),
-                            "tmp",
+                            os.path.join(self.wdir, "tmp"),
                             "--ncbi-tax-dump", self.wdir,
                             (*self._get_tax_mapping_file(database))
                         ])
