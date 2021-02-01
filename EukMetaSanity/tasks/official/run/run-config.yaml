@@ -130,7 +130,7 @@ abinitio.genemark:
 
 evidence:
   workers: 1
-  threads: 1
+  threads: 4  # Each worker needs at least 4 threads to complete this step
   memory: 40G
   time: "12:00:00"
   dependencies:
