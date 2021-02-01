@@ -8,7 +8,7 @@ import os
 from typing import Optional, List
 import yaml
 
-from EukMetaSanity.utils.arg_parse import ArgParse
+from EukMetaSanity.arg_parse import ArgParse
 
 
 BOILERPLATE = '''"""
@@ -93,6 +93,7 @@ NEW_CONFIG_DATA = {
 }
 
 
+# TODO: Test
 def update_config_file(file_path: str, cfg_name: str, existing_sections: Optional[List[str]] = None):
     """ Add the newly-created class base config section at either root or within existing section
 

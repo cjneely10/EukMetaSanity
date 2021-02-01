@@ -12,7 +12,7 @@ from pathlib import Path
 # pylint: disable=no-member
 from art import tprint
 from plumbum import colors
-from EukMetaSanity.utils.arg_parse import ArgParse
+from EukMetaSanity.arg_parse import ArgParse
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.task_manager import TaskManager
 from EukMetaSanity.tasks.base.input_manager import InputManager

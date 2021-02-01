@@ -13,7 +13,7 @@ from BCBio import GFF
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
-from EukMetaSanity.utils.arg_parse import ArgParse
+from EukMetaSanity.arg_parse import ArgParse
 
 # Result as read in from DNA/contig side as subject
 Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand"))

@@ -16,7 +16,7 @@ from typing import List, Dict, Tuple, Generator, Optional, Set
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from EukMetaSanity.utils.arg_parse import ArgParse
+from EukMetaSanity.arg_parse import ArgParse
 
 # Current identifiers that signify an abinitio-based prediction
 ABINITIO_IDENTIFIERS = ["augustus", "GeneMark.hmm", "ab-initio"]

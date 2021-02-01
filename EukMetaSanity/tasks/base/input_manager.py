@@ -89,8 +89,12 @@ class InputManager:
             if record_id not in self.data.keys():
                 self.data[record_id] = {}
             self.data[record_id].update(data[record_id])
+            # Update input dictionary with new ids if requested
             if ConfigManager.INPUT in cfg.config[ConfigManager.INPUT].keys():
                 input_adjust_dict = cfg.config[ConfigManager.INPUT][ConfigManager.INPUT]
+                stored_key = list(input_adjust_dict.values())[0]
+                if stored_key not in self.data[record_id].keys():
+                    raise KeyError("Input key from config file is not present in stored results")
                 self.data[record_id][list(input_adjust_dict.keys())[0]] = self.data[record_id][
                     list(input_adjust_dict.values())[0]]
 

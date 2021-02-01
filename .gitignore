@@ -9,3 +9,4 @@ EukMetaSanity/scripts/MergeRegions/ntest.h
 Cargo.lock
 target/
 data/
+tmp/
