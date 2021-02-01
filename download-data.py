@@ -52,5 +52,4 @@ class DataDownloader(cli.Application):
 
 
 if __name__ == "__main__":
-    update_config_files(os.path.join(os.getcwd(), "data"))
-    # DataDownloader.run()
+    DataDownloader.run()
