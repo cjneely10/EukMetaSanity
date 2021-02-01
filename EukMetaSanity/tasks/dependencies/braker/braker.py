@@ -12,17 +12,17 @@ class BrakerIter(TaskList):
 
     name: braker
 
-    requires:
+    requires: mapping, taxonomy
 
-    depends:
+    depends: mmseqs.filtertaxseqdb
 
-    output:
+    expects: fasta
 
-    final:
+    output: cds, prot, nr_gff3
 
     """
     name = "braker"
-    requires = ["mapping", "taxonomy", "repeats"]
+    requires = ["mapping", "taxonomy"]
     depends = [DependencyInput("mmseqs.filtertaxseqdb")]
 
     class Braker(Task):
@@ -71,7 +71,7 @@ class BrakerIter(TaskList):
                     self.parallel(
                         self.program[
                             "--cores=%s" % str(self.threads),
-                            "--genome=%s" % self.input["repeats"]["fna"],
+                            "--genome=%s" % self.dependency_input["fasta"],
                             (*bams),
                             "--prot_seq=%s" % _fasta_output,
                             "--workingdir=%s" % self.wdir,

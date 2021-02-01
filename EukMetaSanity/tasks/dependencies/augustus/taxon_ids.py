@@ -1,8 +1,14 @@
+"""
+Module holds helper methods for augustus search
+"""
 from typing import Dict
 
 
-# All available AUGUSTUS taxon ids
+# pylint: disable=unnecessary-comprehension
 def augustus_taxon_ids() -> Dict[str, str]:
+    """
+    Get all available AUGUSTUS taxon ids
+    """
     tax_ids = """9606
 7227
 3702

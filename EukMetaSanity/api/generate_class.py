@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
 Module holds logic to generate TaskList/Task class stub and associated config file sections
@@ -30,6 +30,8 @@ class {0}Iter(TaskList):
     requires:
 
     depends:
+
+    expects:
 
     output:
 
