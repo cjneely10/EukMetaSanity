@@ -204,7 +204,7 @@ class TaskManager:
         for _task in task.tasks:
             # Only track tasks that are not complete and that are not non-file tasks
             # (e.g. have some expected path as output)
-            if not _task.is_complete and not _task.is_non_file_output():
+            if not _task.is_complete and not _task.is_non_file_output() and not _task.is_skip:
                 needs_completing[_task.record_id] += 1
         i = 1
         # Run each task in list
@@ -217,7 +217,7 @@ class TaskManager:
             for _task in task.tasks:
                 if _task.is_non_file_output():
                     needs_completing[_task.record_id] += 0
-                elif not _task.is_complete:
+                elif not _task.is_complete and not _task.is_skip:
                     needs_completing[_task.record_id] += 1
             i += 1
         self.completed_tasks = {}
