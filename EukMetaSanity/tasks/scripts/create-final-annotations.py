@@ -19,7 +19,7 @@ from Bio.SeqRecord import SeqRecord
 from EukMetaSanity.utils.arg_parse import ArgParse
 
 # Current identifiers that signify an abinitio-based prediction
-ABINITIO_IDENTIFIERS = {"augustus", "GeneMark.hmm", "ab-initio"}
+ABINITIO_IDENTIFIERS = ["augustus", "GeneMark.hmm", "ab-initio"]
 
 
 class Gene:
@@ -269,10 +269,18 @@ class GffMerge:
             # exons that were not identified in ab initio predictions
             if tier == 0:
                 # Generate initial exon structure
-                tx = []
-                for ident in ABINITIO_IDENTIFIERS:
+                tx = gene_data["transcripts"][ABINITIO_IDENTIFIERS[0]]
+                for ident in ABINITIO_IDENTIFIERS[1:]:
+                    to_replace = None
                     for val in gene_data["transcripts"][ident]:
-                        tx.append(val)
+                        for t in tx:
+                            if Gene.in_exon(val, t):
+                                if t[1] - t[0] < val[1] - val[0]:
+                                    to_replace = (t, val)
+                    if to_replace is not None:
+                        tx.remove(to_replace[0])
+                        tx.append(to_replace[1])
+                tx.sort()
                 gene = Gene(
                     tx,
                     gene_data["strand"],
