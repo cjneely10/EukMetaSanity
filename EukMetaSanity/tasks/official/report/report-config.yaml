@@ -28,7 +28,6 @@ quality:
   skip: false
   dependencies:
     busco:
-      skip: false
       program: busco
       mode: prot
       lineage: eukaryota
@@ -43,10 +42,8 @@ mmseqs:
   skip: false
   dependencies:
     mmseqs.createdb:
-      skip: false
       program: mmseqs
     mmseqs.search:
-      skip: false
       data:
         /path/to/ortho_db
       program: mmseqs
@@ -59,7 +56,6 @@ mmseqs:
         --cov-mode 1
         --remove-tmp-files
     mmseqs.convertalis:
-      skip: false
       data:
         /path/to/ortho_db
       program: mmseqs
@@ -72,7 +68,6 @@ eggnog:
   skip: true
   dependencies:
     emapper:
-      skip: true
       program: /path/to/emapper.py
       python: /path/to/python2.7
       FLAGS:
@@ -87,7 +82,6 @@ kofamscan:
   skip: true
   dependencies:
     kofamscan.exec_annotation:
-      skip: true
       program: /path/to/kofamscan/exec_annotation
       kolist: /path/to/kofam/ko_list
       profiles: /path/to/profiles/eukaryote.hal

@@ -122,7 +122,12 @@ class Task(ABC):
         # Store id of record in Task
         self._record_id = record_id
         # Check if task is set to be skipped in config file
-        self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True
+        if self._scope == "":
+            self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True
+        else:
+            # Task is an inner-level dependency of an abstract task
+            self.is_skip = "skip" in self._cfg.config[self._scope].keys() and \
+                           self._cfg.config[self._scope]["skip"] is True
         # Store whether this task has been completed
         self.is_complete = False
         super().__init__()
