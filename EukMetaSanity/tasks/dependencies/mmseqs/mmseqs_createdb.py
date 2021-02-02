@@ -1,17 +1,26 @@
+"""
+Module holds mmseqs.createdb build functionality
+"""
 import os
 from EukMetaSanity import Task, TaskList, program_catch, set_complete
 
 
 class CreateDBIter(TaskList):
-    """ This class will create an MMseqs database
+    """ TaskList class iterates over mmseqs.createdb tasks
 
     name: mmseqs.createdb
 
-    requires: None
+    requires:
 
-    output keys: db
+    depends:
 
-    finalizes: None
+    expects: fasta
+
+    output: db
+
+    config:
+        mmseqs.createdb:
+          program: mmseqs
 
     """
     name = "mmseqs.createdb"
@@ -19,8 +28,14 @@ class CreateDBIter(TaskList):
     depends = []
 
     class MMSeqsCreateDB(Task):
+        """
+        Task class handles mmseqs.createdb task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
+            """
+            Instantiate class with given output
+            """
             super().__init__(*args, **kwargs)
             self.output = {
                 "db": os.path.join(self.wdir, self.record_id + "_db")
@@ -28,6 +43,9 @@ class CreateDBIter(TaskList):
 
         @program_catch
         def run(self):
+            """
+            Run mmseqs.createdb
+            """
             self.single(
                 self.program[
                     "createdb",
@@ -37,8 +55,7 @@ class CreateDBIter(TaskList):
             )
 
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(CreateDBIter.MMSeqsCreateDB, CreateDBIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass
