@@ -8,4 +8,3 @@ install:
   - conda env create -f EukMetaSanity/api/environment.yml
 script:
   - pylint EukMetaSanity/ --ignore-patterns=__init__.py
-  - pytest --cov=EukMetaSanity tests/
