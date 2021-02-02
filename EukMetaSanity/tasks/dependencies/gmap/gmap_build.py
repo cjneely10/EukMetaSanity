@@ -18,9 +18,12 @@ class GMapBuildIter(TaskList):
 
     expects: fasta
 
-    output:
+    output: db
 
-    final:
+    config:
+        gmap.build:
+          skip: true
+          program: gmapindex
 
     """
     name = "gmap.build"

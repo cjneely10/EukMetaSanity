@@ -1,5 +1,5 @@
 """
-Module holds Hisat2 build functionality
+Module holds hisat2.build build functionality
 """
 
 import os
@@ -12,15 +12,20 @@ class Hisat2BuildIter(TaskList):
 
     name: hisat2.build
 
-    requires: None
+    requires:
 
-    depends: None
+    depends:
+
+    expects: fasta
 
     output: db
 
     expects: fasta
 
-    final: None
+    config:
+        hisat2.build:
+          skip: true
+          program: hisat2-build
 
     """
     name = "hisat2.build"

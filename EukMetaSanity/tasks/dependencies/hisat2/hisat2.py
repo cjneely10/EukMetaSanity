@@ -1,5 +1,5 @@
 """
-Module holds logic to run Hisat2
+Module holds hisat2 build functionality
 """
 import os
 from pathlib import Path
@@ -11,15 +11,25 @@ from EukMetaSanity import program_catch, prefix, set_complete
 class Hisat2Iter(TaskList):
     """ TaskList class iterates over Hisat2 tasks
 
-    name:
+    name: hisat2
 
     requires:
 
     depends: hisat2.build
 
-    output:
+    expects:
 
-    final:
+    output: sams
+
+    config:
+        hisat2:
+          skip: true
+          program: hisat2
+          # Should be in format (excluding spaces around tab):
+          # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+          rnaseq: /path/to/rnaseq-mapping-file
+          FLAGS:
+            ""
 
     """
     name = "hisat2"

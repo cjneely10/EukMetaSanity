@@ -37,6 +37,8 @@ class {0}Iter(TaskList):
 
     final:
 
+    config:
+
     """
     name = "{1}"
     requires = []

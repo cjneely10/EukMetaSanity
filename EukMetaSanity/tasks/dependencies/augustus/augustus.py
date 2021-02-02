@@ -23,6 +23,12 @@ class AugustusIter(TaskList):
 
     output: ab-gff3
 
+    config:
+        augustus:
+          program: augustus
+          cutoff: 25.0
+          rounds: 3
+
     """
     name = "augustus"
     requires = []

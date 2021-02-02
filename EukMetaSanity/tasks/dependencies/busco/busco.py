@@ -17,9 +17,17 @@ class BuscoIter(TaskList):
 
     depends:
 
+    expects: fasta
+
     output: results
 
-    final:
+    config:
+        busco:
+          program: busco
+          mode: prot
+          lineage: eukaryota
+          FLAGS:
+            -f
 
     """
     name = "busco"

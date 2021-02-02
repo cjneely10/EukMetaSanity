@@ -19,9 +19,22 @@ class GMapIter(TaskList):
 
     depends: gmap.build
 
+    expects:
+
     output: sams
 
-    final:
+    config:
+        gmap:
+          skip: true
+          program: gmap
+          # Should be in format (excluding spaces around tab):
+          # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+          transcriptome: /path/to/transcriptome-mapping-file
+          FLAGS:
+            -B 5
+            --input-buffer-size 1000000
+            --output-buffer-size 1000000
+            -f samse
 
     """
     name = "gmap"

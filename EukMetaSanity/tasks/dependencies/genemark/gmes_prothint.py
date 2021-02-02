@@ -1,24 +1,53 @@
+"""
+Module holds gmes.prothint build functionality
+"""
 import os
 from EukMetaSanity import ProcessExecutionError, set_complete
 from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput
 
 
 class ProtHintIter(TaskList):
+    """ TaskList class iterates over gmes.prothint tasks
+
+    name: gmes.prothint
+
+    requires:
+
+    depends: mmseqs.filtertaxseqdb
+
+    expects: fasta
+
+    output: hints, evidence
+
+    config:
+        gmes.prothint:
+          program: prothint.py
+
+    """
     name = "gmes.prothint"
     requires = []
     depends = [DependencyInput("mmseqs.filtertaxseqdb")]
-    
+
     class ProtHint(Task):
+        """
+        Task class handles gmes.prothint task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
+            """
+            Instantiate class with given output
+            """
             super().__init__(*args, **kwargs)
             self.output = {
                 "hints": os.path.join(self.wdir, "prothint.gff"),
                 "evidence": os.path.join(self.wdir, "evidence.gff")
             }
-            
+
         @program_catch
         def run(self):
+            """
+            Run gmes.prothint
+            """
             try:
                 # Run prothint
                 self.parallel(
@@ -32,10 +61,9 @@ class ProtHintIter(TaskList):
             except ProcessExecutionError:
                 touch(str(self.output["hints"]))
                 touch(str(self.output["evidence"]))
-            
+
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(ProtHintIter.ProtHint, ProtHintIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

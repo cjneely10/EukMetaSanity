@@ -7,6 +7,7 @@ from EukMetaSanity import Task, TaskList, DependencyInput
 from EukMetaSanity import program_catch, set_complete
 
 
+# TODO: Needs config section
 class BrakerIter(TaskList):
     """ TaskList class iterates over braker tasks
 
@@ -19,6 +20,8 @@ class BrakerIter(TaskList):
     expects: fasta
 
     output: cds, prot, nr_gff3
+
+    config:
 
     """
     name = "braker"
@@ -43,7 +46,11 @@ class BrakerIter(TaskList):
                     "nr_gff3": os.path.join(self.wdir, self.record_id + ".gff3"),
                 }
             else:
-                self.output = {}
+                self.output = {
+                    "cds": [],
+                    "prot": [],
+                    "nr_gff3": [],
+                }
 
         @program_catch
         def run(self):
@@ -100,7 +107,7 @@ class BrakerIter(TaskList):
                             (*_files),
                             "--merge", "-G", "-S",
                             "-o", os.path.join(self.wdir, self.record_id + ".gff3"),
-                            "-g", self.input["root"]["fna"],
+                            "-g", self.dependency_input["fasta"],
                             "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
                             "-y", os.path.join(self.wdir, self.record_id + ".faa"),
                         ]

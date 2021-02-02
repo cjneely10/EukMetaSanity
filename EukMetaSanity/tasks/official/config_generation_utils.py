@@ -15,7 +15,6 @@ def update_config_files(data_path: str):
         new_config_file = open(os.path.join(data_path, os.path.basename(config_file)), "w")
         original_file_ptr = open(config_file, "r")
         for line in original_file_ptr:
-            if not line.lstrip().startswith("#"):
-                line = line.replace("/path/to/data", str(Path(data_path).resolve()))
+            line = line.replace("/path/to/data", str(Path(data_path).resolve()))
             new_config_file.write(line)
         new_config_file.close()
