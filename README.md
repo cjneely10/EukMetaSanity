@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/cjneely10/EukMetaSanity.svg?token=M4ut94Kepv6qucNU1mEy&branch=dependency-graph)](https://travis-ci.com/cjneely10/EukMetaSanity)
+
 # EukMetaSanity
 
 ## About
@@ -11,7 +13,7 @@ This software suite is broken up into several sub-programs
 ![](assets/eukmetasanity_pipeline.png)
 
 ### Run
-Identify putative taxonomy using the OrthoDB and MMseqs2 and annotate repeated regions of
+Identify putative taxonomy using the OrthoDB/MMETSP databases and MMseqs2 and annotate repeated regions of
 the genome with either MMseqs2 or RepeatModeler/RepeatMasker. 
 
 Generate *ab initio* structural predictions of coding regions of the genome using either Augustus or GeneMark.
@@ -22,9 +24,9 @@ Map RNA-seq (using HISAT2) and assembled transcriptome (using GMAP) evidence fro
 organism or species) to the genome to add additional evidence using BRAKER2. 
 
 ### Report
-Identify RNA (noncoding, tRNA, etc.) regions of the genome using Rfam.
-
 Search KEGG, EggNOG, and any MMseqs2 database for functional annotation of putative proteins.
+
+Check the quality of your annotation using BUSCO.
 
 ## Installation
 
@@ -33,12 +35,8 @@ for detailed installation instructions.
 
 ## Usage
 
-After running `download-data.py`, config files will be available in the database
-directory. These can be edited to fit your needs. Make sure that all `DATA` and `PATH` sections reference valid
-locations on your system.
-
-If the `download-data.py` script was not used, then the default config files will be available in this repo's 
-`config` directory.
+After running `download-data.py`, config files will be available in the `data` 
+directory. These can be edited to fit your needs.
 
 ```
 usage: EukMetaSanity.py [-h] -f FASTA_DIRECTORY -c CONFIG_FILE [-x EXTENSIONS]
@@ -60,13 +58,12 @@ optional arguments:
                         Gather files matching list of extensions separated by '/', default .fna/.fasta/.fa
   -o OUTPUT, --output OUTPUT
                         Output directory, default out
-  -d, --debug           Developer mode: display all commands on single thread, default False
 ```
 
 ### Example usage
 
 #### Run
-Copy and edit the `run-config.ini` config file to fit your analysis needs.
+Copy and edit the `run-config.yaml` config file to fit your analysis needs.
 
 Ensure your input FASTA sequences do not have the pipe (`|`) character present.
 
@@ -80,10 +77,10 @@ MAGs/
 Generate initial ab initio and protein-based annotation models using the command:
 
 ```
-EukMetaSanity -f MAGs -c run-config.ini run
+EukMetaSanity -f MAGs -c run-config.yaml run
 ```
 
-Add `-x ext[,ext]` if your extension does not match the default list, or if other files are present in the directory.
+Add `-x ext[/ext]` if your extension does not match the default list, or if other files are present in the directory.
 
 This will create a directory structure resembling:
 ```
@@ -91,21 +88,21 @@ out/
   |-- wdir/
   |-- run-eukmetasanity.log
   |-- results/
-      |-- run-paths_summary.tsv
-      |-- run/
-          |-- mag1/
-              |-- mag1.nr.gff3  # Final predictions
-              |-- mag1.cds.fna  # CDS sequences
-              |-- mag1.faa  # Protein sequences
-              |-- metaeuk.gff3  # Protein-based prediction
-              |-- mag1.gff3  # Ab initio based prediction
-              |-- mag1.all.gff3  # Merged/redundant prediction
-              |-- mag1.fna  # Original genome/MAG
-              |-- mag1-mask.fna  # Masked genome/MAG in FASTA format
-              |-- mask.final.gff3  # Masked genome/MAG in GFF3 format
-              |-- mask.final.tbl  # Masking statistics
-          |-- mag2/
-              .. 
+    |-- run/
+        |-- run.pkl
+        |-- mag1/
+          |-- mask.final.gff3  # Repeat regions in GFF3 format
+          |-- mask.final.tbl  # Summary table of identified repeats
+          |-- mag1.mask.fna  # Masked FASTA sequence
+          |-- tax-report.txt  # Taxonomy report from MMseqs2
+          |-- mag1.augustus.gff3  # Augustus predictions
+          |-- mag1.gmes.gff3  # GeneMark predictions
+          |-- mag1.all.gff3  # Combined prediction tracks
+          |-- mag1.all.tiern.nr.gff3  # Tiered output predictions in GFF3 format
+          |-- mag1.all.tiern.cds.fna  # Tiered output CDS predictions in FASTA format
+          |-- mag1.all.tiern.faa  # Tiered output protein predictions in FASTA format
+        |-- mag2/
+          .. 
 ```
 
 ### Note on running:
@@ -114,11 +111,11 @@ portion of the pipeline, simply delete its directories in the project structure.
 of the `run` pipeline for all MAGs, run the following command to delete all existing data:
 
 ```
-rm -r out/wdir/*/taxonomy
+rm -r out/wdir/*/taxonomy*
 ```
 
 #### Refine (optional)
-Copy and edit the `refine-config.ini` config file to fit your analysis needs. Pay close attention to the input format
+Copy and edit the `refine-config.yaml` config file to fit your analysis needs. Pay close attention to the input format
 for RNA-seq and transcriptomes that is required by the config file:
 
 ```
@@ -134,7 +131,7 @@ of transcriptomes.
 Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 
 ```
-EukMetaSanity -f out/run-paths_summary.tsv -c refine-config.ini refine
+EukMetaSanity -c refine-config.yaml refine
 ```
 
 This will update the directory structure:
@@ -144,9 +141,8 @@ out/
   |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
   |-- results/
-      |-- refine-paths_summary.tsv
-      |-- run-paths_summary.tsv
       |-- refine/
+          |-- refine.pkl
           |-- mag1/
               |-- mag1.nr.gff3  # Final predictions
               |-- mag1.cds.fna  # CDS sequences
@@ -156,23 +152,22 @@ out/
           |-- mag2/
               ..
       |-- run/
+          |-- run.pkl
           |-- mag1/
               ..
           |-- mag2/
               .. 
-          ..
 ```
 
 #### Report (optional)
-Copy and edit the `report-config.ini` config file to fit your analysis needs.
+Copy and edit the `report-config.yaml` config file to fit your analysis needs. Set the `INPUT/base` section to be either
+`run` or `refine`, depending on which set of predictions you want to annotate.
 
 Annotate gene models using the command:
 
 ```
-EukMetaSanity -f out/{}-paths_summary.tsv -c report-config.ini report
+EukMetaSanity -c report-config.yaml report
 ```
-
-Replacing `{}` with either `run` or `refine` (if this step was completed).
 
 This will update the directory structure:
 ```
@@ -182,27 +177,24 @@ out/
   |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
   |-- results/
-      |-- report-paths_summary.tsv
-      |-- refine-paths_summary.tsv
-      |-- run-paths_summary.tsv
       |-- report/
+          |-- report.pkl
           |-- mag1/
-              |-- mag1.summary  # TSV-summary of all annotations
-              |-- mag1.db  # SQLite3 summary of all annotations
               ... (results based on annotation programs run)
           |-- mag2/
               ..
       |-- refine/
+          |-- refine.pkl
           |-- mag1/
               ..
           |-- mag2/
               ..
       |-- run/
+          |-- run.pkl
           |-- mag1/
               ..
           |-- mag2/
               .. 
-          ..
 ```
 
 ## Citations

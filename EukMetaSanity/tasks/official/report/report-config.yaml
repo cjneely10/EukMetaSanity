@@ -1,0 +1,89 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    run
+  INPUT:
+    prot: prot-tier1
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+quality:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: false
+  dependencies:
+    busco:
+      program: busco
+      mode: prot
+      lineage: eukaryota
+      FLAGS:
+        -f
+
+mmseqs:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.search:
+      data:
+        /path/to/data/odb-mmetsp_db
+      program: mmseqs
+      subname: search
+      FLAGS:
+        --split-memory-limit 12G
+        -s 7
+        -k 7
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+    mmseqs.convertalis:
+      data:
+        /path/to/data/odb-mmetsp_db
+      program: mmseqs
+
+eggnog:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: true
+  dependencies:
+    emapper:
+      program: /path/to/emapper.py
+      python: /path/to/python2.7
+      FLAGS:
+        # Provide flags as needed
+        -m diamond
+
+kofamscan:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  skip: true
+  dependencies:
+    kofamscan.exec_annotation:
+      program: /path/to/kofamscan/exec_annotation
+      kolist: /path/to/kofam/ko_list
+      profiles: /path/to/profiles/eukaryote.hal
+
+...  # document end

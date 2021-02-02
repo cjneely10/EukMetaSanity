@@ -1,0 +1,157 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    root
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+taxonomy:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "12:00:00"
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
+  dependencies:
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.taxonomy:
+      program: mmseqs
+      data:
+        /path/to/data/odb-mmetsp_db
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 7
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
+        --split-memory-limit 12G
+
+repeats:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    repmod.build_database:
+      program: BuildDatabase
+    repmod.repeat_modeler:
+      program: RepeatModeler
+      skip: false
+    repmask.repeat_masker:
+      level: family
+      program: RepeatMasker
+      data:
+        "" # Comma-separated list of repeat models to incorporate
+      FLAGS:
+        -nolow
+    repmask.process_repeats:
+      program: ProcessRepeats
+      FLAGS:
+        -nolow
+    repmask.rmout:
+      program: rmOutToGFF3.pl
+
+abinitio.augustus:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "6:00:00"
+  skip: false
+  dependencies:
+    augustus:
+      program: augustus
+      cutoff: 25.0
+      rounds: 3
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.search:
+      data:
+        /path/to/data/odb-mmetsp_db
+      program: mmseqs
+      subname: search  # Can use `linsearch` if linear index is present for database
+      FLAGS:
+        --split-memory-limit 12G
+        --cov-mode 0
+        -c 0.6
+        -e 0.01
+        --remove-tmp-files
+    mmseqs.convertalis:
+      data:
+        /path/to/data/odb-mmetsp_db
+      program: mmseqs
+      FLAGS:
+        --format-output query,target,pident,taxid,taxname,taxlineage
+
+abinitio.genemark:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "6:00:00"
+  skip: false
+  dependencies:
+    gmes.petap:
+      program: gmes_petap.pl
+      FLAGS:
+        --min_contig 100
+        --max_contig 100000000
+        --max_gap 5000
+        --max_mask 5000
+        --min_contig_in_predict 100
+        --min_gene_in_predict 10
+        --gc_donor 0.001
+        --max_intron 10000
+        --max_intergenic 50000
+        --soft_mask auto
+    gmes.prothint:
+      program: prothint.py
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      level: order
+      data:
+        /path/to/data/odb-mmetsp_db
+    gmes.gffread:
+      program: gffread
+      FLAGS:
+        -G
+
+evidence:
+  workers: 1
+  threads: 4  # Each worker needs at least 4 threads to complete this step
+  memory: 40G
+  time: "12:00:00"
+  dependencies:
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      level: order
+      data:
+        /path/to/data/odb-mmetsp_db
+    metaeuk:
+      program: metaeuk
+      data:
+        /path/to/data/odb-mmetsp_db
+      # Pass any flags to metaeuk required
+      FLAGS:
+        --min-length 30
+        --metaeuk-eval 0.0001
+        --split-memory-limit 12G
+        -s 7
+        --cov-mode 0
+        -c 0.3
+        -e 100
+        --max-overlap 0
+
+...  # document end

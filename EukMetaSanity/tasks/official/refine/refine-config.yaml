@@ -1,0 +1,106 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    run
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+mapping:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    hisat2.build:
+      skip: true
+      program: hisat2-build
+    hisat2:
+      skip: true
+      program: hisat2
+      # Should be in format (excluding spaces around tab):
+      # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+      rnaseq: /path/to/rnaseq-mapping-file
+      FLAGS:
+        ""
+    gmap.build:
+      skip: true
+      program: gmapindex
+    gmap:
+      skip: true
+      program: gmap
+      # Should be in format (excluding spaces around tab):
+      # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+      transcriptome: /path/to/transcriptome-mapping-file
+      FLAGS:
+        -B 5
+        --input-buffer-size 1000000
+        --output-buffer-size 1000000
+        -f samse
+
+filtering:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    sambamba.view:
+      program: sambamba
+      FLAGS:
+        -f bam
+    sambamba.sort:
+      program: sambamba
+      FLAGS:
+        -m 10G
+
+taxonomy:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "12:00:00"
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
+  dependencies:
+    mmseqs.createdb:
+      program: mmseqs
+    mmseqs.taxonomy:
+      program: mmseqs
+      data:
+        /path/to/data/odb-mmetsp_db
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 7
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
+        --split-memory-limit 12G
+
+combined-evidence:
+  workers: 1
+  threads: 1
+  memory: 40G
+  time: "8:00:00"
+  dependencies:
+    braker:
+      program: braker.pl
+      program_gffread: gffread
+      level: order
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      level: order
+      data:
+        /path/to/data/odb-mmetsp_db
+
+...  # document end
