@@ -16,7 +16,7 @@ class ConvertAlisIter(TaskList):
 
     expects:
 
-    output: results_files
+    output: results_files[List[Path]]
 
     config:
         mmseqs.convertalis:

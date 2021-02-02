@@ -17,9 +17,9 @@ class BuscoIter(TaskList):
 
     depends:
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: results
+    output: results[Path]
 
     config:
         busco:

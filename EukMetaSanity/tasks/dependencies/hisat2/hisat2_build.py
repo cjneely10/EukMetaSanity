@@ -16,11 +16,11 @@ class Hisat2BuildIter(TaskList):
 
     depends:
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: db
+    output: db[Path]
 
-    expects: fasta
+    expects: fasta[Path]
 
     config:
         hisat2.build:

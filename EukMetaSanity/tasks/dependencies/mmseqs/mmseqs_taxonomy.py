@@ -1,26 +1,49 @@
+"""
+Module holds mmseqs.taxonomy build functionality
+"""
 import os
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
 class TaxonomyIter(TaskList):
-    """ This class runs the MMseqs taxonomy subprogram
+    """ TaskList class iterates over mmseqs.taxonomy tasks
 
     name: mmseqs.taxonomy
 
-    requires: mmseqs.createdb
+    requires:
 
-    output keys: tax-report
+    depends: mmseqs.createdb
 
-    finalizes: None
+    output: tax-report[Path]
+
+    config:
+        mmseqs.taxonomy:
+          program: mmseqs
+          data:
+            /path/to/data/odb-mmetsp_db
+          # Pass any flags to mmseqs required
+          FLAGS:
+            --remove-tmp-files
+            -s 7
+            --min-seq-id 0.40
+            -c 0.3
+            --cov-mode 0
+            --split-memory-limit 12G
 
     """
     name = "mmseqs.taxonomy"
     requires = []
     depends = [DependencyInput("mmseqs.createdb")]
-    
+
     class Taxonomy(Task):
+        """
+        Task class handles mmseqs.taxonomy task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
+            """
+            Instantiate class with given output
+            """
             super().__init__(*args, **kwargs)
             self.output = {
                 "tax-report": os.path.join(self.wdir, "tax-report.txt"),
@@ -28,6 +51,9 @@ class TaxonomyIter(TaskList):
 
         @program_catch
         def run(self):
+            """
+            Run mmseqs.taxonomy
+            """
             tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
             # Search taxonomy db
             self.parallel(
@@ -50,10 +76,9 @@ class TaxonomyIter(TaskList):
                     self.output["tax-report"]
                 ]
             )
-            
+
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(TaxonomyIter.Taxonomy, TaxonomyIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

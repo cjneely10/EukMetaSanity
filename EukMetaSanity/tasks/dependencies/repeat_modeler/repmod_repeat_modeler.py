@@ -1,3 +1,6 @@
+"""
+Module holds repmod.repeat_modeler build functionality
+"""
 import os
 import glob
 import shutil
@@ -5,11 +8,32 @@ from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput,
 
 
 class RepeatModelerIter(TaskList):
+    """ TaskList class iterates over repmod.repeat_modeler tasks
+
+    name: repmod.repeat_modeler
+
+    requires:
+
+    depends: repmod.build_database
+
+    expects:
+
+    output: model[Path]
+
+    config:
+        repmod.repeat_modeler:
+          program: RepeatModeler
+          skip: false
+
+    """
     name = "repmod.repeat_modeler"
     requires = []
     depends = [DependencyInput("repmod.build_database")]
 
     class RepeatModeler(Task):
+        """
+        Task class handles repmod.repeat_modeler task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -19,6 +43,9 @@ class RepeatModelerIter(TaskList):
 
         @program_catch
         def run(self):
+            """
+            Run repmod.repeat_modeler
+            """
             script = self.create_script(
                 self.program[
                     "-pa", str(int(self.threads) // 4 or 1),
@@ -34,8 +61,7 @@ class RepeatModelerIter(TaskList):
                 touch(str(self.output["model"]))
 
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(RepeatModelerIter.RepeatModeler, RepeatModelerIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

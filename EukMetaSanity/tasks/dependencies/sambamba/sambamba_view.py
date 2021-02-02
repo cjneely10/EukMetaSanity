@@ -16,11 +16,15 @@ class SambambaViewIter(TaskList):
 
     depends:
 
-    expects: sams
+    expects: sams[List[Path]]
 
     output: bams
 
-    final:
+    config:
+        sambamba.view:
+          program: sambamba
+          FLAGS:
+            -f bam
 
     """
     name = "sambamba.view"

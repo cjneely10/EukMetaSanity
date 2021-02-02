@@ -14,9 +14,9 @@ class EMapperIter(TaskList):
 
     depends:
 
-    expects: prot
+    expects: prot[Path]
 
-    output: emapper
+    output: emapper[Path]
 
     config:
         emapper:

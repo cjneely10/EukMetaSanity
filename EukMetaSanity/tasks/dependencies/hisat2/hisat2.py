@@ -19,7 +19,7 @@ class Hisat2Iter(TaskList):
 
     expects:
 
-    output: sams
+    output: sams[Path]
 
     config:
         hisat2:

@@ -14,9 +14,9 @@ class ExecAnnotationIter(TaskList):
 
     depends:
 
-    expects: prot
+    expects: prot[Path]
 
-    output: kegg
+    output: kegg[Path]
 
     config:
         kofamscan.exec_annotation:

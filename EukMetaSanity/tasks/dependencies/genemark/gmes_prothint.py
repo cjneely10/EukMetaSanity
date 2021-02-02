@@ -15,9 +15,9 @@ class ProtHintIter(TaskList):
 
     depends: mmseqs.filtertaxseqdb
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: hints, evidence
+    output: hints[Path], evidence[Path]
 
     config:
         gmes.prothint:

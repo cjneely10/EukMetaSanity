@@ -16,7 +16,7 @@ class GffReadIter(TaskList):
 
     expects:
 
-    output: ab-gff3
+    output: ab-gff3[Path]
 
     config:
         gmes.gffread:

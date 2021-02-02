@@ -1,17 +1,42 @@
+"""
+Module holds repmask.rmout build functionality
+"""
 import os
 import shutil
-
 from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput, set_complete
 
 
 class RepeatMaskerOutIter(TaskList):
+    """ TaskList class iterates over repmask.rmout tasks
+
+    name: repmask.rmout
+
+    requires:
+
+    depends: repmask.process_repeats
+
+    expects: fasta[Path]
+
+    output: mask-gff3[Path], mask-fna[Path]
+
+    config:
+        repmask.rmout:
+          program: rmOutToGFF3.pl
+
+    """
     name = "repmask.rmout"
     requires = []
     depends = [DependencyInput("repmask.process_repeats")]
 
     class RepeatModelerOut(Task):
+        """
+        Task class handles repmask.rmout task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
+            """
+            Instantiate class with given output
+            """
             super().__init__(*args, **kwargs)
             self.output = {
                 "mask-gff3": os.path.join(self.wdir, "mask.final.gff3"),
@@ -20,6 +45,9 @@ class RepeatMaskerOutIter(TaskList):
 
         @program_catch
         def run(self):
+            """
+            Run repmask.rmout
+            """
             input_file = str(self.dependency_input["fasta"]) + ".masked"
             if os.path.exists(input_file):
                 os.replace(
@@ -40,8 +68,7 @@ class RepeatMaskerOutIter(TaskList):
                 )
 
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(RepeatMaskerOutIter.RepeatModelerOut, RepeatMaskerOutIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

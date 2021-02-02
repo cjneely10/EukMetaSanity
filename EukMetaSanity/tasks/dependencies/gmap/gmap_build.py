@@ -16,9 +16,9 @@ class GMapBuildIter(TaskList):
 
     depends:
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: db
+    output: db[Path]
 
     config:
         gmap.build:

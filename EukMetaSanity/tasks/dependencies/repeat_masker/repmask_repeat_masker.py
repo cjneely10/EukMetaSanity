@@ -1,3 +1,6 @@
+"""
+Module holds repmask.repeat_masker build functionality
+"""
 import os
 from pathlib import Path
 from EukMetaSanity import ProcessExecutionError, set_complete
@@ -5,11 +8,36 @@ from EukMetaSanity import Task, TaskList, program_catch, prefix, DependencyInput
 
 
 class RepeatMaskerIter(TaskList):
+    """ TaskList class iterates over repmask.repeat_masker tasks
+
+    name: repmask.repeat_masker
+
+    requires: taxonomy.taxonomy[TaxonomyAssignment]
+
+    depends: repmod.repeat_modeler
+
+    expects: fasta[Path]
+
+    output: libraries[List[Path]]
+
+    config:
+        repmask.repeat_masker:
+          level: family
+          program: RepeatMasker
+          data:
+            "" # Comma-separated list of repeat models to incorporate
+          FLAGS:
+            -nolow
+
+    """
     name = "repmask.repeat_masker"
     requires = ["taxonomy"]
     depends = [DependencyInput("repmod.repeat_modeler")]
-    
+
     class RepeatMasker(Task):
+        """
+        Task class handles repmask.repeat_masker task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -33,9 +61,12 @@ class RepeatMaskerIter(TaskList):
             self.output = {
                 "libraries": out
             }
-            
+
         @program_catch
         def run(self):
+            """
+            Run repmask.repeat_masker
+            """
             _added_dirs = []
             for val in self.output["libraries"]:
                 search, _dir = val
@@ -58,10 +89,9 @@ class RepeatMaskerIter(TaskList):
                     self.parallel(script)
                 except ProcessExecutionError:
                     continue
-            
+
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(RepeatMaskerIter.RepeatMasker, RepeatMaskerIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

@@ -10,13 +10,13 @@ class GeneMarkPetapIter(TaskList):
 
     name: gmes.petap
 
-    requires: taxonomy
+    requires: taxonomy.taxonomy[TaxonomyAssignment]
 
     depends: gmes.prothint
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: gtf
+    output: gtf[Path]
 
     config:
         gmes.petap:

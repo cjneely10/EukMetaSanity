@@ -16,9 +16,13 @@ class SambambaSortIter(TaskList):
 
     depends: sambamba.view
 
-    output: sorted.bams
+    output: sorted.bams[List[Path]]
 
-    final:
+    config:
+        sambamba.sort:
+          program: sambamba
+          FLAGS:
+            -m 10G
 
     """
     name = "sambamba.sort"

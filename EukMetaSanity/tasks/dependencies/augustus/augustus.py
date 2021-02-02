@@ -20,9 +20,9 @@ class AugustusIter(TaskList):
 
     depends: mmseqs.convertalis
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: ab-gff3
+    output: ab-gff3[Path]
 
     config:
         augustus:

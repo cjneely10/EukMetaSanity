@@ -1,15 +1,43 @@
+"""
+Module holds repmask.process_repeats build functionality
+"""
 import os
 from EukMetaSanity import Task, TaskList, program_catch, touch, DependencyInput, set_complete
 
 
 class ProcessRepeatsIter(TaskList):
+    """ TaskList class iterates over repmask.process_repeats tasks
+
+    name: repmask.process_repeats
+
+    requires: taxonomy.taxonomy[TaxonomyAssignment]
+
+    depends: repmask.repeat_masker
+
+    expects: fasta[Path]
+
+    output: rmout[Path], rmtbl[Path], rmcat[Path]
+
+    config:
+        repmask.process_repeats:
+          program: ProcessRepeats
+          FLAGS:
+            -nolow
+
+    """
     name = "repmask.process_repeats"
     requires = ["taxonomy"]
     depends = [DependencyInput("repmask.repeat_masker")]
 
     class ProcessRepeats(Task):
+        """
+        Task class handles repmask.process_repeats task
+        """
         @set_complete
         def __init__(self, *args, **kwargs):
+            """
+            Instantiate class with given output
+            """
             super().__init__(*args, **kwargs)
             self.output = {
                 "rmout": os.path.join(self.wdir, "mask.final.out"),
@@ -19,6 +47,9 @@ class ProcessRepeatsIter(TaskList):
 
         @program_catch
         def run(self):
+            """
+            Run repmask.process_repeats
+            """
             _basename = os.path.basename(str(self.dependency_input["fasta"]))
             cat_files = []
             for rep_dir in self.input["repmask.repeat_masker"]["libraries"]:
@@ -58,8 +89,7 @@ class ProcessRepeatsIter(TaskList):
                 touch(str(self.output["rmout"]))
 
     def __init__(self, *args, **kwargs):
+        """
+        Instantiate TaskList
+        """
         super().__init__(ProcessRepeatsIter.ProcessRepeats, ProcessRepeatsIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

@@ -21,7 +21,7 @@ class GMapIter(TaskList):
 
     expects:
 
-    output: sams
+    output: sams[List[Path]]
 
     config:
         gmap:

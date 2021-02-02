@@ -13,13 +13,13 @@ class BrakerIter(TaskList):
 
     name: braker
 
-    requires: mapping, taxonomy
+    requires: mapping.sorted-bams[List[Path]], taxonomy.taxonomy[TaxonomyAssignment]
 
     depends: mmseqs.filtertaxseqdb
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: cds, prot, nr_gff3
+    output: cds[Path], prot[Path], nr_gff3[Path]
 
     config:
 

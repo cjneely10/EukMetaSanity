@@ -14,9 +14,9 @@ class MetaEukIter(TaskList):
 
     depends: mmseqs.filtertaxseqdb
 
-    expects: fasta
+    expects: fasta[Path]
 
-    output: gff3
+    output: gff3[Path]
 
     config:
         metaeuk:
