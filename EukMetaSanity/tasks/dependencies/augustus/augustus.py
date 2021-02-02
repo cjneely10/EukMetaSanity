@@ -1,6 +1,7 @@
 """
 Module holds augustus build functionality
 """
+import glob
 import os
 import shutil
 from pathlib import Path
@@ -129,10 +130,10 @@ class AugustusIter(TaskList):
                 os.path.dirname(os.path.dirname(Path(str(self.program)).resolve())),
                 "config", "species"
             )
-            for i in range(1, int(self.config["rounds"])):
+            for file in glob.glob(os.path.join(config_dir, self.record_id + "*")):
                 shutil.move(
-                    os.path.join(config_dir, self.record_id + str(i + 1)),
-                    self.wdir
+                    file,
+                    os.path.join(self.wdir, os.path.basename(file))
                 )
 
         @program_catch
