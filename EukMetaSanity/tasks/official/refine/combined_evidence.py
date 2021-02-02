@@ -2,11 +2,8 @@
 Module holds combined-evidence build functionality
 """
 
-import os
 from EukMetaSanity import Task, TaskList, DependencyInput
-from EukMetaSanity import ProcessExecutionError, CommandNotFound
-from EukMetaSanity import InvalidPathError, MissingDataError, InvalidProtocolError
-from EukMetaSanity import program_catch, prefix, touch, set_complete
+from EukMetaSanity import program_catch, set_complete
 
 
 class EvidenceIter(TaskList):
@@ -24,8 +21,8 @@ class EvidenceIter(TaskList):
 
     """
     name = "combined-evidence"
-    requires = []
-    depends = []
+    requires = ["mapping", "filtering", "taxonomy"]
+    depends = [DependencyInput("braker")]
 
     class Evidence(Task):
         """
@@ -37,7 +34,11 @@ class EvidenceIter(TaskList):
             Instantiate class with given output
             """
             super().__init__(*args, **kwargs)
-            self.output = {}
+            self.output = {
+                "cds": self.input["braker"]["cds"],
+                "prot": self.input["braker"]["prot"],
+                "nr_gff3": self.input["braker"]["nr_gff3"],
+            }
 
         @program_catch
         def run(self):
