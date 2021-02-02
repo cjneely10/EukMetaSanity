@@ -11,13 +11,13 @@ class EvidenceIter(TaskList):
 
     name: combined-evidence
 
-    requires:
+    requires: mapping, filtering, taxonomy
 
-    depends:
+    depends: braker
 
-    output:
+    output: cds[Path], prot[Path], nr_gff3[Path]
 
-    final:
+    final: cds[Path], prot[Path], nr_gff3[Path]
 
     """
     name = "combined-evidence"
@@ -38,6 +38,7 @@ class EvidenceIter(TaskList):
                 "cds": self.input["braker"]["cds"],
                 "prot": self.input["braker"]["prot"],
                 "nr_gff3": self.input["braker"]["nr_gff3"],
+                "final": ["cds", "prot", "nr_gff3"]
             }
 
         @program_catch
