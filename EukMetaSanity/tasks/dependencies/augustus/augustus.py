@@ -45,7 +45,7 @@ class AugustusIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "ab-gff3": os.path.join(self.wdir, self.record_id + ".gff3")
+                "ab-gff3": os.path.join(self.wdir, self.record_id + ".augustus.gff3")
             }
 
         @program_catch

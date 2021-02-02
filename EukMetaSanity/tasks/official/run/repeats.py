@@ -29,8 +29,6 @@ class RepeatsIter(TaskList):
             self.output = {
                 "fna": self.input["repmask.rmout"]["mask-fna"],
                 "final": [
-                    "repmask.process_repeats.rmout",
-                    "repmask.process_repeats.rmcat",
                     "repmask.process_repeats.rmtbl",
                     "repmask.rmout.mask-fna",
                     "repmask.rmout.mask-gff3"

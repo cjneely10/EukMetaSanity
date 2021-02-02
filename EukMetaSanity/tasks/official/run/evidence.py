@@ -24,7 +24,10 @@ class EvidenceIter(TaskList):
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.output = {"final": []}
+            self.output = {
+                "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
+                "final": []
+            }
             for i in range(0, 4):
                 self.output.update({
                     "nr-gff3-tier%i" % i: os.path.join(self.wdir, self.record_id + ".all.tier%i.nr.gff3" % i),  # NR GFF
@@ -34,10 +37,6 @@ class EvidenceIter(TaskList):
                 self.output["final"].append("nr-gff3-tier%i" % i)
                 self.output["final"].append("prot-tier%i" % i)
                 self.output["final"].append("cds-tier%i" % i)
-
-            self.output.update({
-                "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
-            })
 
         @program_catch
         def run(self):

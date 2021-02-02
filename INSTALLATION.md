@@ -72,10 +72,10 @@ up on search time, but takes a lot of storage space):
 
 ```
 cd /path/to/EukMetaSanity
-./download-data.py -t <threads> -m <max-mem> data
+./download-data.py -t <threads>
 ```
 
-This will download the OrthoDB and RFAM databases for use in **EukMetaSanity**. Additionally, config files will 
+This will download the OrthoDB and MMETSP databases for use in **EukMetaSanity**. Additionally, config files will 
 automatically generate for use when running **EukMetaSanity**.
 
 

@@ -40,7 +40,7 @@ class GffReadIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "ab-gff3": os.path.join(self.wdir, self.record_id + ".gff3")
+                "ab-gff3": os.path.join(self.wdir, self.record_id + ".gmes.gff3")
             }
 
         @program_catch
