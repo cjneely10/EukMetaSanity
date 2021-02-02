@@ -36,7 +36,4 @@ def get_modules(calling_file: str, base_name: str) -> dict:
     return out
 
 
-# TODO: Add `expects` to docstrings for all dependencies
-# TODO: Ensure that all output has name of calling program as part of extension (to ensure uniqueness)
-# TODO: Incorporate time_overrides at all levels
 dependencies = get_modules(__file__, "EukMetaSanity.tasks")
