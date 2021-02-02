@@ -6,5 +6,6 @@ install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - source "$HOME/miniconda/etc/profile.d/conda.sh"
   - conda env create -f EukMetaSanity/api/environment.yml
+  - pip install pylint
 script:
   - pylint EukMetaSanity/ --ignore-patterns=__init__.py
