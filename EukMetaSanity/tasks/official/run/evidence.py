@@ -26,7 +26,7 @@ class EvidenceIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
-                "final": []
+                "final": ["all_gff3"]
             }
             for i in range(0, 4):
                 self.output.update({
