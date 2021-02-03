@@ -25,7 +25,6 @@ class Index(DataUtil):
 
         :param threads: Number of system threads
         :param wdir: Directory containing built databases
-        :param split_mem_limit: Maximum allowed memory
         :param databases: List of databases for which to generate indices
         """
         super().__init__(databases)

@@ -13,7 +13,6 @@ class Fasta(Data):
     def __init__(self, *args, **kwargs):
         """ FASTA format will be input into mmseqs createdb
 
-        :param fasta_file: Path to FASTA file downloaded
         :param args: Args to pass to superclass
         :param kwargs: kwargs to pass to superclass
         """
