@@ -35,7 +35,7 @@ gunzip Dfam.h5.gz && cd ..
 perl ./configure
 ```
 
-The configure script should ask you to confirm the location of your installation, as well as to select your search 
+The `configure` script should ask you to confirm the location of your installation, as well as to select your search 
 engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS_run/bin/` when requested 
 (substituting for the proper path on your system).
 
@@ -57,8 +57,8 @@ sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNA
 
 ### Configuring GeneMark
 
-Ensure that .gm_key is present in your home directory if you are using GeneMark as your ab initio predictor. You also 
-may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
+Ensure that your `.gm_key` file is present in your home directory if you are using GeneMark as your ab initio predictor. 
+You also may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
 
 Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
 
@@ -76,7 +76,7 @@ cd /path/to/EukMetaSanity
 ```
 
 This will download the OrthoDB and MMETSP databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate for use when running **EukMetaSanity**.
+automatically generate in the newly-created `data` directory for use when running **EukMetaSanity**.
 
 
 ## **Your installation is complete!**
