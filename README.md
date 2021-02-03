@@ -30,7 +30,7 @@ Check the quality of your annotation using BUSCO.
 
 ## Installation
 
-See <a href="https://github.com/cjneely10/EukMetaSanity/blob/master/INSTALLATION.md" target="_blank">INSTALLATION.md</a> 
+See <a href="https://github.com/cjneely10/EukMetaSanity/blob/main/INSTALLATION.md" target="_blank">INSTALLATION.md</a> 
 for detailed installation instructions.
 
 ## Usage
@@ -161,7 +161,8 @@ out/
 
 #### Report (optional)
 Copy and edit the `report-config.yaml` config file to fit your analysis needs. Set the `INPUT/base` section to be either
-`run` or `refine`, depending on which set of predictions you want to annotate.
+`run` or `refine`, depending on which set of predictions you want to annotate. You may also adjust the tier you wish to 
+annotate.
 
 Annotate gene models using the command:
 
