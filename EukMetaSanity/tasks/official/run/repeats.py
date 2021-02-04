@@ -5,11 +5,17 @@ from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_co
 
 
 class RepeatsIter(TaskList):
-    """ Task will use NCBI repeats libraries to mask genome.
-    Also can generate ab-initio repeat models to mask genome.
+    """ TaskList class iterates over repeats tasks
 
-    Outputs: mask-fna, mask-tbl, mask-gff3
-    Finalizes: mask-tbl
+    name: repeats
+
+    requires: taxonomy
+
+    depends: repmask.rmout, repmask.process_repeats
+
+    output: fna[Path]
+
+    final: repmask.{process_repeats.rmtbl,rmout.mask-fna,rmout.mask-gff3}[Path]
 
     """
     name = "repeats"
@@ -47,7 +53,3 @@ class RepeatsIter(TaskList):
         Generate task list
         """
         super().__init__(RepeatsIter.Repeats, RepeatsIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass

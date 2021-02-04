@@ -10,11 +10,16 @@ class TaxonomyIter(TaskList):
 
     name: taxonomy
 
-    requires: mmseqs.createdb, mmseqs.taxonomy
+    requires:
 
-    output keys: taxonomy
+    depends: mmseqs.taxonomy
 
-    finalizes: mmseqs.taxonomy.tax-report
+    output: taxonomy[TaxonomyAssignment]
+
+    final: mmseqs.taxonomy.tax-report[Path], taxonomy[TaxonomyAssignment]
+
+    config:
+        cutoff: 8.0  # Minimum % of mapped reads to tax level
 
     """
     name = "taxonomy"
@@ -78,7 +83,3 @@ class TaxonomyIter(TaskList):
 
     def __init__(self, *args, **kwargs):
         super().__init__(TaxonomyIter.Taxonomy, TaxonomyIter.name, *args, **kwargs)
-
-
-if __name__ == "__main_":
-    pass
