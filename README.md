@@ -64,7 +64,7 @@ optional arguments:
 ### Example usage
 
 #### Run
-Copy and edit the `run-config.yaml` config file to fit your analysis needs.
+Copy and edit the `run-config.yaml` config file to fit your analysis needs. Activate your `EukMS_run` conda environment.
 
 Ensure your input FASTA sequences do not have the pipe (`|`) character present.
 
@@ -163,7 +163,7 @@ out/
 #### Report (optional)
 Copy and edit the `report-config.yaml` config file to fit your analysis needs. Set the `INPUT/base` section to be either
 `run` or `refine`, depending on which set of predictions you want to annotate. You may also adjust the tier you wish to 
-annotate.
+annotate. Activate your `EukMS_report` conda environment.
 
 Annotate gene models using the command:
 

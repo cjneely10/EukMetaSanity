@@ -22,7 +22,7 @@ taxonomy:
   workers: 1
   threads: 1
   memory: 40G
-  time: "12:00:00"
+  time: "4:00:00"
   cutoff: 8.0  # Minimum % of mapped reads to tax level
   dependencies:
     mmseqs.createdb:
@@ -34,17 +34,17 @@ taxonomy:
       # Pass any flags to mmseqs required
       FLAGS:
         --remove-tmp-files
-        -s 7
+        -s 5
         --min-seq-id 0.40
         -c 0.3
         --cov-mode 0
-        --split-memory-limit 12G
+        --split-memory-limit 16G
 
 repeats:
   workers: 1
   threads: 1
-  memory: 40G
-  time: "8:00:00"
+  memory: 16G
+  time: "12:00:00"
   dependencies:
     repmod.build_database:
       program: BuildDatabase
@@ -68,7 +68,7 @@ repeats:
 abinitio.augustus:
   workers: 1
   threads: 1
-  memory: 40G
+  memory: 16G
   time: "6:00:00"
   skip: false
   dependencies:
@@ -84,7 +84,7 @@ abinitio.augustus:
       program: mmseqs
       subname: search  # Can use `linsearch` if linear index is present for database
       FLAGS:
-        --split-memory-limit 12G
+        --split-memory-limit 16G
         --cov-mode 0
         -c 0.6
         -e 0.01
@@ -99,7 +99,7 @@ abinitio.augustus:
 abinitio.genemark:
   workers: 1
   threads: 1
-  memory: 40G
+  memory: 16G
   time: "6:00:00"
   skip: false
   dependencies:
@@ -132,7 +132,7 @@ evidence:
   workers: 1
   threads: 4  # Each worker needs at least 4 threads to complete this step
   memory: 40G
-  time: "12:00:00"
+  time: "4:00:00"
   dependencies:
     mmseqs.filtertaxseqdb:
       program: mmseqs
@@ -147,7 +147,7 @@ evidence:
       FLAGS:
         --min-length 30
         --metaeuk-eval 0.0001
-        --split-memory-limit 12G
+        --split-memory-limit 16G
         -s 7
         --cov-mode 0
         -c 0.3
