@@ -81,9 +81,10 @@ automatically generate in the newly-created `data` directory for use when runnin
 
 ## **Your installation is complete!**
  
-If you wish to download additional databases to use in the `Report` step, use the 
+If you wish to download additional databases to use in the `report` step, use the 
 `mmseqs database` command to pull them prior to running **EukMetaSanity**, and add their location to your 
-`report-config.ini` file in the `[mmseqs] DATA` section.
+`report-config.yaml` file in the `mmseqs.dependencies` section under `mmseqs.search.data` and 
+`mmseqs.search.convertalis`.
 
 ## Non-Conda installation
 
