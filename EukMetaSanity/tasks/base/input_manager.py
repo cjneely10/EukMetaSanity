@@ -6,6 +6,7 @@ import os
 import sys
 import pickle
 from pathlib import Path
+import concurrent.futures
 from typing import List, Dict, Optional
 from Bio import SeqIO
 # pylint: disable=no-member
@@ -107,19 +108,26 @@ class InputManager:
             print(colors.bold & colors.warn |
                   "Config file requested input files at the command-line, but none were found")
             sys.exit()
-        for file in os.listdir(self.input_dir):
-            for ext in self.extension_list:
-                if file.endswith(ext):
-                    record_id = prefix(file)
-                    if record_id in self.data.keys():
-                        raise AttributeError("Input directory has multiple files with the same basename - exiting")
-                    self.data[record_id] = {}
-                    self.data[record_id]["fasta"] = InputManager._simplify_fasta(os.path.join(self.input_dir, file),
-                                                                                 record_id,
-                                                                                 self.path_manager.get_dir(
-                                                                                     self.path_manager.MAGS),
-                                                                                 ext)
-                    self.path_manager.add_dirs(record_id)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for file in os.listdir(self.input_dir):
+                for ext in self.extension_list:
+                    if file.endswith(ext):
+                        futures.append(executor.submit(self._simplify, file, ext))
+            concurrent.futures.wait(futures)
+
+    def _simplify(self, file, ext):
+        record_id = prefix(file)
+        if record_id in self.data.keys():
+            raise AttributeError("Input directory has multiple files with the same basename - exiting")
+        self.data[record_id] = {}
+        out_path = InputManager._simplify_fasta(os.path.join(self.input_dir, file),
+                                                record_id,
+                                                self.path_manager.get_dir(
+                                                    self.path_manager.MAGS),
+                                                ext)
+        self.data[record_id]["fasta"] = out_path
+        self.path_manager.add_dirs(record_id)
 
     @property
     def input_prefixes(self) -> List[str]:
@@ -145,7 +153,6 @@ class InputManager:
 
         :return: Str of input
         """
-        input_keys = {key for data_dict in self.input_files for key in data_dict.keys() if key != ConfigManager.ROOT}
         return "\n".join((
             colors.bold & colors.blue | "\n".join((
                 f"{record_id}: {len(self.input_files[i][ConfigManager.ROOT])} file(s) gathered"
