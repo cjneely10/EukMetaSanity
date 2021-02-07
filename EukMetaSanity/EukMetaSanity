@@ -83,14 +83,14 @@ if __name__ == "__main__":
     _cfg: ConfigManager = _parse_args(_ap, _tm)
     # Generate primary path manager
     _pm = PathManager(_ap.args.output)
-    # Gather list of files to analyze
-    _im = InputManager(_ap.args.output, _ap.args.fasta_directory, _pm, _cfg, _ap.args.extensions)
     # Run main program logic
     tprint("EukMetaSanity", font="smslant")
+    # Gather list of files to analyze
+    print(colors.yellow & colors.bold | "Gathering files...")
+    print(colors.yellow & colors.bold | "------------------")
+    _im = InputManager(_ap.args.output, _ap.args.fasta_directory, _pm, _cfg, _ap.args.extensions)
 
     if not _ap.args.skip_summary:
-        print(colors.yellow & colors.bold | "Gathering files...")
-        print(colors.yellow & colors.bold | "------------------")
         # Gather input files and display for user
         print(colors.yellow & colors.bold | _im.summarize_input())
         # Confirm valid
