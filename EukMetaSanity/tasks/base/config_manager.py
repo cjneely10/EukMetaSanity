@@ -59,7 +59,7 @@ class ConfigManager:
         """
         self._config = yaml.load(open(str(Path(config_path).resolve()), "r"), Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
-        self._validate()
+        ConfigManager._validate(self.config)
 
     @property
     def config(self) -> Dict[str, Dict[str, Union[str, dict]]]:
@@ -69,13 +69,14 @@ class ConfigManager:
         """
         return self._config
 
-    def _validate(self):
+    @staticmethod
+    def _validate(data_dict):
         """ Confirm that data and dependency paths provided in file are all valid.
 
         :raises: MissingDataError
 
         """
-        for task_name, task_dict in self.config.items():
+        for task_name, task_dict in data_dict.items():
             if "data" in task_dict.keys() and ("skip" not in task_dict.keys() or task_dict["skip"] is not True):
                 for _val in task_dict["data"].split(","):
                     if ":" in _val:
@@ -85,6 +86,7 @@ class ConfigManager:
                             task_name, _val
                         ))
             if "dependencies" in task_dict.keys():
+                ConfigManager._validate(task_dict["dependencies"])
                 ConfigManager._check_dependencies(task_dict)
 
     @staticmethod
