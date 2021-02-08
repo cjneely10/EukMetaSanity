@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 # Get conda location information
 CONDA=`which conda`
 CONDA_DIRNAME=`dirname $CONDA`
