@@ -74,8 +74,8 @@ if __name__ == "__main__":
               "default": DEFAULT_EXTS}),
             (("-o", "--output"),
              {"help": "Output directory, default out", "default": "out"}),
-            (("-s", "--skip_summary"),
-             {"help": "Skip internal summary check and launch pipeline, default False", "default": False,
+            (("-s", "--summary"),
+             {"help": "Run internal summary check prior to launching pipeline, default False", "default": False,
               "action": "store_true"})
         ),
         description="Run EukMetaSanity pipeline"
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     print(colors.yellow & colors.bold | "------------------")
     _im = InputManager(_ap.args.output, _ap.args.fasta_directory, _pm, _cfg, _ap.args.extensions)
 
-    if not _ap.args.skip_summary:
+    if _ap.args.summary:
         # Gather input files and display for user
         print(colors.yellow & colors.bold | _im.summarize_input())
         # Confirm valid
