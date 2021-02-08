@@ -10,17 +10,14 @@ SOURCE=$MINICONDA/etc/profile.d/conda.sh
 conda env create -f EukMetaSanity/tasks/official/run/environment.yml
 source $SOURCE
 conda activate EukMS_run
-python -m pip install .
 conda deactivate
 conda env create -f EukMetaSanity/tasks/official/report/environment.yml
 source $SOURCE
 conda activate EukMS_report
-python -m pip install .
 conda deactivate
 conda env create -f EukMetaSanity/tasks/official/refine/environment.yml
 source $SOURCE
 conda activate EukMS_refine
-python -m pip install .
 conda deactivate
 
 # Create bin directory and install non-conda dependencies
