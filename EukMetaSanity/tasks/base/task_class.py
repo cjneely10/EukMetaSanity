@@ -413,7 +413,7 @@ class Task(ABC):
         :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
-        if self.cfg.config.get(ConfigManager.SLURM, ConfigManager.USE_CLUSTER) is True:
+        if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
             sel = self._scope if self._scope is not None else self._name
             # Confirm valid SLURM section
             if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
