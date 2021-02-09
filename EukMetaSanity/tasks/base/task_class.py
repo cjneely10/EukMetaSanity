@@ -425,7 +425,7 @@ class Task(ABC):
                 str(self._threads_pw),
                 cmd,
                 self.cfg.config[sel][ConfigManager.MEMORY],
-                self.cfg.config[sel][ConfigManager.TIME] if time_override is not None else time_override,
+                self.cfg.config[sel][ConfigManager.TIME] if time_override is None else time_override,
                 self.local,
                 self.cfg.get_slurm_flagged_arguments(),
             )
