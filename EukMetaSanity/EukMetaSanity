@@ -27,9 +27,7 @@ def _initialize_logging(ap: ArgParse):
     """
     # Initialize logging
     log_file = os.path.join(ap.args.output, "%s-eukmetasanity.log" % ap.args.command)
-    if os.path.exists(log_file):
-        os.remove(log_file)
-    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='w')
+    logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='a')
     for _line in ("*" * 80, "",
                   "Primary log statements are redirected to %s" % log_file,
                   "Task-level log statements are redirected to subdirectory log files", "",
