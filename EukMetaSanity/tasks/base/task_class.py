@@ -394,7 +394,38 @@ class Task(ABC):
         # False is False = 1 for user
         self._mode = int(mode is False)
 
-    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
+    def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
+                              threads_override: str = None) -> SLURMCaller:
+        """ Create a SLURM-managed process
+
+        :param cmd: plumbum LocalCommand object to run
+        :param time_override: Time override in "HH:MM:SS" format, if needed
+        :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
+            Note that this will only affect SLURM script generation - this will not override thread values passed in by
+            the cmd parameter
+        :return: SLURM-wrapped command to run script via plumbum interface
+        """
+        if threads_override is not None:
+            threads = threads_override
+        else:
+            threads = str(self._threads_pw)
+        sel = self._scope if self._scope is not None else self._name
+        # Confirm valid SLURM section
+        if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
+            raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
+        # Generate command to launch SLURM job
+        return SLURMCaller(
+            self.cfg.get_slurm_userid(),
+            self.wdir,
+            threads,
+            cmd,
+            self.cfg.config[sel][ConfigManager.MEMORY],
+            self.cfg.config[sel][ConfigManager.TIME] if time_override is None else time_override,
+            self.local,
+            self.cfg.get_slurm_flagged_arguments(),
+        )
+
+    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None, threads_override: str = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
         In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
@@ -410,25 +441,14 @@ class Task(ABC):
 
         :param cmd: plumbum LocalCommand object to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
+        :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
+            Note that this will only affect SLURM script generation - this will not override thread values passed in by
+            the cmd parameter
         :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
         if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
-            sel = self._scope if self._scope is not None else self._name
-            # Confirm valid SLURM section
-            if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
-                raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
-            # Generate command to launch SLURM job
-            cmd = SLURMCaller(
-                self.cfg.get_slurm_userid(),
-                self.wdir,
-                str(self._threads_pw),
-                cmd,
-                self.cfg.config[sel][ConfigManager.MEMORY],
-                self.cfg.config[sel][ConfigManager.TIME] if time_override is None else time_override,
-                self.local,
-                self.cfg.get_slurm_flagged_arguments(),
-            )
+            cmd = self._create_slurm_command(cmd, time_override, threads_override)
         # Run command directly
         if self._mode == 1:
             logging.info(str(cmd))
@@ -439,7 +459,7 @@ class Task(ABC):
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
                     w.write(str(out))
 
-    def single(self, cmd: LocalCommand):
+    def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses a single thread.
 
         The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
@@ -448,17 +468,11 @@ class Task(ABC):
         self.single(self.local["pwd"])
 
         :param cmd: plumbum LocalCommand object to run
+        :param time_override: Time override in "HH:MM:SS" format, if needed
         """
-        if self._mode == 1:
-            print("  " + str(cmd))
-            # Run command directly
-            logging.info(str(cmd))
-            out = cmd()
-            if out is not None:
-                with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                    w.write(str(out))
+        self.parallel(cmd, time_override, threads_override="1")
 
-    def create_script(self, cmd: LocalCommand, file_name: str) -> LocalCommand:
+    def create_script(self, cmd: Union[str, LocalCommand], file_name: str) -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
 
         This is highly useful when incorporating programs that only launch in the directory in which it was called
@@ -481,6 +495,7 @@ class Task(ABC):
 
         :param cmd: Command to write to file
         :param file_name: Name of file to create
+        :return: Command to run script via plumbum interface
         """
         _path = os.path.join(self.wdir, file_name)
         fp = open(_path, "w")
@@ -492,13 +507,14 @@ class Task(ABC):
         self.local["chmod"]["+x", _path]()
         return self.local[_path]
 
-    def batch(self, cmds: List[LocalCommand]):
+    def batch(self, cmds: List[LocalCommand], time_override: Optional[str] = None):
         """ Run a list of commands using self.threads (one task per thread)
 
         Example:
         self.batch([self.local["pwd"], self.local["echo"]])
 
         :param cmds: List of LocalCommand objects to run in parallel
+        :param time_override: Time override in "HH:MM:SS" format, if needed
         """
         write_string = f"  Running {len(cmds)} commands similar to {str(cmds[0])}"
         print(write_string)
@@ -510,10 +526,18 @@ class Task(ABC):
                 if j >= len(cmds):
                     break
                 if self._mode == 1:
-                    f = cmds[j] & BG
+                    if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
+                        f = self._create_slurm_command(cmds[j], time_override)
+                    else:
+                        f = cmds[j] & BG
                     running.append(f)
             # Batch run all jobs and wait to finish
-            all([_f.wait() for _f in running])
+            if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
+                    output_futures = [executor.submit(_task) for _task in running]
+                    concurrent.futures.wait(output_futures)
+            else:
+                all([_f.wait() for _f in running])
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:
