@@ -58,7 +58,8 @@ class RepeatMaskerOutIter(TaskList):
                 self.single(
                     (self.program[
                          self.input["repmask.process_repeats"]["rmout"]
-                     ] > str(self.output["mask-gff3"]))
+                     ] > str(self.output["mask-gff3"])),
+                    "3:00:00"
                 )
             else:
                 touch(str(self.output["mask-gff3"]))

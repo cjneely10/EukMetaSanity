@@ -81,7 +81,8 @@ class ProcessRepeatsIter(TaskList):
                         "-maskSource", str(self.dependency_input["fasta"]),
                         (*self.added_flags),
                         final_out,
-                    ]
+                    ],
+                    "3:00:00"
                 )
             else:
                 touch(str(self.output["rmcat"]))

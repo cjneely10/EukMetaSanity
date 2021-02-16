@@ -48,7 +48,8 @@ class BuildDatabaseIter(TaskList):
                     self.program[
                         "-name", os.path.join(self.wdir, self.record_id),
                         str(self.dependency_input["fasta"]),
-                    ]
+                    ],
+                    "30:00"
                 )
 
     def __init__(self, *args, **kwargs):

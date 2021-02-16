@@ -51,7 +51,8 @@ class CreateDBIter(TaskList):
                     "createdb",
                     self.dependency_input["fasta"],
                     self.output["db"]
-                ]
+                ],
+                "30:00"
             )
 
     def __init__(self, *args, **kwargs):

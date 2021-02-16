@@ -64,7 +64,8 @@ class BrakerIter(TaskList):
                 # Output CDS and prot fasta
                 _gtf = os.path.join(self.wdir, self.record_id + ".gtf")
                 self.single(
-                    gffread[self.input["root"]["nr-gff3"]] > _gtf
+                    gffread[self.input["root"]["nr-gff3"]] > _gtf,
+                    "30:00"
                 )
                 _added = ["--geneMarkGtf=%s" % _gtf]
             if not os.path.exists(os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf")) or \
@@ -104,7 +105,8 @@ class BrakerIter(TaskList):
                         "-g", self.dependency_input["fasta"],
                         "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
                         "-y", os.path.join(self.wdir, self.record_id + ".faa"),
-                    ]
+                    ],
+                    "30:00"
                 )
             # Else just keep
             else:

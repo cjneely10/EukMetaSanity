@@ -86,14 +86,16 @@ class MetaEukIter(TaskList):
                     self.local["metaeuk-to-gff3.py"][
                         str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
                         os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
-                    ]
+                    ],
+                    "30:00"
                 )
                 out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
             self.single(
                 self.local["gffread"][
                     (*out_results), "-G", "--cluster-only",
                     "-o", str(self.output["gff3"])
-                ]
+                ],
+                "30:00"
             )
 
     def __init__(self, *args, **kwargs):

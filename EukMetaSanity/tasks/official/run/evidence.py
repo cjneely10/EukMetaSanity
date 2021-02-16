@@ -48,9 +48,15 @@ class EvidenceIter(TaskList):
             """
             Merge final results
             """
+            final_res = []
+            if os.path.exists(str(self.input["abinitio.augustus"]["ab-gff3"])):
+                final_res.append(str(self.input["abinitio.augustus"]["ab-gff3"]))
+            if os.path.exists(str(self.input["abinitio.genemark"]["ab-gff3"])):
+                final_res.append(str(self.input["abinitio.genemark"]["ab-gff3"]))
+            if os.path.exists(str(self.input["metaeuk"]["gff3"])):
+                final_res.append(str(self.input["metaeuk"]["gff3"]))
             self.merge(
-                [str(self.input["metaeuk"]["gff3"]),
-                 self.input["abinitio.augustus"]["ab-gff3"], self.input["abinitio.genemark"]["ab-gff3"]],
+                final_res,
                 str(self.input["root"]["fasta"]),
                 os.path.join(self.wdir, self.record_id),
             )
@@ -66,11 +72,13 @@ class EvidenceIter(TaskList):
                 self.local["gffread"][
                     (*input_list), "-G", "--merge",
                     "-o", out_prefix + ".all.gff3"
-                ]
+                ],
+                "30:00"
             )
             self.batch([self.local["create-final-annotations.py"][
                             "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i]
-                        for i in range(0, 4)])
+                        for i in range(0, 4)],
+                       "3:00:00")
 
     def __init__(self, *args, **kwargs):
         """

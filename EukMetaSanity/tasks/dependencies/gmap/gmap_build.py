@@ -55,7 +55,8 @@ class GMapBuildIter(TaskList):
                 self.program[
                     "-d", self.output["db"],
                     "-D", _genome_dir, _genome_basename
-                ]
+                ],
+                "30:00"
             )
 
     def __init__(self, *args, **kwargs):

@@ -53,7 +53,8 @@ class GffReadIter(TaskList):
                     self.input["gmes.petap"]["gtf"],
                     (*self.added_flags),
                     "-o", str(self.output["ab-gff3"])
-                ]
+                ],
+                "30:00"
             )
 
     def __init__(self, *args, **kwargs):

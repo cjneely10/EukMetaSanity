@@ -74,7 +74,8 @@ class TaxonomyIter(TaskList):
                     self.data[0],
                     tax_db,
                     self.output["tax-report"]
-                ]
+                ],
+                "1:00:00"
             )
 
     def __init__(self, *args, **kwargs):

@@ -107,13 +107,14 @@ class AugustusIter(TaskList):
                         out_file_path,
                     ]
                 )
-            self.batch(progs)
+            self.batch(progs, "1:00:00")
             touch(out_gff + ".tmp")
             for out_g in out_gffs:
                 (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
             # Combine files
             self.single(
-                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"]
+                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
+                "30:00"
             )
             # Make ids unique
             self._make_unique(out_gff)
@@ -160,7 +161,8 @@ class AugustusIter(TaskList):
                     _file,
                     "1000",
                     out_gb
-                ]
+                ],
+                "30:00"
             )
 
             species_config_prefix = self.record_id + str(_round)
@@ -169,14 +171,16 @@ class AugustusIter(TaskList):
                 self.local["new_species.pl"][
                     "--species=%s" % species_config_prefix,
                     out_gb
-                ]
+                ],
+                "1:00:00"
             )
             # Run training
             self.single(
                 self.local["etraining"][
                     "--species=%s" % species_config_prefix,
                     out_gb
-                ]
+                ],
+                "1:00:00"
             )
             return out_gff
 

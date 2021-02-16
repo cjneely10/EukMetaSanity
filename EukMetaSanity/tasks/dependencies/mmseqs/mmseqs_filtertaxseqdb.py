@@ -78,7 +78,8 @@ class FilterTaxSeqDBIter(TaskList):
                             "convert2fasta",
                             subset_db_outpath,
                             out_fasta,
-                        ]
+                        ],
+                        "30:00"
                     )
 
     def __init__(self, *args, **kwargs):
