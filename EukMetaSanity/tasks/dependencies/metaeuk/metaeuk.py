@@ -37,7 +37,7 @@ class MetaEukIter(TaskList):
     """
     name = "metaeuk"
     requires = []
-    depends = [DependencyInput("mmseqs.filtertaxseqdb")]
+    depends = []
 
     class MetaEuk(Task):
         """
@@ -59,7 +59,7 @@ class MetaEukIter(TaskList):
             Run metaeuk
             """
             out_results = []
-            for i, database in enumerate(self.input["mmseqs.filtertaxseqdb"]["fastas"]):
+            for i, database in enumerate(self.data):
                 if database == "":
                     continue
                 is_profile = []

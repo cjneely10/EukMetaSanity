@@ -134,11 +134,6 @@ evidence:
   memory: 40G
   time: "4:00:00"
   dependencies:
-    mmseqs.filtertaxseqdb:
-      program: mmseqs
-      level: order
-      data:
-        /path/to/data/odb-mmetsp_db
     metaeuk:
       program: metaeuk
       data:
