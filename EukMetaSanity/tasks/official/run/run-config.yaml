@@ -34,7 +34,7 @@ taxonomy:
       # Pass any flags to mmseqs required
       FLAGS:
         --remove-tmp-files
-        -s 5
+        -s 6.5
         --min-seq-id 0.40
         -c 0.3
         --cov-mode 0

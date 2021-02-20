@@ -44,8 +44,9 @@ class RepeatMaskerIter(TaskList):
             data_files = []
             data_files += [_f for _f in self.data if _f != ""]
             # Perform on optimal taxonomic identification
-            if self.input["taxonomy"]["taxonomy"].assignment(self.config["level"]) is not None:
-                data_files += [self.input["taxonomy"]["taxonomy"].family.value]
+            assignment = self.input["taxonomy"]["taxonomy"].assignment(self.config["level"])
+            if assignment is not None:
+                data_files += [assignment]
             _file = str(self.input["repmod.repeat_modeler"]["model"])
             if os.path.exists(_file) and os.path.getsize(_file) > 0:
                 data_files.append(_file)
