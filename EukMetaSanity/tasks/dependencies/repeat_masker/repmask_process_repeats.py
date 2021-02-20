@@ -77,7 +77,7 @@ class ProcessRepeatsIter(TaskList):
                 self.single(
                     self.program[
                         # Input taxonomy from OrthoDB search
-                        "-species", self.input["taxonomy"]["taxonomy"].family.value,
+                        "-species", self.input["taxonomy"]["taxonomy"].assignment("family").value,
                         "-maskSource", str(self.dependency_input["fasta"]),
                         (*self.added_flags),
                         final_out,
