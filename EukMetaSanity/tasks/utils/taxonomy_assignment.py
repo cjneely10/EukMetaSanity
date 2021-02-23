@@ -45,7 +45,6 @@ class TaxonomyAssignment:
         :param find_next_best: Search for next-best tax assignment if provided level not found
         :return: Assignment object or None
         """
-        print(str(self))
         idx = TaxonomyAssignment._tax_order.index(level)
         if not find_next_best:
             return getattr(self, TaxonomyAssignment._tax_order[idx], None)
