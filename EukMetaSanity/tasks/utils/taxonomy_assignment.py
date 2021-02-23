@@ -18,12 +18,13 @@ class TaxonomyAssignment:
     """
     Assignment = namedtuple("Assignment", ("value", "tax_id", "score"))
 
-    _tax_order = ["kingdom", "phylum", "_class", "order", "superfamily", "family", "genus", "species"]
+    _tax_order = ["superkingdom", "kingdom", "phylum", "_class", "order", "superfamily", "family", "genus", "species"]
 
     def __init__(self):
         """ Create empty assignment
 
         """
+        self.superkingdom: Optional[TaxonomyAssignment.Assignment] = None
         self.kingdom: Optional[TaxonomyAssignment.Assignment] = None
         self.phylum: Optional[TaxonomyAssignment.Assignment] = None
         self._class: Optional[TaxonomyAssignment.Assignment] = None
@@ -44,11 +45,12 @@ class TaxonomyAssignment:
         :param find_next_best: Search for next-best tax assignment if provided level not found
         :return: Assignment object or None
         """
+        print(str(self))
         idx = TaxonomyAssignment._tax_order.index(level)
         if not find_next_best:
             return getattr(self, TaxonomyAssignment._tax_order[idx], None)
         _level = None
-        while idx > 0 and _level is None:
+        while idx >= 0 and _level is None:
             _level = getattr(self, TaxonomyAssignment._tax_order[idx], None)
             idx -= 1
         if _level is None:
@@ -60,12 +62,12 @@ class TaxonomyAssignment:
 
         :return: Assignment as string
         """
-        return "TaxonomyAssignment(kingdom={}, phylum={}, class={}, order={}, superfamily={}, family={}, genus={}, " \
-               "species={})".format(
+        return "TaxonomyAssignment(superkingdom={}, kingdom={}, phylum={}, class={}, order={}, superfamily={}, " \
+               "family={}, genus={}, species={})".format(
             *[
                 str(v.value) if v is not None else "None" for v in (
-                    self.kingdom, self.phylum, self._class, self.order, self.superfamily, self.family, self.genus,
-                    self.species
+                    self.superkingdom, self.kingdom, self.phylum, self._class, self.order, self.superfamily,
+                    self.family, self.genus, self.species
                 )
             ]
         )

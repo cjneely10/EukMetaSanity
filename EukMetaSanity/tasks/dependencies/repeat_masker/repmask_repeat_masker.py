@@ -44,6 +44,7 @@ class RepeatMaskerIter(TaskList):
             data_files = []
             data_files += [_f for _f in self.data if _f != ""]
             # Perform on optimal taxonomic identification
+            print(self.record_id)
             assignment = self.input["taxonomy"]["taxonomy"].assignment(self.config["level"])
             if assignment is not None:
                 data_files += [assignment.value]

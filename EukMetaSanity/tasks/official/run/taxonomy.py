@@ -57,7 +57,7 @@ class TaxonomyIter(TaskList):
             if self.developer_mode:
                 return TaxonomyAssignment()
             tax_assignment_out = TaxonomyAssignment()
-            tax_levels = ["kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
+            tax_levels = ["superkingdom", "kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
             taxonomy = {key: None for key in tax_levels}
             tax_assignment_out.kingdom = TaxonomyAssignment.Assignment("Eukaryota", 2759, -1)
             try:
