@@ -109,7 +109,7 @@ class TaskManager:
                     else (req.name, task.name)
                 ].tasks[k].output
                 # Dependency input will either come from root or will be collected from a task that has already run
-                if self.task_list[i][3] is not None:
+                if self.task_list[i][3] is not None and (self.task_list[i][2], "") in self.completed_tasks.keys():
                     for key, val in self.task_list[i][3]:
                         output[key] = self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output[val]
                 else:

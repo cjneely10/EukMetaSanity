@@ -22,7 +22,7 @@ class QualityIter(TaskList):
     """
     name = "quality"
     requires = []
-    depends = [DependencyInput("busco", id_mapping=[("prot", "fasta")])]
+    depends = [DependencyInput("busco")]
 
     class Quality(Task):
         """

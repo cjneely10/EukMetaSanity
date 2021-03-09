@@ -56,15 +56,16 @@ class BuscoIter(TaskList):
             results_directory = os.path.dirname(str(self.output["results"]))
             self.parallel(
                 self.program[
-                    "-i", self.dependency_input["fasta"],
+                    "-i", self.dependency_input["prot"],
                     "--out_path", results_directory,
-                    "-o", prefix(str(self.dependency_input["fasta"])),
+                    "-o", prefix(str(self.dependency_input["prot"])),
                     "-m", self.config["mode"],
                     "-l", self.config["lineage"],
                     "--cpu", self.threads,
                     (*self.added_flags)
                 ]
             )
+            print(1)
             # Change name of output file
             os.replace(
                 glob.glob(os.path.join(self.wdir, self.record_id, "*", "short_summary*.txt"))[0],
