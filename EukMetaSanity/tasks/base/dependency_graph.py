@@ -86,7 +86,7 @@ class DependencyGraph:
                 )
             else:
                 new_node = Node(
-                    name=requirement, scope=scope, dependency_input=node.dependency_input, id_mapping=node.id_mapping
+                    name=requirement, scope=scope, dependency_input="", id_mapping=None
                 )
             graph.add_edge(new_node, task_node)
             self._add_requirements_within_dependencies(graph, new_node, task_node, attr, scope)

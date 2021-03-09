@@ -77,7 +77,9 @@ class ConfigManager:
 
         """
         for task_name, task_dict in data_dict.items():
-            if "data" in task_dict.keys() and ("skip" not in task_dict.keys() or task_dict["skip"] is not True):
+            if "skip" in task_dict.keys() and task_dict["skip"] is True:
+                continue
+            if "data" in task_dict.keys():
                 for _val in task_dict["data"].split(","):
                     if ":" in _val:
                         _val = _val.split(":")[1]

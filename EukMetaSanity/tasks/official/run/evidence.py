@@ -20,7 +20,7 @@ class EvidenceIter(TaskList):
     """
     name = "evidence"
     requires = ["abinitio.augustus", "abinitio.genemark"]
-    depends = [DependencyInput("metaeuk", "repeats")]
+    depends = [DependencyInput("metaeuk")]
 
     class Evidence(Task):
         """

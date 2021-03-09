@@ -75,6 +75,8 @@ combined-evidence:
       program: braker.pl
       program_gffread: gffread
       level: order
+      FLAGS:
+        # Provide flags as desired
     mmseqs.filtertaxseqdb:
       program: mmseqs
       level: order

@@ -35,7 +35,7 @@ class DependencyInput:
     def input(self) -> str:
         """ Get dependency input object string
 
-        :return: Parsed input object string as tuple
+        :return: Parsed input object string
         """
         return self._input
 
@@ -46,3 +46,6 @@ class DependencyInput:
         :return: Mapping provided at Task level
         """
         return self._id_mapping
+
+    def __str__(self):
+        return f"Dependency <Name: {self._name} Root: {self.input} ID-mapping: {self._id_mapping}>"

@@ -109,17 +109,15 @@ class TaskManager:
                     else (req.name, task.name)
                 ].tasks[k].output
                 # Dependency input will either come from root or will be collected from a task that has already run
-                if req.input != ConfigManager.ROOT:
-                    output.update(self.completed_tasks[
-                                      (req.name, req.input) if (req.name, req.input) in self.completed_tasks.keys()
-                                      else (req.name, task.scope)
-                                  ].tasks[k].output)
+                if self.task_list[i][3] is not None:
+                    for key, val in self.task_list[i][3]:
+                        output[key] = self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output[val]
                 else:
                     output.update(self.input_files[k][ConfigManager.ROOT])
             if output == {}:
                 output = self.input_files[k][ConfigManager.ROOT]
             to_add.append(inner_add)
-            expected_input.append(TaskManager._incorporate_key_overrides(self.task_list[i][3], output))
+            expected_input.append(output)
         return to_add, expected_input
 
     def run(self, output_dir: str):
@@ -129,8 +127,7 @@ class TaskManager:
         """
         # Generate first task from class object
         task = self._generate_task(0, self.debug, [{} for _ in range(len(self.input_files))],
-                                   [TaskManager._incorporate_key_overrides(self.task_list[0][3],
-                                                                           self.input_files[k][ConfigManager.ROOT])
+                                   [self.input_files[k][ConfigManager.ROOT]
                                     for k in range(len(self.input_files))])
         # Run and store results
         task.run()
@@ -175,19 +172,20 @@ class TaskManager:
         # Serialize output to file
         pickle.dump(output_data, open(os.path.join(_final_output_dir, self.command + ".pkl"), "wb"))
 
-    @staticmethod
-    def _incorporate_key_overrides(override_tuples: Optional[List[Tuple]], output: Dict) -> Dict:
-        """ Use tuple of new_key: old_key data to update dictionary keys for passing to dependencies
-
-        :param override_tuples: List of new_key: old_key values to incorporate into output dict
-        :param output: Dict to modify
-        :return: Reference to updated dict
-        """
-        if override_tuples is None:
-            return output
-        for key, val in override_tuples:
-            output[val] = output[key]
-        return output
+    # @staticmethod
+    # def _incorporate_key_overrides(override_tuples: Optional[List[Tuple]], output: Dict) -> Dict:
+    #     """ Use tuple of new_key: old_key data to update dictionary keys for passing to dependencies
+    #
+    #     :param override_tuples: List of new_key: old_key values to incorporate into output dict
+    #     :param output: Dict to modify
+    #     :return: Reference to updated dict
+    #     """
+    #     if override_tuples is None:
+    #         return output
+    #     print(override_tuples)
+    #     for key, val in override_tuples:
+    #         output[val] = output[key]
+    #     return output
 
     def prerun_summarize(self) -> str:
         """ List all tasks that must be completed for each Task item and HPC total time used (if needed)
@@ -197,8 +195,7 @@ class TaskManager:
         needs_completing = defaultdict(int)
         # Generate first task from class object
         task = self._generate_task(0, 0, [{} for _ in range(len(self.input_files))],
-                                   [TaskManager._incorporate_key_overrides(self.task_list[0][3],
-                                                                           self.input_files[k][ConfigManager.ROOT])
+                                   [self.input_files[k][ConfigManager.ROOT]
                                     for k in range(len(self.input_files))])
         self.completed_tasks[(task.name, task.scope)] = task
         for _task in task.tasks:
