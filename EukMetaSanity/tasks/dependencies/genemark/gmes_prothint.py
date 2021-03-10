@@ -48,7 +48,7 @@ class ProtHintIter(TaskList):
             """
             Run gmes.prothint
             """
-            if os.path.getsize(str(self.dependency_input["fasta"])) == 0:
+            if os.path.getsize(str(self.input["mmseqs.filtertaxseqdb"]["fastas"][0])) == 0:
                 touch(str(self.output["hints"]))
                 touch(str(self.output["evidence"]))
                 return
