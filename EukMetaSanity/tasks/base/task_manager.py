@@ -109,11 +109,14 @@ class TaskManager:
                     else (req.name, task.name)
                 ].tasks[k].output
                 # Dependency input will either come from root or will be collected from a task that has already run
-                if self.task_list[i][3] is not None and (self.task_list[i][2], "") in self.completed_tasks.keys():
-                    for key, val in self.task_list[i][3]:
+            if self.task_list[i][3] is not None:
+                for key, val in self.task_list[i][3]:
+                    if (self.task_list[i][2], "") in self.completed_tasks.keys():
                         output[key] = self.completed_tasks[(self.task_list[i][2], "")].tasks[k].output[val]
-                else:
-                    output.update(self.input_files[k][ConfigManager.ROOT])
+                    else:
+                        output[key] = self.input_files[k][ConfigManager.ROOT][val]
+            else:
+                output.update(self.input_files[k][ConfigManager.ROOT])
             if output == {}:
                 output = self.input_files[k][ConfigManager.ROOT]
             to_add.append(inner_add)

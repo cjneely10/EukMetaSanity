@@ -13,7 +13,7 @@ class MMseqsIter(TaskList):
     """
     name = "mmseqs"
     requires = []
-    depends = [DependencyInput("mmseqs.convertalis", id_mapping=[("prot", "fasta")])]
+    depends = [DependencyInput("mmseqs.convertalis", id_mapping=[("fasta", "prot")])]
 
     class MMseqs(Task):
         """
