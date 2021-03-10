@@ -48,6 +48,10 @@ class ProtHintIter(TaskList):
             """
             Run gmes.prothint
             """
+            if os.path.getsize(str(self.dependency_input["fasta"])) == 0:
+                touch(str(self.output["hints"]))
+                touch(str(self.output["evidence"]))
+                return
             try:
                 # Run prothint
                 self.parallel(
