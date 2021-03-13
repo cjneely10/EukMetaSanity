@@ -72,7 +72,7 @@ class ProcessRepeatsIter(TaskList):
                 os.remove(final_out)
             touch(final_out)
             all([(self.local["cat"][_file] >> final_out)() for _file in cat_files])
-            if os.path.getsize(final_out) > 0 and os.path.exists(str(self.output["rmtbl"])):
+            if os.path.getsize(final_out) > 0:
                 # Run ProcessRepeats
                 self.single(
                     self.program[
