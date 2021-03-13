@@ -62,19 +62,34 @@ class GeneMarkPetapIter(TaskList):
             if len(open(str(self.input["gmes.prothint"]["hints"])).readlines()) > 100:
                 ev_vals = ["--EP", str(self.input["gmes.prothint"]["hints"]),
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
-            script = self.create_script(
-                self.program[
-                    "--sequence", str(self.dependency_input["fasta"]),
-                    (*ev_vals),
-                    "--cores", self.threads, (*self.added_flags),
-                    ("--fungus"
-                     if self.input["taxonomy"]["taxonomy"].kingdom is not None and
-                        self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
-                ],
-                "abinitio.sh"
-            )
-            # Run script
-            self.parallel(script)
+            try:
+                script = self.create_script(
+                    self.program[
+                        "--sequence", str(self.dependency_input["fasta"]),
+                        (*ev_vals),
+                        "--cores", self.threads, (*self.added_flags),
+                        ("--fungus"
+                         if self.input["taxonomy"]["taxonomy"].kingdom is not None and
+                            self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
+                    ],
+                    "abinitio.sh"
+                )
+                # Run script
+                self.parallel(script)
+            except:
+                script = self.create_script(
+                    self.program[
+                        "--sequence", str(self.dependency_input["fasta"]),
+                        "--ES",
+                        "--cores", self.threads, (*self.added_flags),
+                        ("--fungus"
+                         if self.input["taxonomy"]["taxonomy"].kingdom is not None and
+                            self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
+                    ],
+                    "abinitio.sh"
+                )
+                # Run script
+                self.parallel(script)
 
     def __init__(self, *args, **kwargs):
         """
