@@ -84,10 +84,9 @@ class ProcessRepeatsIter(TaskList):
                     ],
                     "3:00:00"
                 )
-            else:
-                touch(str(self.output["rmcat"]))
-                touch(str(self.output["rmtbl"]))
-                touch(str(self.output["rmout"]))
+            touch(str(self.output["rmcat"]))
+            touch(str(self.output["rmtbl"]))
+            touch(str(self.output["rmout"]))
 
     def __init__(self, *args, **kwargs):
         """

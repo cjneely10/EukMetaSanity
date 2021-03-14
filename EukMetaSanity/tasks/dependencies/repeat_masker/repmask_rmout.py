@@ -54,19 +54,18 @@ class RepeatMaskerOutIter(TaskList):
                     input_file,
                     str(self.output["mask-fna"])
                 )
-                # Output the repeats file as a gff3 file
-                self.single(
-                    (self.program[
-                         self.input["repmask.process_repeats"]["rmout"]
-                     ] > str(self.output["mask-gff3"])),
-                    "3:00:00"
-                )
             else:
-                touch(str(self.output["mask-gff3"]))
                 shutil.copyfile(
                     str(self.dependency_input["fasta"]),
                     str(self.output["mask-fna"])
                 )
+            # Output the repeats file as a gff3 file
+            self.single(
+                (self.program[
+                     self.input["repmask.process_repeats"]["rmout"]
+                 ] > str(self.output["mask-gff3"])),
+                "3:00:00"
+            )
 
     def __init__(self, *args, **kwargs):
         """
