@@ -519,25 +519,40 @@ class Task(ABC):
         write_string = f"  Running {len(cmds)} commands similar to {str(cmds[0])}"
         print(write_string)
         logging.info(write_string)
+        if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
+            self._batch_slurm(cmds, time_override)
+        else:
+            self._batch(cmds)
+
+    def _batch(self, cmds: List[LocalCommand]):
+        """ Run commands list distributed on own system
+
+        :param cmds: List of LocalCommand objects to run in parallel
+        """
         for i in range(0, len(cmds), int(self.threads)):
             running = []
             # Run up to `threads` tasks at a time
             for j in range(i, i + int(self.threads)):
                 if j >= len(cmds):
                     break
-                if self._mode == 1:
-                    if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
-                        f = self._create_slurm_command(cmds[j], time_override)
-                    else:
-                        f = cmds[j] & BG
-                    running.append(f)
-            # Batch run all jobs and wait to finish
-            if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
-                with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
-                    output_futures = [executor.submit(_task) for _task in running]
-                    concurrent.futures.wait(output_futures)
-            else:
-                all([_f.wait() for _f in running])
+                running.append(cmds[j] & BG)
+            all([_f.wait() for _f in running])
+
+    def _batch_slurm(self, cmds: List[LocalCommand], time_override: Optional[str] = None):
+        """ Run commands list distributed on HPC
+
+        :param cmds: List of LocalCommand objects to run in parallel
+        :param time_override: Time override in "HH:MM:SS" format, if needed
+        """
+        with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
+            for i in range(0, len(cmds), int(self.threads)):
+                running = []
+                # Run up to `threads` tasks at a time
+                for j in range(i, i + int(self.threads)):
+                    if j >= len(cmds):
+                        break
+                    running.append(executor.submit(self.single, cmds[j], time_override))
+                concurrent.futures.wait(running)
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:
