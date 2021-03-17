@@ -545,14 +545,10 @@ class Task(ABC):
         :param time_override: Time override in "HH:MM:SS" format, if needed
         """
         with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
-            for i in range(0, len(cmds), int(self.threads)):
-                running = []
-                # Run up to `threads` tasks at a time
-                for j in range(i, i + int(self.threads)):
-                    if j >= len(cmds):
-                        break
-                    running.append(executor.submit(self.single, cmds[j], time_override))
-                concurrent.futures.wait(running)
+            running = []
+            for i in range(0, len(cmds)):
+                running.append(executor.submit(self.single, cmds[i], time_override))
+            concurrent.futures.wait(running)
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:

@@ -107,20 +107,24 @@ class AugustusIter(TaskList):
                         out_file_path,
                     ]
                 )
-            self.batch(progs, "1:00:00")
+            self.batch(progs, "10:00")
             touch(out_gff + ".tmp")
             for out_g in out_gffs:
-                (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
+                if os.path.exists(out_g):
+                    (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
             # Combine files
-            self.single(
-                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
-                "30:00"
-            )
+            try:
+                self.single(
+                    self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
+                    "30:00"
+                )
+            except:
+                pass
             # Make ids unique
             self._make_unique(out_gff)
             # Remove intermediary files
-            all([os.remove(_file) for _file in out_files])
-            all([os.remove(_file) for _file in out_gffs])
+            all([os.remove(_file) for _file in out_files if os.path.exists(_file)])
+            all([os.remove(_file) for _file in out_gffs if os.path.exists(_file)])
             return out_gff
 
         def _handle_config_output(self):
