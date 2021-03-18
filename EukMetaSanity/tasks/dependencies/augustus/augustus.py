@@ -107,7 +107,7 @@ class AugustusIter(TaskList):
                         out_file_path,
                     ]
                 )
-            self.batch(progs, "10:00")
+            self.batch(progs, "1:00")
             touch(out_gff + ".tmp")
             for out_g in out_gffs:
                 if os.path.exists(out_g):
@@ -116,7 +116,7 @@ class AugustusIter(TaskList):
             try:
                 self.single(
                     self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
-                    "30:00"
+                    "5:00"
                 )
             except:
                 pass
@@ -166,7 +166,7 @@ class AugustusIter(TaskList):
                     "1000",
                     out_gb
                 ],
-                "30:00"
+                "2:00"
             )
 
             species_config_prefix = self.record_id + str(_round)
@@ -176,7 +176,7 @@ class AugustusIter(TaskList):
                     "--species=%s" % species_config_prefix,
                     out_gb
                 ],
-                "1:00:00"
+                "2:00"
             )
             # Run training
             self.single(
@@ -184,7 +184,7 @@ class AugustusIter(TaskList):
                     "--species=%s" % species_config_prefix,
                     out_gb
                 ],
-                "1:00:00"
+                "10:00"
             )
             return out_gff
 
