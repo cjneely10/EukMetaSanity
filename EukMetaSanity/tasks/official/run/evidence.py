@@ -74,7 +74,7 @@ class EvidenceIter(TaskList):
                     (*input_list), "-G", "--merge",
                     "-o", out_prefix + ".all.gff3"
                 ],
-                "30:00"
+                "10:00"
             )
             self.batch([self.local["create-final-annotations.py"][
                             "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i]

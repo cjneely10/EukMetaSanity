@@ -107,7 +107,7 @@ class AugustusIter(TaskList):
                         out_file_path,
                     ]
                 )
-            self.batch(progs, "1:00")
+            self.batch(progs, "5:00")
             touch(out_gff + ".tmp")
             for out_g in out_gffs:
                 if os.path.exists(out_g):
