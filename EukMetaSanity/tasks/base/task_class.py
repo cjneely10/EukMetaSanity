@@ -395,7 +395,7 @@ class Task(ABC):
         self._mode = int(mode is False)
 
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
-                              threads_override: str = None) -> SLURMCaller:
+                              threads_override: str = None, memory_override: str = None) -> SLURMCaller:
         """ Create a SLURM-managed process
 
         :param cmd: plumbum LocalCommand object to run
@@ -403,6 +403,7 @@ class Task(ABC):
         :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
             Note that this will only affect SLURM script generation - this will not override thread values passed in by
             the cmd parameter
+        :param memory_override: Provide memory override for command in "2GB" format, etc.
         :return: SLURM-wrapped command to run script via plumbum interface
         """
         if threads_override is not None:
@@ -419,13 +420,14 @@ class Task(ABC):
             self.wdir,
             threads,
             cmd,
-            self.cfg.config[sel][ConfigManager.MEMORY],
+            self.cfg.config[sel][ConfigManager.MEMORY] if memory_override is None else memory_override,
             self.cfg.config[sel][ConfigManager.TIME] if time_override is None else time_override,
             self.local,
             self.cfg.get_slurm_flagged_arguments(),
         )
 
-    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None, threads_override: str = None):
+    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None, threads_override: str = None,
+                 memory_override: str = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
         In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
@@ -444,11 +446,12 @@ class Task(ABC):
         :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
             Note that this will only affect SLURM script generation - this will not override thread values passed in by
             the cmd parameter
+        :param memory_override: Provide memory override for command in "2GB" format, etc.
         :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
         if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
-            cmd = self._create_slurm_command(cmd, time_override, threads_override)
+            cmd = self._create_slurm_command(cmd, time_override, threads_override, memory_override)
         # Run command directly
         if self._mode == 1:
             logging.info(str(cmd))
@@ -459,7 +462,7 @@ class Task(ABC):
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
                     w.write(str(out))
 
-    def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
+    def single(self, cmd: LocalCommand, time_override: Optional[str] = None, memory_override: str = None):
         """ Launch a command that uses a single thread.
 
         The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
@@ -469,8 +472,9 @@ class Task(ABC):
 
         :param cmd: plumbum LocalCommand object to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
+        :param memory_override: Provide memory override for command in "2GB" format, etc.
         """
-        self.parallel(cmd, time_override, threads_override="1")
+        self.parallel(cmd, time_override, threads_override="1", memory_override=memory_override)
 
     def create_script(self, cmd: Union[str, LocalCommand], file_name: str) -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.

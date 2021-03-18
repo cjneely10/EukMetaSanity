@@ -69,17 +69,13 @@ class EvidenceIter(TaskList):
             :param fasta_file: FASTA file with masked data
             :param out_prefix: Output prefix for files
             """
-            self.single(
-                self.local["gffread"][
-                    (*input_list), "-G", "--merge",
-                    "-o", out_prefix + ".all.gff3"
-                ],
-                "10:00"
-            )
-            self.batch([self.local["create-final-annotations.py"][
-                            "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i]
-                        for i in range(0, 4)],
-                       "3:00:00")
+            self.local["gffread"][
+                (*input_list), "-G", "--merge",
+                "-o", out_prefix + ".all.gff3"
+            ]()
+            for i in range(0, 4):
+                self.local["create-final-annotations.py"][
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i]()
 
     def __init__(self, *args, **kwargs):
         """
