@@ -394,6 +394,26 @@ class Task(ABC):
         # False is False = 1 for user
         self._mode = int(mode is False)
 
+    @property
+    def memory(self) -> str:
+        """ Get SLURM memory set at either the current task level, or its parent scope
+
+        :return: Memory string
+        """
+        if ConfigManager.MEMORY in self.config.keys():
+            return self.config[ConfigManager.MEMORY]
+        return self.cfg.config[self._scope][ConfigManager.MEMORY]
+
+    @property
+    def time(self) -> str:
+        """ Get SLURM time set at either the current task level, or its parent scope
+
+        :return: Time string
+        """
+        if ConfigManager.TIME in self.config.keys():
+            return self.config[ConfigManager.TIME]
+        return self.cfg.config[self._scope][ConfigManager.TIME]
+
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
                               threads_override: str = None, memory_override: str = None) -> SLURMCaller:
         """ Create a SLURM-managed process
@@ -420,8 +440,8 @@ class Task(ABC):
             self.wdir,
             threads,
             cmd,
-            self.cfg.config[sel][ConfigManager.MEMORY] if memory_override is None else memory_override,
-            self.cfg.config[sel][ConfigManager.TIME] if time_override is None else time_override,
+            self.memory if memory_override is None else memory_override,
+            self.time if time_override is None else time_override,
             self.local,
             self.cfg.get_slurm_flagged_arguments(),
         )

@@ -82,7 +82,7 @@ class ProcessRepeatsIter(TaskList):
                         (*self.added_flags),
                         final_out,
                     ],
-                    "3:00:00"
+                    "1:00:00"
                 )
             touch(str(self.output["rmcat"]))
             touch(str(self.output["rmtbl"]))

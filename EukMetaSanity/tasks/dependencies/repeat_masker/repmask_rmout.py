@@ -64,7 +64,7 @@ class RepeatMaskerOutIter(TaskList):
                 (self.program[
                      self.input["repmask.process_repeats"]["rmout"]
                  ] > str(self.output["mask-gff3"])),
-                "3:00:00"
+                "1:00:00"
             )
 
     def __init__(self, *args, **kwargs):
