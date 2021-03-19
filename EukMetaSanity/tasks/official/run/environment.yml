@@ -15,6 +15,7 @@ dependencies:
   - perl-logger-simple=2.0
   - perl-parallel-forkmanager=2.02
   - perl-threaded=5.26.0
+  - perl-math-utils=1.13
   - pip
   - pip:
     - bcbio-gff==0.6.6

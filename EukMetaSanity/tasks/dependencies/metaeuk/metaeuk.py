@@ -16,7 +16,7 @@ class MetaEukIter(TaskList):
 
     expects: fasta[Path]
 
-    output: gff3[Path]
+    output: gff3[Path], prot[Path]
 
     config:
         metaeuk:
@@ -50,7 +50,8 @@ class MetaEukIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "gff3": os.path.join(self.wdir, self.record_id + ".evidence.gff3")
+                "gff3": os.path.join(self.wdir, self.record_id + ".evidence.gff3"),
+                "prot": os.path.join(self.wdir, self.record_id + ".faa")
             }
 
         @program_catch
@@ -58,45 +59,37 @@ class MetaEukIter(TaskList):
             """
             Run metaeuk
             """
-            out_results = []
-            for i, database in enumerate(self.data):
-                if database == "":
-                    continue
-                is_profile = []
-                if "p:" in database:
-                    is_profile.append("--slice-search")
-                    database = database[2:]
-                db_prefix = prefix(database) + str(i)
-                _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
-                if not os.path.exists(_outfile + ".fas"):
-                    self.parallel(
-                        self.program[
-                            "easy-predict",
-                            str(self.dependency_input["fasta"]),
-                            database,
-                            _outfile,
-                            os.path.join(self.wdir, "tmp"),
-                            "--threads", self.threads,
-                            (*self.added_flags),
-                            (*is_profile),
-                        ]
-                    )
-                # Convert to GFF3
-                self.single(
-                    self.local["metaeuk-to-gff3.py"][
-                        str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
-                        os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix),
-                    ],
-                    "30:00"
+            if len(self.data) == 0:
+                return
+            database = self.data[0]
+            is_profile = []
+            if "p:" in database:
+                is_profile.append("--slice-search")
+                database = database[2:]
+            db_prefix = prefix(database)
+            _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
+            if not os.path.exists(_outfile + ".fas"):
+                self.parallel(
+                    self.program[
+                        "easy-predict",
+                        str(self.dependency_input["fasta"]),
+                        database,
+                        _outfile,
+                        os.path.join(self.wdir, "tmp"),
+                        "--threads", self.threads,
+                        (*self.added_flags),
+                        (*is_profile),
+                    ]
                 )
-                out_results.append(os.path.join(self.wdir, "%s-metaeuk.gff3" % db_prefix))
+            # Convert to GFF3
             self.single(
-                self.local["gffread"][
-                    (*out_results), "-G", "--cluster-only",
-                    "-o", str(self.output["gff3"])
+                self.local["metaeuk-to-gff3.py"][
+                    str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
+                    str(self.output["gff3"]),
                 ],
                 "30:00"
             )
+            os.replace(_outfile + ".fas", str(self.output["prot"]))
 
     def __init__(self, *args, **kwargs):
         """
