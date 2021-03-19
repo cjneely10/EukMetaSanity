@@ -226,11 +226,7 @@ class Task(ABC):
 
         :return: LocalCommand to `program` path
         """
-        if isinstance(self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name], dict):
-            return self.local[
-                self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name][ConfigManager.PROGRAM]
-            ]
-        return self.local[self._cfg.config[self._scope][ConfigManager.DEPENDENCIES][self._name]]
+        return self.local[self.config[ConfigManager.PROGRAM]]
 
     @property
     def local(self) -> LocalMachine:
@@ -426,19 +422,17 @@ class Task(ABC):
         :param memory_override: Provide memory override for command in "2GB" format, etc.
         :return: SLURM-wrapped command to run script via plumbum interface
         """
-        if threads_override is not None:
-            threads = threads_override
-        else:
-            threads = str(self._threads_pw)
         sel = self._scope if self._scope is not None else self._name
         # Confirm valid SLURM section
         if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
+            raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
+        if ConfigManager.TIME not in self.cfg.config[sel].keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self._name)
         # Generate command to launch SLURM job
         return SLURMCaller(
             self.cfg.get_slurm_userid(),
             self.wdir,
-            threads,
+            str(self._threads_pw) if threads_override is None else threads_override,
             cmd,
             self.memory if memory_override is None else memory_override,
             self.time if time_override is None else time_override,
