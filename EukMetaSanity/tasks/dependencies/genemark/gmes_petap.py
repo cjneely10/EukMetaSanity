@@ -49,7 +49,8 @@ class GeneMarkPetapIter(TaskList):
             """
             super().__init__(*args, **kwargs)
             self.output = {
-                "gtf": os.path.join(self.wdir, "genemark.gtf")
+                "gtf": os.path.join(self.wdir, "genemark.gtf"),
+                "ab-gff3": os.path.join(self.wdir, self.record_id + ".gmes.gff3")
             }
 
         @program_catch
@@ -90,6 +91,12 @@ class GeneMarkPetapIter(TaskList):
                 )
                 # Run script
                 self.parallel(script)
+            self.single(
+                self.local["gffread"][
+                    self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"])
+                ],
+                "30:00"
+            )
 
     def __init__(self, *args, **kwargs):
         """

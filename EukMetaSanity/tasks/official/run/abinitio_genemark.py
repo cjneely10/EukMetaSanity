@@ -9,8 +9,8 @@ class AbInitioGeneMarkIter(TaskList):
     Abinitio class iterator for running genemark
     """
     name = "abinitio.genemark"
-    requires = ["taxonomy", "repeats"]
-    depends = [DependencyInput("gmes.gffread", "repeats", id_mapping=[("fasta", "mask-fna")])]
+    requires = ["taxonomy", "repeats", "evidence"]
+    depends = [DependencyInput("gmes.petap", "repeats", id_mapping=[("fasta", "mask-fna")])]
 
     class AbInitioGeneMark(Task):
         """

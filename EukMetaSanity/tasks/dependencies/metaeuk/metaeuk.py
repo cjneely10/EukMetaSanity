@@ -68,20 +68,20 @@ class MetaEukIter(TaskList):
                 database = database[2:]
             db_prefix = prefix(database)
             _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
-            if not os.path.exists(_outfile + ".fas"):
-                self.parallel(
-                    self.program[
-                        "easy-predict",
-                        str(self.dependency_input["fasta"]),
-                        database,
-                        _outfile,
-                        os.path.join(self.wdir, "tmp"),
-                        "--threads", self.threads,
-                        (*self.added_flags),
-                        (*is_profile),
-                    ]
-                )
-            # Convert to GFF3
+            # Run MetaEuk
+            self.parallel(
+                self.program[
+                    "easy-predict",
+                    str(self.dependency_input["fasta"]),
+                    database,
+                    _outfile,
+                    os.path.join(self.wdir, "tmp"),
+                    "--threads", self.threads,
+                    (*self.added_flags),
+                    (*is_profile),
+                ]
+            )
+            # Write in GFF3 format
             self.single(
                 self.local["metaeuk-to-gff3.py"][
                     str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
@@ -89,6 +89,7 @@ class MetaEukIter(TaskList):
                 ],
                 "30:00"
             )
+            # Rename output file
             os.replace(_outfile + ".fas", str(self.output["prot"]))
 
     def __init__(self, *args, **kwargs):

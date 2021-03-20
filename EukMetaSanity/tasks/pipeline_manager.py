@@ -11,6 +11,7 @@ from EukMetaSanity.tasks.official.run.taxonomy import TaxonomyIter
 from EukMetaSanity.tasks.official.run.repeats import RepeatsIter
 from EukMetaSanity.tasks.official.run.abinitio_augustus import AbInitioAugustusIter
 from EukMetaSanity.tasks.official.run.abinitio_genemark import AbInitioGeneMarkIter
+from EukMetaSanity.tasks.official.run.merge import MergeIter
 from EukMetaSanity.tasks.official.run.evidence import EvidenceIter
 # # Report imports
 from EukMetaSanity.tasks.official.report.kofamscan import KoFamScanIter
@@ -37,11 +38,12 @@ class PipelineManager:
         """
         self._programs: Dict[str, List[Type[TaskList]]] = {
             "run": [
-                EvidenceIter,
+                MergeIter,
                 TaxonomyIter,
                 AbInitioAugustusIter,
                 AbInitioGeneMarkIter,
                 RepeatsIter,
+                EvidenceIter,
             ],
             "report": [
                 KoFamScanIter,
