@@ -23,20 +23,20 @@ class TaxonomyIter(TaskList):
 
     """
     name = "taxonomy"
-    requires = []
-    depends = [DependencyInput("mmseqs.taxonomy")]
+    requires = ["evidence"]
+    depends = [DependencyInput("mmseqs.taxonomy", "evidence", id_mapping=[("fasta", "prot")])]
 
     class Taxonomy(Task):
         """
         Predict taxonomy
         """
+
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "taxonomy": self.get_taxonomy(
-                    str(self.input["mmseqs.taxonomy"]["tax-report"]),
-                    float(self.config["cutoff"])),
+                "taxonomy": self.get_taxonomy(str(self.input["mmseqs.taxonomy"]["tax-report"]),
+                                              float(self.config["cutoff"])),
                 "final": ["mmseqs.taxonomy.tax-report", "taxonomy"]
             }
 
@@ -57,7 +57,8 @@ class TaxonomyIter(TaskList):
             if self.developer_mode:
                 return TaxonomyAssignment()
             tax_assignment_out = TaxonomyAssignment()
-            tax_levels = ["superkingdom", "kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
+            tax_levels = ["superkingdom", "kingdom", "phylum", "class", "order", "superfamily", "family", "genus",
+                          "species"]
             taxonomy = {key: None for key in tax_levels}
             tax_assignment_out.kingdom = TaxonomyAssignment.Assignment("Eukaryota", 2759, -1)
             try:
