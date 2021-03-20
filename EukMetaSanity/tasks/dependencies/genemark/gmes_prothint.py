@@ -25,7 +25,7 @@ class ProtHintIter(TaskList):
 
     """
     name = "gmes.prothint"
-    requires = []
+    requires = ["evidence"]
     depends = []
 
     class ProtHint(Task):
@@ -48,12 +48,13 @@ class ProtHintIter(TaskList):
             """
             Run gmes.prothint
             """
+            print(self.dependency_input.keys())
             try:
                 # Run prothint
                 self.parallel(
                     self.program[
                         str(self.dependency_input["fasta"]),
-                        str(self.dependency_input["prot"]),
+                        str(self.input["evidence"]["prot"]),
                         "--workdir", self.wdir,
                         "--threads", self.threads,
                     ]
