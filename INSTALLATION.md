@@ -55,7 +55,7 @@ cd ~/miniconda/envs/EukMS_refine/bin
 sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
 ```
 
-### Configuring GeneMark
+### Configuring GeneMark 4.65_lic
 
 Ensure that your `.gm_key` file is present in your home directory if you are using GeneMark as your ab initio predictor. 
 You also may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
