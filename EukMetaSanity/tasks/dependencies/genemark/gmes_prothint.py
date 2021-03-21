@@ -48,7 +48,6 @@ class ProtHintIter(TaskList):
             """
             Run gmes.prothint
             """
-            print(self.dependency_input.keys())
             try:
                 # Run prothint
                 self.parallel(

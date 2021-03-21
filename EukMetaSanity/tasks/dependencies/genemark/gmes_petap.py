@@ -2,6 +2,7 @@
 Module holds gmes.petap build functionality
 """
 import os
+from typing import List
 from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
 
 
@@ -64,39 +65,35 @@ class GeneMarkPetapIter(TaskList):
                 ev_vals = ["--EP", str(self.input["gmes.prothint"]["hints"]),
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
             try:
-                script = self.create_script(
-                    self.program[
-                        "--sequence", str(self.dependency_input["fasta"]),
-                        (*ev_vals),
-                        "--cores", self.threads, (*self.added_flags),
-                        ("--fungus"
-                         if self.input["taxonomy"]["taxonomy"].kingdom is not None and
-                            self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
-                    ],
-                    "abinitio.sh"
-                )
-                # Run script
-                self.parallel(script)
+                self._run_petap(ev_vals)
             except:
-                script = self.create_script(
-                    self.program[
-                        "--sequence", str(self.dependency_input["fasta"]),
-                        "--ES",
-                        "--cores", self.threads, (*self.added_flags),
-                        ("--fungus"
-                         if self.input["taxonomy"]["taxonomy"].kingdom is not None and
-                            self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
-                    ],
-                    "abinitio.sh"
-                )
-                # Run script
-                self.parallel(script)
+                if ev_vals != ["--ES"]:
+                    self._run_petap(["--ES"])
             self.single(
                 self.local["gffread"][
                     self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"])
                 ],
                 "30:00"
             )
+
+        def _run_petap(self, ev_vals: List[str]):
+            """ Run gmes_petap.pl
+
+            :param ev_vals: List containing ES- or EP-related command-line flags to pass to run
+            """
+            script = self.create_script(
+                self.program[
+                    "--sequence", str(self.dependency_input["fasta"]),
+                    (*ev_vals),
+                    "--cores", self.threads, (*self.added_flags),
+                    ("--fungus"
+                     if self.input["taxonomy"]["taxonomy"].kingdom is not None and
+                        self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
+                ],
+                "abinitio.sh"
+            )
+            # Run script
+            self.parallel(script)
 
     def __init__(self, *args, **kwargs):
         """
