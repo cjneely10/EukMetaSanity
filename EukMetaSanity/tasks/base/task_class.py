@@ -13,7 +13,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable, Sized, Sequence
 # pylint: disable=no-member
 from plumbum import colors, local, BG
-from plumbum.commands.processes import ProcessExecutionError
 from plumbum.machines.local import LocalCommand, LocalMachine
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
@@ -32,12 +31,8 @@ def program_catch(func: Callable):
     def _add_try_except(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except ProcessExecutionError as err:
-            logging.info(err)
-            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
-                w_out.write(str(err))
-            print(colors.warn | str(err))
-        except FileExistsError as err:
+        # pylint: disable=broad-except
+        except BaseException as err:
             logging.info(err)
             with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
                 w_out.write(str(err))
@@ -564,8 +559,8 @@ class Task(ABC):
         """
         with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
             running = []
-            for i in range(0, len(cmds)):
-                running.append(executor.submit(self.single, cmds[i], time_override))
+            for cmd in cmds:
+                running.append(executor.submit(self.single, cmd, time_override))
             concurrent.futures.wait(running)
 
     @staticmethod
