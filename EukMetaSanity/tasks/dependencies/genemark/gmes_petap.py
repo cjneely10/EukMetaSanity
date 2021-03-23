@@ -61,7 +61,8 @@ class GeneMarkPetapIter(TaskList):
             """
             ev_vals = ["--ES"]
             # For now default to 100 intron predictions minimum to use file
-            if len(open(str(self.input["gmes.prothint"]["hints"])).readlines()) > 100:
+            if len(open(str(self.input["gmes.prothint"]["hints"])).readlines()) > 100 and \
+                    len(open(str(self.input["gmes.prothint"]["evidence"])).readlines()) > 100:
                 ev_vals = ["--EP", str(self.input["gmes.prothint"]["hints"]),
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
             try:
