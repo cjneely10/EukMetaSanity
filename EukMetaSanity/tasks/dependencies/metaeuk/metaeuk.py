@@ -54,6 +54,7 @@ class MetaEukIter(TaskList):
                 "prot": os.path.join(self.wdir, self.record_id + ".faa")
             }
 
+        # TODO: Revert to multiple dbs
         @program_catch
         def run(self):
             """

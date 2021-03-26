@@ -73,6 +73,7 @@ class AugustusIter(TaskList):
             # Rename final file
             os.replace(out_gff, str(self.output["ab-gff3"]))
 
+        # TODO: Make HPC-safe
         def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
             """ Run augustus training round
 

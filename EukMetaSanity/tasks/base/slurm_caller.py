@@ -4,7 +4,7 @@ Module holds logic for running a dask distributed task within a SLURM job
 
 import os
 from time import sleep
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from plumbum.machines.local import LocalCommand, LocalMachine
 
 
@@ -18,7 +18,7 @@ class SLURMCaller:
     OUTPUT_SCRIPTS = "slurm-runner.sh"
     FAILED_ID = "failed-job-id"
 
-    def __init__(self, user_id: str, wdir: str, threads: str, cmd: LocalCommand,
+    def __init__(self, user_id: str, wdir: str, threads: str, cmd: Union[LocalCommand, List[LocalCommand]],
                  memory: str, time: str, _local: LocalMachine, slurm_flags: List[Tuple[str, str]]):
         """ Generate SLURMCaller object using user metadata gathered from SLURM config section and
         the task's own metadata
@@ -26,7 +26,7 @@ class SLURMCaller:
         :param user_id: user-id argument in SLURM template
         :param wdir: Job working directory
         :param threads: Total number of cpus to give to job
-        :param cmd: Command to run in SLURM template
+        :param cmd: Command to run in SLURM template, or list of commands to run
         :param memory: Amount of memory to request for job
         :param time: Max allowed time to run job
         :param _local: Reference to LocalMachine object to use to run command
@@ -120,7 +120,12 @@ class SLURMCaller:
             file_ptr.write(SLURMCaller._create_header_line(*added_arg))
         file_ptr.write("\n")
         # Write command to run
-        file_ptr.write("".join((str(self.cmd), "\n")))
+        if isinstance(self.cmd, list):
+            for cmd in self.cmd:
+                file_ptr.write("".join((str(cmd), "\n")) + " &")
+            file_ptr.write("wait\n")
+        else:
+            file_ptr.write("".join((str(self.cmd), "\n")))
         file_ptr.close()
 
     @staticmethod

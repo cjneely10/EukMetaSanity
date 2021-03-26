@@ -70,6 +70,8 @@ class GeneMarkPetapIter(TaskList):
             except:
                 if ev_vals != ["--ES"]:
                     self._run_petap(["--ES"])
+            if not os.path.exists(str(self.output["ab-gff3"])):
+                self._run_petap(["--ES"])
             self.single(
                 self.local["gffread"][
                     self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"])

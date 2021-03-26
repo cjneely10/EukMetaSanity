@@ -405,6 +405,13 @@ class Task(ABC):
             return self.config[ConfigManager.TIME]
         return self.cfg.config[self._scope][ConfigManager.TIME]
 
+    @property
+    def is_slurm(self) -> bool:
+        """
+        Run was launched on SLURM
+        """
+        return bool(self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER])
+
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
                               threads_override: str = None, memory_override: str = None) -> SLURMCaller:
         """ Create a SLURM-managed process
@@ -435,8 +442,8 @@ class Task(ABC):
             self.cfg.get_slurm_flagged_arguments(),
         )
 
-    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None, threads_override: str = None,
-                 memory_override: str = None):
+    def parallel(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None,
+                 threads_override: str = None, memory_override: str = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
         In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
@@ -450,7 +457,7 @@ class Task(ABC):
         Example:
         self.parallel(self.local["pwd"], "1:00")
 
-        :param cmd: plumbum LocalCommand object to run
+        :param cmd: plumbum LocalCommand object to run, or list of commands to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
         :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
             Note that this will only affect SLURM script generation - this will not override thread values passed in by
@@ -459,7 +466,7 @@ class Task(ABC):
         :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
-        if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
+        if self.is_slurm:
             cmd = self._create_slurm_command(cmd, time_override, threads_override, memory_override)
         # Run command directly
         if self._mode == 1:
@@ -471,7 +478,8 @@ class Task(ABC):
                 with open(os.path.join(self.wdir, "task.log"), "a") as w:
                     w.write(str(out))
 
-    def single(self, cmd: LocalCommand, time_override: Optional[str] = None, memory_override: str = None):
+    def single(self, cmd: Union[LocalCommand, List[LocalCommand]],
+               time_override: Optional[str] = None, memory_override: str = None):
         """ Launch a command that uses a single thread.
 
         The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
@@ -479,13 +487,13 @@ class Task(ABC):
         Example:
         self.single(self.local["pwd"])
 
-        :param cmd: plumbum LocalCommand object to run
+        :param cmd: plumbum LocalCommand object to run, or list of commands to run
         :param time_override: Time override in "HH:MM:SS" format, if needed
         :param memory_override: Provide memory override for command in "2GB" format, etc.
         """
         self.parallel(cmd, time_override, threads_override="1", memory_override=memory_override)
 
-    def create_script(self, cmd: Union[str, LocalCommand], file_name: str) -> LocalCommand:
+    def create_script(self, cmd: Union[str, LocalCommand, List[str]], file_name: str) -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
 
         This is highly useful when incorporating programs that only launch in the directory in which it was called
@@ -506,7 +514,7 @@ class Task(ABC):
         self.parallel(script)
         self.single(script)
 
-        :param cmd: Command to write to file
+        :param cmd: Command to write to file, or list of commands to write
         :param file_name: Name of file to create
         :return: Command to run script via plumbum interface
         """
@@ -515,7 +523,11 @@ class Task(ABC):
         # Write shebang and move to working directory
         fp.write("#!/bin/bash\ncd %s || return\n\n" % self.wdir)
         # Write command to run
-        fp.write("".join((str(cmd), "\n")))
+        if isinstance(cmd, list):
+            for _cmd in cmd:
+                fp.write("".join((str(_cmd), "\n")))
+        else:
+            fp.write("".join((str(cmd), "\n")))
         fp.close()
         self.local["chmod"]["+x", _path]()
         return self.local[_path]
@@ -532,31 +544,8 @@ class Task(ABC):
         write_string = f"  Running {len(cmds)} commands similar to {str(cmds[0])}"
         print(write_string)
         logging.info(write_string)
-        if self.cfg.config.get(ConfigManager.SLURM)[ConfigManager.USE_CLUSTER]:
-            self._batch_slurm(cmds, time_override)
-        else:
-            self._batch(cmds)
-
-    def _batch(self, cmds: List[LocalCommand]):
-        """ Run commands list distributed on own system
-
-        :param cmds: List of LocalCommand objects to run in parallel
-        """
-        for i in range(0, len(cmds), int(self.threads)):
-            running = []
-            # Run up to `threads` tasks at a time
-            for j in range(i, i + int(self.threads)):
-                if j >= len(cmds):
-                    break
-                running.append(cmds[j] & BG)
-            all([_f.wait() for _f in running])
-
-    def _batch_slurm(self, cmds: List[LocalCommand], time_override: Optional[str] = None):
-        """ Run commands list distributed on HPC
-
-        :param cmds: List of LocalCommand objects to run in parallel
-        :param time_override: Time override in "HH:MM:SS" format, if needed
-        """
+        if self.is_slurm:
+            self.parallel(cmds, time_override=time_override)
         with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
             running = []
             for cmd in cmds:

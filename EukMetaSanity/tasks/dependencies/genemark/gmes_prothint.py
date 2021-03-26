@@ -48,6 +48,8 @@ class ProtHintIter(TaskList):
             """
             Run gmes.prothint
             """
+            touch(str(self.output["hints"]))
+            touch(str(self.output["evidence"]))
             try:
                 # Run prothint
                 self.parallel(
@@ -58,9 +60,8 @@ class ProtHintIter(TaskList):
                         "--threads", self.threads,
                     ]
                 )
-            except ProcessExecutionError:
-                touch(str(self.output["hints"]))
-                touch(str(self.output["evidence"]))
+            except:
+                return
 
     def __init__(self, *args, **kwargs):
         """
