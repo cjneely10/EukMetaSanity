@@ -553,11 +553,12 @@ class Task(ABC):
                         break
                     running.append(cmds[j])
                 self.parallel(running, time_override=time_override)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
-            running = []
-            for cmd in cmds:
-                running.append(executor.submit(self.single, cmd, time_override))
-            concurrent.futures.wait(running)
+        else:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
+                running = []
+                for cmd in cmds:
+                    running.append(executor.submit(self.single, cmd, time_override))
+                concurrent.futures.wait(running)
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:
