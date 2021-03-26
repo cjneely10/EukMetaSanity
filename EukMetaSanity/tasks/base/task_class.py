@@ -545,7 +545,14 @@ class Task(ABC):
         print(write_string)
         logging.info(write_string)
         if self.is_slurm:
-            self.parallel(cmds, time_override=time_override)
+            for i in range(0, len(cmds), int(self.threads)):
+                running = []
+                # Run up to `threads` tasks at a time
+                for j in range(i, i + int(self.threads)):
+                    if j >= len(cmds):
+                        break
+                    running.append(cmds[j])
+                self.parallel(running, time_override=time_override)
         with concurrent.futures.ThreadPoolExecutor(max_workers=int(self.threads)) as executor:
             running = []
             for cmd in cmds:
