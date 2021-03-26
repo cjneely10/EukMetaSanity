@@ -122,7 +122,7 @@ class SLURMCaller:
         # Write command to run
         if isinstance(self.cmd, list):
             for cmd in self.cmd:
-                file_ptr.write("".join((str(cmd), "\n")) + " &")
+                file_ptr.write(str(cmd) + " &\n")
             file_ptr.write("wait\n")
         else:
             file_ptr.write("".join((str(self.cmd), "\n")))
