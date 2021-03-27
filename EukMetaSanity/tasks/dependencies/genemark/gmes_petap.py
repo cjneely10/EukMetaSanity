@@ -3,7 +3,7 @@ Module holds gmes.petap build functionality
 """
 import os
 from typing import List
-from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete
+from EukMetaSanity import Task, TaskList, program_catch, DependencyInput, set_complete, touch
 
 
 class GeneMarkPetapIter(TaskList):
@@ -72,12 +72,15 @@ class GeneMarkPetapIter(TaskList):
                     self._run_petap(["--ES"])
             if not os.path.exists(str(self.output["ab-gff3"])):
                 self._run_petap(["--ES"])
-            self.single(
-                self.local["gffread"][
-                    self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"])
-                ],
-                "30:00"
-            )
+            if os.path.exists(self.output["gtf"]):
+                self.single(
+                    self.local["gffread"][
+                        self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"])
+                    ],
+                    "30:00"
+                )
+            else:
+                touch(str(self.output["ab-gff3"]))
 
         def _run_petap(self, ev_vals: List[str]):
             """ Run gmes_petap.pl

@@ -86,32 +86,42 @@ class AugustusIter(TaskList):
                 self.wdir, AugustusIter.Augustus.out_path(str(self.dependency_input["fasta"]), ".%i.gb" % _round)
             )
             # Chunk file predictions
-            record_p = SeqIO.parse(_file, "fasta")
-            progs = []
-            out_files = []
-            out_gffs = []
-            for record in record_p:
-                out_file_path = os.path.join(self.wdir, str(record.id) + ".fna")
-                _out_gff = out_gff + "-" + str(record.id)
-                out_files.append(out_file_path)
-                out_gffs.append(_out_gff)
-                SeqIO.write([record], out_file_path, "fasta")
-                # Run prediction
-                progs.append(
-                    self.program[
-                        "--codingseq=on",
-                        "--stopCodonExcludedFromCDS=false",
-                        "--species=%s" % species,
-                        "--outfile=%s" % _out_gff,
-                        ("--gff3=on" if _last else "--gff3=off"),
-                        out_file_path,
-                    ]
-                )
-            self.batch(progs, "5:00")
-            touch(out_gff + ".tmp")
-            for out_g in out_gffs:
-                if os.path.exists(out_g):
-                    (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
+            # record_p = SeqIO.parse(_file, "fasta")
+            # progs = []
+            # out_files = []
+            # out_gffs = []
+            # for record in record_p:
+            #     out_file_path = os.path.join(self.wdir, str(record.id) + ".fna")
+            #     _out_gff = out_gff + "-" + str(record.id)
+            #     out_files.append(out_file_path)
+            #     out_gffs.append(_out_gff)
+            #     SeqIO.write([record], out_file_path, "fasta")
+            #     # Run prediction
+            #     progs.append(
+            #         self.program[
+            #             "--codingseq=on",
+            #             "--stopCodonExcludedFromCDS=false",
+            #             "--species=%s" % species,
+            #             "--outfile=%s" % _out_gff,
+            #             ("--gff3=on" if _last else "--gff3=off"),
+            #             out_file_path,
+            #         ]
+            #     )
+            # self.batch(progs, "30:00")
+            # touch(out_gff + ".tmp")
+            # for out_g in out_gffs:
+            #     if os.path.exists(out_g):
+            #         (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
+            self.single(
+                self.program[
+                    "--codingseq=on",
+                    "--stopCodonExcludedFromCDS=false",
+                    "--species=%s" % species,
+                    "--outfile=%s" % out_gff + ".a.tmp",
+                    ("--gff3=on" if _last else "--gff3=off"),
+                    str(self.dependency_input["fasta"]),
+                ]
+            )
             # Combine files
             try:
                 self.single(
@@ -123,8 +133,8 @@ class AugustusIter(TaskList):
             # Make ids unique
             self._make_unique(out_gff)
             # Remove intermediary files
-            all([os.remove(_file) for _file in out_files if os.path.exists(_file)])
-            all([os.remove(_file) for _file in out_gffs if os.path.exists(_file)])
+            # all([os.remove(_file) for _file in out_files if os.path.exists(_file)])
+            # all([os.remove(_file) for _file in out_gffs if os.path.exists(_file)])
             return out_gff
 
         def _handle_config_output(self):
