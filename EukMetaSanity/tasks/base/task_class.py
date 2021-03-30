@@ -8,11 +8,12 @@ import os
 import sys
 import time
 import logging
+import traceback
 import concurrent.futures
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Callable, Optional, Union, Iterable, Sized, Sequence
 # pylint: disable=no-member
-from plumbum import colors, local, BG
+from plumbum import colors, local
 from plumbum.machines.local import LocalCommand, LocalMachine
 from EukMetaSanity.tasks.base.path_manager import PathManager
 from EukMetaSanity.tasks.base.slurm_caller import SLURMCaller
@@ -34,8 +35,10 @@ def program_catch(func: Callable):
         # pylint: disable=broad-except
         except BaseException as err:
             logging.info(err)
+            logging.info(traceback.print_exc())
             with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
-                w_out.write(str(err))
+                w_out.write(str(err) + "\n")
+                w_out.write(traceback.format_exc() + "\n")
             print(colors.warn | str(err))
 
     return _add_try_except

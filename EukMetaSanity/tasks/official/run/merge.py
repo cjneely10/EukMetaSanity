@@ -69,13 +69,15 @@ class MergeIter(TaskList):
             :param fasta_file: FASTA file with masked data
             :param out_prefix: Output prefix for files
             """
-            self.local["gffread"][
-                (*input_list), "-G", "--merge",
-                "-o", out_prefix + ".all.gff3"
-            ]()
+            self.single(
+                self.local["gffread"][
+                    (*input_list), "-G", "--merge",
+                    "-o", out_prefix + ".all.gff3"
+                ]
+            )
             for i in range(0, 4):
-                self.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i]()
+                self.parallel(self.local["create-final-annotations.py"][
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i], threads_override="4")
 
     def __init__(self, *args, **kwargs):
         """

@@ -22,7 +22,7 @@ class AugustusIter(TaskList):
 
     expects: fasta[Path]
 
-    output: ab-gff3[Path]
+    output: ab-gff3[Path] (may be empty)
 
     config:
         augustus:
@@ -54,11 +54,16 @@ class AugustusIter(TaskList):
             """
             Run augustus
             """
+            if self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])) == "":
+                touch(str(self.output["ab-gff3"]))
+                return
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(
                 self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])), 1,
                 str(self.dependency_input["fasta"])
             )
+            if len(open(out_gff, "r").readlines()) < 200:
+                return
             self._train_augustus(1, str(self.dependency_input["fasta"]), out_gff)
             # Remaining rounds of re-training on generated predictions
             for i in range(int(self.config["rounds"])):
@@ -66,6 +71,8 @@ class AugustusIter(TaskList):
                 if i == int(self.config["rounds"]) - 1:
                     _last = True
                 out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.dependency_input["fasta"]), _last)
+                if len(open(out_gff, "r").readlines()) < 200:
+                    break
                 if i != int(self.config["rounds"]) - 1:
                     self._train_augustus(i + 2, str(self.dependency_input["fasta"]), out_gff)
             # Move any augustus-generated config stuff
@@ -85,33 +92,6 @@ class AugustusIter(TaskList):
             out_gff = os.path.join(
                 self.wdir, AugustusIter.Augustus.out_path(str(self.dependency_input["fasta"]), ".%i.gb" % _round)
             )
-            # Chunk file predictions
-            # record_p = SeqIO.parse(_file, "fasta")
-            # progs = []
-            # out_files = []
-            # out_gffs = []
-            # for record in record_p:
-            #     out_file_path = os.path.join(self.wdir, str(record.id) + ".fna")
-            #     _out_gff = out_gff + "-" + str(record.id)
-            #     out_files.append(out_file_path)
-            #     out_gffs.append(_out_gff)
-            #     SeqIO.write([record], out_file_path, "fasta")
-            #     # Run prediction
-            #     progs.append(
-            #         self.program[
-            #             "--codingseq=on",
-            #             "--stopCodonExcludedFromCDS=false",
-            #             "--species=%s" % species,
-            #             "--outfile=%s" % _out_gff,
-            #             ("--gff3=on" if _last else "--gff3=off"),
-            #             out_file_path,
-            #         ]
-            #     )
-            # self.batch(progs, "30:00")
-            # touch(out_gff + ".tmp")
-            # for out_g in out_gffs:
-            #     if os.path.exists(out_g):
-            #         (self.local["cat"][out_g] >> out_gff + ".a.tmp")()
             self.single(
                 self.program[
                     "--codingseq=on",
@@ -266,6 +246,8 @@ class AugustusIter(TaskList):
                     # Count those that pass the user-defined cutoff value
                     if line[3] in augustus_ids_dict.keys() and float(line[2]) >= (float(self.config["cutoff"]) / 100.):
                         found_taxa[line[3]] += 1
+            if len(found_taxa.most_common()) == 0:
+                return ""
             return augustus_ids_dict[found_taxa.most_common()[0][0]]
 
     def __init__(self, *args, **kwargs):
