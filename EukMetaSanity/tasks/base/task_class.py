@@ -427,7 +427,7 @@ class Task(ABC):
         :param memory_override: Provide memory override for command in "2GB" format, etc.
         :return: SLURM-wrapped command to run script via plumbum interface
         """
-        sel = self._scope if self._scope is not None else self._name
+        sel = self._scope if (self._scope is not None and self._scope != "") else self._name
         # Confirm valid SLURM section
         if ConfigManager.MEMORY not in self.cfg.config[sel].keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self._name)

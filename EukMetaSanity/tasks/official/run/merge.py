@@ -73,11 +73,12 @@ class MergeIter(TaskList):
                 self.local["gffread"][
                     (*input_list), "-G", "--merge",
                     "-o", out_prefix + ".all.gff3"
-                ]
+                ],
+                time_override="30:00"
             )
             for i in range(0, 4):
-                self.parallel(self.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i], threads_override="4")
+                self.single(self.local["create-final-annotations.py"][
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i])
 
     def __init__(self, *args, **kwargs):
         """
