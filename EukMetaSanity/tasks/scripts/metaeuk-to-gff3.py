@@ -40,8 +40,8 @@ def metaeuk(metaeuk_file_ptr: TextIO, data: Dict[str, List[List[Result]]]):
         recs.append(
             Result(
                 loc_type="gene",
-                sstart=int(line[6]) - 1,
-                send=int(line[7]),
+                sstart=int(line[6]),
+                send=int(line[7]) + 1,
                 strand=strand,
             )
         )
@@ -59,8 +59,8 @@ def metaeuk(metaeuk_file_ptr: TextIO, data: Dict[str, List[List[Result]]]):
                 recs.append(
                     Result(
                         loc_type=_type,
-                        sstart=start - 1,
-                        send=end,
+                        sstart=start,
+                        send=end + 1,
                         strand=strand,
                     )
                 )
