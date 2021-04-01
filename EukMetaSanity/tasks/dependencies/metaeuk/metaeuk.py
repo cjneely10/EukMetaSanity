@@ -88,7 +88,8 @@ class MetaEukIter(TaskList):
                     str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
                     str(self.output["gff3"]),
                 ],
-                "30:00"
+                time_override="30:00",
+                memory_override="8G"
             )
             # Rename output file
             os.replace(_outfile + ".fas", str(self.output["prot"]))
