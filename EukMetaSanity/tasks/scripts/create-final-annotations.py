@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # pylint: disable=invalid-name
 """
 Script handles collecting results from all gene predictors and parsing into final output results
 """
-
+import faulthandler
 import os
 import re
 import sys
@@ -579,6 +579,7 @@ def parse_args(ap: ArgParse):
 
 
 if __name__ == "__main__":
+    faulthandler.enable()
     _ap = ArgParse(
         (
             (("-g", "--gff3_file"),
@@ -590,7 +591,7 @@ if __name__ == "__main__":
             (("-t", "--tier"),
              {"help": "Tiered output, any value greater than 1, default is 0 for owned parsing", "default": 0}),
             (("-r", "--recursion_limit"),
-             {"help": "Override python's default recursion limit, default 2000000", "default": "2000000"}),
+             {"help": "Override python's default recursion limit, default 2000000", "default": "20000000"}),
         ),
         description="GFF3 output final annotations as <prefix>.nr.gff3"
     )

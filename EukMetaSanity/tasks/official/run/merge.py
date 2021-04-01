@@ -26,6 +26,7 @@ class MergeIter(TaskList):
         """
         Merge class handles merging all lines of evidence (ab initio and protein-based)
         """
+
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -76,9 +77,11 @@ class MergeIter(TaskList):
                 ],
                 time_override="30:00"
             )
-            for i in range(0, 4):
+            self.batch([
                 self.single(self.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i])
+                                "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i])
+                for i in range(0, 4)
+            ])
 
     def __init__(self, *args, **kwargs):
         """
