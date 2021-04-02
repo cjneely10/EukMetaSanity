@@ -77,11 +77,10 @@ class MergeIter(TaskList):
                 ],
                 time_override="30:00"
             )
-            self.batch([
+            for i in range(0, 4):
                 self.single(self.local["create-final-annotations.py"][
-                                "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i])
-                for i in range(0, 4)
-            ])
+                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i],
+                            memory_override="8G")
 
     def __init__(self, *args, **kwargs):
         """

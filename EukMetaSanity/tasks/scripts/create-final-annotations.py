@@ -4,6 +4,7 @@
 """
 Script handles collecting results from all gene predictors and parsing into final output results
 """
+import concurrent.futures
 import faulthandler
 import os
 import re
@@ -343,7 +344,13 @@ class GffMerge:
         :param out_cds: List of output CDS to build
         :param _offsets: List of offsets
         """
-        record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1: exon[1]]))
+        front = 0
+        back = 0
+        if strand == "-":
+            back -= exon[2]
+        else:
+            front += exon[2]
+        record = SeqRecord(seq=Seq(orig_seq[exon[0] - 1 + front: exon[1] + back]))
         if strand == "-":
             record = record.reverse_complement()
         out_cds.append(str(record.seq))
@@ -408,6 +415,7 @@ class GffMerge:
             GffMerge.create_seq_record(orig_seq, exon, strand, out_cds, offsets)
         if strand == "-":
             offsets.reverse()
+        # print(gene_data["fasta-id"], len("".join(out_cds)), gene_data["geneid"])
         return GffMerge.gene_dict_data_to_seqrecords(Seq(GffMerge.longest_orf("".join(out_cds))), gene,
                                                      gene_data, offsets)
 
@@ -424,9 +432,15 @@ class GffMerge:
             start_pos = (m.start() for m in re.finditer(start, sequence))
             for pos in start_pos:
                 idx = set()
-                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
-                if len(orf) > len(longest):
-                    longest = orf
+                try:
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        futures = [executor.submit(GffMerge.l_orf_helper, sequence, idx, StringIO(), 3, pos)]
+                        concurrent.futures.wait(futures)
+                        orf = futures[0].result()
+                    if len(orf) > len(longest):
+                        longest = orf
+                except:
+                    longest = sequence[start_pos:]
         return longest
 
     @staticmethod
