@@ -60,6 +60,15 @@ class RepeatModelerIter(TaskList):
             else:
                 touch(str(self.output["model"]))
 
+        def get_output_file(self):
+            _output = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
+            if len(_output) == 0:
+                _output = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa"))
+                if len(_output) == 0:
+                    _output = sorted(glob.glob(os.path.join(self.wdir, "RM*", "round*", "consensi.fa")), reverse=True)
+                    return _output
+            return _output
+
     def __init__(self, *args, **kwargs):
         """
         Instantiate TaskList

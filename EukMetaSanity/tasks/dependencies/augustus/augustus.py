@@ -103,13 +103,10 @@ class AugustusIter(TaskList):
                 ]
             )
             # Combine files
-            try:
-                self.single(
-                    self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
-                    "5:00"
-                )
-            except:
-                pass
+            self.single(
+                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
+                "5:00"
+            )
             # Make ids unique
             self._make_unique(out_gff)
             # Remove intermediary files

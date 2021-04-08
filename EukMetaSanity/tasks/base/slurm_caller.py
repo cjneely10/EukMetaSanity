@@ -8,6 +8,10 @@ from typing import List, Tuple, Union
 from plumbum.machines.local import LocalCommand, LocalMachine
 
 
+class SlurmRunError(Exception):
+    pass
+
+
 class SLURMCaller:
     """ SLURMCaller handles running a program on a SLURM cluster
 
@@ -147,3 +151,5 @@ class SLURMCaller:
         self._launch_script()
         while self._is_running():
             sleep(60)  # Wait 1 minute in between checking if still running
+        if "ERROR" in "\n".join(open("slurm-%s.out" % self.job_id, "r").readlines()):
+            raise SlurmRunError("Timeout found in SLURM job")

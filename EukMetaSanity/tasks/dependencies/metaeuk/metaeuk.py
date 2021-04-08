@@ -70,31 +70,29 @@ class MetaEukIter(TaskList):
             db_prefix = prefix(database)
             _outfile = os.path.join(self.wdir, "%s_%s" % (self.record_id, db_prefix))
             # Run MetaEuk
-            if not os.path.exists(_outfile + ".codon.fas"):
-                self.parallel(
-                    self.program[
-                        "easy-predict",
-                        str(self.dependency_input["fasta"]),
-                        database,
-                        _outfile,
-                        os.path.join(self.wdir, "tmp"),
-                        "--threads", self.threads,
-                        (*self.added_flags),
-                        (*is_profile),
-                    ]
-                )
+            self.parallel(
+                self.program[
+                    "easy-predict",
+                    str(self.dependency_input["fasta"]),
+                    database,
+                    _outfile,
+                    os.path.join(self.wdir, "tmp"),
+                    "--threads", self.threads,
+                    (*self.added_flags),
+                    (*is_profile),
+                ]
+            )
             # Write in GFF3 format
             self.single(
                 self.local["metaeuk-to-gff3.py"][
-                    str(self.dependency_input["fasta"]), _outfile + ".codon.fas", "-o",
+                    str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
                     str(self.output["gff3"]),
                 ],
                 time_override="30:00",
                 memory_override="8G"
             )
             # Rename output file
-            if os.path.exists(_outfile + ".fas"):
-                os.replace(_outfile + ".fas", str(self.output["prot"]))
+            os.replace(_outfile + ".fas", str(self.output["prot"]))
 
     def __init__(self, *args, **kwargs):
         """
