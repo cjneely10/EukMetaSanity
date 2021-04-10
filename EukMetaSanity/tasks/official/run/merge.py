@@ -30,10 +30,13 @@ class MergeIter(TaskList):
         @set_complete
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.output = {
-                "prot": os.path.join(self.wdir, self.record_id + ".faa"),
-                "final": ["prot"],
-            }
+            self.output = {"final": []}
+            if os.path.exists(str(self.input["abinitio.genemark"]["ab-gff3"])):
+                self.output["prot-genemark"] = os.path.join(self.wdir, self.record_id + ".gmes.faa")
+                self.output["final"].append("prot-genemark")
+            if os.path.exists(str(self.input["abinitio.augustus"]["ab-gff3"])):
+                self.output["prot-augustus"] = os.path.join(self.wdir, self.record_id + ".augustus.faa")
+                self.output["final"].append("prot-augustus")
 
         @program_catch
         def run(self):
@@ -45,7 +48,15 @@ class MergeIter(TaskList):
                     self.local["gffread"][
                         "-g", self.input["root"]["fasta"],
                         str(self.input["abinitio.genemark"]["ab-gff3"]),
-                        "-y", self.output["prot"]
+                        "-y", self.output["prot-genemark"]
+                    ]
+                )
+            if os.path.exists(str(self.input["abinitio.augustus"]["ab-gff3"])):
+                self.single(
+                    self.local["gffread"][
+                        "-g", self.input["root"]["fasta"],
+                        str(self.input["abinitio.augustus"]["ab-gff3"]),
+                        "-y", self.output["prot-augustus"]
                     ]
                 )
 

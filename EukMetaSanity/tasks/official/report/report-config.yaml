@@ -6,7 +6,7 @@ INPUT:
   base:  # List pipelines containing input data
     run
   INPUT:
-    prot: prot-tier1
+    prot: prot-genemark
 
 ###########################################
 

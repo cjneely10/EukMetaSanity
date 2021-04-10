@@ -65,7 +65,7 @@ class OutputResultsFileError(FileNotFoundError):
 
 
 # Type alias for allowable input types to task input and dependency_input data members
-InputType = Union[object, Iterable, Sized, Sequence]
+InputType = Union[object, Iterable, Sized, Sequence, List]
 
 
 # pylint: disable=too-many-public-methods
