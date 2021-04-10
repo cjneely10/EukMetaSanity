@@ -65,7 +65,6 @@ class BuscoIter(TaskList):
                     (*self.added_flags)
                 ]
             )
-            print(1)
             # Change name of output file
             os.replace(
                 glob.glob(os.path.join(self.wdir, self.record_id, "*", "short_summary*.txt"))[0],

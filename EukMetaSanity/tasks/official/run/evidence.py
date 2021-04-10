@@ -43,7 +43,8 @@ class EvidenceIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "gff3": self.input["metaeuk"]["gff3"],
-                "prot": self.input["metaeuk"]["prot"]
+                "prot": self.input["metaeuk"]["prot"],
+                "final": ["prot", "gff3"]
             }
 
         @program_catch

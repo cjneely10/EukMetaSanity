@@ -31,56 +31,23 @@ class MergeIter(TaskList):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.output = {
-                "all_gff3": os.path.join(self.wdir, self.record_id + ".all.gff3"),  # Combined gff file
-                "evidence": self.input["evidence"]["gff3"],
-                "final": ["all_gff3", "evidence"]
+                "prot": os.path.join(self.wdir, self.record_id + ".faa"),
+                "final": ["prot"],
             }
-            for i in range(0, 4):
-                self.output.update({
-                    "nr-gff3-tier%i" % i: os.path.join(self.wdir, self.record_id + ".all.tier%i.nr.gff3" % i),  # NR GFF
-                    "prot-tier%i" % i: os.path.join(self.wdir, self.record_id + ".all.tier%i.faa" % i),  # NR Proteins
-                    "cds-tier%i" % i: os.path.join(self.wdir, self.record_id + ".all.tier%i.cds.fna" % i),  # NR CDS
-                })
-                self.output["final"].append("nr-gff3-tier%i" % i)
-                self.output["final"].append("prot-tier%i" % i)
-                self.output["final"].append("cds-tier%i" % i)
 
         @program_catch
         def run(self):
             """
             Merge final results
             """
-            final_res = []
-            if os.path.exists(str(self.input["abinitio.augustus"]["ab-gff3"])):
-                final_res.append(str(self.input["abinitio.augustus"]["ab-gff3"]))
             if os.path.exists(str(self.input["abinitio.genemark"]["ab-gff3"])):
-                final_res.append(str(self.input["abinitio.genemark"]["ab-gff3"]))
-            if os.path.exists(str(self.input["evidence"]["gff3"])):
-                final_res.append(str(self.input["evidence"]["gff3"]))
-            self.merge(
-                final_res,
-                str(self.input["root"]["fasta"]),
-                os.path.join(self.wdir, self.record_id),
-            )
-
-        def merge(self, input_list: List[str], fasta_file: str, out_prefix: str):
-            """  Convert to final non-redundant tiered gff3 files
-
-            :param input_list: List of files to merge
-            :param fasta_file: FASTA file with masked data
-            :param out_prefix: Output prefix for files
-            """
-            self.single(
-                self.local["gffread"][
-                    (*input_list), "-G", "--merge",
-                    "-o", out_prefix + ".all.gff3"
-                ],
-                time_override="30:00"
-            )
-            for i in range(0, 4):
-                self.single(self.local["create-final-annotations.py"][
-                    "-f", fasta_file, "-g", out_prefix + ".all.gff3", "-t", i],
-                            memory_override="8G")
+                self.single(
+                    self.local["gffread"][
+                        "-g", self.input["root"]["fasta"],
+                        str(self.input["abinitio.genemark"]["ab-gff3"]),
+                        "-y", self.output["prot"]
+                    ]
+                )
 
     def __init__(self, *args, **kwargs):
         """
