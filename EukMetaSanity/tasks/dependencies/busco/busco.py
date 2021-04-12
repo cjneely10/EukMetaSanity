@@ -17,7 +17,7 @@ class BuscoIter(TaskList):
 
     depends:
 
-    expects: fasta[Path]
+    expects: prot[Path]
 
     output: results[Path]
 

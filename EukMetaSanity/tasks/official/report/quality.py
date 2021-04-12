@@ -13,7 +13,7 @@ class QualityIter(TaskList):
 
     requires:
 
-    depends:
+    depends: busco
 
     output:
 
