@@ -51,7 +51,7 @@ class MetaEukIter(TaskList):
             super().__init__(*args, **kwargs)
             self.output = {
                 "gff3": os.path.join(self.wdir, self.record_id + ".evidence.gff3"),
-                "prot": os.path.join(self.wdir, self.record_id + ".faa")
+                "prot": os.path.join(self.wdir, self.record_id + ".evidence.faa")
             }
 
         # TODO: Revert to multiple dbs
@@ -88,8 +88,8 @@ class MetaEukIter(TaskList):
                     str(self.dependency_input["fasta"]), _outfile + ".fas", "-o",
                     str(self.output["gff3"]),
                 ],
-                time_override="30:00",
-                memory_override="8G"
+                time_override="8:00",
+                memory_override="6G"
             )
             # Rename output file
             os.replace(_outfile + ".fas", str(self.output["prot"]))

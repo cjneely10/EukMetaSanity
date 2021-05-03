@@ -62,7 +62,11 @@ class AugustusIter(TaskList):
                 self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])), 1,
                 str(self.dependency_input["fasta"])
             )
-            if len(open(out_gff, "r").readlines()) < 200:
+            if len(open(out_gff, "r").readlines()) < 200 or int(self.config["rounds"]) == 0:
+                # Move any augustus-generated config stuff
+                self._handle_config_output()
+                # Rename final file
+                os.replace(out_gff, str(self.output["ab-gff3"]))
                 return
             self._train_augustus(1, str(self.dependency_input["fasta"]), out_gff)
             # Remaining rounds of re-training on generated predictions
@@ -97,18 +101,18 @@ class AugustusIter(TaskList):
                     "--codingseq=on",
                     "--stopCodonExcludedFromCDS=false",
                     "--species=%s" % species,
-                    "--outfile=%s" % out_gff + ".a.tmp",
+                    "--outfile=%s" % out_gff + ".tmp",
                     ("--gff3=on" if _last else "--gff3=off"),
                     str(self.dependency_input["fasta"]),
                 ]
             )
-            # Combine files
+            # # Combine files
             self.single(
-                self.local["gffread"]["-o", out_gff + ".tmp", "-F", "-G", "--keep-comments", out_gff + ".a.tmp"],
+                self.local["gffread"]["-o", out_gff, "-F", "-G", "--keep-comments", out_gff + ".tmp"],
                 "5:00"
             )
-            # Make ids unique
-            self._make_unique(out_gff)
+            # # Make ids unique
+            # self._make_unique(out_gff)
             # Remove intermediary files
             # all([os.remove(_file) for _file in out_files if os.path.exists(_file)])
             # all([os.remove(_file) for _file in out_gffs if os.path.exists(_file)])

@@ -26,7 +26,7 @@ class ProtHintIter(TaskList):
     """
     name = "gmes.prothint"
     requires = ["evidence"]
-    depends = []
+    depends = [DependencyInput("mmseqs.filtertaxseqdb")]
 
     class ProtHint(Task):
         """
@@ -51,11 +51,15 @@ class ProtHintIter(TaskList):
             touch(str(self.output["hints"]))
             touch(str(self.output["evidence"]))
             try:
+                tmp_file = os.path.join(self.wdir, "fasta.tmp")
+                (self.local["cat"][
+                    str(self.input["evidence"]["prot"]), str(self.input["mmseqs.filtertaxseqdb"]["fastas"][0])
+                ] > tmp_file)()
                 # Run prothint
                 self.parallel(
                     self.program[
                         str(self.dependency_input["fasta"]),
-                        str(self.input["evidence"]["prot"]),
+                        tmp_file,
                         "--workdir", self.wdir,
                         "--threads", self.threads,
                     ]

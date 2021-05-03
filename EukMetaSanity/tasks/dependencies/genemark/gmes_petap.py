@@ -81,6 +81,7 @@ class GeneMarkPetapIter(TaskList):
                 )
             else:
                 touch(str(self.output["ab-gff3"]))
+                touch(self.output["gtf"])
 
         def _run_petap(self, ev_vals: List[str]):
             """ Run gmes_petap.pl

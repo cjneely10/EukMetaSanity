@@ -151,5 +151,6 @@ class SLURMCaller:
         self._launch_script()
         while self._is_running():
             sleep(60)  # Wait 1 minute in between checking if still running
-        if "ERROR" in "\n".join(open("slurm-%s.out" % self.job_id, "r").readlines()):
+        _file = "\n".join(open("slurm-%s.out" % self.job_id, "r").readlines())
+        if "ERROR" in _file and "TIME" in _file:
             raise SlurmRunError("Timeout found in SLURM job")

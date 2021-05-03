@@ -5,6 +5,8 @@ Module contains logic for generating dependency DAGs
 from collections import namedtuple
 from typing import List, Type, Tuple, Dict
 import networkx as nx
+
+from EukMetaSanity import DependencyInput
 from EukMetaSanity.tasks.base.task_class import TaskList
 from EukMetaSanity.tasks.dependencies import dependencies
 
@@ -29,6 +31,11 @@ class DependencyGraph:
     The root task is simply populating input files to run in a pipeline
 
     """
+    ERR = DependencyGraphGenerationError(
+                "There was an error generating dependency graph information for this pipeline.\n"
+                "If you are a user seeing this, this is likely a fatal error - contact the authors of the pipeline\n"
+                "If you are a developer, double-check dependency information in your pipeline"
+            )
 
     def __init__(self, tasks: List[TaskList]):
         """ Create DAG from list of TaskList class objects
@@ -41,11 +48,7 @@ class DependencyGraph:
         self.graph = nx.DiGraph()
         self._build_dependency_graph(tasks)
         if not nx.is_directed_acyclic_graph(self.graph):
-            raise DependencyGraphGenerationError(
-                "There was an error generating dependency graph information for this pipeline.\n"
-                "If you are a user seeing this, this is likely a fatal error - contact the authors of the pipeline\n"
-                "If you are a developer, double-check dependency information in your pipeline"
-            )
+            raise DependencyGraph.ERR
 
     def _build_dependency_graph(self, tasks: List[TaskList]):
         """ Create dependency graph using provided task list
@@ -63,6 +66,8 @@ class DependencyGraph:
                     Node(name=requirement, scope="", dependency_input="root", id_mapping=None), task_node
                 )
             for dependency in task_list.depends:
+                if not isinstance(dependency, DependencyInput):
+                    raise DependencyGraph.ERR
                 self._add_requirements_within_dependencies(self.graph, Node(name=dependency.name, scope=task_list.name,
                                                                             dependency_input=dependency.input,
                                                                             id_mapping=dependency.id_mapping),
@@ -80,6 +85,8 @@ class DependencyGraph:
         """
         for requirement in getattr(self.idx[node.name], attr):
             if attr == "depends":
+                if not isinstance(requirement, DependencyInput):
+                    raise DependencyGraph.ERR
                 new_node = Node(
                     name=requirement.name, scope=scope, dependency_input=node.dependency_input,
                     id_mapping=node.id_mapping
@@ -103,6 +110,8 @@ class DependencyGraph:
         task_node = Node(name=task.name, scope="", dependency_input="root", id_mapping=None)
         graph.add_node(task_node)
         for dependency in task.depends:
+            if not isinstance(dependency, DependencyInput):
+                raise DependencyGraph.ERR
             graph.add_edge(
                 Node(name=dependency.name, scope=task.name, dependency_input=dependency.input,
                      id_mapping=dependency.id_mapping), task_node
