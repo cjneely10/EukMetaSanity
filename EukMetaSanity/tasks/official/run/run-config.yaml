@@ -103,6 +103,11 @@ abinitio.genemark:
   time: "6:00:00"
   skip: false
   dependencies:
+    mmseqs.filtertaxseqdb:
+      program: mmseqs
+      level: order
+      data:
+        /path/to/data/odb-mmetsp_db
     gmes.petap:
       program: gmes_petap.pl
       FLAGS:
