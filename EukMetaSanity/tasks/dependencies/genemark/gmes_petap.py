@@ -66,12 +66,13 @@ class GeneMarkPetapIter(TaskList):
                 ev_vals = ["--EP", str(self.input["gmes.prothint"]["hints"]),
                            "--evidence", str(self.input["gmes.prothint"]["evidence"])]
             try:
-                self._run_petap(ev_vals)
+                if "--ES" not in ev_vals:
+                    self._run_petap(ev_vals, "gmep.sh")
+                else:
+                    self._run_petap(ev_vals, "gmes.sh")
             except:
                 if ev_vals != ["--ES"]:
-                    self._run_petap(["--ES"])
-            if not os.path.exists(str(self.output["ab-gff3"])):
-                self._run_petap(["--ES"])
+                    self._run_petap(["--ES"], "gmes.sh")
             if os.path.exists(self.output["gtf"]):
                 self.single(
                     self.local["gffread"][
@@ -83,7 +84,7 @@ class GeneMarkPetapIter(TaskList):
                 touch(str(self.output["ab-gff3"]))
                 touch(self.output["gtf"])
 
-        def _run_petap(self, ev_vals: List[str]):
+        def _run_petap(self, ev_vals: List[str], script_name: str):
             """ Run gmes_petap.pl
 
             :param ev_vals: List containing ES- or EP-related command-line flags to pass to run
@@ -97,7 +98,7 @@ class GeneMarkPetapIter(TaskList):
                      if self.input["taxonomy"]["taxonomy"].kingdom is not None and
                         self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
                 ],
-                "abinitio.sh"
+                script_name
             )
             # Run script
             self.parallel(script)

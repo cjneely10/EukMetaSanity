@@ -432,15 +432,9 @@ class GffMerge:
             start_pos = (m.start() for m in re.finditer(start, sequence))
             for pos in start_pos:
                 idx = set()
-                try:
-                    with concurrent.futures.ThreadPoolExecutor() as executor:
-                        futures = [executor.submit(GffMerge.l_orf_helper, sequence, idx, StringIO(), 3, pos)]
-                        concurrent.futures.wait(futures)
-                        orf = futures[0].result()
-                    if len(orf) > len(longest):
-                        longest = orf
-                except:
-                    longest = sequence[start_pos:]
+                orf = GffMerge.l_orf_helper(sequence, idx, StringIO(), 3, pos)
+                if len(orf) > len(longest):
+                    longest = orf
         return longest
 
     @staticmethod

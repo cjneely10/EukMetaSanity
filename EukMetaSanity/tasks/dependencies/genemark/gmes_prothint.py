@@ -11,9 +11,9 @@ class ProtHintIter(TaskList):
 
     name: gmes.prothint
 
-    requires:
+    requires: evidence.prot[Path]
 
-    depends:
+    depends: mmseqs.filtertaxseqdb
 
     expects: fasta[Path], prot[Path]
 
