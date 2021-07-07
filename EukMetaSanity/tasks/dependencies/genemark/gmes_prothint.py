@@ -48,24 +48,23 @@ class ProtHintIter(TaskList):
             """
             Run gmes.prothint
             """
-            touch(str(self.output["hints"]))
-            touch(str(self.output["evidence"]))
             try:
-                tmp_file = os.path.join(self.wdir, "fasta.tmp")
-                (self.local["cat"][
-                    str(self.input["evidence"]["prot"]), str(self.input["mmseqs.filtertaxseqdb"]["fastas"][0])
-                ] > tmp_file)()
+                # tmp_file = os.path.join(self.wdir, "fasta.tmp")
+                # (self.local["cat"][
+                #     str(self.input["evidence"]["prot"]), str(self.input["mmseqs.filtertaxseqdb"]["fastas"][0])
+                # ] > tmp_file)()
                 # Run prothint
                 self.parallel(
                     self.program[
                         str(self.dependency_input["fasta"]),
-                        tmp_file,
+                        str(self.input["mmseqs.filtertaxseqdb"]["fastas"][0]),
                         "--workdir", self.wdir,
                         "--threads", self.threads,
                     ]
                 )
             except:
-                return
+                touch(str(self.output["hints"]))
+                touch(str(self.output["evidence"]))
 
     def __init__(self, *args, **kwargs):
         """
