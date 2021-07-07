@@ -15,7 +15,7 @@ You may need to restart your shell for these changes to take effect.
 
 ## Installing dependencies
 
-**EukMetaSanity**'s conda installation is packaged with all (most) of the required dependencies.
+**EukMetaSanity**'s `conda` installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately.
@@ -28,7 +28,7 @@ Make sure your `EukMS_run` conda environment is still active prior to updating. 
 according to your system:
 
 ```
-cd ~/miniconda/envs/EukMS_run/share/RepeatMasker/Libraries/
+cd ~/miniconda3/envs/EukMS_run/share/RepeatMasker/Libraries/
 wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
 gunzip Dfam.h5.gz && cd ..
 perl ./configure
@@ -80,7 +80,7 @@ automatically generate in the newly-created directory for use when running **Euk
 ## **Your installation is complete!**
  
 If you wish to download additional databases to use in the `report` step, use the 
-`mmseqs databases` command to pull them prior to running **EukMetaSanity**, and add their location to your 
+`mmseqs databases` command to download and install them prior to running **EukMetaSanity**, and add their location to your 
 `report-config.yaml` file in the `mmseqs.dependencies` section under `MMSeqs.MMSeqsSearch.data` and 
 `MMSeqs.Convertalis.data`.
 

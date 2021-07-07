@@ -10,8 +10,6 @@ experience can easily extend the **EukMetaSanity** code base to add to or create
 
 This software suite is broken up into several sub-programs
 
-![](assets/eukmetasanity_pipeline.png)
-
 ### Run
 Identify putative taxonomy using the OrthoDB/MMETSP databases and MMseqs2 and annotate repeated regions of
 the genome with either MMseqs2 or RepeatModeler/RepeatMasker. 
@@ -35,31 +33,7 @@ for detailed installation instructions.
 
 ## Usage
 
-After running `download-data.py`, config files will be available in the `data` 
-directory. These can be edited to fit your needs.
-
-```
-usage: EukMetaSanity [-h] [-f FASTA_DIRECTORY] -c CONFIG_FILE [-x EXTENSIONS]
-                     [-o OUTPUT] [-s]
-                     command
-
-Run EukMetaSanity pipeline
-
-positional arguments:
-  command               Select from run/report/refine
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -f FASTA_DIRECTORY, --fasta_directory FASTA_DIRECTORY
-                        Directory of FASTA files to annotate
-  -c CONFIG_FILE, --config_file CONFIG_FILE
-                        Config file
-  -x EXTENSIONS, --extensions EXTENSIONS
-                        Gather files matching list of extensions separated by '/', default .fna/.fasta/.fa
-  -o OUTPUT, --output OUTPUT
-                        Output directory, default out
-  -s, --skip_summary    Skip internal summary check and launch pipeline, default False
-```
+Default configuration files will be available in the directory created by running `download-data` in the installation README above. These can be edited to fit your needs.
 
 ### Example usage
 
@@ -78,10 +52,8 @@ MAGs/
 Generate initial ab initio and protein-based annotation models using the command:
 
 ```
-EukMetaSanity -f MAGs -c run-config.yaml run
+yapim run -i MAGs -c run-config.yaml -p /path/to/EukMetaSanity/EukMetaSanity/run-pipeline
 ```
-
-Add `-x ext[/ext]` if your extension does not match the default list, or if other files are present in the directory.
 
 This will create a directory structure resembling:
 ```
