@@ -2,10 +2,12 @@
 Module holds logic to generate MMseqs database indices
 """
 import os
-from typing import Sequence
 from abc import abstractmethod
+from typing import Sequence
+
 from plumbum import local
-from EukMetaSanity.api.data.data import DataUtil
+
+from EukMetaSanity.data.data import DataUtil
 
 
 class Index(DataUtil):

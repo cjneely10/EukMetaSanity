@@ -8,5 +8,4 @@ EukMetaSanity/scripts/MergeRegions/argparse.h
 EukMetaSanity/scripts/MergeRegions/ntest.h
 Cargo.lock
 target/
-data/
 tmp/

@@ -3,12 +3,14 @@ Base classes in use
 """
 # pylint: disable=too-few-public-methods
 import os
-from pathlib import Path
 from abc import abstractmethod
+from pathlib import Path
 from typing import List, Optional, Set, Sequence
+
 from plumbum import local
 from plumbum.machines import LocalCommand
-from EukMetaSanity import touch
+
+from yapim import touch
 
 
 class Command:

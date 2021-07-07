@@ -4,9 +4,11 @@ Module downloads requisite data for official pipelines in EukMetaSanity
 """
 import os
 from pathlib import Path
+
 from plumbum import cli
-from EukMetaSanity.tasks.official.config_generation_utils import update_config_files
-from EukMetaSanity.tasks.official.download_utils import download_data, parsing_operations, manage_downloaded_data
+
+from EukMetaSanity.data.config_generation_utils import update_config_files
+from EukMetaSanity.data.download_utils import download_data, parsing_operations, manage_downloaded_data
 
 
 class DataDownloader(cli.Application):
