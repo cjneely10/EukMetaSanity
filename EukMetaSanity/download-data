@@ -16,7 +16,7 @@ class DataDownloader(cli.Application):
     _index: bool = False
     _threads: int = 1
 
-    @cli.switch("-d", "--download-directory", str)
+    @cli.switch(["-d", "--download-directory"], str)
     def set_download_directory(self, download_directory):
         self._working_dir = download_directory
 
