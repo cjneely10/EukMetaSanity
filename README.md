@@ -64,27 +64,29 @@ out/
     |-- run/
         |-- run.pkl
         |-- mag1/
-          |-- mask.final.gff3  # Repeat regions in GFF3 format
-          |-- mask.final.tbl  # Summary table of identified repeats
-          |-- mag1.mask.fna  # Masked FASTA sequence
-          |-- tax-report.txt  # Taxonomy report from MMseqs2
-          |-- mag1.augustus.gff3  # Augustus predictions
-          |-- mag1.gmes.gff3  # GeneMark predictions
-          |-- mag1.all.gff3  # Combined prediction tracks
-          |-- mag1.all.tiern.nr.gff3  # Tiered output predictions in GFF3 format
-          |-- mag1.all.tiern.cds.fna  # Tiered output CDS predictions in FASTA format
-          |-- mag1.all.tiern.faa  # Tiered output protein predictions in FASTA format
+          |-- mag1.Merge.gff3  # Merged final results (GFF3)
+          |-- mag1.Merge.faa  # Merged final results (FASTA)
+          |-- mag1.AbinitioAugustus.gff3  # Augustus results (GFF3)
+          |-- mag1.AbinitioAugustus.faa  # Augustus results (FASTA)
+          |-- mag1.AbinitioGeneMark.gff3  # GeneMark results (GFF3)
+          |-- mag1.AbinitioGeneMark.faa  # GeneMark results (FASTA)
+          |-- mag1.MetaEuk.gff3  # MetaEuk results (GFF3)
+          |-- mag1.MetaEuk.faa  # MetaEuk results (FASTA)
+          |-- mask.final.Repeats.gff3  # Repeats locations (GFF3)
+          |-- mask.final.Repeats.tbl  # Summary of repeats annotation
+          |-- mag1.mask.Repeats.fna  # Masked input genome (FASTA)
+          |-- tax-report.Taxonomy.txt  # Taxonomy assignment summary
         |-- mag2/
           .. 
 ```
 
 ### Note on running:
 **EukMetaSanity** will not re-run already completed steps within a given pipeline. If you would like to re-do a particular
-portion of the pipeline, simply delete its directories in the project structure. For example, to redo the `taxonomy` step
+portion of the pipeline, simply delete its directories in the project structure. For example, to redo the `Taxonomy` step
 of the `run` pipeline for all MAGs, run the following command to delete all existing data:
 
 ```
-rm -r out/wdir/*/taxonomy*
+yapim clean -p /path/to/run-pipeline Taxonomy
 ```
 
 #### Refine (optional)
@@ -104,7 +106,7 @@ of transcriptomes.
 Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 
 ```
-EukMetaSanity -c refine-config.yaml refine
+yapim run -c refine-config.yaml -p /path/to/EukMetaSanity/EukMetaSanity/refine-pipeline
 ```
 
 This will update the directory structure:
@@ -134,13 +136,12 @@ out/
 
 #### Report (optional)
 Copy and edit the `report-config.yaml` config file to fit your analysis needs. Set the `INPUT/base` section to be either
-`run` or `refine`, depending on which set of predictions you want to annotate. You may also adjust the tier you wish to 
-annotate. Activate your `EukMS_report` conda environment.
+`run` or `refine`, depending on which set of predictions you want to annotate. Activate your `EukMS_report` conda environment.
 
 Annotate gene models using the command:
 
 ```
-EukMetaSanity -c report-config.yaml report
+yapim run -c report-config.yaml -p /path/to/EukMetaSanity/EukMetaSanity/report-pipeline
 ```
 
 This will update the directory structure:

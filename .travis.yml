@@ -1,12 +1,10 @@
 language: python
 python:
-  - "3.6"      # current default Python on Travis CI
+  - "3.8.6"      # current default Python on Travis CI
 install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - source "$HOME/miniconda/etc/profile.d/conda.sh"
-  - conda env create -f EukMetaSanity/api/environment.yml
-  - export PYTHONPATH=$PYTHONPATH:$(pwd)
-  - pip install pylint
+  - ./INSTALL.sh
 script:
   - echo Complete

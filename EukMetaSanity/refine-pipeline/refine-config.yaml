@@ -3,7 +3,7 @@
 ###########################################
 ## Pipeline input section
 INPUT:
-  run: all
+  run: all  # Or set to refine: all
 
 ## Global settings
 GLOBAL:

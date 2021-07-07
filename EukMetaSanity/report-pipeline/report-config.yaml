@@ -5,7 +5,7 @@
 INPUT:
   root: all
   run:
-    prot: genemark-prot
+    prot: merged-prot
 
 ## Global settings
 GLOBAL:
