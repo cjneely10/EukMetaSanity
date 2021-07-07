@@ -16,7 +16,7 @@ source $SOURCE
 conda activate EukMS_report
 python -m pip install .
 conda deactivate
-conda env create EukMetaSanity/refine-pipeline/environment.yml
+conda env create -f EukMetaSanity/refine-pipeline/environment.yml
 source $SOURCE
 conda activate EukMS_refine
 python -m pip install .
