@@ -8,7 +8,7 @@ setup(
     author='Christopher Neely',
     author_email='christopher.neely1200@gmail.com',
     license='GPL-3.0',
-    packages=['EukMetaSanity'],
-    scripts=["EukMetaSanity/EukMetaSanity"],
+    packages=['EukMetaSanity', "EukMetaSanity.data"],
+    scripts=["EukMetaSanity/download-data"],
     zip_safe=False
 )
