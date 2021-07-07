@@ -16,6 +16,10 @@ class DataDownloader(cli.Application):
     _index: bool = False
     _threads: int = 1
 
+    @cli.switch("-d", "--download-directory", str)
+    def set_download_directory(self, download_directory):
+        self._working_dir = download_directory
+
     @cli.switch(["-x", "--index"], help="Generate search index (optional, but takes a lot of space)")
     def set_index(self, _index):
         self._index = _index

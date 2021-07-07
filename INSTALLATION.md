@@ -65,25 +65,24 @@ The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both 
 
 ### Installing required databases
 
-**The `download-data.py` script** is provided to download all other required base data. Run the script to download the 
+**The `download-data` script** is provided to download all other required base data. Run the script to download the 
 required databases, and include the `-x` flag if you wish to generate pre-computed search indices (results in a speed 
 up on search time, but takes a lot of storage space):
 
 ```
-cd /path/to/EukMetaSanity
-./download-data.py -t <threads>
+download-data -t <threads> -d </path/to/download/location>
 ```
 
 This will download the OrthoDB and MMETSP databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate in the newly-created `data` directory for use when running **EukMetaSanity**.
+automatically generate in the newly-created directory for use when running **EukMetaSanity**.
 
 
 ## **Your installation is complete!**
  
 If you wish to download additional databases to use in the `report` step, use the 
-`mmseqs database` command to pull them prior to running **EukMetaSanity**, and add their location to your 
-`report-config.yaml` file in the `mmseqs.dependencies` section under `mmseqs.search.data` and 
-`mmseqs.search.convertalis`.
+`mmseqs databases` command to pull them prior to running **EukMetaSanity**, and add their location to your 
+`report-config.yaml` file in the `mmseqs.dependencies` section under `MMSeqs.MMSeqsSearch.data` and 
+`MMSeqs.Convertalis.data`.
 
 ## Non-Conda installation
 
