@@ -14,7 +14,7 @@ class Merge(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["AbinitioGeneMark", "AbinitioAugustus", "Evidence"]
+        return ["AbinitioGeneMark", "AbinitioAugustus", "MetaEukEV"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -25,7 +25,7 @@ class Merge(Task):
             self.program[
                 self.input["AbinitioGeneMark"]["genemark-gff3"],
                 self.input["AbinitioAugustus"]["aug-gff3"],
-                self.input["Evidence"]["evidence-gff3"],
+                self.input["MetaEukEV"]["MetaEukEV-gff3"],
                 "-o", self.output["merged-gff3"]
             ]
         )
