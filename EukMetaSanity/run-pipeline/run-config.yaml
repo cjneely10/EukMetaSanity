@@ -140,7 +140,7 @@ AbinitioGeneMark:
 
 AbinitioAugustus:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
   memory: 8
   time: "24:00:00"
@@ -152,7 +152,6 @@ AbinitioAugustus:
 
     MMSeqsSearch:
       memory: 20
-      threads: 10
       data:
         /path/to/odb-mmetsp_db
       program: mmseqs
@@ -173,7 +172,6 @@ AbinitioAugustus:
         --format-output query,target,pident,taxid,taxname,taxlineage
 
     Augustus:
-      threads: 1
       program: augustus
       cutoff: 25.0
       rounds: 1
