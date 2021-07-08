@@ -109,7 +109,9 @@ class Augustus(Task):
             self.local["rm"][out_gff]()
         out_gff = str(out_gff)
         for contig_file in contig_files:
-            (self.local["cat"][str(contig_file) + f".{_round}.gb"] >> out_gff)()
+            gb_file = str(contig_file) + f".{_round}.gb"
+            (self.local["cat"][gb_file] >> out_gff)()
+            self.local["rm"][contig_file, gb_file]()
 
         return out_gff
 
