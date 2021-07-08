@@ -24,7 +24,7 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-Evidence:
+MetaEukEV:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
