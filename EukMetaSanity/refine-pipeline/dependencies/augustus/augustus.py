@@ -81,7 +81,6 @@ class Augustus(Task):
             collector.append(out_file)
             yield out_file
 
-    # Parallelize
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         """ Run augustus training round
 
@@ -91,16 +90,22 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
+        if self.config["run_mode"] == "genome":
+            return self._run_genome_mode(species, _round, _file, _last)
+        else:
+            return self._run_mag_mode(species, _round, _file, _last)
+
+    def _run_genome_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         contig_files = []
         contig_files_iter = self._contig_splitter(contig_files)
         self.batch(self.program[
-                "--codingseq=on",
-                "--stopCodonExcludedFromCDS=false",
-                "--species=%s" % species,
-                "--outfile=%s" % contig_file + f".{_round}.gb",
-                ("--gff3=on" if _last else "--gff3=off"),
-                contig_file,
-            ] for contig_file in contig_files_iter)
+                       "--codingseq=on",
+                       "--stopCodonExcludedFromCDS=false",
+                       "--species=%s" % species,
+                       "--outfile=%s" % contig_file + f".{_round}.gb",
+                       ("--gff3=on" if _last else "--gff3=off"),
+                       contig_file,
+                   ] for contig_file in contig_files_iter)
 
         out_gff = Path(os.path.join(
             self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
@@ -113,6 +118,22 @@ class Augustus(Task):
             (self.local["cat"][gb_file] >> out_gff)()
             self.local["rm"][contig_file, gb_file]()
 
+        return out_gff
+
+    def _run_mag_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
+        out_gff = os.path.join(
+            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
+        )
+        self.single(
+            self.program[
+                "--codingseq=on",
+                "--stopCodonExcludedFromCDS=false",
+                "--species=%s" % species,
+                "--outfile=%s" % out_gff,
+                ("--gff3=on" if _last else "--gff3=off"),
+                str(self.input["fasta"]),
+            ]
+        )
         return out_gff
 
     def _handle_config_output(self):

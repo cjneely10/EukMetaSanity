@@ -175,5 +175,6 @@ AbinitioAugustus:
       program: augustus
       cutoff: 25.0
       rounds: 1
+      run_mode: genome  # Set to either genome or MAG
 
 ...  # document end
