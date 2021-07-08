@@ -75,7 +75,7 @@ class Augustus(Task):
 
     def _contig_splitter(self, collector: list) -> Iterable[str]:
         for record in SeqIO.parse(self.input["fasta"], "fasta"):
-            out_file = f"{record.id}.fasta"
+            out_file = str(self.wdir.joinpath(f"{record.id}.fasta"))
             with open(out_file, "w") as out_ptr:
                 SeqIO.write([record], out_ptr, "fasta")
             collector.append(out_file)
