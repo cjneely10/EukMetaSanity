@@ -36,7 +36,7 @@ perl ./configure
 
 The `configure` script should ask you to confirm the location of your installation, as well as to select your search 
 engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS_run/bin/` when requested 
-(substituting for the proper path on your system).
+(substituting for the full path on your system).
 
 Finally, due to a small bug in the conda `RepeatMasker` conda environment, run the following command:
 
@@ -48,9 +48,9 @@ cp util/rmOutToGFF3.pl ./
 The conda version of AUGUSTUS is missing one needed element:
 
 ```
-cd ~/miniconda/envs/EukMS_run/bin
+cd ~/miniconda3/envs/EukMS_run/bin
 sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-cd ~/miniconda/envs/EukMS_refine/bin
+cd ~/miniconda3/envs/EukMS_refine/bin
 sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
 ```
 
