@@ -25,7 +25,7 @@ class Merge(Task):
             self.program[
                 self.input["AbinitioGeneMark"]["genemark-gff3"],
                 self.input["AbinitioAugustus"]["aug-gff3"],
-                self.input["MetaEukEV"]["MetaEukEV-gff3"],
+                self.input["MetaEukEV"]["evidence-gff3"],
                 "-o", self.output["merged-gff3"]
             ]
         )
