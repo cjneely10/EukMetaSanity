@@ -69,21 +69,51 @@ class FeatureDensityHandler(cli.Application):
                          limit_info={"gff_type": [self.feature]})
 
     def parse_to_buckets(self, out_path: Path):
-        out_ptr = open(out_path, "w")
         sorted_records: List[SeqRecord] = sorted(self.get_features(), key=lambda rec: len(rec.seq), reverse=True)
         genome_length: int = sum([len(record) for record in sorted_records])
         pos_in_genome: int = 0
         buckets: np.ndarray = np.zeros(genome_length // self.bucket_size + 1, dtype="int64")
         for record in sorted_records:
             for feature in record.features:
-                for i in feature.location:
-                    buckets[(pos_in_genome + i) // self.bucket_size] += 1
+                feature_start = feature.location.start + pos_in_genome
+                feature_end = feature.location.end + pos_in_genome
+                start = self.start_bucket_idx(feature_start)
+                end = self.end_bucket_idx(feature_end)
+                if start - 1 != end:
+                    buckets[start - 1] += self.amt_at_start(start, feature_start)
+                    buckets[end] += self.amt_at_end(end, feature_end)
+                    for i in self.overlapping_bucket_range(start, end):
+                        buckets[i] += self.bucket_size
+                else:
+                    buckets[start - 1] += feature_end - feature_start
             pos_in_genome += len(record.seq)
-        out_ptr.write("\t".join(map(str, buckets)))
+        self.write_results(out_path, buckets)
+
+    def start_bucket_idx(self, start: int):
+        return start // self.bucket_size + 1
+
+    def end_bucket_idx(self, end: int):
+        return end // self.bucket_size
+
+    def amt_at_start(self, start_idx: int, start: int):
+        return self.bucket_size * start_idx - start
+
+    def amt_at_end(self, end_idx: int, end: int):
+        return end - self.bucket_size * end_idx
+
+    def overlapping_bucket_range(self, start: int, end: int):
+        return range(self.start_bucket_idx(start), self.end_bucket_idx(end))
+
+    def write_results(self, out_path: Path, buckets: np.ndarray):
+        out_ptr = open(out_path, "w")
+        out_ptr.write(str(round(buckets[0] / self.bucket_size, 2)))
+        for bucket in buckets[1:]:
+            out_ptr.write("\t")
+            out_ptr.write(str(round(bucket / self.bucket_size, 2)))
         out_ptr.write("\n")
         out_ptr.close()
 
-    def main(self, *args):
+    def main(self):
         self.parse_to_buckets(Path(f"{os.path.splitext(self.gff3_file)[0]}.{self.feature}.density").resolve())
 
 
