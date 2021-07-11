@@ -176,4 +176,13 @@ AbinitioAugustus:
       cutoff: 25.0
       rounds: 1
 
+Tier:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 2
+  time: "10:00"
+  program: locus_solver
+  tier: 1
+
 ...  # document end

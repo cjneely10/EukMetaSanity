@@ -79,7 +79,7 @@ class Augustus(Task):
         for pos in range(0, len(records), threads):
             out_file = str(self.wdir.joinpath(f"{self.record_id}.{pos}.fasta"))
             with open(out_file, "w") as out_ptr:
-                SeqIO.write([records[pos: pos + threads]], out_ptr, "fasta")
+                SeqIO.write(records[pos: pos + threads], out_ptr, "fasta")
             created_files_list.append(out_file)
             yield out_file
 
