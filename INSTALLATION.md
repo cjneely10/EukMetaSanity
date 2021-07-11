@@ -155,4 +155,4 @@ conda remove --name EukMS_report --all
 conda remove --name EukMS_refine --all
 ```
 
-You will also need to remove the 4 lines added to your `.bashrc` file. 
+You will also need to remove the 4 lines added to your `.bashrc` file. You may also wish to delete this repository.
