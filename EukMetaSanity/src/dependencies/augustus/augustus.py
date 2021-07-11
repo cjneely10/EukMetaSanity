@@ -73,12 +73,14 @@ class Augustus(Task):
             "5:00"
         )
 
-    def _contig_splitter(self, collector: list) -> Iterable[str]:
-        for record in SeqIO.parse(self.input["fasta"], "fasta"):
-            out_file = str(self.wdir.joinpath(f"{record.id}.fasta"))
+    def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
+        records = list(SeqIO.parse(self.input["fasta"], "fasta"))
+        threads = int(self.threads)
+        for pos in range(0, len(records), threads):
+            out_file = str(self.wdir.joinpath(f"{self.record_id}.{pos}.fasta"))
             with open(out_file, "w") as out_ptr:
-                SeqIO.write([record], out_ptr, "fasta")
-            collector.append(out_file)
+                SeqIO.write([records[pos: pos + threads]], out_ptr, "fasta")
+            created_files_list.append(out_file)
             yield out_file
 
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
@@ -90,10 +92,7 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        if self.config["run_mode"] == "genome":
-            return self._run_genome_mode(species, _round, _file, _last)
-        else:
-            return self._run_mag_mode(species, _round, _file, _last)
+        return self._run_genome_mode(species, _round, _file, _last)
 
     def _run_genome_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         contig_files = []
