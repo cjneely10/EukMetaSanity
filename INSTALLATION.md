@@ -21,7 +21,7 @@ You may need to restart your shell for these changes to take effect.
 **EukMetaSanity**'s `conda` installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
-must install them separately.
+must install them separately. We highly suggest using of these software suites, but they are not directly required.
 
 ### Configuring RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. 
@@ -41,7 +41,7 @@ The `configure` script should ask you to confirm the location of your installati
 engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS_run/bin/` when requested 
 (substituting for the full path on your system).
 
-Finally, due to a small bug in the conda `RepeatMasker` conda environment, run the following command:
+Finally, run the following command:
 
 ```
 cp util/rmOutToGFF3.pl ./

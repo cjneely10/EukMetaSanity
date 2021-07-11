@@ -1,10 +1,12 @@
 CONDA = conda
 YAPIM = yapim
+
 BIN = bin
 SRC = EukMetaSanity/src
-RUN = run
 CONFIG_EXT = -config.yaml
 PIPELINE_EXT = -pipeline
+
+RUN = run
 REPORT = report
 REFINE = refine
 DEPENDENCIES = dependencies
