@@ -9,6 +9,9 @@ environment. Then, run the following commands:
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
+echo export EukMS_run="$(pwd)"/bin/run-pipeline' >> ~/.bashrc
+echo export EukMS_report="$(pwd)"/bin/report-pipeline' >> ~/.bashrc
+echo export EukMS_refine="$(pwd)"/bin/refine-pipeline' >> ~/.bashrc
 ```
 
 You may need to restart your shell for these changes to take effect.
@@ -144,4 +147,12 @@ Install [GMAP](http://research-pub.gene.com/gmap/)
 Install [BRAKER](https://github.com/Gaius-Augustus/BRAKER#installation)
 
 
+### Uninstalling EukMetaSanity
 
+```
+conda remove --name EukMS_run --all
+conda remove --name EukMS_report --all
+conda remove --name EukMS_refine --all
+```
+
+You will also need to remove the 4 lines added to your `.bashrc` file. 

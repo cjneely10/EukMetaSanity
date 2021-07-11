@@ -1,6 +1,5 @@
 .idea/
-bin/
-!EukMetaSanity/bin/
+bin/metaeuk
 __pycache__/
 .vscode/
 HashTable/

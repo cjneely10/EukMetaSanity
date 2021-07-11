@@ -52,7 +52,7 @@ MAGs/
 Generate initial ab initio and protein-based annotation models using the command:
 
 ```
-yapim run -i MAGs -c run-config.yaml -p /path/to/EukMetaSanity/EukMetaSanity/run-pipeline
+yapim run -i MAGs -c run-config.yaml -p $EukMS_run
 ```
 
 This will create a directory structure resembling:
@@ -86,7 +86,7 @@ portion of the pipeline, simply delete its directories in the project structure.
 of the `run` pipeline for all MAGs, run the following command to delete all existing data:
 
 ```
-yapim clean -p /path/to/run-pipeline Taxonomy
+yapim clean -p $EukMS_run Taxonomy
 ```
 
 #### Refine (optional)
@@ -106,7 +106,7 @@ of transcriptomes.
 Integrate RNAseq and transcriptomic evidence into annotation models using the command:
 
 ```
-yapim run -c refine-config.yaml -p /path/to/EukMetaSanity/EukMetaSanity/refine-pipeline
+yapim run -c refine-config.yaml -p $EukMS_refine
 ```
 
 This will update the directory structure:
@@ -141,7 +141,7 @@ Copy and edit the `report-config.yaml` config file to fit your analysis needs. S
 Annotate gene models using the command:
 
 ```
-yapim run -c report-config.yaml -p /path/to/EukMetaSanity/EukMetaSanity/report-pipeline
+yapim run -c report-config.yaml -p $EukMS_report
 ```
 
 This will update the directory structure:
