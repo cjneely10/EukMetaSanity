@@ -1,5 +1,5 @@
 .idea/
-bin
+#bin
 __pycache__/
 .vscode/
 HashTable/
