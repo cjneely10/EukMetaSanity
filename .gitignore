@@ -1,5 +1,5 @@
 .idea/
-bin/metaeuk
+bin
 __pycache__/
 .vscode/
 HashTable/
