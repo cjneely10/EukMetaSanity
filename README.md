@@ -38,7 +38,17 @@ Default configuration files will be available in the directory created by runnin
 ### Example usage
 
 #### Run
-Copy and edit the `run-config.yaml` config file to fit your analysis needs. Activate your `EukMS_run` conda environment.
+Copy and edit the `run-config.yaml` config file to fit your analysis needs. 
+
+```shell
+cp $EukMS_run/run-config.yaml ./
+```
+
+Activate your `EukMS_run` conda environment.
+
+```shell
+conda activate EukMS_run
+```
 
 Ensure your input FASTA sequences do not have the pipe (`|`) character present.
 
@@ -90,7 +100,19 @@ yapim clean -p $EukMS_run Taxonomy
 ```
 
 #### Refine (optional)
-Copy and edit the `refine-config.yaml` config file to fit your analysis needs. Pay close attention to the input format
+Copy and edit the `refine-config.yaml` config file to fit your analysis needs. 
+
+```shell
+cp $EukMS_refine/refine-config.yaml ./
+```
+
+Activate your `EukMS_run` conda environment.
+
+```shell
+conda activate EukMS_refine
+```
+
+Pay close attention to the input format
 for RNA-seq and transcriptomes that is required by the config file:
 
 ```
@@ -135,7 +157,19 @@ out/
 ```
 
 #### Report (optional)
-Copy and edit the `report-config.yaml` config file to fit your analysis needs. Set the `INPUT/base` section to be either
+Copy and edit the `report-config.yaml` config file to fit your analysis needs. 
+
+```shell
+cp $EukMS_report/report-config.yaml ./
+```
+
+Activate your `EukMS_run` conda environment.
+
+```shell
+conda activate EukMS_report
+```
+
+Set the `INPUT/base` section to be either
 `run` or `refine`, depending on which set of predictions you want to annotate. Activate your `EukMS_report` conda environment.
 
 Annotate gene models using the command:
