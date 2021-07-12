@@ -81,13 +81,19 @@ class Augustus(Task):
         sums = {i: 0 for i in range(len(buckets))}
         total_size = sum([len(rec.seq) for rec in data])
         bucket_size = total_size // n
+
+        # Track contigs that are too big to fit into a bucket,
         too_large = []
+        # and contigs that couldn't fit because buckets are all mostly full
+        unable_to_fit = []
         for record in data:
-            pos = 0
             record_length = len(record.seq)
+            # Contig too large for bucket size - place into own bucket
             if record_length > bucket_size:
                 too_large.append([record])
                 continue
+            # Try to find a bucket that can fit contig
+            pos = 0
             while pos < len(buckets):
                 current_sum = sums[pos]
                 if current_sum + record_length > bucket_size:
@@ -96,8 +102,17 @@ class Augustus(Task):
                     buckets[pos].append(record)
                     sums[pos] += len(record)
                     break
+            # Reached end and did not find appropriate bucket, collect into own bucket
+            if pos == len(buckets):
+                unable_to_fit.append(record)
+
+        # Add bucket of records that could not be placed
+        buckets.append(unable_to_fit)
+        # Extend using records that were too large to fit
         buckets.extend(too_large)
+        # Remore empty buckets
         buckets = [bucket for bucket in buckets if len(bucket) > 0]
+        # Sanity check
         assert total_size == sum([sum([len(record.seq) for record in bucket]) for bucket in buckets])
         return buckets
 
