@@ -3,7 +3,7 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class Merge(Task):
+class Tier(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
@@ -26,7 +26,8 @@ class Merge(Task):
                 self.input["AbinitioGeneMark"]["genemark-gff3"],
                 self.input["AbinitioAugustus"]["aug-gff3"],
                 self.input["MetaEukEV"]["evidence-gff3"],
-                "-o", self.output["merged-gff3"]
+                "-o", self.output["merged-gff3"],
+                "-t", self.config["tier"]
             ]
         )
         self.single(
