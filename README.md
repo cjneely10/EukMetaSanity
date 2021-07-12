@@ -33,11 +33,7 @@ for detailed installation instructions.
 
 ## Usage
 
-Default configuration files will be available in the directory created by running `download-data` in the installation README above. These can be edited to fit your needs.
-
-### Example usage
-
-#### Run
+### Run
 Copy and edit the `run-config.yaml` config file to fit your analysis needs. 
 
 ```shell
@@ -74,14 +70,14 @@ out/
     |-- run/
         |-- run.pkl
         |-- mag1/
-          |-- mag1.Merge.gff3  # Merged final results (GFF3)
-          |-- mag1.Merge.faa  # Merged final results (FASTA)
+          |-- mag1.n.Tier.gff3  # Tier n final results (GFF3)
+          |-- mag1.n.Tier.faa  # Tier n final results (FASTA)
           |-- mag1.AbinitioAugustus.gff3  # Augustus results (GFF3)
           |-- mag1.AbinitioAugustus.faa  # Augustus results (FASTA)
           |-- mag1.AbinitioGeneMark.gff3  # GeneMark results (GFF3)
           |-- mag1.AbinitioGeneMark.faa  # GeneMark results (FASTA)
-          |-- mag1.MetaEuk.gff3  # MetaEuk results (GFF3)
-          |-- mag1.MetaEuk.faa  # MetaEuk results (FASTA)
+          |-- mag1.MetaEukEV.gff3  # MetaEuk results (GFF3)
+          |-- mag1.MetaEukEV.faa  # MetaEuk results (FASTA)
           |-- mask.final.Repeats.gff3  # Repeats locations (GFF3)
           |-- mask.final.Repeats.tbl  # Summary of repeats annotation
           |-- mag1.mask.Repeats.fna  # Masked input genome (FASTA)
@@ -90,7 +86,7 @@ out/
           .. 
 ```
 
-### Note on running:
+#### Note on running:
 **EukMetaSanity** will not re-run already completed steps within a given pipeline. If you would like to re-do a particular
 portion of the pipeline, simply delete its directories in the project structure. For example, to redo the `Taxonomy` step
 of the `run` pipeline for all MAGs, run the following command to delete all existing data:
@@ -99,14 +95,14 @@ of the `run` pipeline for all MAGs, run the following command to delete all exis
 yapim clean -p $EukMS_run Taxonomy
 ```
 
-#### Refine (optional)
+### Refine (optional)
 Copy and edit the `refine-config.yaml` config file to fit your analysis needs. 
 
 ```shell
 cp $EukMS_refine/refine-config.yaml ./
 ```
 
-Activate your `EukMS_run` conda environment.
+Activate your `EukMS_refine` conda environment.
 
 ```shell
 conda activate EukMS_refine
@@ -156,14 +152,14 @@ out/
               .. 
 ```
 
-#### Report (optional)
+### Report (optional)
 Copy and edit the `report-config.yaml` config file to fit your analysis needs. 
 
 ```shell
 cp $EukMS_report/report-config.yaml ./
 ```
 
-Activate your `EukMS_run` conda environment.
+Activate your `EukMS_report` conda environment.
 
 ```shell
 conda activate EukMS_report

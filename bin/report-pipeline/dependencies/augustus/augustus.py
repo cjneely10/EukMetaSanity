@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List, Union, Type, Iterable
 
 from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 from yapim import Task, DependencyInput, touch
 from .taxon_ids import augustus_taxon_ids
@@ -73,13 +74,35 @@ class Augustus(Task):
             "5:00"
         )
 
+    @staticmethod
+    def split_data(data: List[SeqRecord], n: int) -> List[List[SeqRecord]]:
+        """Accepts list of contig lengths, splits to n lists of indices"""
+        buckets: List[List[SeqRecord]] = [[] for _ in range(n)]
+        sums = {i: 0 for i in range(n)}
+        total_size = sum([len(rec.seq) for rec in data])
+        bucket_size = total_size // (n - 1)
+
+        for record in data:
+            pos = 0
+            record_length = len(record.seq)
+            while pos < len(buckets):
+                current_sum = sums[pos]
+                if current_sum + record_length > bucket_size:
+                    pos += 1
+                else:
+                    buckets[pos].append(record)
+                    sums[pos] += len(record)
+                    break
+
+        return buckets
+
     def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
         records = list(SeqIO.parse(self.input["fasta"], "fasta"))
-        file_size = len(records) // int(self.threads)
-        for pos in range(0, len(records), file_size):
+        split_records: List[List[SeqRecord]] = Augustus.split_data(records, int(self.threads))
+        for pos, records_list in enumerate(split_records):
             out_file = str(self.wdir.joinpath(f"{self.record_id}.{pos}.fasta"))
             with open(out_file, "w") as out_ptr:
-                SeqIO.write(records[pos: pos + file_size], out_ptr, "fasta")
+                SeqIO.write(records_list, out_ptr, "fasta")
             created_files_list.append(out_file)
             yield out_file
 
