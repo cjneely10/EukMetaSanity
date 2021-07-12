@@ -78,7 +78,7 @@ class MMSeqsTaxonomy(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "tax-report": os.path.join(self.wdir, "tax-report.txt"),
+            "tax-report": os.path.join(self.wdir, f"{self.record_id}.txt"),
             "taxonomy": {},
             "taxonomy-actual": {},
             "tax-db": Result(os.path.join(self.wdir, self.record_id + "-tax_db"))

@@ -78,10 +78,10 @@ out/
           |-- mag1.AbinitioGeneMark.faa  # GeneMark results (FASTA)
           |-- mag1.MetaEukEV.gff3  # MetaEuk results (GFF3)
           |-- mag1.MetaEukEV.faa  # MetaEuk results (FASTA)
-          |-- mask.final.Repeats.gff3  # Repeats locations (GFF3)
-          |-- mask.final.Repeats.tbl  # Summary of repeats annotation
-          |-- mag1.mask.Repeats.fna  # Masked input genome (FASTA)
-          |-- tax-report.Taxonomy.txt  # Taxonomy assignment summary
+          |-- mag1.Repeats.gff3  # Repeats locations (GFF3)
+          |-- mag1.Repeats.tbl  # Summary of repeats annotation
+          |-- mag1.Repeats.fna  # Masked input genome (FASTA)
+          |-- mag1.Taxonomy.txt  # Taxonomy assignment summary
         |-- mag2/
           .. 
 ```

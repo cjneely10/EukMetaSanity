@@ -8,9 +8,9 @@ class RMaskProcessRepeats(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, *kwargs)
         self.output = {
-            "rmout": os.path.join(self.wdir, "mask.final.out"),
-            "rmtbl": os.path.join(self.wdir, "mask.final.tbl"),
-            "rmcat": os.path.join(self.wdir, "mask.final.cat"),
+            "rmout": os.path.join(self.wdir, f"{self.record_id}.out"),
+            "rmtbl": os.path.join(self.wdir, f"{self.record_id}.tbl"),
+            "rmcat": os.path.join(self.wdir, f"{self.record_id}.cat"),
         }
 
     @staticmethod
@@ -44,7 +44,7 @@ class RMaskProcessRepeats(Task):
             if os.path.exists(_file) and os.path.getsize(_file) > 0:
                 cat_files.append(_file)
         # Combine results into single file
-        final_out = os.path.join(self.wdir, "mask.final.cat")
+        final_out = self.output["rmcat"]
         if os.path.exists(final_out):
             os.remove(final_out)
         touch(final_out)

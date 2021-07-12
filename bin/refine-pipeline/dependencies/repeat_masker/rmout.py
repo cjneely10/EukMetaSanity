@@ -9,8 +9,8 @@ class RMaskRMOut(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "mask-gff3": os.path.join(self.wdir, "mask.final.gff3"),
-            "mask-fna": os.path.join(self.wdir, self.record_id + ".mask.fna")
+            "mask-gff3": os.path.join(self.wdir, f"{self.record_id}.gff3"),
+            "mask-fna": os.path.join(self.wdir, f"{self.record_id}.fna")
         }
 
     @staticmethod
