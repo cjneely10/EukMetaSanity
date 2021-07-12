@@ -81,11 +81,14 @@ class Augustus(Task):
         sums = {i: 0 for i in range(n)}
         total_size = sum([len(rec.seq) for rec in data])
         bucket_size = total_size // (n - 1)
-
+        too_large = []
         for record in data:
             pos = 0
             record_length = len(record.seq)
             while pos < len(buckets):
+                if record_length > bucket_size:
+                    too_large.append([record])
+                    continue
                 current_sum = sums[pos]
                 if current_sum + record_length > bucket_size:
                     pos += 1
@@ -93,8 +96,8 @@ class Augustus(Task):
                     buckets[pos].append(record)
                     sums[pos] += len(record)
                     break
-
-        return buckets
+        buckets.extend(too_large)
+        return [bucket for bucket in buckets if len(bucket) > 0]
 
     def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
         records = list(SeqIO.parse(self.input["fasta"], "fasta"))

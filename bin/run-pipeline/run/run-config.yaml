@@ -44,6 +44,7 @@ MetaEukEV:
         -c 0.3
         -e 100
         --max-overlap 0
+        --remove-tmp-files
 
 Taxonomy:
   # Number of threads task will use
