@@ -92,7 +92,7 @@ portion of the pipeline, simply delete its directories in the project structure.
 of the `run` pipeline for all MAGs, run the following command to delete all existing data:
 
 ```
-yapim clean -p $EukMS_run Taxonomy
+yapim clean -p $EukMS_run Taxonomy -o out
 ```
 
 ### Refine (optional)
