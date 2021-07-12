@@ -115,19 +115,21 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        return self._run_genome_mode(species, _round, _file, _last)
-
-    def _run_genome_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         contig_files = []
         contig_files_iter = self._contig_splitter(contig_files)
-        self.parallel(self.create_script([self.program[
-                       "--codingseq=on",
-                       "--stopCodonExcludedFromCDS=false",
-                       "--species=%s" % species,
-                       "--outfile=%s" % contig_file + f".{_round}.gb",
-                       ("--gff3=on" if _last else "--gff3=off"),
-                       contig_file,
-                   ] for contig_file in contig_files_iter], "augustus-runner.sh", parallelize=True))
+        self.parallel(
+            self.create_script(
+                [self.program[
+                     "--codingseq=on",
+                     "--stopCodonExcludedFromCDS=false",
+                     "--species=%s" % species,
+                     "--outfile=%s" % contig_file + f".{_round}.gb",
+                     ("--gff3=on" if _last else "--gff3=off"),
+                     contig_file,
+                 ] for contig_file in contig_files_iter], "augustus-runner.sh",
+                parallelize=True
+            )
+        )
 
         out_gff = Path(os.path.join(
             self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
