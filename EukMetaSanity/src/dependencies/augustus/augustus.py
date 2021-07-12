@@ -85,10 +85,10 @@ class Augustus(Task):
         for record in data:
             pos = 0
             record_length = len(record.seq)
+            if record_length > bucket_size:
+                too_large.append([record])
+                continue
             while pos < len(buckets):
-                if record_length > bucket_size:
-                    too_large.append([record])
-                    continue
                 current_sum = sums[pos]
                 if current_sum + record_length > bucket_size:
                     pos += 1
