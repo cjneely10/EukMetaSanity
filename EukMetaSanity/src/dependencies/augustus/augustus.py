@@ -77,13 +77,10 @@ class Augustus(Task):
     @staticmethod
     def split_data(data: List[SeqRecord], n: int) -> List[List[SeqRecord]]:
         """Accepts list of contig lengths, splits to n lists of indices"""
-        buckets: List[List[SeqRecord]] = [[] for _ in range(n)]
-        sums = {i: 0 for i in range(n)}
+        buckets: List[List[SeqRecord]] = [[] for _ in range(n + 1)]
+        sums = {i: 0 for i in range(len(buckets))}
         total_size = sum([len(rec.seq) for rec in data])
-        if n > 1:
-            bucket_size = total_size // (n - 1)
-        else:
-            bucket_size = total_size
+        bucket_size = total_size // n
         too_large = []
         for record in data:
             pos = 0
@@ -100,7 +97,9 @@ class Augustus(Task):
                     sums[pos] += len(record)
                     break
         buckets.extend(too_large)
-        return [bucket for bucket in buckets if len(bucket) > 0]
+        buckets = [bucket for bucket in buckets if len(bucket) > 0]
+        assert total_size == sum([sum([len(record.seq) for record in bucket]) for bucket in buckets])
+        return buckets
 
     def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
         records = list(SeqIO.parse(self.input["fasta"], "fasta"))
