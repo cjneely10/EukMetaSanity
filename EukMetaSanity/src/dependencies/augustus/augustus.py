@@ -80,7 +80,10 @@ class Augustus(Task):
         buckets: List[List[SeqRecord]] = [[] for _ in range(n)]
         sums = {i: 0 for i in range(n)}
         total_size = sum([len(rec.seq) for rec in data])
-        bucket_size = total_size // (n - 1)
+        if n > 1:
+            bucket_size = total_size // (n - 1)
+        else:
+            bucket_size = total_size
         too_large = []
         for record in data:
             pos = 0
