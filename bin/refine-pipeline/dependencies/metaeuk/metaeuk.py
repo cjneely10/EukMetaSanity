@@ -6,7 +6,6 @@ from BCBio import GFF
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from Bio.SeqRecord import SeqRecord
-
 from yapim import Task, DependencyInput, prefix
 
 Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand"))

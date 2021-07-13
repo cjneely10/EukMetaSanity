@@ -4,7 +4,6 @@ import shutil
 from typing import List, Union, Type
 
 from plumbum import ProcessExecutionError
-
 from yapim import Task, DependencyInput, touch
 
 
