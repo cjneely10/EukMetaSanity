@@ -4,8 +4,8 @@ Module holds functionality for manipulating downloaded databases from initial fo
 import os
 from typing import Sequence, Callable, List
 
-from yapim import prefix
 from plumbum import local
+from yapim import prefix
 
 from EukMetaSanity.data.data import DataUtil
 

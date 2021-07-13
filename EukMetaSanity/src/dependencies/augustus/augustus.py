@@ -3,12 +3,11 @@ import os
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import List, Union, Type, Iterable
+from typing import List, Union, Type
 
-from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
-
 from yapim import Task, DependencyInput, touch
+
 from .taxon_ids import augustus_taxon_ids
 
 
@@ -116,16 +115,6 @@ class Augustus(Task):
         assert total_size == sum([sum([len(record.seq) for record in bucket]) for bucket in buckets])
         return buckets
 
-    def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
-        records = list(SeqIO.parse(self.input["fasta"], "fasta"))
-        split_records: List[List[SeqRecord]] = Augustus.split_data(records, int(self.threads))
-        for pos, records_list in enumerate(split_records):
-            out_file = str(self.wdir.joinpath(f"{self.record_id}.{pos}.fasta"))
-            with open(out_file, "w") as out_ptr:
-                SeqIO.write(records_list, out_ptr, "fasta")
-            created_files_list.append(out_file)
-            yield out_file
-
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         """ Run augustus training round
 
@@ -135,39 +124,6 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        contig_files = []
-        contig_files_iter = self._contig_splitter(contig_files)
-        self.parallel(
-            self.create_script(
-                [self.program[
-                     "--codingseq=on",
-                     "--stopCodonExcludedFromCDS=false",
-                     "--species=%s" % species,
-                     "--outfile=%s" % contig_file + f".{_round}.gb",
-                     ("--gff3=on" if _last else "--gff3=off"),
-                     contig_file,
-                 ] for contig_file in contig_files_iter], "augustus-runner.sh",
-                parallelize=True
-            )
-        )
-
-        out_gff = Path(os.path.join(
-            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
-        ))
-        if out_gff.exists():
-            self.local["rm"][out_gff]()
-        out_gff = str(out_gff)
-        self._merge_results_out(contig_files, _round, out_gff)
-        return out_gff
-
-    # TODO
-    def _merge_results_out(self, result_files: List[Path], _round: int, out_gff: str):
-        for contig_file in result_files:
-            gb_file = str(contig_file) + f".{_round}.gb"
-            (self.local["cat"][gb_file] >> out_gff)()
-            self.local["rm"][contig_file, gb_file]()
-
-    def _run_mag_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         out_gff = os.path.join(
             self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
         )

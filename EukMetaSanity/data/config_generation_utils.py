@@ -1,8 +1,8 @@
 """
 Module handles taking all config files in the official pipeline and generating
 """
-import os
 import glob
+import os
 from pathlib import Path
 
 
