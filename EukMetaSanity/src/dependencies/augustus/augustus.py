@@ -157,12 +157,15 @@ class Augustus(Task):
         if out_gff.exists():
             self.local["rm"][out_gff]()
         out_gff = str(out_gff)
-        for contig_file in contig_files:
+        self._merge_results_out(contig_files, _round, out_gff)
+        return out_gff
+
+    # TODO
+    def _merge_results_out(self, result_files: List[Path], _round: int, out_gff: str):
+        for contig_file in result_files:
             gb_file = str(contig_file) + f".{_round}.gb"
             (self.local["cat"][gb_file] >> out_gff)()
             self.local["rm"][contig_file, gb_file]()
-
-        return out_gff
 
     def _run_mag_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         out_gff = os.path.join(
