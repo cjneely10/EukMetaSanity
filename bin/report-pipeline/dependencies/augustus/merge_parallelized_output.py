@@ -50,20 +50,9 @@ def _collect(file: Path, output_data: List[SeqRecord], counter: GeneCount):
                 )
                 top_feature.sub_features = []
                 for sub_feature in feature.sub_features:
-                    sub_qualifiers = {
+                    sub_feature.qualifiers = {
                         "source": "augustus",
                     }
-                    phase = sub_feature.qualifiers.get("phase")
-                    if phase is not None:
-                        sub_qualifiers["phase"] = phase
-                    top_feature.sub_features.append(
-                        SeqFeature(
-                            sub_feature.location,
-                            type=sub_feature.type,
-                            strand=sub_feature.strand,
-                            qualifiers=sub_qualifiers,
-                            sub_features=sub_feature.sub_features
-                        )
-                    )
+                    top_feature.sub_features.append(sub_feature)
                 new_record.features.append(top_feature)
             output_data.append(new_record)
