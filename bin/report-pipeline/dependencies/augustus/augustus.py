@@ -157,7 +157,7 @@ class Augustus(Task):
         ))
         if out_gff.exists():
             self.local["rm"][out_gff]()
-        merge([Path(str(contig_file) + f".{_round}.gff") for contig_file in contig_files], out_gff)
+        merge(contig_files, out_gff, _round)
         return str(out_gff)
 
     def _handle_config_output(self):

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 
@@ -16,11 +17,13 @@ class GeneCount:
         return self._count
 
 
-def merge(files: List[Path], output_path: Path):
+def merge(files: List[Path], output_path: Path, _round: int):
     output_data: List[SeqRecord] = []
     gene_count = GeneCount()
     for file in files:
-        _collect(file, output_data, gene_count)
+        _collect(Path(str(file) + f".{_round}.gff"), output_data, gene_count)
+        os.remove(file)
+        os.remove(str(file) + f".{_round}.gff")
     with open(output_path, "w") as out_ptr:
         GFF.write(output_data, out_ptr)
 
@@ -59,6 +62,7 @@ def _collect(file: Path, output_data: List[SeqRecord], counter: GeneCount):
                             type=sub_feature.type,
                             strand=sub_feature.strand,
                             qualifiers=sub_qualifiers,
+                            sub_features=sub_feature.sub_features
                         )
                     )
                 new_record.features.append(top_feature)
