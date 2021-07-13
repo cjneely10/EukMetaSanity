@@ -5,7 +5,7 @@
 INPUT:
   root: all
   run:
-    prot: merged-prot
+    prot: merged-prot  # or gmes-prot or genemark-prot or aug-prot or evidence-prot
 
 ## Global settings
 GLOBAL:

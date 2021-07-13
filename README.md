@@ -4,18 +4,19 @@
 
 ## About
 Eukaryotic genome annotation is a laborious and time-intensive process. **EukMetaSanity** provides a structural and 
-functional annotation of MAGs in a highly-parallel fashion, allowing for quick and in-depth analyses. The software is
-customizable - users may choose from several provided options based on their analysis needs, and power users with Python
-experience can easily extend the **EukMetaSanity** code base to add to or create new pipelines!
+functional annotation of MAGs in a highly-parallel fashion, allowing for quick and in-depth analyses.
 
 This software suite is broken up into several sub-programs
 
 ### Run
-Identify putative taxonomy using the OrthoDB/MMETSP databases and MMseqs2 and annotate repeated regions of
-the genome with either MMseqs2 or RepeatModeler/RepeatMasker. 
+Perform high-quality structural annotation using protein evidence recruited from the Orthologous Database of Proteins and the Marine 
+Microbial Eukaryotic Transcriptomic Sequencing Project databases.
 
-Generate *ab initio* structural predictions of coding regions of the genome using either Augustus or GeneMark.
-Refine predictions with protein evidence using MetaEuk.
+Performs:
+
+- Taxonomy prediction using proteins identified by MetaEuk
+- DNA repeat modeling and masking using RepeatModeler and RepeatMasker, respectively
+- *Ab initio* prediction with Augustus and/or GeneMark
 
 ### Refine
 Map RNA-seq (using HISAT2) and assembled transcriptome (using GMAP) evidence from closely related organisms (same 
@@ -31,14 +32,219 @@ Check the quality of your annotation using BUSCO.
 See <a href="https://github.com/cjneely10/EukMetaSanity/blob/main/INSTALLATION.md" target="_blank">INSTALLATION.md</a> 
 for detailed installation instructions.
 
-## Usage
+---
 
-### Run
-Copy and edit the `run-config.yaml` config file to fit your analysis needs. 
+## Run
+
+### Config setup
+Copy and edit the `run-config.yaml` config file to fit your analysis needs.
 
 ```shell
 cp $EukMS_run/run-config.yaml ./
 ```
+
+In the `GLOBAL` section, you will want to set the number of `MaxThreads` you will use to run the analysis, as well as the `MaxMemory` to be used.
+In the `SLURM` section, set `USE_CLUSTER` to `true` if running on slurm, and provide run configuration details (such as qos, job_name, partition, account, etc.).
+
+In each subsequent section, you may adjust the `threads`, `memory`, and `FLAGS` that are passed to the program. Be sure to set the
+time allocation for each step if running pipeline on `SLURM`.
+
+If you choose to omit running `AbinitioAugustus` or `AbinitioGeneMark`, set its respective `skip` flag to be `true`.
+
+```yaml
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 20
+  # Maximum memory to use (in GB)
+  MaxMemory: 120
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+MetaEukEV:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 100
+  time: "12:00:00"
+  dependencies:
+    MetaEuk:
+      program: metaeuk
+      data:
+        /path/to/odb-mmetsp_db
+      # Pass any flags to metaeuk required
+      FLAGS:
+        --min-length 30
+        --metaeuk-eval 0.0001
+        -s 5
+        --cov-mode 0
+        -c 0.3
+        -e 100
+        --max-overlap 0
+        --remove-tmp-files
+
+Taxonomy:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 100
+  time: "8:00:00"
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+      threads: 1
+
+    MMSeqsTaxonomy:
+      program: mmseqs
+      cutoff: 8.0  # Minimum % of mapped reads to tax level
+      data:
+        /path/to/odb-mmetsp_db
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 6.5
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
+
+Repeats:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 16
+  time: "24:00:00"
+  dependencies:
+    RModBuildDatabase:
+      time: "10:00"
+      threads: 1
+      program: BuildDatabase
+
+    RModRepeatModeler:
+      program: RepeatModeler
+      skip: false
+
+    RMaskRepeatMasker:
+      program: RepeatMasker
+      level: family
+      data:
+        "" # Comma-separated list of repeat models to incorporate
+      FLAGS:
+        -nolow
+
+    RMaskProcessRepeats:
+      time: "30:00"
+      threads: 1
+      program: ProcessRepeats
+      FLAGS:
+        -nolow
+
+    RMaskRMOut:
+      time: "10:00"
+      threads: 1
+      program: rmOutToGFF3.pl
+
+AbinitioGeneMark:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 16
+  time: "16:00:00"
+  skip: false
+  dependencies:
+    MMSeqsFilterTaxSeqDB:
+      threads: 1
+      time: "10:00"
+      program: mmseqs
+      level: order
+      data:
+        /path/to/odb-mmetsp_db
+
+    GeneMarkProtHint:
+      program: prothint.py
+
+    GeneMarkPETAP:
+      program: gmes_petap.pl
+      FLAGS:
+        --min_contig 100
+        --max_contig 1000000000
+        --max_gap 5000
+        --max_mask 5000
+        --min_contig_in_predict 100
+        --min_gene_in_predict 10
+        --gc_donor 0.001
+        --max_intron 10000
+        --max_intergenic 50000
+        --soft_mask auto
+
+AbinitioAugustus:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "24:00:00"
+  skip: false
+  dependencies:
+    MMSeqsCreateDB:
+      time: "10:00"
+      program: mmseqs
+      threads: 1
+
+    MMSeqsSearch:
+      memory: 20
+      data:
+        /path/to/odb-mmetsp_db
+      program: mmseqs
+      subname: linsearch  # Can use `search` if linear index is not present for database
+      FLAGS:
+        --split-memory-limit 16G
+        --cov-mode 0
+        -c 0.6
+        -e 0.01
+        --remove-tmp-files
+
+    MMSeqsConvertAlis:
+      time: "2:00:00"
+      data:
+        /path/to/odb-mmetsp_db
+      program: mmseqs
+      FLAGS:
+        --format-output query,target,pident,taxid,taxname,taxlineage
+
+    Augustus:
+      program: augustus
+      cutoff: 25.0
+      rounds: 1
+
+Tier:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 2
+  time: "10:00"
+  program: locus_solver
+  tier: 1
+
+...  # document end
+```
+
+### Call pipeline
 
 Activate your `EukMS_run` conda environment.
 
@@ -55,11 +261,13 @@ MAGs/
   |-- mag2.fna
 ```
 
-Generate initial ab initio and protein-based annotation models using the command:
+Run the pipeline using the command:
 
 ```
 yapim run -i MAGs -c run-config.yaml -p $EukMS_run
 ```
+
+### Run output
 
 This will create a directory structure resembling:
 ```
@@ -95,18 +303,19 @@ of the `run` pipeline for all MAGs, run the following command to delete all exis
 yapim clean -p $EukMS_run Taxonomy -o out
 ```
 
-### Refine (optional)
-Copy and edit the `refine-config.yaml` config file to fit your analysis needs. 
+---
+
+## Refine (optional)
+
+### Config setup
+
+Copy and edit the `refine-config.yaml` config file to fit your analysis needs.
 
 ```shell
 cp $EukMS_refine/refine-config.yaml ./
 ```
 
-Activate your `EukMS_refine` conda environment.
-
-```shell
-conda activate EukMS_refine
-```
+As before, set resource usage in the `GLOBAL` settings as well as for each subsequent section. Also set the `SLURM` settings, if needed.
 
 Pay close attention to the input format
 for RNA-seq and transcriptomes that is required by the config file:
@@ -121,13 +330,147 @@ file-basename \t /path/to/tr1.fna,/path/to/tr2.fna
 The listed paired-end or single-end reads will be mapped to the file that begins with `file-basename`, as will the list 
 of transcriptomes.
 
-Integrate RNAseq and transcriptomic evidence into annotation models using the command:
+```yaml
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  run: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 24
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+CollectInput:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  # Should be in format (excluding spaces around tab):
+  # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+  transcriptomes: /path/to/transcriptome-mapping-file
+  # Should be in format (excluding spaces around tab):
+  # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+  rnaseq: /path/to/rnaseq-mapping-file
+
+GatherProteins:
+  # Number of threads task will use
+  threads: 8
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MMSeqsFilterTaxSeqDB:
+      program: mmseqs
+      level: order
+      data:
+        /path/to/odb-mmetsp_db
+
+Transcriptomes:
+  # Number of threads task will use
+  threads: 8
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    GMAPBuild:
+      threads: 1
+      program: gmapindex
+
+    GMAP:
+      program: gmap
+      FLAGS:
+        -B 5
+        --input-buffer-size 1000000
+        --output-buffer-size 1000000
+        -f samse
+
+RNASeq:
+  # Number of threads task will use
+  threads: 8
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    Hisat2Build:
+      threads: 1
+      program: hisat2-build
+
+    Hisat2:
+      program: hisat2
+      FLAGS:
+        ""
+
+MergeSams:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+ProcessMapping:
+  # Number of threads task will use
+  threads: 8
+  # Amount of memory task will use (in GB)
+  memory: 60
+  time: "4:00:00"
+  dependencies:
+    SambambaView:
+      program: sambamba
+
+    SambambaSort:
+      program: sambamba
+
+RunBraker:
+  # Number of threads task will use
+  threads: 4
+  # Amount of memory task will use (in GB)
+  memory: 100
+  time: "4:00:00"
+  dependencies:
+    Braker:
+      program: braker.pl
+      FLAGS:
+      # Provide flags as desired
+
+...  # document end
+```
+
+### Call pipeline
+
+Activate your `EukMS_refine` conda environment.
+
+```shell
+conda activate EukMS_refine
+```
+
+Run pipeline with the command:
 
 ```
-yapim run -c refine-config.yaml -p $EukMS_refine
+yapim run -c refine-config.yaml -p $EukMS_refine -i MAGs
 ```
+
+### Refine output
 
 This will update the directory structure:
+
 ```
 out/
   |-- wdir/
@@ -152,12 +495,133 @@ out/
               .. 
 ```
 
-### Report (optional)
-Copy and edit the `report-config.yaml` config file to fit your analysis needs. 
+## Report (optional)
+
+### Config setup
+
+Copy and edit the `report-config.yaml` config file to fit your analysis needs.
 
 ```shell
 cp $EukMS_report/report-config.yaml ./
 ```
+
+As before, set resource usage in the `GLOBAL` settings as well as for each subsequent section. Also set the `SLURM` settings, if needed.
+
+Set `skip` to `true` if you wish to skip any of the steps listed in the pipeline.
+
+If you wish to use the results of the `refine` pipeline instead of default results from the `run` pipeline, update the `INPUT` section as follows:
+
+```yaml
+INPUT:
+  root: all
+  refine: prot
+```
+
+Otherwise, set the protein output you wish to annotate:
+
+```yaml
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+  run:
+    prot: merged-prot  # or gmes-prot or genemark-prot or aug-prot or evidence-prot
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 20
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+Quality:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    Busco:
+      program: busco
+      mode: prot
+      lineage: eukaryota
+      FLAGS:
+        -f
+
+MMSeqs:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 90
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+
+    MMSeqsSearch:
+      data:
+        /path/to/odb-mmetsp_db
+      program: mmseqs
+      subname: linsearch
+      FLAGS:
+        --split-memory-limit 75G
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+
+    MMSeqsConvertAlis:
+      data:
+        /path/to/odb-mmetsp_db
+      program: mmseqs
+
+KOFamScan:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  skip: true
+  dependencies:
+    KofamscanExecAnnotation:
+      program: /path/to/kofamscan/exec_annotation
+      kolist: /path/to/kofam/ko_list
+      profiles: /path/to/profiles/eukaryote.hal
+
+EggNog:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  skip: true
+  dependencies:
+    EMapper:
+      program: /path/to/emapper.py
+      python: /path/to/python2.7
+      FLAGS:
+        # Provide flags as needed
+        -m diamond
+
+...  # document end
+```
+
+### Call pipeline
 
 Activate your `EukMS_report` conda environment.
 
@@ -165,14 +629,13 @@ Activate your `EukMS_report` conda environment.
 conda activate EukMS_report
 ```
 
-Set the `INPUT/base` section to be either
-`run` or `refine`, depending on which set of predictions you want to annotate. Activate your `EukMS_report` conda environment.
-
-Annotate gene models using the command:
+Run pipeline using the command:
 
 ```
 yapim run -c report-config.yaml -p $EukMS_report
 ```
+
+### Report output
 
 This will update the directory structure:
 ```

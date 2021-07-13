@@ -145,6 +145,7 @@ AbinitioAugustus:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "24:00:00"
+  skip: false
   dependencies:
     MMSeqsCreateDB:
       time: "10:00"
