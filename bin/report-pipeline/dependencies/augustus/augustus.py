@@ -3,12 +3,14 @@ import os
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import List, Union, Type
+from typing import List, Union, Type, Iterable
 
+from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from yapim import Task, DependencyInput, touch
 
 from .taxon_ids import augustus_taxon_ids
+from .merge_parallelized_output import merge
 
 
 class Augustus(Task):
@@ -115,6 +117,16 @@ class Augustus(Task):
         assert total_size == sum([sum([len(record.seq) for record in bucket]) for bucket in buckets])
         return buckets
 
+    def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
+        records = list(SeqIO.parse(self.input["fasta"], "fasta"))
+        split_records: List[List[SeqRecord]] = Augustus.split_data(records, int(self.threads))
+        for pos, records_list in enumerate(split_records):
+            out_file = str(self.wdir.joinpath(f"{self.record_id}.{pos}.fasta"))
+            with open(out_file, "w") as out_ptr:
+                SeqIO.write(records_list, out_ptr, "fasta")
+            created_files_list.append(out_file)
+            yield out_file
+
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         """ Run augustus training round
 
@@ -124,20 +136,29 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        out_gff = os.path.join(
-            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
+        contig_files = []
+        contig_files_iter = self._contig_splitter(contig_files)
+        self.parallel(
+            self.create_script(
+                [self.program[
+                     "--codingseq=on",
+                     "--stopCodonExcludedFromCDS=false",
+                     "--species=%s" % species,
+                     "--outfile=%s" % contig_file + f".{_round}.gff",
+                     ("--gff3=on" if _last else "--gff3=off"),
+                     contig_file,
+                 ] for contig_file in contig_files_iter], "augustus-runner.sh",
+                parallelize=True
+            )
         )
-        self.single(
-            self.program[
-                "--codingseq=on",
-                "--stopCodonExcludedFromCDS=false",
-                "--species=%s" % species,
-                "--outfile=%s" % out_gff,
-                ("--gff3=on" if _last else "--gff3=off"),
-                str(self.input["fasta"]),
-            ]
-        )
-        return out_gff
+
+        out_gff = Path(os.path.join(
+            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gff" % _round)
+        ))
+        if out_gff.exists():
+            self.local["rm"][out_gff]()
+        merge([Path(str(contig_file) + f".{_round}.gff") for contig_file in contig_files], out_gff)
+        return str(out_gff)
 
     def _handle_config_output(self):
         """
