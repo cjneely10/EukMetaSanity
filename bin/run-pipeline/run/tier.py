@@ -1,3 +1,4 @@
+import os
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput
@@ -21,11 +22,15 @@ class Tier(Task):
         pass
 
     def run(self):
+        files = []
+        for file in (self.input["AbinitioGeneMark"]["genemark-gff3"],
+                     self.input["AbinitioAugustus"]["aug-gff3"],
+                     self.input["MetaEukEV"]["evidence-gff3"]):
+            if os.path.exists(file):
+                files.append(file)
         self.single(
             self.program[
-                self.input["AbinitioGeneMark"]["genemark-gff3"],
-                self.input["AbinitioAugustus"]["aug-gff3"],
-                self.input["MetaEukEV"]["evidence-gff3"],
+                (*files),
                 "-o", self.output["merged-gff3"],
                 "-t", self.config["tier"]
             ]
