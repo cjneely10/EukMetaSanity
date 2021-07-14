@@ -8,8 +8,8 @@ class Tier(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "merged-prot": str(self.wdir.joinpath(self.record_id + ".faa")),
-            "merged-gff3": str(self.wdir.joinpath(self.record_id + ".gff3")),
+            "merged-prot": str(self.wdir.joinpath(self.record_id + f".{self.config['tier']}.faa")),
+            "merged-gff3": str(self.wdir.joinpath(self.record_id + f".{self.config['tier']}.gff3")),
             "final": ["merged-prot", "merged-gff3"]
         }
 
