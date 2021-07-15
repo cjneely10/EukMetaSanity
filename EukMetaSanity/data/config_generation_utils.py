@@ -10,8 +10,9 @@ def update_config_files(data_path: str, eukms_bin_dir: str):
     """ Get all config files matching pattern *-config.* and replace the "/path/to" strings with their actual paths
 
     """
-    for config_file in glob.glob(os.path.join(eukms_bin_dir, "*", "*-config.*")):
-        new_config_file = open(os.path.join(data_path, os.path.basename(config_file)), "w")
+    for config_file in glob.glob(os.path.join(os.path.dirname(eukms_bin_dir), "*", "*", "*-config.*")):
+        updated_config_dir = os.path.dirname(os.path.dirname(config_file))
+        new_config_file = open(os.path.join(updated_config_dir, os.path.basename(config_file)), "w")
         original_file_ptr = open(config_file, "r")
         for line in original_file_ptr:
             line = line.replace("/path/to", str(Path(data_path).resolve()))

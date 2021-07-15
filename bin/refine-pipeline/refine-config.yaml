@@ -1,1 +1,100 @@
-refine/refine-config.yaml
+---  # document start
+
+###########################################
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+## SLURM run settings
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+###########################################
+
+CollectInput:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+Transcriptomes:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    GMAPBuild:
+      program:
+
+    GMAP:
+      program:
+
+RNASeq:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    Hisat2Build:
+      program:
+
+    Hisat2:
+      program:
+
+MergeSams:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+ProcessMapping:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    SambambaSort:
+      program:
+
+GatherProteins:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MMSeqsFilterTaxSeqDB:
+      program:
+
+RunBraker:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    Braker:
+      program:
+
+...  # document end

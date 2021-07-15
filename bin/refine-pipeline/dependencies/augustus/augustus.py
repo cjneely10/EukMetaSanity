@@ -9,8 +9,8 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from yapim import Task, DependencyInput, touch
 
-from .taxon_ids import augustus_taxon_ids
 from .merge_parallelized_output import merge
+from .taxon_ids import augustus_taxon_ids
 
 
 class Augustus(Task):
