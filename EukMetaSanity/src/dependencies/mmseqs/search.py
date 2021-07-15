@@ -40,7 +40,7 @@ class MMSeqsSearch(Task):
                         db_path,  # Input db
                         outfile,  # Output db
                         os.path.join(self.wdir, "tmp"),
-                        "--split-memory-limit", str(self.memory) + "G",
+                        "--split-memory-limit", str(int(float(self.memory) * 0.7)) + "G",
                         (*self.added_flags),
                         "--threads", self.threads,
                     ]

@@ -152,7 +152,7 @@ class MetaEuk(Task):
                 _outfile,
                 os.path.join(self.wdir, "tmp"),
                 "--threads", self.threads,
-                "--split-memory-limit", str(self.memory) + "G",
+                "--split-memory-limit", str(int(float(self.memory) * 0.7)) + "G",
                 (*self.added_flags),
                 (*is_profile),
             ]
