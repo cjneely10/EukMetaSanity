@@ -15,6 +15,7 @@ class DataDownloader(cli.Application):
     _working_dir: str = str(Path(os.path.join(os.getcwd(), "data")).resolve())
     _index: bool = False
     _threads: int = 1
+    _bin_dir: str = cli.SwitchAttr("--eukms-run-bin", str, envname="EukMS_run")
 
     @cli.switch(["-d", "--download-directory"], str)
     def set_download_directory(self, download_directory):
@@ -54,7 +55,7 @@ class DataDownloader(cli.Application):
             util_instruction()
 
         # Generate system-specific config files
-        update_config_files(self._working_dir)
+        update_config_files(self._working_dir, self._bin_dir)
 
 
 if __name__ == "__main__":

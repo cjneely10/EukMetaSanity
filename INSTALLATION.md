@@ -59,6 +59,8 @@ sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNA
 
 ### Configuring GeneMark 4.65_lic
 
+If you choose to include GeneMark in your analysis pipeline, follow the installation instructions [on their webpage](http://topaz.gatech.edu/GeneMark/license_download.cgi) to download their software and accept their license agreements.
+
 Ensure that your `.gm_key` file is present in your home directory if you are using GeneMark as your ab initio predictor. 
 You also may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
 
@@ -69,15 +71,14 @@ The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both 
 ### Installing required databases
 
 **The `download-data`** script downloads all other required base data. Run the script to download the 
-required databases, and include the `-x` flag if you wish to generate pre-computed search indices (results in a speed 
-up on search time, but takes a lot of storage space):
+required databases:
 
 ```
 download-data -t <threads> -d </path/to/download/location>
 ```
 
 This will download the OrthoDB and MMETSP databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate in the newly-created directory for use when running **EukMetaSanity**.
+automatically generate in the installation directory for use when running **EukMetaSanity**.
 
 
 ## **Your installation is complete!**
