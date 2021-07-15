@@ -159,7 +159,6 @@ AbinitioAugustus:
       program: mmseqs
       subname: linsearch  # Can use `search` if linear index is not present for database
       FLAGS:
-        --split-memory-limit 16G
         --cov-mode 0
         -c 0.6
         -e 0.01

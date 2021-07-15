@@ -112,6 +112,7 @@ class MMSeqsTaxonomy(Task):
                 os.path.join(self.wdir, "tmp"),
                 (*self.added_flags),
                 "--threads", self.threads,
+                "--split-memory-limit", str(self.memory) + "G",
             ]
         )
         # Generate taxonomy report
