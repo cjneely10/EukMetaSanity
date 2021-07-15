@@ -514,7 +514,7 @@ If you wish to use the results of the `refine` pipeline instead of default resul
 ```yaml
 INPUT:
   root: all
-  refine: prot
+  refine: all
 ```
 
 Otherwise, set the protein output you wish to annotate:

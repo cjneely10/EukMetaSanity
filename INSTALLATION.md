@@ -68,7 +68,7 @@ The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both 
 
 ### Installing required databases
 
-**The `download-data` script** is provided to download all other required base data. Run the script to download the 
+**The `download-data`** script downloads all other required base data. Run the script to download the 
 required databases, and include the `-x` flag if you wish to generate pre-computed search indices (results in a speed 
 up on search time, but takes a lot of storage space):
 
