@@ -542,7 +542,7 @@ Otherwise, set the protein output you wish to annotate:
 INPUT:
   root: all
   run:
-    prot: merged-prot  # or gmes-prot or genemark-prot or aug-prot or evidence-prot
+    prot: merged-prot  # or genemark-prot or aug-prot or evidence-prot
 
 ## Global settings
 GLOBAL:
