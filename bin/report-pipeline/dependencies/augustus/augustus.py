@@ -71,7 +71,9 @@ class Augustus(Task):
         )
         touch(str(self.output["prot"]))
         self.single(
-            self.local["gffread"][str(self.output["ab-gff3"]), "-y", self.output["prot"], "-g", self.input["fasta"]],
+            self.local["gffread"][
+                str(self.output["ab-gff3"]), "-y", self.output["prot"], "-g", self.input["fasta"], "-S"
+            ],
             "5:00"
         )
 

@@ -39,6 +39,6 @@ class Tier(Task):
             self.local["gffread"][
                 "-g", self.input["fasta"],
                 self.output["merged-gff3"],
-                "-y", self.output["merged-prot"]
+                "-y", self.output["merged-prot"], "-S"
             ]
         )

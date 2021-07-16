@@ -23,6 +23,8 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately. We highly suggest using of these software suites, but they are not directly required.
 
+EggNOG users should download the software using `pip` with their `EukMS_report` environment loaded. Download any other required databases.
+
 ### Configuring RepeatMasker libraries and scripts
 **RepeatMasker** incorporates additional DFam updates. 
 

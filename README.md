@@ -522,7 +522,7 @@ cp $EukMS_report/report-config.yaml ./
 
 As before, set resource usage in the `GLOBAL` settings as well as for each subsequent section. Also set the `SLURM` settings, if needed.
 
-Set `skip` to `true` if you wish to skip any of the steps listed in the pipeline.
+Set `skip` to `true` if you wish to skip any of the steps listed in the pipeline. If running `EggNog`, ensure to provide the path to the eggnog databases on your system.
 
 If you wish to use the results of the `refine` pipeline instead of default results from the `run` pipeline, update the `INPUT` section as follows:
 
@@ -626,11 +626,12 @@ EggNog:
   skip: true
   dependencies:
     EMapper:
-      program: /path/to/emapper.py
-      python: /path/to/python2.7
+      program: emapper.py
       FLAGS:
         # Provide flags as needed
         -m diamond
+        --override
+        --data_dir /location/of/eggnog-data
 
 ...  # document end
 ```

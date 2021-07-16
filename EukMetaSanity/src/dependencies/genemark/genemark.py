@@ -46,7 +46,7 @@ class GeneMarkPETAP(Task):
                 self.local["gffread"][
                     self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"]),
                     "-g", self.input["fasta"],
-                    "-y", self.output["prot"]
+                    "-y", self.output["prot"], "-S"
                 ],
                 "30:00"
             )

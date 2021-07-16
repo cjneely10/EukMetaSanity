@@ -24,8 +24,7 @@ class EMapper(Task):
         Run emapper
         """
         self.parallel(
-            self.local[self.config["python"]][
-                self.program,
+            self.program[
                 "-i", self.input["prot"],
                 "--output", self.output["emapper"].replace(".txt", ""),
                 "--cpu", self.threads,

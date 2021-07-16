@@ -89,10 +89,11 @@ EggNog:
   skip: true
   dependencies:
     EMapper:
-      program: /path/to/emapper.py
-      python: /path/to/python2.7
+      program: emapper.py
       FLAGS:
         # Provide flags as needed
         -m diamond
+        --override
+        --data_dir /location/of/eggnog-data
 
 ...  # document end
