@@ -1,15 +1,19 @@
 ---  # document start
 
 ###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 10
+  MaxThreads: 20
   # Maximum memory to use (in GB)
-  MaxMemory: 100
+  MaxMemory: 120
 
 ###########################################
-## SLURM run settings
+
 SLURM:
   ## Set to True if using SLURM
   USE_CLUSTER: false
@@ -20,98 +24,166 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-###########################################
-## Pipeline input section
-INPUT:
-  root: all
-
-###########################################
-
 MetaEukEV:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
+  memory: 100
+  time: "12:00:00"
   dependencies:
     MetaEuk:
-      program:
+      program: metaeuk
+      data:
+        /media/user/2TB/tmp/data2/odb-mmetsp_db
+      # Pass any flags to metaeuk required
+      FLAGS:
+        --min-length 30
+        --metaeuk-eval 0.0001
+        -s 5
+        --cov-mode 0
+        -c 0.3
+        -e 100
+        --max-overlap 0
+        --remove-tmp-files
 
 Taxonomy:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
+  memory: 100
+  time: "8:00:00"
   dependencies:
     MMSeqsCreateDB:
-      program:
+      program: mmseqs
+      threads: 1
 
     MMSeqsTaxonomy:
-      program:
+      program: mmseqs
+      cutoff: 8.0  # Minimum % of mapped reads to tax level
+      data:
+        /media/user/2TB/tmp/data2/odb-mmetsp_db
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 6.5
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
 
 Repeats:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
+  memory: 16
+  time: "24:00:00"
   dependencies:
     RModBuildDatabase:
-      program:
+      time: "10:00"
+      threads: 1
+      program: BuildDatabase
 
     RModRepeatModeler:
-      program:
+      program: RepeatModeler
+      skip: false
 
     RMaskRepeatMasker:
-      program:
+      program: RepeatMasker
+      level: family
+      data:
+        "" # Comma-separated list of repeat models to incorporate
+      FLAGS:
+        -nolow
 
     RMaskProcessRepeats:
-      program:
+      time: "30:00"
+      threads: 1
+      program: ProcessRepeats
+      FLAGS:
+        -nolow
 
     RMaskRMOut:
-      program:
+      time: "10:00"
+      threads: 1
+      program: rmOutToGFF3.pl
 
 AbinitioGeneMark:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
+  memory: 16
+  time: "16:00:00"
+  skip: false
   dependencies:
     MMSeqsFilterTaxSeqDB:
-      program:
+      threads: 1
+      time: "10:00"
+      program: mmseqs
+      level: order
+      data:
+        /media/user/2TB/tmp/data2/odb-mmetsp_db
 
     GeneMarkProtHint:
-      program:
+      program: prothint.py
 
     GeneMarkPETAP:
-      program:
+      program: gmes_petap.pl
+      FLAGS:
+        --min_contig 100
+        --max_contig 1000000000
+        --max_gap 5000
+        --max_mask 5000
+        --min_contig_in_predict 100
+        --min_gene_in_predict 10
+        --gc_donor 0.001
+        --max_intron 10000
+        --max_intergenic 50000
+        --soft_mask auto
 
 AbinitioAugustus:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
   memory: 8
-  time: "4:00:00"
+  time: "24:00:00"
+  skip: false
   dependencies:
     MMSeqsCreateDB:
-      program:
+      time: "10:00"
+      program: mmseqs
+      threads: 1
 
     MMSeqsSearch:
-      program:
+      memory: 20
+      data:
+        /media/user/2TB/tmp/data2/odb-mmetsp_db
+      program: mmseqs
+      subname: linsearch  # Can use `search` if linear index is not present for database
+      FLAGS:
+        --cov-mode 0
+        -c 0.6
+        -e 0.01
+        --remove-tmp-files
 
     MMSeqsConvertAlis:
-      program:
+      time: "2:00:00"
+      data:
+        /media/user/2TB/tmp/data2/odb-mmetsp_db
+      program: mmseqs
+      FLAGS:
+        --format-output query,target,pident,taxid,taxname,taxlineage
 
     Augustus:
-      program:
+      program: augustus
+      cutoff: 25.0
+      rounds: 1
 
 Tier:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
+  memory: 2
+  time: "10:00"
+  program: locus_solver
+  tier: 1
 
 ...  # document end
