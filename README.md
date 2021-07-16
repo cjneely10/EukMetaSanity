@@ -34,6 +34,18 @@ for detailed installation instructions.
 
 ---
 
+We have provided a test set of data for use in validating installation, or as a means of better understanding the EukMetaSanity implementation.
+
+These files are present in the directory `tests/data`:
+
+```
+tests/
+  |-- data/
+    |-- NAO-all-DCM-20-180-00_bin-1.fna
+    |-- NAO-all-DCM-20-180-00_bin-2.fna
+    |-- NAO-all-DCM-20-180-00_bin-19.fna
+```
+
 ## Run
 
 ### Config setup
@@ -253,18 +265,13 @@ conda activate EukMS_run
 
 Ensure your input FASTA sequences do not have the pipe (`|`) character present.
 
-For a directory of MAGs:
-```
-MAGs/
-  |-- mag1.fna
-  |-- mag2.fna
-```
-
 Run the pipeline using the command:
 
 ```
-yapim run -i MAGs -c run-config.yaml -p $EukMS_run
+yapim run -i /path/to/EukMetaSanity/tests/data -c run-config.yaml -p $EukMS_run
 ```
+
+If run with default config parameters, the analysis should complete within about 4 hours. This can be sped up by running the analysis on `SLURM` and/or increasing the thread count.
 
 ### Run output
 
@@ -272,25 +279,28 @@ This will create a directory structure resembling:
 ```
 out/
   |-- wdir/
+  |-- input/
   |-- run-eukmetasanity.log
   |-- results/
     |-- run/
         |-- run.pkl
-        |-- mag1/
-          |-- mag1.n.Tier.gff3  # Tier n final results (GFF3)
-          |-- mag1.n.Tier.faa  # Tier n final results (FASTA)
-          |-- mag1.AbinitioAugustus.gff3  # Augustus results (GFF3)
-          |-- mag1.AbinitioAugustus.faa  # Augustus results (FASTA)
-          |-- mag1.AbinitioGeneMark.gff3  # GeneMark results (GFF3)
-          |-- mag1.AbinitioGeneMark.faa  # GeneMark results (FASTA)
-          |-- mag1.MetaEukEV.gff3  # MetaEuk results (GFF3)
-          |-- mag1.MetaEukEV.faa  # MetaEuk results (FASTA)
-          |-- mag1.Repeats.gff3  # Repeats locations (GFF3)
-          |-- mag1.Repeats.tbl  # Summary of repeats annotation
-          |-- mag1.Repeats.fna  # Masked input genome (FASTA)
-          |-- mag1.Taxonomy.txt  # Taxonomy assignment summary
-        |-- mag2/
-          .. 
+        |-- NAO-all-DCM-20-180-00_bin-1
+          |-- NAO-all-DCM-20-180-00_bin-1.n.Tier.gff3  # Tier n final results (GFF3)
+          |-- NAO-all-DCM-20-180-00_bin-1.n.Tier.faa  # Tier n final results (FASTA)
+          |-- NAO-all-DCM-20-180-00_bin-1.AbinitioAugustus.gff3  # Augustus results (GFF3)
+          |-- NAO-all-DCM-20-180-00_bin-1.AbinitioAugustus.faa  # Augustus results (FASTA)
+          |-- NAO-all-DCM-20-180-00_bin-1.AbinitioGeneMark.gff3  # GeneMark results (GFF3)
+          |-- NAO-all-DCM-20-180-00_bin-1.AbinitioGeneMark.faa  # GeneMark results (FASTA)
+          |-- NAO-all-DCM-20-180-00_bin-1.MetaEukEV.gff3  # MetaEuk results (GFF3)
+          |-- NAO-all-DCM-20-180-00_bin-1.MetaEukEV.faa  # MetaEuk results (FASTA)
+          |-- NAO-all-DCM-20-180-00_bin-1.Repeats.gff3  # Repeats locations (GFF3)
+          |-- NAO-all-DCM-20-180-00_bin-1.Repeats.tbl  # Summary of repeats annotation
+          |-- NAO-all-DCM-20-180-00_bin-1.Repeats.fna  # Masked input genome (FASTA)
+          |-- NAO-all-DCM-20-180-00_bin-1.Taxonomy.txt  # Taxonomy assignment summary
+        |-- NAO-all-DCM-20-180-00_bin-19/
+          ...
+        |-- NAO-all-DCM-20-180-00_bin-2/
+          ...
 ```
 
 #### Note on running:
@@ -312,6 +322,8 @@ rm -r out/wdir/*/Taxonomy*
 ---
 
 ## Refine (optional)
+
+For the `Refine` pipeline, we do not provide transcriptomic data for testing. If you wish to test this installation, you must provide your own set of test data.
 
 ### Config setup
 
@@ -470,7 +482,7 @@ conda activate EukMS_refine
 Run pipeline with the command:
 
 ```
-yapim run -c refine-config.yaml -p $EukMS_refine -i MAGs
+yapim run -i /path/to/EukMetaSanity/tests/data -c refine-config.yaml -p $EukMS_refine
 ```
 
 ### Refine output
@@ -479,6 +491,7 @@ This will update the directory structure:
 
 ```
 out/
+  |-- input/
   |-- wdir/
   |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
@@ -492,13 +505,9 @@ out/
               |-- augustus.hints.gtf  # Augustus predictions
               |-- genemark.gtf  # GeneMark predictions
           |-- mag2/
-              ..
+              ...
       |-- run/
-          |-- run.pkl
-          |-- mag1/
-              ..
-          |-- mag2/
-              .. 
+          ...
 ```
 
 ## Report (optional)
@@ -640,34 +649,33 @@ Run pipeline using the command:
 yapim run -c report-config.yaml -p $EukMS_report
 ```
 
+Note that we do not need to provide the input directory for this analysis, as the pipeline will only annotate genomes that have completed the `Run` or `Refine` pipeline.
+
+With default settings, the analysis should complete in less than 10 minutes.
+
 ### Report output
 
 This will update the directory structure:
 ```
 out/
   |-- wdir/
+  |-- input/
   |-- report-eukmetasanity.log
   |-- refine-eukmetasanity.log
   |-- run-eukmetasanity.log
   |-- results/
       |-- report/
           |-- report.pkl
-          |-- mag1/
+          |-- NAO-all-DCM-20-180-00_bin-1/
               ... (results based on annotation programs run)
-          |-- mag2/
-              ..
+          |-- NAO-all-DCM-20-180-00_bin-19/
+              ...
+          |-- NAO-all-DCM-20-180-00_bin-2/
+              ...
       |-- refine/
-          |-- refine.pkl
-          |-- mag1/
-              ..
-          |-- mag2/
-              ..
+          ...
       |-- run/
-          |-- run.pkl
-          |-- mag1/
-              ..
-          |-- mag2/
-              .. 
+          ...
 ```
 
 ## Citations

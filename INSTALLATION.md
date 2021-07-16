@@ -2,7 +2,7 @@
 
 `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, `make`, and `git` should be on your PATH.
 
-Ensure you have `conda`4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda 
+Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda 
 environment. Then, run the following commands:
 
 ```
