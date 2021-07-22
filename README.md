@@ -46,6 +46,16 @@ tests/
     |-- NAO-all-DCM-20-180-00_bin-19.fna
 ```
 
+If you are using your own input set, ensure that your FASTA files' extensions are one of the following:
+
+```
+.fna
+.fa
+.fasta
+.faa
+.fas
+```
+
 ## Run
 
 ### Config setup
