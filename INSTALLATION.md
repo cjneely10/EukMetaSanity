@@ -8,7 +8,6 @@ environment. Then, run the following commands:
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
-echo export PYTHONPATH="$(pwd)":$PYTHONPATH
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
 echo export EukMS_run="$(pwd)"/bin/run-pipeline >> ~/.bashrc
 echo export EukMS_report="$(pwd)"/bin/report-pipeline >> ~/.bashrc
