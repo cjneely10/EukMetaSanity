@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='EukMetaSanity',
-    version='0.1',
+    version='0.1.0',
     description='Eukaryotic Metagenome-Assembled Genome Structural/Functional Annotation Pipeline',
     url='https://github.com/cjneely10/EukMetaSanity',
     author='Christopher Neely',
