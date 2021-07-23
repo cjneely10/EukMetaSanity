@@ -691,8 +691,7 @@ out/
 
 ## Citations
 
-Neely, C. J., & Tully, B. *EukMetaSanity*. Source code is available at [https://github.com/cjneely10/EukMetaSanity](). 
-It is implemented in Python 3 under the GNU General Public License v3.0.
+"The high-throughput gene prediction of more than 1,700 eukaryote genomes using the software package EukMetaSanity" by Neely, Hu, Alexander, and Tully, 2021.
 
 Also cite all dependencies that you used, as **EukMetaSanity** would not be possible were it not for the developers of 
 these programs.
