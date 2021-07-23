@@ -6,17 +6,17 @@ MINICONDA=`dirname $CONDA_DIRNAME`
 SOURCE=$MINICONDA/etc/profile.d/conda.sh
 
 # Create each environment and install EukMetaSanity within it
-conda env create -f bin/run-pipeline/environment.yml
+conda env create -f bin/run-pipeline/run/environment.yml
 source $SOURCE
 conda activate EukMS_run
 python -m pip install .
 conda deactivate
-conda env create -f bin/report-pipeline/environment.yml
+conda env create -f bin/report-pipeline/report/environment.yml
 source $SOURCE
 conda activate EukMS_report
 python -m pip install .
 conda deactivate
-conda env create -f bin/refine-pipeline/environment.yml
+conda env create -f bin/refine-pipeline/refine/environment.yml
 source $SOURCE
 conda activate EukMS_refine
 python -m pip install .
