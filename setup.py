@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='EukMetaSanity',
@@ -8,7 +8,7 @@ setup(
     author='Christopher Neely',
     author_email='christopher.neely1200@gmail.com',
     license='GPL-3.0',
-    packages=['EukMetaSanity', "EukMetaSanity.data"],
+    packages=find_packages(include=['EukMetaSanity', 'EukMetaSanity.*']),
     scripts=["EukMetaSanity/download-data"],
     zip_safe=False
 )
