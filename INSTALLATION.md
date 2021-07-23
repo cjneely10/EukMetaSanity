@@ -6,7 +6,7 @@ Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and t
 environment. Then, run the following commands:
 
 ```
-git clone https://github.com/cjneely10/EukMetaSanity.git@v0.1.0
+git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity && ./INSTALL.sh
 echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
 echo export EukMS_run="$(pwd)"/bin/run-pipeline >> ~/.bashrc
