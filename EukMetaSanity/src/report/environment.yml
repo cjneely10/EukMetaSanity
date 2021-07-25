@@ -18,4 +18,4 @@ dependencies:
     - pylint==2.6.0
     - pytest==6.2.1
     - pytest-cov==2.10.1
-    - git+https://github.com/cjneely10/YAPIM.git@v0.1.1
+    - git+https://github.com/cjneely10/YAPIM.git@v0.1.2
