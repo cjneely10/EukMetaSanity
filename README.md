@@ -268,7 +268,7 @@ Tier:
 ---
 
 **Note on HPC usage**: EukMetaSanity launches multiple SLURM jobs to complete its analysis, similar to SLURM job arrays. 
-The node on which EukMetaSanity is launched manages these jobs - RAM and CPU usage is minimal for this node.
+The node on which EukMetaSanity is launched manages these jobs - RAM and CPU usage is minimal.
 Users should follow their institution's best practices for selecting a node on which to launch this program.
 
 ---

@@ -16,7 +16,7 @@ class DataDownloader(cli.Application):
     _working_dir: str = str(Path(os.path.join(os.getcwd(), "data")).resolve())
     _index: bool = False
     _threads: int = 1
-    _bin_dir: str = cli.SwitchAttr("--eukms-run-bin", str, envname="EukMS_run")
+    _bin_dir: str = cli.SwitchAttr("--eukms-run-bin", str, envname="EukMS_run", help="$EukMS_run environment variable")
     _config_only: bool = False
 
     @cli.switch(["-d", "--download-directory"], str)
@@ -40,8 +40,8 @@ class DataDownloader(cli.Application):
         self._config_only = True
 
     def main(self):
-        if self._bin_dir is None:
-            print(f"Error: EukMS_run environment variable is not set!")
+        if self._bin_dir is None or not os.path.exists(self._bin_dir):
+            print(f"Error: EukMS_run environment variable is not set or does not exist!")
             exit(1)
         if not self._config_only:
             # Generate working directory
