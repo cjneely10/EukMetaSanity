@@ -265,6 +265,14 @@ Tier:
 
 ### Call pipeline
 
+---
+
+**Note on HPC usage**: EukMetaSanity launches multiple SLURM jobs to complete its analysis, similar to SLURM job arrays. 
+The node on which EukMetaSanity is launched manages these jobs - RAM and CPU usage is minimal for this node.
+Users should follow their institution's best practices for selecting a node on which to launch this program.
+
+---
+
 Activate your `EukMS_run` conda environment.
 
 ```shell
