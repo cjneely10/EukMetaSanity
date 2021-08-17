@@ -54,7 +54,7 @@ MMSeqs:
 
     MMSeqsSearch:
       data:
-        /media/user/2TB/tmp/data2/odb-mmetsp_db
+        /media/user/2TB/tmp/eukmetasanity/databases/odb-mmetsp_db
       program: mmseqs
       subname: linsearch
       FLAGS:
@@ -64,7 +64,7 @@ MMSeqs:
 
     MMSeqsConvertAlis:
       data:
-        /media/user/2TB/tmp/data2/odb-mmetsp_db
+        /media/user/2TB/tmp/eukmetasanity/databases/odb-mmetsp_db
       program: mmseqs
 
 KOFamScan:
@@ -76,9 +76,9 @@ KOFamScan:
   skip: true
   dependencies:
     KofamscanExecAnnotation:
-      program: /media/user/2TB/tmp/data2/kofamscan/exec_annotation
-      kolist: /media/user/2TB/tmp/data2/kofam/ko_list
-      profiles: /media/user/2TB/tmp/data2/profiles/eukaryote.hal
+      program: /media/user/2TB/tmp/eukmetasanity/databases/kofamscan/exec_annotation
+      kolist: /media/user/2TB/tmp/eukmetasanity/databases/kofam/ko_list
+      profiles: /media/user/2TB/tmp/eukmetasanity/databases/profiles/eukaryote.hal
 
 EggNog:
   # Number of threads task will use

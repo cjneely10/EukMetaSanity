@@ -2,20 +2,8 @@
 
 `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, and `git` should be on your PATH.
 
----
-
-### Note on Conda installation
-
-The current installation process is very long-running (>12 hours). 
-
-This is a known issue, and we are currently optimizing this download process. 
-
-Users are advised to use a clean conda environment if they encounter this issue.
-
----
-
-Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda 
-environment. Then, run the following commands:
+Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
+Then, run the following commands:
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
@@ -45,6 +33,7 @@ Make sure your `EukMS_run` conda environment is still active prior to updating. 
 according to your system:
 
 ```
+conda activate EukMS_run
 cd ~/miniconda3/envs/EukMS_run/share/RepeatMasker/Libraries/
 wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
 gunzip Dfam.h5.gz && cd ..

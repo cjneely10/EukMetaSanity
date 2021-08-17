@@ -31,11 +31,11 @@ CollectInput:
   memory: 8
   time: "4:00:00"
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /media/user/2TB/tmp/data2/tr1.fna[,/media/user/2TB/tmp/data2/tr2.fna]
-  transcriptomes: /media/user/2TB/tmp/data2/transcriptome-mapping-file
+  # file-basename \t /media/user/2TB/tmp/eukmetasanity/databases/tr1.fna[,/media/user/2TB/tmp/eukmetasanity/databases/tr2.fna]
+  transcriptomes: /media/user/2TB/tmp/eukmetasanity/databases/transcriptome-mapping-file
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /media/user/2TB/tmp/data2/r1.fq[,/media/user/2TB/tmp/data2/r2.fq][;/media/user/2TB/tmp/data2/r3.fq[,/media/user/2TB/tmp/data2/r4.fq]]
-  rnaseq: /media/user/2TB/tmp/data2/rnaseq-mapping-file
+  # file-basename \t /media/user/2TB/tmp/eukmetasanity/databases/r1.fq[,/media/user/2TB/tmp/eukmetasanity/databases/r2.fq][;/media/user/2TB/tmp/eukmetasanity/databases/r3.fq[,/media/user/2TB/tmp/eukmetasanity/databases/r4.fq]]
+  rnaseq: /media/user/2TB/tmp/eukmetasanity/databases/rnaseq-mapping-file
 
 GatherProteins:
   # Number of threads task will use
@@ -48,7 +48,7 @@ GatherProteins:
       program: mmseqs
       level: order
       data:
-        /media/user/2TB/tmp/data2/odb-mmetsp_db
+        /media/user/2TB/tmp/eukmetasanity/databases/odb-mmetsp_db
 
 Transcriptomes:
   # Number of threads task will use
