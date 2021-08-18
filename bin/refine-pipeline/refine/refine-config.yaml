@@ -31,10 +31,10 @@ CollectInput:
   memory: 8
   time: "4:00:00"
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
+  # file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
   transcriptomes: /path/to/transcriptome-mapping-file
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
+  # file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
   rnaseq: /path/to/rnaseq-mapping-file
 
 GatherProteins:
