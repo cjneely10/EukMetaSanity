@@ -6,7 +6,7 @@ MINICONDA=`dirname $CONDA_DIRNAME`
 SOURCE=$MINICONDA/etc/profile.d/conda.sh
 
 # Install mamba if not already present
-conda install mamba -n base -c conda-forge
+conda install mamba -n base -c conda-forge -y
 
 # Create each environment and install EukMetaSanity within it
 mamba env create -f bin/run-pipeline/run/environment.yml

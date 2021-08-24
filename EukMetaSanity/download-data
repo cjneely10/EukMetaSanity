@@ -10,10 +10,12 @@ from plumbum import cli
 from EukMetaSanity.data.config_generation_utils import update_config_files
 from EukMetaSanity.data.download_utils import download_data, parsing_operations, manage_downloaded_data
 
+DEFAULT_DIR = str(Path(os.path.join(os.getcwd(), "data")).resolve())
+
 
 class DataDownloader(cli.Application):
     """Download EukMetaSanity data"""
-    _working_dir: str = str(Path(os.path.join(os.getcwd(), "data")).resolve())
+    _working_dir: str = DEFAULT_DIR
     _index: bool = False
     _threads: int = 1
     _bin_dir: str = cli.SwitchAttr("--eukms-run-bin", str, envname="EukMS_run", help="$EukMS_run environment variable")
@@ -22,6 +24,9 @@ class DataDownloader(cli.Application):
     @cli.switch(["-d", "--download-directory"], str)
     def set_download_directory(self, download_directory):
         """Download path, recommended NOT to be the same as the installation directory"""
+        download_directory = str(Path(download_directory).resolve())
+        if download_directory == os.getcwd():
+            download_directory = DEFAULT_DIR
         self._working_dir = download_directory
 
     @cli.switch(["-x", "--index"], help="Generate search index (optional, but takes a lot of space)")

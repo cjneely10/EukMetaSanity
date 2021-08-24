@@ -31,10 +31,10 @@ CollectInput:
   memory: 8
   time: "4:00:00"
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /media/user/2TB/tmp/eukmetasanity/databases/tr1.fna[,/media/user/2TB/tmp/eukmetasanity/databases/tr2.fna]
+  # file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
   transcriptomes: /media/user/2TB/tmp/eukmetasanity/databases/transcriptome-mapping-file
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /media/user/2TB/tmp/eukmetasanity/databases/r1.fq[,/media/user/2TB/tmp/eukmetasanity/databases/r2.fq][;/media/user/2TB/tmp/eukmetasanity/databases/r3.fq[,/media/user/2TB/tmp/eukmetasanity/databases/r4.fq]]
+  # file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
   rnaseq: /media/user/2TB/tmp/eukmetasanity/databases/rnaseq-mapping-file
 
 GatherProteins:
