@@ -9,9 +9,9 @@ SOURCE="$MINICONDA"/etc/profile.d/conda.sh
 
 # Parse command-line arguments
 POSITIONAL=()
-DATABASE_PATH=""
+DATABASE_PATH="$CWD"
 THREADS="1"
-SKIP_RM_DOWNLOAD=false
+SKIP_DATA_DOWNLOAD=false
 SOURCE_SCRIPT=~/.bashrc
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -22,8 +22,8 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    -s|--skip-rm-download)
-      SKIP_RM_DOWNLOAD=true
+    -s|--skip-data-download)
+      SKIP_DATA_DOWNLOAD=true
       shift
       ;;
     -d|--database-path)
@@ -54,7 +54,7 @@ if [ ${#POSITIONAL[@]} -gt 0 ]; then
   echo ""
   echo "-h|--help                           Display this help message"
   echo "-t|--threads <threads>              Number of threads to use in building indices"
-  echo "-s|--skip-rm-download               Skip repeat modeler updated library download (otherwise, uses wget)"
+  echo "-s|--skip-data-download             Skip repeat modeler and EukMS database download (otherwise, uses wget)"
   echo "-d|--database-path <path>           Path for database download, default is $CWD"
   echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
   echo ""
@@ -131,8 +131,9 @@ function update_source_script() {
 
 # Install mamba if not already present
 conda install mamba -n base -c conda-forge -y
+
 # Create run environment
-install_eukms_run $SKIP_RM_DOWNLOAD
+install_eukms_run $SKIP_DATA_DOWNLOAD
 # Create report environment
 install_env report true
 # Create refine environment
@@ -147,11 +148,12 @@ fi
 # Update .bashrc with proper locations
 EukMS_run="$(pwd)"/bin/run-pipeline
 update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
+
 # Download updated databases
-conda activate EukMS_run
-if [ -z "${DATABASE_PATH}" ]; then
-  download-data -t $THREADS --eukms-run-bin "$EukMS_run"
-else
+if [ $SKIP_DATA_DOWNLOAD = false ]; then
+  conda activate EukMS_run
   download-data -t $THREADS -d "$DATABASE_PATH" --eukms-run-bin "$EukMS_run"
+  conda deactivate
 fi
+
 echo "Your installation is complete!"

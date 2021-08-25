@@ -2,3 +2,4 @@
 bin/metaeuk
 __pycache__/
 install/repeats.txt
+condaenv.*.requirements.txt

@@ -1,6 +1,6 @@
 # Installation
 
-`sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, and `git` should be on your PATH.
+`sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, `wget`, and `git` should be on your PATH.
 
 Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
 Then, run the following commands:
@@ -20,7 +20,7 @@ Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads] [-
 
 -h|--help                           Display this help message
 -t|--threads <threads>              Number of threads to use in building indices
--s|--skip-rm-download               Skip repeat modeler updated library download (otherwise, uses wget)
+-s|--skip-data-download             Skip repeat modeler and EukMS database download (otherwise, uses wget)
 -d|--database-path <path>           Path for database download, default is installation directory
 -b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc
 ```
