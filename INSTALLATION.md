@@ -7,14 +7,25 @@ Then, run the following commands:
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
-cd EukMetaSanity && ./INSTALL.sh
-echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
-echo export EukMS_run="$(pwd)"/bin/run-pipeline >> ~/.bashrc
-echo export EukMS_report="$(pwd)"/bin/report-pipeline >> ~/.bashrc
-echo export EukMS_refine="$(pwd)"/bin/refine-pipeline >> ~/.bashrc
+cd EukMetaSanity && ./INSTALL.sh [-d /path/to/database-download-path] [-t threads] [-s]
 ```
 
-You may need to restart your shell for these changes to take effect.
+The installation file accepts the following command-line arguments: 
+
+```
+./INSTALL.sh -sh
+
+Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads] [-b /source/script]
+
+
+-h|--help                           Display this help message
+-t|--threads <threads>              Number of threads to use in building indices
+-s|--skip-rm-download               Skip repeat modeler updated library download (otherwise, uses wget)
+-d|--database-path <path>           Path for database download, default is installation directory
+-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc
+```
+
+You must restart your shell for these changes to take effect.
 
 ## Installing dependencies
 
@@ -24,41 +35,6 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 must install them separately. We highly suggest using of these software suites, but they are not directly required.
 
 EggNOG users should download the software using `pip` with their `EukMS_report` environment loaded. Download any other required databases.
-
-### Configuring RepeatMasker libraries and scripts
-**RepeatMasker** incorporates additional DFam updates. 
-
-Make sure your `EukMS_run` conda environment is still active prior to updating. Here, we assume that you have used 
-`miniconda`, and that it is located in your home directory. You will want to adjust the path for the following commands 
-according to your system:
-
-```
-conda activate EukMS_run
-cd ~/miniconda3/envs/EukMS_run/share/RepeatMasker/Libraries/
-wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
-gunzip Dfam.h5.gz && cd ..
-perl ./configure
-```
-
-The `configure` script should ask you to confirm the location of your installation, as well as to select your search 
-engine. Select 2 for `RMBlast`, and provide the path as `~/miniconda3/envs/EukMS_run/bin/` when requested 
-(substituting for the full path on your system).
-
-Finally, run the following command:
-
-```
-cp util/rmOutToGFF3.pl ./
-```
-
-### Fixing AUGUSTUS bug
-The conda version of AUGUSTUS is missing one needed element:
-
-```
-cd ~/miniconda3/envs/EukMS_run/bin
-sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-cd ~/miniconda3/envs/EukMS_refine/bin
-sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-```
 
 ### Configuring GeneMark 4.65_lic
 
@@ -70,19 +46,6 @@ You also may need to run their accessory script `perl change_path_in_perl_script
 Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
 
 The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
-
-### Installing required databases
-
-**The `download-data`** script downloads all other required base data. Run the script to download the 
-required databases:
-
-```
-download-data -t <threads> -d </path/to/download/location>
-```
-
-This will download the OrthoDB and MMETSP databases for use in **EukMetaSanity**. Additionally, config files will 
-automatically generate in the installation directory for use when running **EukMetaSanity**.
-
 
 ## **Your installation is complete!**
  
