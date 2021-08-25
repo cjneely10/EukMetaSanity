@@ -154,9 +154,9 @@ Install [BRAKER](https://github.com/Gaius-Augustus/BRAKER#installation)
 ### Uninstalling EukMetaSanity
 
 ```
-conda remove --name EukMS_run --all
-conda remove --name EukMS_report --all
-conda remove --name EukMS_refine --all
+conda remove --name EukMS_run --all -y
+conda remove --name EukMS_report --all -y
+conda remove --name EukMS_refine --all -y
 ```
 
 You will also need to remove the 4 lines added to your `.bashrc` file. You may also wish to delete this repository.

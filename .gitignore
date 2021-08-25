@@ -1,3 +1,4 @@
 .idea/
 bin/metaeuk
 __pycache__/
+install/repeats.txt

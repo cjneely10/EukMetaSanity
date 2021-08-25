@@ -12,6 +12,7 @@ POSITIONAL=()
 DATABASE_PATH=""
 THREADS="1"
 SKIP_RM_DOWNLOAD=false
+SOURCE_SCRIPT=~/.bashrc
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -34,6 +35,11 @@ while [[ $# -gt 0 ]]; do
       POSITIONAL+=("$1")
       shift
       ;;
+    -b|--bash-source-script)
+      SOURCE_SCRIPT="$2"
+      shift
+      shift
+      ;;
     *)
       POSITIONAL+=("$1")
       shift
@@ -42,18 +48,25 @@ while [[ $# -gt 0 ]]; do
 done
 # Confirm correctly parsed
 if [ ${#POSITIONAL[@]} -gt 0 ]; then
-  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads]"
   echo ""
-  echo "-h                              Display this help message"
-  echo "-t|--threads n                  Number of threads to use in building indices"
-  echo "-s|--skip-rm-download           Skip repeat modeler updated library download (otherwise, uses wget)"
-  echo "-d|--database-path <path>       Path for database download, default is installation directory"
-  return 1
+  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads] [-b /source/script]"
+  echo ""
+  echo ""
+  echo "-h|--help                           Display this help message"
+  echo "-t|--threads <threads>              Number of threads to use in building indices"
+  echo "-s|--skip-rm-download               Skip repeat modeler updated library download (otherwise, uses wget)"
+  echo "-d|--database-path <path>           Path for database download, default is $CWD"
+  echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
+  echo ""
+  exit 1
 fi
 
 # Usage: install_env <env-name> <deactivate?>
 function install_env() {
-  mamba env create -f bin/$1-pipeline/$1/environment.yml
+  EXISTS=$(conda info --envs | grep -c "EukMS_$1")
+  if [ $EXISTS -lt 1 ]; then
+    mamba env create -f bin/$1-pipeline/$1/environment.yml
+  fi
   source $SOURCE
   conda activate EukMS_$1
   python -m pip install .
@@ -66,15 +79,17 @@ function install_env() {
 function modify_rm_location() {
   # Install RepeatMasker updated libraries and configure
   cd "$MINICONDA"/envs/EukMS_run/share/RepeatMasker/Libraries/
-  if [ $1 = true ]; then
+  if [ $1 = false ]; then
     wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
-    gunzip Dfam.h5.gz && cd ..
+    gunzip Dfam.h5.gz
   fi
-  sed "s/INSTALLATION_LOCATION/$2" install/repeats.default.txt > install/repeats.txt
-  perl ./configure < install/repeats.txt
+  cd ..
+  sed "s,INSTALLATION_LOCATION,$2," "$CWD"/install/repeats.default.txt > "$CWD"/install/repeats.txt
+  perl ./configure < "$CWD"/install/repeats.txt
   cp util/rmOutToGFF3.pl ./
 }
 
+# Update conda versions of augustus for proper id parsing
 function update_augustus() {
   cd "$MINICONDA"/envs/EukMS_run/bin
   sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
@@ -97,11 +112,19 @@ function install_metaeuk() {
 # Create run environment and install repeat modeler updates
 function install_eukms_run() {
   install_env run false
-  modify_rm_location $SKIP_RM_DOWNLOAD "$MINICONDA"/envs/EukMS_run/bin/
+  modify_rm_location $1 "$MINICONDA"/envs/EukMS_run/bin/
   update_augustus
   # Return to installation directory
   cd $CWD
   conda deactivate
+}
+
+# Add EukMS definitions to source script (default is ~/.bashrc)
+function update_source_script() {
+  echo export PATH="$(pwd)"/bin/:'$PATH' >> "$1"
+  echo export EukMS_run="$2" >> "$1"
+  echo export EukMS_report="$(pwd)"/bin/report-pipeline >> "$1"
+  echo export EukMS_refine="$(pwd)"/bin/refine-pipeline >> "$1"
 }
 
 # # # Begin installation procedure
@@ -109,7 +132,7 @@ function install_eukms_run() {
 # Install mamba if not already present
 conda install mamba -n base -c conda-forge -y
 # Create run environment
-install_eukms_run
+install_eukms_run $SKIP_RM_DOWNLOAD
 # Create report environment
 install_env report true
 # Create refine environment
@@ -118,19 +141,16 @@ install_env refine true
 # Install metaeuk and confirm proper completion
 install_metaeuk
 if [ $? = 1 ]; then
-  return
+  exit 1
 fi
 
 # Update .bashrc with proper locations
 EukMS_run="$(pwd)"/bin/run-pipeline
-echo export PATH="$(pwd)"/bin/:'$PATH' >> ~/.bashrc
-echo export EukMS_run="$(EukMS_run)" >> ~/.bashrc
-echo export EukMS_report="$(pwd)"/bin/report-pipeline >> ~/.bashrc
-echo export EukMS_refine="$(pwd)"/bin/refine-pipeline >> ~/.bashrc
+update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 # Download updated databases
 conda activate EukMS_run
 if [ -z "${DATABASE_PATH}" ]; then
-  download-data -t $THREADS --eukms-run-bin "$(EukMS_run)"
+  download-data -t $THREADS --eukms-run-bin "$EukMS_run"
 else
-  download-data -t $THREADS -d "$DATABASE_PATH" --eukms-run-bin "$(EukMS_run)"
+  download-data -t $THREADS -d "$DATABASE_PATH" --eukms-run-bin "$EukMS_run"
 fi
