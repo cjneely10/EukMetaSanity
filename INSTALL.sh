@@ -154,3 +154,4 @@ if [ -z "${DATABASE_PATH}" ]; then
 else
   download-data -t $THREADS -d "$DATABASE_PATH" --eukms-run-bin "$EukMS_run"
 fi
+echo "Your installation is complete!"
