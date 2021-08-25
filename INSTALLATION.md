@@ -13,7 +13,7 @@ cd EukMetaSanity && ./INSTALL.sh [-d /path/to/database-download-path] [-t thread
 The installation file accepts the following command-line arguments: 
 
 ```
-./INSTALL.sh -sh
+./INSTALL.sh -h
 
 Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads] [-b /source/script]
 
