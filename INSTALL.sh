@@ -7,11 +7,6 @@ CONDA_DIRNAME="`dirname $CONDA`"
 MINICONDA="`dirname "$CONDA_DIRNAME"`"
 SOURCE="$MINICONDA"/etc/profile.d/conda.sh
 
-if [ ! -e "$SOURCE" ]; then
-  echo "There was an error locating your conda installation"
-  exit 1
-fi
-
 # Parse command-line arguments
 POSITIONAL=()
 DATABASE_PATH="$CWD"
@@ -66,6 +61,11 @@ if [ ${#POSITIONAL[@]} -gt 0 ]; then
   exit 1
 fi
 
+if [ ! -e "$SOURCE" ]; then
+  echo "There was an error locating your conda installation"
+  exit 1
+fi
+
 # Usage: install_env <env-name> <deactivate?>
 function install_env() {
   EXISTS=$(conda info --envs | grep -c "EukMS_$1")
@@ -85,7 +85,8 @@ function modify_rm_location() {
   # Install RepeatMasker updated libraries and configure
   cd "$MINICONDA"/envs/EukMS_run/share/RepeatMasker/Libraries/
   if [ $1 = false ]; then
-    wget -O - https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz | gunzip -c > Dfam.h5
+    wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
+    gunzip Dfam.h5.gz
   fi
   cd ..
   sed "s,INSTALLATION_LOCATION,$2," "$CWD"/install/repeats.default.txt > "$CWD"/install/repeats.txt
