@@ -2,15 +2,31 @@
 
 `sed`, `grep`, `cp`, `rm`, `gunzip`, `cat`, `conda`, `wget`, and `git` should be on your PATH.
 
-Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
-Then, run the following commands:
+Clone this repository:
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
-cd EukMetaSanity && ./INSTALL.sh [-d /path/to/database-download-path] [-t threads] [-s]
+cd EukMetaSanity
 ```
 
-The installation file accepts the following command-line arguments: 
+Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
+
+
+A typical installation can be run using:
+
+```shell
+./INSTALL.sh -t <num-threads>
+```
+
+To specify an external directory for storing database files, provide a path using the `-d` flag:
+
+```shell
+./INSTALL.sh -t <num-threads> -d /path/to/download-location
+```
+
+Your `~/.bashrc` file will be modified to append updated environment variables.
+
+The installation script accepts the following command-line arguments: 
 
 ```
 ./INSTALL.sh -h
@@ -25,7 +41,7 @@ Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads] [-
 -b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc
 ```
 
-You must restart your shell for these changes to take effect.
+After running the `INSTALL.sh` script, you must restart your shell for these changes to take effect.
 
 ## Installing dependencies
 
