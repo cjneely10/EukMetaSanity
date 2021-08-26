@@ -9,7 +9,7 @@ SOURCE="$MINICONDA"/etc/profile.d/conda.sh
 
 # Parse command-line arguments
 POSITIONAL=()
-DATABASE_PATH="$CWD"
+DATABASE_PATH="$CWD"/databases
 THREADS="1"
 SKIP_DATA_DOWNLOAD=false
 SOURCE_SCRIPT=~/.bashrc
