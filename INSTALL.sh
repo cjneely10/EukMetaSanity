@@ -9,8 +9,9 @@ SOURCE="$MINICONDA"/etc/profile.d/conda.sh
 
 # Parse command-line arguments
 POSITIONAL=()
-DATABASE_PATH="$CWD"/databases
+DATABASE_PATH="$CWD"
 THREADS="1"
+SKIP_RM_DOWNLOAD=false
 SKIP_DATA_DOWNLOAD=false
 SOURCE_SCRIPT=~/.bashrc
 while [[ $# -gt 0 ]]; do
@@ -22,7 +23,11 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    -s|--skip-data-download)
+    -r|--skip-rm-download)
+      SKIP_RM_DOWNLOAD=true
+      shift
+      ;;
+    -s|--skip-database-download)
       SKIP_DATA_DOWNLOAD=true
       shift
       ;;
@@ -54,7 +59,8 @@ if [ ${#POSITIONAL[@]} -gt 0 ]; then
   echo ""
   echo "-h|--help                           Display this help message"
   echo "-t|--threads <threads>              Number of threads to use in building indices"
-  echo "-s|--skip-data-download             Skip repeat modeler and EukMS database download (otherwise, uses wget)"
+  echo "-r|--skip-rm-download               Skip repeat modeler database download (otherwise, uses wget)"
+  echo "-s|--skip-database-download         Skip EukMS database download (otherwise, uses wget)"
   echo "-d|--database-path <path>           Path for database download, default is $CWD"
   echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
   echo ""
@@ -138,7 +144,7 @@ function update_source_script() {
 conda install mamba -n base -c conda-forge -y
 
 # Create run environment
-install_eukms_run $SKIP_DATA_DOWNLOAD
+install_eukms_run $SKIP_RM_DOWNLOAD
 # Create report environment
 install_env report true
 # Create refine environment
