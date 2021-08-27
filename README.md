@@ -64,7 +64,8 @@ cp $EukMS_run/run-config.yaml ./
 ```
 
 In the `GLOBAL` section, you will want to set the number of `MaxThreads` you will use to run the analysis, as well as the `MaxMemory` to be used. If using `SLURM`, set this to be appropriately high (> 100 threads, etc.).
-In the `SLURM` section, set `USE_CLUSTER` to `true` if needed, and provide run configuration details (such as qos, job_name, partition, account, etc.).
+
+In the `SLURM` section, set `USE_CLUSTER` to `true` if needed, and provide run configuration details (such as qos, job_name, partition, account, etc.). Make sure the id listed in `user-id` matches your linux id.
 
 In each subsequent section, you may adjust the `threads`, `memory`, and `FLAGS` that are passed to the program. Be sure to set the
 time allocation for each step if running pipeline on `SLURM`.
@@ -89,7 +90,7 @@ GLOBAL:
 ###########################################
 
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
