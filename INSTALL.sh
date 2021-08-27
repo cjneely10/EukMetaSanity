@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 # Installation location
 CWD=`pwd`
 # Get conda location information
@@ -54,7 +56,7 @@ done
 # Confirm correctly parsed
 if [ ${#POSITIONAL[@]} -gt 0 ]; then
   echo ""
-  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-s] [-d /path/to/database/downloads] [-b /source/script]"
+  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-r] [-s] [-d /path/to/database/downloads] [-b /source/script]"
   echo ""
   echo ""
   echo "-h|--help                           Display this help message"
@@ -71,6 +73,14 @@ if [ ! -e "$SOURCE" ]; then
   echo "There was an error locating your conda installation"
   exit 1
 fi
+
+function install_mamba() {
+  # Install mamba if not already present
+  EXISTS=$(conda list | grep -c mamba)
+  if [ $EXISTS -lt 1 ]; then
+    conda install mamba -n base -c conda-forge -y
+  fi
+}
 
 # Usage: install_env <env-name> <deactivate?>
 function install_env() {
@@ -97,6 +107,7 @@ function modify_rm_location() {
   cd ..
   sed "s,INSTALLATION_LOCATION,$2," "$CWD"/install/repeats.default.txt > "$CWD"/install/repeats.txt
   perl ./configure < "$CWD"/install/repeats.txt
+  rm "$CWD"/install/repeats.txt
   cp util/rmOutToGFF3.pl ./
 }
 
@@ -140,9 +151,8 @@ function update_source_script() {
 
 # # # Begin installation procedure
 
-# Install mamba if not already present
-conda install mamba -n base -c conda-forge -y
-
+# Installer
+install_mamba
 # Create run environment
 install_eukms_run $SKIP_RM_DOWNLOAD
 # Create report environment
