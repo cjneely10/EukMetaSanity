@@ -24,7 +24,8 @@ SLURM:
   ## --nodes, --ntasks, --mem, --cpus-per-task
   --qos: unlim
   --job-name: EukMS
-  user-id: uid
+  user-id: user
+
 
 Quality:
   # Number of threads task will use
