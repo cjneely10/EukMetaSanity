@@ -63,7 +63,7 @@ if [ ${#POSITIONAL[@]} -gt 0 ]; then
   echo "-t|--threads <threads>              Number of threads to use in building indices"
   echo "-r|--skip-rm-download               Skip repeat modeler database download (otherwise, uses wget)"
   echo "-s|--skip-database-download         Skip EukMS database download (otherwise, uses wget)"
-  echo "-d|--database-path <path>           Path for database download, default is $CWD"
+  echo "-d|--database-path <path>           Path for database download, default is $CWD/data"
   echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
   echo ""
   exit 1
@@ -122,13 +122,11 @@ function update_augustus() {
 # Download MetaEuk from MMSeqs2 server
 function install_metaeuk() {
   # Create bin directory and install non-conda dependencies
-  mkdir -p bin
-  cd bin || return 1
+  cd bin
   wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz
   tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz
   mv metaeuk/bin/metaeuk ./_metaeuk
-  rm -r metaeuk/ && mv _metaeuk metaeuk && cd - || return 1
-  return 0
+  rm -r metaeuk/ && mv _metaeuk metaeuk && cd -
 }
 
 # Create run environment and install repeat modeler updates
@@ -161,9 +159,8 @@ install_env report true
 install_env refine true
 
 # Install metaeuk and confirm proper completion
-install_metaeuk
-if [ $? = 1 ]; then
-  exit 1
+if [ ! -e bin/metaeuk ]; then
+  install_metaeuk
 fi
 
 # Update .bashrc with proper locations

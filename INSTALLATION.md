@@ -36,7 +36,7 @@ Usage: ./INSTALL.sh [-h] [-t <threads>] [-r] [-s] [-d /path/to/database/download
 -t|--threads <threads>              Number of threads to use in building indices
 -r|--skip-rm-download               Skip repeat modeler database download (otherwise, uses wget)
 -s|--skip-database-download         Skip EukMS database download (otherwise, uses wget)
--d|--database-path <path>           Path for database download, default is /home/user/BioProjects/EukMetaSanity
+-d|--database-path <path>           Path for database download, default is installation directory
 -b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc
 ```
 
