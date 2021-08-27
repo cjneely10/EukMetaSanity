@@ -76,6 +76,7 @@ If you wish to download additional databases to use in the `report` step, use th
 for f in run report refine; do
     conda remove --name EukMS_$f --all -y
 done
+conda remove mamba
 ```
 
 You will also need to remove the 4 lines added to your `.bashrc` file. You may also wish to delete this repository and the database directory.

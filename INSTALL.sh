@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Installation location
 CWD=`pwd`
