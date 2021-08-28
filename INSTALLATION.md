@@ -24,6 +24,8 @@ To specify a separate directory for storing database files, provide a path using
 ./INSTALL.sh -t <num-threads> -d /path/to/download-location
 ```
 
+Be sure you have >128GB of storage space and 4-8 hours to complete the installation and database downloads.
+
 Your `~/.bashrc` file will be modified to append updated environment variables. You may change this using the `-b` flag.
 
 The installation script accepts the following command-line arguments: 
@@ -56,7 +58,11 @@ EggNOG users should download the software using `pip` with their `EukMS_report` 
 If you choose to include GeneMark in your analysis pipeline, follow the installation instructions [on their webpage](http://topaz.gatech.edu/GeneMark/license_download.cgi) to download their software and accept their license agreements.
 
 Ensure that your `.gm_key` file is present in your home directory if you are using GeneMark as your ab initio predictor. 
-You also may need to run their accessory script `perl change_path_in_perl_scripts.pl "/usr/bin/env perl"`
+You also may need to run their accessory script from within your `EukMS` environment:
+
+```
+perl change_path_in_perl_scripts.pl "/usr/bin/env perl"
+```
 
 Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
 
@@ -76,7 +82,7 @@ If you wish to download additional databases to use in the `report` step, use th
 for f in run report refine; do
     conda remove --name EukMS_$f --all -y
 done
-conda remove mamba
+conda remove mamba -y
 ```
 
 You will also need to remove the 4 lines added to your `.bashrc` file. You may also wish to delete this repository and the database directory.
