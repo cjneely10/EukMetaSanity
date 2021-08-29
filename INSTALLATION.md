@@ -9,7 +9,7 @@ git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity
 ```
 
-Ensure you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
+Ensure that you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
 
 
 A typical installation can be run using:
@@ -27,20 +27,7 @@ To specify a separate directory for storing database files, provide a path using
 Be sure you have >128GB of storage space and 4-8 hours to complete the installation and database downloads.
 
 Your `~/.bashrc` file will be modified to append updated environment variables. You may change this using the `-b` flag.
-
-The installation script accepts the following command-line arguments: 
-
-```
-Usage: ./INSTALL.sh [-h] [-t <threads>] [-r] [-s] [-d /path/to/database/downloads] [-b /source/script]
-
-
--h|--help                           Display this help message
--t|--threads <threads>              Number of threads to use in building indices
--r|--skip-rm-download               Skip repeat modeler database download (otherwise, uses wget)
--s|--skip-database-download         Skip EukMS database download (otherwise, uses wget)
--d|--database-path <path>           Path for database download, default is installation directory
--b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc
-```
+More information is available with the `-h` flag.
 
 After running the `INSTALL.sh` script, you must restart your shell for these changes to take effect.
 
@@ -51,7 +38,7 @@ Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_downlo
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
 must install them separately. We highly suggest using of these software suites, but they are not directly required.
 
-EggNOG users should download the software using `pip` with their `EukMS_report` environment loaded. Download any other required databases.
+EggNOG users should download the software and its required databases using `pip` with their `EukMS_report` environment loaded.
 
 ### Configuring GeneMark 4.65_lic
 
