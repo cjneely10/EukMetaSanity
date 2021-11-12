@@ -103,7 +103,7 @@ histoplasma_capsulatum
 kluyveromyces_lactis
 laccaria_bicolor
 lamprey
-leishmania_tarentolaeout/wdir/GCA_000277815.3_ASM27781v3_genomic/
+leishmania_tarentolae
 lodderomyces_elongisporus
 magnaporthe_grisea
 neurospora_crassa
