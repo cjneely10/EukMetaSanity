@@ -53,7 +53,17 @@ perl change_path_in_perl_scripts.pl "/usr/bin/env perl"
 
 Ensure that your `gmes.cfg` file has parameters that are sufficient for your dataset (min contig, etc.).
 
-The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path.
+The `gmes_linux_64` directory and its enclosed `ProtHint` directory should both be on your system path:
+
+```shell
+~$ echo $PATH | tr ":" "\n"
+...
+/path/to/gmes_linux_64
+/path/to/gmes_linux_64/ProtHint/bin
+/path/to/gmes_linux_64/ProtHint/dependencies
+/path/to/gmes_linux_64/ProtHint
+...
+```
 
 ## **Your installation is complete!**
  

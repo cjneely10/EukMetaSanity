@@ -1,19 +1,15 @@
 ---  # document start
 
 ###########################################
-## Pipeline input section
-INPUT:
-  run: all
-
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 24
+  MaxThreads: 10
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
 ###########################################
-
+## SLURM run settings
 SLURM:
   ## Set to True if using SLURM
   USE_CLUSTER: false
@@ -22,8 +18,14 @@ SLURM:
   ## --nodes, --ntasks, --mem, --cpus-per-task
   --qos: unlim
   --job-name: EukMS
-  user-id: user
+  user-id: uid
 
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+###########################################
 
 CollectInput:
   # Number of threads task will use
@@ -31,60 +33,32 @@ CollectInput:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
-  # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
-  transcriptomes: /media/user/2TB/Data/EukMetaSanity/transcriptome-mapping-file
-  # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
-  rnaseq: /media/user/2TB/Data/EukMetaSanity/rnaseq-mapping-file
-
-GatherProteins:
-  # Number of threads task will use
-  threads: 8
-  # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
-  dependencies:
-    MMSeqsFilterTaxSeqDB:
-      program: mmseqs
-      level: order
-      data:
-        /media/user/2TB/Data/EukMetaSanity/odb-mmetsp_db
 
 Transcriptomes:
   # Number of threads task will use
-  threads: 8
+  threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
   dependencies:
     GMAPBuild:
-      threads: 1
-      program: gmapindex
+      program:
 
     GMAP:
-      program: gmap
-      FLAGS:
-        -B 5
-        --input-buffer-size 1000000
-        --output-buffer-size 1000000
-        -f samse
+      program:
 
 RNASeq:
   # Number of threads task will use
-  threads: 8
+  threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
   dependencies:
     Hisat2Build:
-      threads: 1
-      program: hisat2-build
+      program:
 
     Hisat2:
-      program: hisat2
-      FLAGS:
-        ""
+      program:
 
 MergeSams:
   # Number of threads task will use
@@ -95,27 +69,32 @@ MergeSams:
 
 ProcessMapping:
   # Number of threads task will use
-  threads: 8
+  threads: 1
   # Amount of memory task will use (in GB)
-  memory: 60
+  memory: 8
   time: "4:00:00"
   dependencies:
-    SambambaView:
-      program: sambamba
-
     SambambaSort:
-      program: sambamba
+      program:
+
+GatherProteins:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MMSeqsFilterTaxSeqDB:
+      program:
 
 RunBraker:
   # Number of threads task will use
-  threads: 4
+  threads: 1
   # Amount of memory task will use (in GB)
-  memory: 100
+  memory: 8
   time: "4:00:00"
   dependencies:
     Braker:
-      program: braker.pl
-      FLAGS:
-      # Provide flags as desired
+      program:
 
 ...  # document end

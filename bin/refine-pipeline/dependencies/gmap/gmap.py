@@ -27,16 +27,12 @@ class GMAP(Task):
         """
         # Get transcripts
         for transcript, sam_file in zip(self.input["transcripts"], self.output["sams"]):
-            # Generate genome index
-            genome_idx = self.input["GMAPBuild"]["db"]
-            _genome_dir = os.path.dirname(str(self.input["GMAPBuild"]["db"]))
-            _genome_basename = os.path.basename(str(self.input["GMAPBuild"]["db"]))
-            # Align
             self.parallel(
                 self.program[
-                    "-D", _genome_dir, "-d", genome_idx,
+                    "-D", str(self.input["GMAPBuild"]["db_dir"]),
+                    "-d", str(self.input["GMAPBuild"]["db_name"]),
                     "-t", self.threads,
+                    (*self.added_flags),
                     transcript,
-                    (*self.added_flags)
                 ] > str(sam_file)
             )

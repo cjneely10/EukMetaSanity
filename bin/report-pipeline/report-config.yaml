@@ -1,21 +1,15 @@
 ---  # document start
 
 ###########################################
-## Pipeline input section
-INPUT:
-  root: all
-  run:
-    prot: merged-prot  # or gmes-prot or genemark-prot or aug-prot or evidence-prot
-
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 20
+  MaxThreads: 10
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
 ###########################################
-
+## SLURM run settings
 SLURM:
   ## Set to True if using SLURM
   USE_CLUSTER: false
@@ -24,49 +18,40 @@ SLURM:
   ## --nodes, --ntasks, --mem, --cpus-per-task
   --qos: unlim
   --job-name: EukMS
-  user-id: user
+  user-id: uid
 
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+###########################################
 
 Quality:
   # Number of threads task will use
-  threads: 16
+  threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
-  skip: false
   dependencies:
     Busco:
-      program: busco
-      mode: prot
-      lineage: eukaryota
-      FLAGS:
-        -f
+      program:
 
 MMSeqs:
   # Number of threads task will use
-  threads: 16
+  threads: 1
   # Amount of memory task will use (in GB)
-  memory: 90
+  memory: 8
   time: "4:00:00"
-  skip: false
   dependencies:
     MMSeqsCreateDB:
-      program: mmseqs
+      program:
 
     MMSeqsSearch:
-      data:
-        /media/user/2TB/Data/EukMetaSanity/odb-mmetsp_db
-      program: mmseqs
-      subname: linsearch
-      FLAGS:
-        -c 0.3
-        --cov-mode 1
-        --remove-tmp-files
+      program:
 
     MMSeqsConvertAlis:
-      data:
-        /media/user/2TB/Data/EukMetaSanity/odb-mmetsp_db
-      program: mmseqs
+      program:
 
 KOFamScan:
   # Number of threads task will use
@@ -74,12 +59,9 @@ KOFamScan:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
-  skip: true
   dependencies:
     KofamscanExecAnnotation:
-      program: /media/user/2TB/Data/EukMetaSanity/kofamscan/exec_annotation
-      kolist: /media/user/2TB/Data/EukMetaSanity/kofam/ko_list
-      profiles: /media/user/2TB/Data/EukMetaSanity/profiles/eukaryote.hal
+      program:
 
 EggNog:
   # Number of threads task will use
@@ -87,14 +69,8 @@ EggNog:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
-  skip: true
   dependencies:
     EMapper:
-      program: emapper.py
-      FLAGS:
-        # Provide flags as needed
-        -m diamond
-        --override
-        --data_dir /location/of/eggnog-data
+      program:
 
 ...  # document end

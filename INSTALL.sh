@@ -1,12 +1,13 @@
 #!/bin/bash
+set -euo pipefail
 
 # Installation location
-CWD=`pwd`
+CWD="$(pwd)"
 # Get conda location information
-CONDA="`which conda`"
-CONDA_DIRNAME="`dirname $CONDA`"
-MINICONDA="`dirname "$CONDA_DIRNAME"`"
-SOURCE="$MINICONDA"/etc/profile.d/conda.sh
+CONDA="$(which conda)"
+CONDA_DIRNAME="$(dirname "$CONDA")"
+MINICONDA="$(dirname "$CONDA_DIRNAME")"
+SOURCE="$MINICONDA/etc/profile.d/conda.sh"
 
 # Parse command-line arguments
 POSITIONAL=()
@@ -98,23 +99,23 @@ function install_env() {
 # Create repeats.txt installation instructions with download path
 function modify_rm_location() {
   # Install RepeatMasker updated libraries and configure
-  cd "$MINICONDA"/envs/EukMS_run/share/RepeatMasker/Libraries/
+  cd "$MINICONDA/envs/EukMS_run/share/RepeatMasker/Libraries/"
   if [ $1 = false ]; then
     wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
     gunzip Dfam.h5.gz
   fi
   cd ..
-  sed "s,INSTALLATION_LOCATION,$2," "$CWD"/install/repeats.default.txt > "$CWD"/install/repeats.txt
-  perl ./configure < "$CWD"/install/repeats.txt
-  rm "$CWD"/install/repeats.txt
+  sed "s,INSTALLATION_LOCATION,$2," "$CWD/install/repeats.default.txt" > "$CWD/install/repeats.txt"
+  perl ./configure < "$CWD/install/repeats.txt"
+  rm "$CWD/install/repeats.txt"
   cp util/rmOutToGFF3.pl ./
 }
 
 # Update conda versions of augustus for proper id parsing
 function update_augustus() {
-  cd "$MINICONDA"/envs/EukMS_run/bin
+  cd "$MINICONDA/envs/EukMS_run/bin"
   sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-  cd "$MINICONDA"/envs/EukMS_refine/bin
+  cd "$MINICONDA/envs/EukMS_refine/bin"
   sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
 }
 
@@ -134,16 +135,19 @@ function install_eukms_run() {
   modify_rm_location $1 "$MINICONDA"/envs/EukMS_run/bin/
   update_augustus
   # Return to installation directory
-  cd $CWD
+  cd "$CWD"
   conda deactivate
 }
 
 # Add EukMS definitions to source script (default is ~/.bashrc)
 function update_source_script() {
+  echo "# Environment variables are part of EukMetaSanity installation." >> "$1"
+  echo "# Remove on program deletion" >> "$1"
   echo export PATH="$(pwd)"/bin/:'$PATH' >> "$1"
   echo export EukMS_run="$2" >> "$1"
   echo export EukMS_report="$(pwd)"/bin/report-pipeline >> "$1"
   echo export EukMS_refine="$(pwd)"/bin/refine-pipeline >> "$1"
+  echo "# # # # # # " >> "$1"
 }
 
 # # # Begin installation procedure
@@ -163,7 +167,7 @@ if [ ! -e bin/metaeuk ]; then
 fi
 
 # Update .bashrc with proper locations
-EukMS_run="$(pwd)"/bin/run-pipeline
+EukMS_run="$(pwd)/bin/run-pipeline"
 update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 
 # Download updated databases

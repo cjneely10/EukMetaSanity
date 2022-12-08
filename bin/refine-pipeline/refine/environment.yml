@@ -11,7 +11,7 @@ dependencies:
   - bedtools=2.29.2
   - hisat2=2.2.1
   - gmap=2020.06.30
-  - braker2=2.1.2
+  - braker2>=2.1.2
   - perl-mce=1.837
   - perl-math-utils=1.13
   - perl-yaml=1.28

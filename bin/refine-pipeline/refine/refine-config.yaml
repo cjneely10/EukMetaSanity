@@ -59,7 +59,7 @@ Transcriptomes:
   dependencies:
     GMAPBuild:
       threads: 1
-      program: gmapindex
+      program: gmap_build
 
     GMAP:
       program: gmap
@@ -115,6 +115,7 @@ RunBraker:
     Braker:
       program: braker.pl
       FLAGS:
-      # Provide flags as desired
+        # Provide flags as desired
+        "--prg=exonerate"
 
 ...  # document end
