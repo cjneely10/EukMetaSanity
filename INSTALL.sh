@@ -74,6 +74,15 @@ if [ ! -e "$SOURCE" ]; then
   exit 1
 fi
 
+function create_binary_directory() {
+  conda create --name yapim-installer python=3.8 -y
+  conda activate yapim-installer
+  pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.3
+  make
+  conda deactivate
+  conda remove --name yapim-installer --all -y
+}
+
 function install_mamba() {
   # Install mamba if not already present
   EXISTS=$(conda list | grep -c mamba)
@@ -152,6 +161,8 @@ function update_source_script() {
 
 # # # Begin installation procedure
 
+# Generate installation directory
+create_binary_directory
 # Installer
 install_mamba
 # Create run environment

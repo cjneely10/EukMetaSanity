@@ -5,3 +5,4 @@ install/repeats.txt
 condaenv.*.requirements.txt
 venv
 EukMetaSanity.egg-info
+bin
