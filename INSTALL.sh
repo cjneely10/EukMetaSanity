@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
 # Installation location
 CWD="$(pwd)"
@@ -11,7 +11,6 @@ SOURCE="$MINICONDA/etc/profile.d/conda.sh"
 
 # Parse command-line arguments
 POSITIONAL=()
-DATABASE_PATH="$CWD"
 THREADS="1"
 SKIP_RM_DOWNLOAD=false
 SKIP_DATA_DOWNLOAD=false
@@ -31,11 +30,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     -s|--skip-database-download)
       SKIP_DATA_DOWNLOAD=true
-      shift
-      ;;
-    -d|--database-path)
-      DATABASE_PATH="$2"
-      shift
       shift
       ;;
     -h|--help)
@@ -63,7 +57,6 @@ if [ ${#POSITIONAL[@]} -gt 0 ]; then
   echo "-t|--threads <threads>              Number of threads to use in building indices"
   echo "-r|--skip-rm-download               Skip repeat modeler database download (otherwise, uses wget)"
   echo "-s|--skip-database-download         Skip EukMS database download (otherwise, uses wget)"
-  echo "-d|--database-path <path>           Path for database download, default is $CWD/data"
   echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
   echo ""
   exit 1
@@ -184,7 +177,7 @@ update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 # Download updated databases
 if [ $SKIP_DATA_DOWNLOAD = false ]; then
   conda activate EukMS_run
-  download-data -t "$THREADS" -d "$DATABASE_PATH" --eukms-run-bin "$EukMS_run"
+  download-data -t "$THREADS" --eukms-run-bin "$EukMS_run"
   conda deactivate
 fi
 

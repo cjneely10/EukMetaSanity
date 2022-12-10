@@ -2,14 +2,16 @@
 
 `sed`, `grep`, `conda`, `wget`, `make`, and `git` should be installed on your system.
 
-Clone this repository:
+Ensure that the drive in which your conda installation is contained has ~80GB of extra space.
+
+Clone this repository to a drive with >128GB of storage space:
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
 cd EukMetaSanity
 ```
 
-Ensure that you have `conda`&ge;4.9.2 installed, that you have conda activated, and that you are in your `(base)` conda environment.
+Ensure that you have `conda`&ge;4.9 installed, that you have conda activated, and that you are in your `(base)` conda environment.
 
 
 A typical installation can be run using:
@@ -18,29 +20,58 @@ A typical installation can be run using:
 ./INSTALL.sh -t <num-threads>
 ```
 
-To specify a separate directory for storing database files, provide a path using the `-d` flag:
-
-```shell
-./INSTALL.sh -t <num-threads> -d /path/to/download-location
-```
-
-Be sure you have >128GB of storage space and 4-8 hours to complete the installation and database downloads.
+Expect 4-8 hours to complete the installation and database downloads.
 
 Your `~/.bashrc` file will be modified to append updated environment variables. You may change this using the `-b` flag.
 More information is available with the `-h` flag.
 
-After running the `INSTALL.sh` script, you must restart your shell for these changes to take effect.
+After running the `INSTALL.sh` script, you must restart your shell.
+
+
+### Note for WSL users
+
+The installation may crash during an initial stage if your anaconda/miniconda installation is not in your home directory. 
+
+The installation also may fail during the creation of various conda environments. 
+If it does, you will likely see error messages that resemble:
+
+```text
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91cd0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91f70>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91cd0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91f70>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
+```
+
+Currently, available fixes include:
+
+1. Restart wsl from the Windows `cmd.exe`
+   1. `wsl --shutdown`
+2. Adjust file permissions for your top-level conda installation directory
+   1. `chmod -R 777 ~/miniconda3`
+   2. `chmod -R 755 ~/miniconda3`
+3. Upgrade your conda version
+   1. `conda update -n base conda`
+
+Delete the installer environment and re-run the installation script.
+
+```shell
+if [ "$(conda info --envs | grep -c yapim_installer)" -eq 1 ]; then
+    conda remove --name yapim_installer --all -y
+fi
+./INSTALL.sh -t <num-threads>
+```
 
 ## Installing dependencies
 
 **EukMetaSanity**'s `conda` installation is packaged with all (most) of the required dependencies.
 Users who wish to use [GeneMark](http://topaz.gatech.edu/GeneMark/license_download.cgi), 
 [eggnog-mapper](https://github.com/eggnogdb/eggnog-mapper), or [kofamscan](https://www.genome.jp/tools/kofamkoala/) 
-must install them separately. We highly suggest using of these software suites, but they are not directly required.
+must install them separately. We highly suggest using of these software suites (especially GeneMark), 
+but they are not directly required.
 
 EggNOG users should download the software and its required databases using `pip` with their `EukMS_report` environment loaded.
 
-### Configuring GeneMark 4.65_lic
+### Configuring GeneMark &ge;4.65_lic
 
 If you choose to include GeneMark in your analysis pipeline, follow the installation instructions [on their webpage](http://topaz.gatech.edu/GeneMark/license_download.cgi) to download their software and accept their license agreements.
 
