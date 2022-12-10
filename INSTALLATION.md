@@ -1,6 +1,6 @@
 # Installation
 
-`sed`, `grep`, `conda`, `wget`, and `git` should be installed on your system.
+`sed`, `grep`, `conda`, `wget`, `make`, and `git` should be installed on your system.
 
 Clone this repository:
 
@@ -79,7 +79,10 @@ If you wish to download additional databases to use in the `report` step, use th
 for f in run report refine; do
     conda remove --name EukMS_$f --all -y
 done
+if [ "$(conda info --envs | grep -c yapim_installer)" -eq 1 ]; then
+    conda remove --name yapim_installer --all -y
+fi
 conda remove mamba -y
 ```
 
-You will also need to remove the 4 lines added to your `.bashrc` file. You may also wish to delete this repository and the database directory.
+You will also need to remove the 7 lines added to your `.bashrc` file. You may also wish to delete this repository and the database directory.

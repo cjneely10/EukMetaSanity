@@ -75,32 +75,32 @@ if [ ! -e "$SOURCE" ]; then
 fi
 
 function create_binary_directory() {
-  conda create --name yapim-installer python=3.8 -y
-  conda activate yapim-installer
-  pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.3
+  if [ "$(conda info --envs | grep -c yapim_installer)" -lt 1 ]; then
+    mamba env create -f EukMetaSanity/src/installer-environment.yml
+  fi
+  source "$SOURCE"
+  conda activate yapim_installer
   make
   conda deactivate
-  conda remove --name yapim-installer --all -y
+  conda remove --name yapim_installer --all -y
 }
 
 function install_mamba() {
   # Install mamba if not already present
-  EXISTS=$(conda list | grep -c mamba)
-  if [ $EXISTS -lt 1 ]; then
+  if [ "$(conda list | grep -c mamba)" -lt 1 ]; then
     conda install mamba -n base -c conda-forge -y
   fi
 }
 
 # Usage: install_env <env-name> <deactivate?>
 function install_env() {
-  EXISTS=$(conda info --envs | grep -c "EukMS_$1")
-  if [ $EXISTS -lt 1 ]; then
-    mamba env create -f bin/$1-pipeline/$1/environment.yml
+  if [ "$(conda info --envs | grep -c "EukMS_$1")" -lt 1 ]; then
+    mamba env create -f "bin/$1-pipeline/$1/environment.yml"
   fi
-  source $SOURCE
-  conda activate EukMS_$1
+  source "$SOURCE"
+  conda activate "EukMS_$1"
   python -m pip install .
-  if [ $2 = true ]; then
+  if [ "$2" = true ]; then
     conda deactivate
   fi
 }
@@ -109,7 +109,7 @@ function install_env() {
 function modify_rm_location() {
   # Install RepeatMasker updated libraries and configure
   cd "$MINICONDA/envs/EukMS_run/share/RepeatMasker/Libraries/"
-  if [ $1 = false ]; then
+  if [ "$1" = false ]; then
     wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
     gunzip Dfam.h5.gz
   fi
@@ -141,7 +141,7 @@ function install_metaeuk() {
 # Create run environment and install repeat modeler updates
 function install_eukms_run() {
   install_env run false
-  modify_rm_location $1 "$MINICONDA"/envs/EukMS_run/bin/
+  modify_rm_location "$1" "$MINICONDA/envs/EukMS_run/bin/"
   update_augustus
   # Return to installation directory
   cd "$CWD"
@@ -154,17 +154,17 @@ function update_source_script() {
   echo "# Remove on program deletion" >> "$1"
   echo export PATH="$(pwd)"/bin/:'$PATH' >> "$1"
   echo export EukMS_run="$2" >> "$1"
-  echo export EukMS_report="$(pwd)"/bin/report-pipeline >> "$1"
-  echo export EukMS_refine="$(pwd)"/bin/refine-pipeline >> "$1"
+  echo export EukMS_report="$(pwd)/bin/report-pipeline" >> "$1"
+  echo export EukMS_refine="$(pwd)/bin/refine-pipeline" >> "$1"
   echo "# # # # # # " >> "$1"
 }
 
 # # # Begin installation procedure
 
-# Generate installation directory
-create_binary_directory
 # Installer
 install_mamba
+# Generate installation directory
+create_binary_directory
 # Create run environment
 install_eukms_run $SKIP_RM_DOWNLOAD
 # Create report environment
@@ -184,7 +184,7 @@ update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 # Download updated databases
 if [ $SKIP_DATA_DOWNLOAD = false ]; then
   conda activate EukMS_run
-  download-data -t $THREADS -d "$DATABASE_PATH" --eukms-run-bin "$EukMS_run"
+  download-data -t "$THREADS" -d "$DATABASE_PATH" --eukms-run-bin "$EukMS_run"
   conda deactivate
 fi
 
