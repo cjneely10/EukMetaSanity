@@ -1,5 +1,5 @@
 #!/bin/bash
-set -exo pipefail
+set -eo pipefail
 
 # Installation location
 CWD="$(pwd)"

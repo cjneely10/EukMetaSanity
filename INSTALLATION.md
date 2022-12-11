@@ -112,4 +112,5 @@ If you wish to download additional databases to use in the `report` step, use th
 ./INSTALL.sh --uninstall
 ```
 
-You will also need to remove the 7 lines added to your `.bashrc` file. You may also wish to delete this repository and the database directory.
+You will also need to remove the 7 lines added to your `.bashrc` file.
+You may also wish to delete this repository and its enclosed database directory.
