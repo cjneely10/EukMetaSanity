@@ -207,7 +207,9 @@ update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 if [ $SKIP_DATA_DOWNLOAD = false ]; then
   source "$SOURCE"
   conda activate EukMS_run
-  download-data -t "$THREADS" --eukms-run-bin "$EukMS_run"
+  if [ ! -e "$CWD/data" ]; then
+    download-data -t "$THREADS" --eukms-run-bin "$EukMS_run"
+  fi
   conda deactivate
 fi
 
