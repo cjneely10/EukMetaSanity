@@ -30,6 +30,8 @@ After running the `INSTALL.sh` script, you must restart your shell.
 
 ### Note for WSL users
 
+Once installed, EukMS functions for WSL users. However, the installation procedure can be a bit buggy.
+
 The installation may crash during an initial stage if your anaconda/miniconda installation is not in your home directory. 
 
 The installation also may fail during the creation of various conda environments. 
@@ -107,13 +109,7 @@ If you wish to download additional databases to use in the `report` step, use th
 ## Uninstalling EukMetaSanity
 
 ```
-for f in run report refine; do
-    conda remove --name EukMS_$f --all -y
-done
-if [ "$(conda info --envs | grep -c yapim_installer)" -eq 1 ]; then
-    conda remove --name yapim_installer --all -y
-fi
-conda remove mamba -y
+./INSTALL.sh --uninstall
 ```
 
 You will also need to remove the 7 lines added to your `.bashrc` file. You may also wish to delete this repository and the database directory.
