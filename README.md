@@ -467,9 +467,6 @@ ProcessMapping:
   memory: 60
   time: "4:00:00"
   dependencies:
-    SambambaView:
-      program: sambamba
-
     SambambaSort:
       program: sambamba
 
