@@ -55,7 +55,7 @@ done
 # Confirm correctly parsed
 if [ ${#POSITIONAL[@]} -gt 0 ]; then
   echo ""
-  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-r] [-s] [-d /path/to/database/downloads] [-b /source/script]"
+  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-r] [-s] [-b /source/script] [--uninstall]"
   echo ""
   echo ""
   echo "-h|--help                           Display this help message"
