@@ -27,6 +27,8 @@ More information is available with the `-h` flag.
 
 After running the `INSTALL.sh` script, you must restart your shell.
 
+# TODO: Notes on upgrade, edits to genemark section, attempt to make kofamscan/eggnog-mapper default installed
+
 ## Installing dependencies
 
 **EukMetaSanity**'s `conda` installation is packaged with all (most) of the required dependencies.

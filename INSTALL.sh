@@ -195,7 +195,7 @@ function update_source_script() {
     echo export EukMS_run="$2" >> "$1"
     echo export EukMS_report="$(pwd)/bin/report-pipeline" >> "$1"
     echo export EukMS_refine="$(pwd)/bin/refine-pipeline" >> "$1"
-    echo "# # # # # # " >> "$1"
+    echo "# # # # # #" >> "$1"
   fi
 }
 
