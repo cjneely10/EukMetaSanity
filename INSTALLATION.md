@@ -82,5 +82,4 @@ Optionally, remove the installer library
 conda remove mamba -y
 ```
 
-You will also need to remove the 7 lines added to your `.bashrc` file.
-You may also wish to delete this repository and its enclosed database directory.
+You will also need to remove the 7 lines added to your `.bashrc` file. You may also wish to delete this repository.
