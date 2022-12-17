@@ -128,7 +128,7 @@ function install_env() {
 }
 
 # Create repeats.txt installation instructions with download path
-# Usage: modify_rm_location <skip-download?> <install-path>
+# Usage: modify_rm_location <install-path>
 function modify_rm_location() {
   # Install RepeatMasker updated libraries and configure
   cd "$MINICONDA/envs/EukMS_run/share/RepeatMasker/Libraries/"
