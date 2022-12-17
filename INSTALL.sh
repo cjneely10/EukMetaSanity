@@ -1,21 +1,221 @@
 #!/bin/bash
 set -eo pipefail
 
-# Installation location
-CWD="$(pwd)"
-# Get conda location information
-CONDA="$(which conda)"
-CONDA_DIRNAME="$(dirname "$CONDA")"
-MINICONDA="$(dirname "$CONDA_DIRNAME")"
-SOURCE="$MINICONDA/etc/profile.d/conda.sh"
-
-# Parse command-line arguments
-POSITIONAL=()
+# EukMS pipelines to generate
+PIPELINES=(run report refine)
+# CLI arguments
 THREADS="1"
 SKIP_RM_DOWNLOAD=false
 SKIP_DATA_DOWNLOAD=false
 SOURCE_SCRIPT=~/.bashrc
 UNINSTALL=false
+UPGRADE=false
+
+# Installation location
+CWD="$(pwd)"
+# Conda location information
+CONDA="$(which conda)"
+CONDA_DIRNAME="$(dirname "$CONDA")"
+MINICONDA="$(dirname "$CONDA_DIRNAME")"
+SOURCE="$MINICONDA/etc/profile.d/conda.sh"
+
+function usage() {
+  echo ""
+  echo "EukMetaSanity v1.1.0 Installation"
+  echo "Usage: ./INSTALL.sh [-h] | [[-t <threads>] [-r] [-s] [-b /source/script]] | [--uninstall] | [--upgrade]"
+  echo ""
+  echo ""
+  echo "-h|--help                           Display this help message"
+  echo "-t|--threads <threads>              Number of threads to use in building indices"
+  echo "-r|--skip-rm-download               Skip repeat modeler database download"
+  echo "-s|--skip-database-download         Skip EukMS database download"
+  echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
+  echo "--uninstall                         Uninstall EukMetaSanity"
+  echo "--upgrade                           Upgrade EukMetaSanity"
+  echo ""
+  echo ""
+  echo "Examples"
+  echo "--------"
+  echo "Basic Installation"
+  echo "./INSTALL.sh -t 8"
+  echo "Skip downloads"
+  echo "./INSTALL.sh -t 8 -r -s"
+  echo "Place EukMetaSanity PATH updated in non-default location (i.e., not ~/.bashrc)"
+  echo "./INSTALL.sh -t 8 -b ~/.scripts"
+  echo "Upgrade installation"
+  echo "./INSTALL.sh -t 6 --upgrade"
+  echo "Uninstall EukMetaSanity"
+  echo "./INSTALL.sh --uninstall"
+  echo ""
+}
+
+# Check if conda environment exists
+function is_installed() {
+  [ "$(conda info --envs | grep -c "$1")" -eq 1 ]
+}
+
+# Check if conda environment doesn't exist
+function not_installed() {
+  [ "$(conda info --envs | grep -c "$1")" -eq 0 ]
+}
+
+# Uninstall all EukMetaSanity conda environments. Delete bin and data directories
+function uninstall() {
+  # Remove conda environments
+  for f in "${PIPELINES[@]}"; do
+    if is_installed "EukMS_$f"; then
+      conda remove --name "EukMS_$f" --all -y
+    fi
+  done
+  # Remove installer, if not already done so
+  if is_installed yapim_installer; then
+    conda remove --name yapim_installer --all -y
+  fi
+  rm -rf bin
+  rm -rf data
+}
+
+# Generate EukMetaSanity bin pipeline directories
+function create_binary_directory() {
+  local DO_INSTALL=false
+  for f in "${PIPELINES[@]}"; do
+    if "$UPGRADE" || [ ! -d bin/"$f-pipeline" ]; then
+      DO_INSTALL=true
+      break
+    fi
+  done
+  if "$DO_INSTALL"; then
+    # Create and activate installer environment
+    if not_installed yapim_installer; then
+      mamba env create -f EukMetaSanity/src/installer-environment.yml
+    fi
+    source "$SOURCE"
+    conda activate yapim_installer
+    # Generate binary directories using the YAPIM `create` function
+    for f in "${PIPELINES[@]}"; do
+      if "$UPGRADE" || [ ! -d bin/"$f-pipeline" ]; then
+        echo n | yapim create -t "EukMetaSanity/src/$f" -d EukMetaSanity/src/dependencies -o "bin/$f-pipeline"
+      fi
+    done
+    # Deactivate and delete installer environment
+    conda deactivate
+    conda remove --name yapim_installer --all -y
+  fi
+}
+
+# Install mamba if not already present
+function install_mamba() {
+  if [ "$(conda list | grep -c mamba)" -lt 1 ]; then
+    conda install mamba -n base -c conda-forge -y
+  fi
+}
+
+# Install EukMS package to environment
+function pip_install_env() {
+  source "$SOURCE"
+  conda activate "EukMS_$1"
+  python -m pip install .
+  conda deactivate
+}
+
+# Usage: install_env <env-name>
+function install_env() {
+  local ENV_FILE="bin/$1-pipeline/$1/environment.yml"
+  if not_installed "EukMS_$1"; then
+    mamba env create -f "$ENV_FILE"
+    pip_install_env "$1"
+  elif "$UPGRADE"; then
+    mamba env update -f "$ENV_FILE"
+    pip_install_env "$1"
+  fi
+}
+
+# Create repeats.txt installation instructions with download path
+# Usage: modify_rm_location <skip-download?> <install-path>
+function modify_rm_location() {
+  # Install RepeatMasker updated libraries and configure
+  cd "$MINICONDA/envs/EukMS_run/share/RepeatMasker/Libraries/"
+  # Download data if not told to skip by caller, if $UPGRADE is set, or if file is not present
+  if [ "$1" = false ]; then
+    if "$UPGRADE" || [ ! -f Dfam.h5 ]; then
+      rm -f Dfam.h5
+      source "$SOURCE"
+      conda activate EukMS_run
+      wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
+      gunzip Dfam.h5.gz
+      # Move up to RepeatMasker top-level
+      cd ..
+      sed "s,INSTALLATION_LOCATION,$2," "$CWD/install/repeats.default.txt" > "$CWD/install/repeats.txt"
+      # Configure installation. If download is skipped, uses smaller, less-complete repeat database
+      perl ./configure < "$CWD/install/repeats.txt"
+      rm "$CWD/install/repeats.txt"
+      cp util/rmOutToGFF3.pl ./
+      conda deactivate
+    fi
+  fi
+  cd "$CWD"
+}
+
+# Update conda versions of augustus for proper id parsing
+function update_augustus() {
+  cd "$MINICONDA/envs/EukMS_run/bin"
+  sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
+  cd "$MINICONDA/envs/EukMS_refine/bin"
+  sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
+  cd "$CWD"
+}
+
+# Download MetaEuk from MMSeqs2 server
+function install_metaeuk() {
+  # Create bin directory and install non-conda dependencies
+  cd bin
+  source "$SOURCE"
+  conda activate "EukMS_run"
+  wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz
+  conda deactivate
+  tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz
+  mv metaeuk/bin/metaeuk ./_metaeuk
+  rm -r metaeuk/ && mv _metaeuk metaeuk
+  cd -
+}
+
+# Create run environment and install repeat modeler updates
+function install_eukms_run() {
+  install_env run
+  modify_rm_location "$1" "$MINICONDA/envs/EukMS_run/bin/"
+}
+
+# Add EukMS definitions to source script (default is ~/.bashrc)
+function update_source_script() {
+  LINE1="# Environment variables are part of EukMetaSanity installation."
+  if [ "$(grep -c "$LINE1" "$SOURCE_SCRIPT")" -lt 1 ]; then
+    echo "$LINE1" >> "$1"
+    echo "# Remove on program deletion" >> "$1"
+    echo export PATH="$(pwd)"/bin/:'$PATH' >> "$1"
+    echo export EukMS_run="$2" >> "$1"
+    echo export EukMS_report="$(pwd)/bin/report-pipeline" >> "$1"
+    echo export EukMS_refine="$(pwd)/bin/refine-pipeline" >> "$1"
+    echo "# # # # # # " >> "$1"
+  fi
+}
+
+# # # # # Begin # # # # #
+
+# Validate top-level working directory
+if [ "$(dirname "$0")" != . ]; then
+  >&2 echo "Run installation script from EukMetaSanity top-level directory"
+  usage
+  exit 1
+fi
+
+# Validate conda source path
+if [ ! -f "$SOURCE" ]; then
+  >&2 echo "There was an error locating your conda installation"
+  exit 1
+fi
+
+# Parse command-line arguments
+POSITIONAL=()
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -34,8 +234,8 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      POSITIONAL+=("$1")
-      shift
+      usage
+      exit 0
       ;;
     -b|--bash-source-script)
       SOURCE_SCRIPT="$2"
@@ -46,140 +246,36 @@ while [[ $# -gt 0 ]]; do
       UNINSTALL=true
       shift
       ;;
+    --upgrade)
+      UPGRADE=true
+      shift
+      ;;
     *)
       POSITIONAL+=("$1")
       shift
       ;;
   esac
 done
+
 # Confirm correctly parsed
 if [ ${#POSITIONAL[@]} -gt 0 ]; then
-  echo ""
-  echo "Usage: ./INSTALL.sh [-h] [-t <threads>] [-r] [-s] [-b /source/script] [--uninstall]"
-  echo ""
-  echo ""
-  echo "-h|--help                           Display this help message"
-  echo "-t|--threads <threads>              Number of threads to use in building indices"
-  echo "-r|--skip-rm-download               Skip repeat modeler database download (otherwise, uses wget)"
-  echo "-s|--skip-database-download         Skip EukMS database download (otherwise, uses wget)"
-  echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
-  echo "--uninstall                         Uninstall EukMetaSanity"
-  echo ""
+  usage
   exit 1
 fi
 
-if [ ! -e "$SOURCE" ]; then
-  echo "There was an error locating your conda installation"
+# Confirm valid upgrade/uninstall setting
+if "$UPGRADE" && "$UNINSTALL"; then
+  >&2 echo "Provide either --upgrade OR --uninstall flag"
   exit 1
 fi
 
-function uninstall() {
-  for f in run report refine; do
-    conda remove --name EukMS_$f --all -y
-  done
-  if [ "$(conda info --envs | grep -c yapim_installer)" -eq 1 ]; then
-    conda remove --name yapim_installer --all -y
-  fi
-  conda remove mamba -y
-}
-
-function create_binary_directory() {
-  if [ ! -e "$CWD/bin" ]; then
-    mamba env create -f EukMetaSanity/src/installer-environment.yml
-    source "$SOURCE"
-    conda activate yapim_installer
-    make
-    conda deactivate
-    conda remove --name yapim_installer --all -y
-  fi
-}
-
-function install_mamba() {
-  # Install mamba if not already present
-  if [ "$(conda list | grep -c mamba)" -lt 1 ]; then
-    conda install mamba -n base -c conda-forge -y
-  fi
-}
-
-# Usage: install_env <env-name> <deactivate?>
-function install_env() {
-  if [ "$(conda info --envs | grep -c "EukMS_$1")" -lt 1 ]; then
-    mamba env create -f "bin/$1-pipeline/$1/environment.yml"
-    source "$SOURCE"
-    conda activate "EukMS_$1"
-    python -m pip install .
-    if [ "$2" = true ]; then
-      conda deactivate
-    fi
-  fi
-}
-
-# Create repeats.txt installation instructions with download path
-function modify_rm_location() {
-  # Install RepeatMasker updated libraries and configure
-  cd "$MINICONDA/envs/EukMS_run/share/RepeatMasker/Libraries/"
-  if [ "$1" = false ]; then
-    wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
-    gunzip Dfam.h5.gz
-  fi
-  cd ..
-  sed "s,INSTALLATION_LOCATION,$2," "$CWD/install/repeats.default.txt" > "$CWD/install/repeats.txt"
-  perl ./configure < "$CWD/install/repeats.txt"
-  rm "$CWD/install/repeats.txt"
-  cp util/rmOutToGFF3.pl ./
-  cd "$CWD"
-}
-
-# Update conda versions of augustus for proper id parsing
-function update_augustus() {
-  cd "$MINICONDA/envs/EukMS_run/bin"
-  sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-  cd "$MINICONDA/envs/EukMS_refine/bin"
-  sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
-  cd "$CWD"
-}
-
-# Download MetaEuk from MMSeqs2 server
-function install_metaeuk() {
-  # Create bin directory and install non-conda dependencies
-  cd bin
-  wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz
-  tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz
-  mv metaeuk/bin/metaeuk ./_metaeuk
-  rm -r metaeuk/ && mv _metaeuk metaeuk && cd -
-}
-
-# Create run environment and install repeat modeler updates
-function install_eukms_run() {
-  if [ "$(conda info --envs | grep -c "EukMS_run")" -lt 1 ]; then
-    install_env run false
-    modify_rm_location "$1" "$MINICONDA/envs/EukMS_run/bin/"
-    conda deactivate
-  fi
-}
-
-# Add EukMS definitions to source script (default is ~/.bashrc)
-function update_source_script() {
-  LINE1="# Environment variables are part of EukMetaSanity installation."
-  if [ "$(grep -c "$LINE1" "$SOURCE_SCRIPT")" -lt 1 ]; then
-    echo "$LINE1" >> "$1"
-    echo "# Remove on program deletion" >> "$1"
-    echo export PATH="$(pwd)"/bin/:'$PATH' >> "$1"
-    echo export EukMS_run="$2" >> "$1"
-    echo export EukMS_report="$(pwd)/bin/report-pipeline" >> "$1"
-    echo export EukMS_refine="$(pwd)/bin/refine-pipeline" >> "$1"
-    echo "# # # # # # " >> "$1"
-  fi
-}
-
-# # # Uninstall EukMetaSanity
-if [ "$UNINSTALL" = true ]; then
+# # # Uninstall EukMetaSanity # # #
+if "$UNINSTALL"; then
   uninstall
   exit 0
 fi
 
-# # # Begin installation procedure
-
+# # # Install EukMetaSanity # # #
 # Installer
 install_mamba
 # Generate installation directory
@@ -187,12 +283,12 @@ create_binary_directory
 # Create run environment
 install_eukms_run $SKIP_RM_DOWNLOAD
 # Create report environment
-install_env report true
+install_env report
 # Create refine environment
-install_env refine true
+install_env refine
 
 # Install metaeuk and confirm proper completion
-if [ ! -e bin/metaeuk ]; then
+if "$UPGRADE" || [ ! -e bin/metaeuk ]; then
   install_metaeuk
 fi
 
@@ -204,13 +300,13 @@ EukMS_run="$CWD/bin/run-pipeline"
 update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 
 # Download updated databases
-if [ $SKIP_DATA_DOWNLOAD = false ]; then
-  source "$SOURCE"
-  conda activate EukMS_run
-  if [ ! -e "$CWD/data" ]; then
+if [ "$SKIP_DATA_DOWNLOAD" = false ]; then
+  if "$UPGRADE" || [ ! -e "$CWD/data" ]; then
+    source "$SOURCE"
+    conda activate EukMS_run
     download-data -t "$THREADS" --eukms-run-bin "$EukMS_run"
+    conda deactivate
   fi
-  conda deactivate
 fi
 
 echo "Your installation is complete!"
