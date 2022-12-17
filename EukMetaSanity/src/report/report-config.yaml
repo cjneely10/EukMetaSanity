@@ -78,9 +78,9 @@ KOFamScan:
   skip: true
   dependencies:
     KofamscanExecAnnotation:
-      program: /path/to/kofamscan/exec_annotation
-      kolist: /path/to/kofam/ko_list
-      profiles: /path/to/profiles/eukaryote.hal
+      program: /path/To/kofamscan/exec_annotation
+      kolist: /path/To/kofam/ko_list
+      profiles: /path/To/profiles/eukaryote.hal
 
 EggNog:
   # Number of threads task will use
