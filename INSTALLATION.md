@@ -20,14 +20,18 @@ A typical installation can be run using:
 ./INSTALL.sh -t <num-threads>
 ```
 
+If updating installation from a previous version of EukMetaSanity, run:
+
+```shell
+./INSTALL.sh -t <num-threads> --upgrade
+```
+
 Expect 4-8 hours to complete the installation and database downloads.
 
 Your `~/.bashrc` file will be modified to append updated environment variables. You may change this using the `-b` flag.
 More information is available with the `-h` flag.
 
 After running the `INSTALL.sh` script, you must restart your shell.
-
-# TODO: Notes on upgrade, edits to genemark section, attempt to make kofamscan/eggnog-mapper default installed
 
 ## Installing dependencies
 
@@ -43,7 +47,7 @@ EggNOG users should download the software and its required databases using `pip`
 
 If you choose to include GeneMark in your analysis pipeline, follow the installation instructions [on their webpage](http://topaz.gatech.edu/GeneMark/license_download.cgi) to download their software and accept their license agreements.
 
-Ensure that your `.gm_key` file is present in your home directory if you are using GeneMark as your ab initio predictor. 
+Ensure that your `.gm_key` file is present in your home directory. 
 You also may need to run their accessory script from within your `EukMS` environment:
 
 ```
