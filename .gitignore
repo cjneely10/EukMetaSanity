@@ -6,4 +6,5 @@ condaenv.*.requirements.txt
 venv
 EukMetaSanity.egg-info
 bin
+data
 build

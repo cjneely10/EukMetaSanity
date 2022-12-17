@@ -136,7 +136,7 @@ function modify_rm_location() {
   if "$UPGRADE" || [ ! -f ../installation-complete ]; then
     source "$SOURCE"
     conda activate EukMS_run
-    rm Dfam.h5
+    rm -f Dfam.h5
     wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
     gunzip Dfam.h5.gz
     # Move up to RepeatMasker top-level
