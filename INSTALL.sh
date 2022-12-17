@@ -5,8 +5,6 @@ set -eo pipefail
 PIPELINES=(run report refine)
 # CLI arguments
 THREADS="1"
-SKIP_RM_DOWNLOAD=false
-SKIP_DATA_DOWNLOAD=false
 SOURCE_SCRIPT=~/.bashrc
 UNINSTALL=false
 UPGRADE=false
@@ -18,6 +16,9 @@ CONDA="$(which conda)"
 CONDA_DIRNAME="$(dirname "$CONDA")"
 MINICONDA="$(dirname "$CONDA_DIRNAME")"
 SOURCE="$MINICONDA/etc/profile.d/conda.sh"
+# Installation directories
+BIN=bin
+DATA=data
 
 function usage() {
   echo ""
@@ -27,8 +28,6 @@ function usage() {
   echo ""
   echo "-h|--help                           Display this help message"
   echo "-t|--threads <threads>              Number of threads to use in building indices"
-  echo "-r|--skip-rm-download               Skip repeat modeler database download"
-  echo "-s|--skip-database-download         Skip EukMS database download"
   echo "-b|--bash-source-script <path>      Script to add PATH updates, default is ~/.bashrc"
   echo "--uninstall                         Uninstall EukMetaSanity"
   echo "--upgrade                           Upgrade EukMetaSanity"
@@ -38,8 +37,6 @@ function usage() {
   echo "--------"
   echo "Basic Installation"
   echo "./INSTALL.sh -t 8"
-  echo "Skip downloads"
-  echo "./INSTALL.sh -t 8 -r -s"
   echo "Place EukMetaSanity PATH updated in non-default location (i.e., not ~/.bashrc)"
   echo "./INSTALL.sh -t 8 -b ~/.scripts"
   echo "Upgrade installation"
@@ -71,15 +68,15 @@ function uninstall() {
   if is_installed yapim_installer; then
     conda remove --name yapim_installer --all -y
   fi
-  rm -rf bin
-  rm -rf data
+  rm -rf "$BIN"
+  rm -rf "$DATA"
 }
 
 # Generate EukMetaSanity bin pipeline directories
 function create_binary_directory() {
   local DO_INSTALL=false
   for f in "${PIPELINES[@]}"; do
-    if "$UPGRADE" || [ ! -d bin/"$f-pipeline" ]; then
+    if "$UPGRADE" || [ ! -d "$BIN/$f-pipeline" ]; then
       DO_INSTALL=true
       break
     fi
@@ -93,8 +90,8 @@ function create_binary_directory() {
     conda activate yapim_installer
     # Generate binary directories using the YAPIM `create` function
     for f in "${PIPELINES[@]}"; do
-      if "$UPGRADE" || [ ! -d bin/"$f-pipeline" ]; then
-        echo n | yapim create -t "EukMetaSanity/src/$f" -d EukMetaSanity/src/dependencies -o "bin/$f-pipeline"
+      if "$UPGRADE" || [ ! -d "$BIN/$f-pipeline" ]; then
+        echo n | yapim create -t "EukMetaSanity/src/$f" -d EukMetaSanity/src/dependencies -o "$BIN/$f-pipeline"
       fi
     done
     # Deactivate and delete installer environment
@@ -120,7 +117,7 @@ function pip_install_env() {
 
 # Usage: install_env <env-name>
 function install_env() {
-  local ENV_FILE="bin/$1-pipeline/$1/environment.yml"
+  local ENV_FILE="$BIN/$1-pipeline/$1/environment.yml"
   if not_installed "EukMS_$1"; then
     mamba env create -f "$ENV_FILE"
     pip_install_env "$1"
@@ -135,23 +132,22 @@ function install_env() {
 function modify_rm_location() {
   # Install RepeatMasker updated libraries and configure
   cd "$MINICONDA/envs/EukMS_run/share/RepeatMasker/Libraries/"
-  # Download data if not told to skip by caller, if $UPGRADE is set, or if file is not present
-  if [ "$1" = false ]; then
-    if "$UPGRADE" || [ ! -f Dfam.h5 ]; then
-      rm -f Dfam.h5
-      source "$SOURCE"
-      conda activate EukMS_run
-      wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
-      gunzip Dfam.h5.gz
-      # Move up to RepeatMasker top-level
-      cd ..
-      sed "s,INSTALLATION_LOCATION,$2," "$CWD/install/repeats.default.txt" > "$CWD/install/repeats.txt"
-      # Configure installation. If download is skipped, uses smaller, less-complete repeat database
-      perl ./configure < "$CWD/install/repeats.txt"
-      rm "$CWD/install/repeats.txt"
-      cp util/rmOutToGFF3.pl ./
-      conda deactivate
-    fi
+  # Download data if $UPGRADE is set or if file 'installation-complete' is not present
+  if "$UPGRADE" || [ ! -f ../installation-complete ]; then
+    source "$SOURCE"
+    conda activate EukMS_run
+    rm Dfam.h5
+    wget https://www.dfam.org/releases/Dfam_3.2/families/Dfam.h5.gz
+    gunzip Dfam.h5.gz
+    # Move up to RepeatMasker top-level
+    cd ..
+    sed "s,INSTALLATION_LOCATION,$1," "$CWD/install/repeats.default.txt" > "$CWD/install/repeats.txt"
+    # Configure installation. If download is skipped, uses smaller, less-complete repeat database
+    perl ./configure < "$CWD/install/repeats.txt"
+    rm "$CWD/install/repeats.txt"
+    cp util/rmOutToGFF3.pl ./
+    conda deactivate
+    touch installation-complete
   fi
   cd "$CWD"
 }
@@ -168,13 +164,13 @@ function update_augustus() {
 # Download MetaEuk from MMSeqs2 server
 function install_metaeuk() {
   # Create bin directory and install non-conda dependencies
-  cd bin
+  cd "$BIN"
   source "$SOURCE"
   conda activate "EukMS_run"
   wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz
   conda deactivate
   tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz
-  mv metaeuk/bin/metaeuk ./_metaeuk
+  mv "metaeuk/$BIN/metaeuk" ./_metaeuk
   rm -r metaeuk/ && mv _metaeuk metaeuk
   cd -
 }
@@ -182,7 +178,7 @@ function install_metaeuk() {
 # Create run environment and install repeat modeler updates
 function install_eukms_run() {
   install_env run
-  modify_rm_location "$1" "$MINICONDA/envs/EukMS_run/bin/"
+  modify_rm_location "$MINICONDA/envs/EukMS_run/bin/"
 }
 
 # Add EukMS definitions to source script (default is ~/.bashrc)
@@ -191,10 +187,10 @@ function update_source_script() {
   if [ "$(grep -c "$LINE1" "$SOURCE_SCRIPT")" -lt 1 ]; then
     echo "$LINE1" >> "$1"
     echo "# Remove on program deletion" >> "$1"
-    echo export PATH="$(pwd)"/bin/:'$PATH' >> "$1"
+    echo export PATH="$(pwd)/$BIN/":'$PATH' >> "$1"
     echo export EukMS_run="$2" >> "$1"
-    echo export EukMS_report="$(pwd)/bin/report-pipeline" >> "$1"
-    echo export EukMS_refine="$(pwd)/bin/refine-pipeline" >> "$1"
+    echo export EukMS_report="$(pwd)/$BIN/report-pipeline" >> "$1"
+    echo export EukMS_refine="$(pwd)/$BIN/refine-pipeline" >> "$1"
     echo "# # # # # #" >> "$1"
   fi
 }
@@ -223,14 +219,6 @@ while [[ $# -gt 0 ]]; do
     -t|--threads)
       THREADS="$2"
       shift
-      shift
-      ;;
-    -r|--skip-rm-download)
-      SKIP_RM_DOWNLOAD=true
-      shift
-      ;;
-    -s|--skip-database-download)
-      SKIP_DATA_DOWNLOAD=true
       shift
       ;;
     -h|--help)
@@ -281,14 +269,14 @@ install_mamba
 # Generate installation directory
 create_binary_directory
 # Create run environment
-install_eukms_run $SKIP_RM_DOWNLOAD
+install_eukms_run
 # Create report environment
 install_env report
 # Create refine environment
 install_env refine
 
 # Install metaeuk and confirm proper completion
-if "$UPGRADE" || [ ! -e bin/metaeuk ]; then
+if "$UPGRADE" || [ ! -e "$BIN/metaeuk" ]; then
   install_metaeuk
 fi
 
@@ -296,17 +284,15 @@ fi
 update_augustus
 
 # Update .bashrc with proper locations
-EukMS_run="$CWD/bin/run-pipeline"
+EukMS_run="$CWD/$BIN/run-pipeline"
 update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 
 # Download updated databases
-if [ "$SKIP_DATA_DOWNLOAD" = false ]; then
-  if "$UPGRADE" || [ ! -e "$CWD/data" ]; then
-    source "$SOURCE"
-    conda activate EukMS_run
-    download-data -t "$THREADS" --eukms-run-bin "$EukMS_run"
-    conda deactivate
-  fi
+if "$UPGRADE" || [ ! -d "$DATA" ]; then
+  source "$SOURCE"
+  conda activate EukMS_run
+  download-data -t "$THREADS" --eukms-run-bin "$EukMS_run"
+  conda deactivate
 fi
 
 echo "Your installation is complete!"

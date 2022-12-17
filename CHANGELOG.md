@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Ability to set database directory as part of installation
+- Ability to skip database downloads as part of installation
+- Ability to skip RepeatMasker database downloads as part of installation
 
 ## [1.0.0] - 2021-07-25
 First release of `EukMetaSanity`
