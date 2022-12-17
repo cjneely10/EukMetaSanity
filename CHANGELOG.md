@@ -8,8 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2022-12-13
 ### Added
-- Basic support for WSL users
-- Support to uninstall `EukMetaSanity` from `INSTALL.sh` script
+- Support to upgrade and uninstall `EukMetaSanity` from `INSTALL.sh` script
 
 ### Changed
 - Installation script now fails on error (as expected)

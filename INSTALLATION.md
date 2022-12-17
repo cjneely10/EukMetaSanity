@@ -1,6 +1,6 @@
 # Installation
 
-`sed`, `grep`, `conda`, `wget`, `make`, and `git` should be installed on your system.
+`sed`, `grep`, `conda`, and `git` should be available on your system `PATH`.
 
 Ensure that the drive in which your conda installation is contained has ~80GB of extra space.
 
@@ -26,42 +26,6 @@ Your `~/.bashrc` file will be modified to append updated environment variables. 
 More information is available with the `-h` flag.
 
 After running the `INSTALL.sh` script, you must restart your shell.
-
-
-### Note for WSL users
-
-Once installed, EukMS functions for WSL users. However, the installation procedure can be a bit buggy.
-
-The installation may crash during an initial stage if your anaconda/miniconda installation is not in your home directory. 
-
-The installation also may fail during the creation of various conda environments. 
-If it does, you will likely see error messages that resemble:
-
-```text
-WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91cd0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
-WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91f70>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
-WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91cd0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
-WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x7f9abaa91f70>: Failed to establish a new connection: [Errno -2] Name or service not known')': /simple/bcbio-gff/
-```
-
-Currently, available fixes include:
-
-1. Restart wsl from the Windows `cmd.exe`
-   1. `wsl --shutdown`
-2. Adjust file permissions for your top-level conda installation directory
-   1. `chmod -R 777 ~/miniconda3`
-   2. `chmod -R 755 ~/miniconda3`
-3. Upgrade your conda version
-   1. `conda update -n base conda`
-
-Delete the installer environment and re-run the installation script.
-
-```shell
-if [ "$(conda info --envs | grep -c yapim_installer)" -eq 1 ]; then
-    conda remove --name yapim_installer --all -y
-fi
-./INSTALL.sh -t <num-threads>
-```
 
 ## Installing dependencies
 
@@ -108,8 +72,14 @@ If you wish to download additional databases to use in the `report` step, use th
 
 ## Uninstalling EukMetaSanity
 
-```
+```shell
 ./INSTALL.sh --uninstall
+```
+
+Optionally, remove the installer library
+
+```shell
+conda remove mamba -y
 ```
 
 You will also need to remove the 7 lines added to your `.bashrc` file.
