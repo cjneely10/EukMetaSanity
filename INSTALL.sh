@@ -23,7 +23,7 @@ DATA=data
 function usage() {
   echo ""
   echo "EukMetaSanity v1.1.0 Installation"
-  echo "Usage: ./INSTALL.sh [-h] | [[-t <threads>] [-r] [-s] [-b /source/script]] | [--uninstall] | [--upgrade]"
+  echo "Usage: ./INSTALL.sh [-h] | [[-t <threads>] [-b /source/script]] | [--upgrade [-t <threads>]] | [--uninstall]"
   echo ""
   echo ""
   echo "-h|--help                           Display this help message"
