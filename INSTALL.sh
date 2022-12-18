@@ -183,9 +183,8 @@ function install_eukms_run() {
 
 # Add EukMS definitions to source script (default is ~/.bashrc)
 function update_source_script() {
-  LINE1="# Environment variables are part of EukMetaSanity installation."
-  if [ "$(grep -c "$LINE1" "$SOURCE_SCRIPT")" -lt 1 ]; then
-    echo "$LINE1" >> "$1"
+  if [ "$(grep -c "EukMS_run=$2" "$SOURCE_SCRIPT")" -lt 1 ]; then
+    echo "# Environment variables are part of EukMetaSanity installation." >> "$1"
     echo "# Remove on program deletion" >> "$1"
     echo export PATH="$(pwd)/$BIN/":'$PATH' >> "$1"
     echo export EukMS_run="$2" >> "$1"
