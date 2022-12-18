@@ -120,3 +120,33 @@ class CreateTaxDBs(DataUtil):
         if os.path.exists(tax_file):
             tax_mapping = ["--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".input")]
         return tax_mapping
+
+
+class DownloadMMSeqsDatabases(DataUtil):
+    """
+    Download MMSeqs2 database using `mmseqs database` utility
+    """
+    def __init__(self, wdir: str, threads: int, databases: Sequence[str]):
+        """
+        Create database entry for each in `databases`
+
+        :param wdir: Working directory for download
+        :param threads: Number of threads for creation operation
+        :param databases: List of MMSeqs2 databases to download
+        """
+        super().__init__(databases)
+        self.wdir = wdir
+        self.threads = threads
+
+    def __call__(self):
+        """
+        Generate requested databases
+        """
+        for database in self.databases:
+            self.run(local["mmseqs"][
+                         "databases",
+                         database,
+                         os.path.join(self.wdir, database),
+                         os.path.join(self.wdir, "tmp"),
+                        "--threads", str(self.threads)
+                     ])

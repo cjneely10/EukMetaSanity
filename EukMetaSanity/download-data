@@ -55,21 +55,15 @@ class DataDownloader(cli.Application):
 
             # Download data
             print("Downloading data")
-            for db_download in download_data(self._working_dir):
-                db_download()
+            download_data(self._working_dir)
 
             # Parse any required download data
             print("\nGenerating taxonomy lookup files")
-            for parsing_operation in parsing_operations(self._working_dir):
-                parsing_operation()
+            parsing_operations(self._working_dir)
 
             # Run database utility protocols
             print("\nRunning MMseqs utility functions on data")
-            for util_instruction in manage_downloaded_data(self._working_dir,
-                                                           self._index,
-                                                           True,
-                                                           self._threads):
-                util_instruction()
+            manage_downloaded_data(self._working_dir, self._index, True, self._threads)
         # Generate system-specific config files
         update_config_files(self._working_dir, self._bin_dir)
 

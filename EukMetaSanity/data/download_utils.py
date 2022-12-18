@@ -3,15 +3,14 @@ Module houses functionality to use in EukMS installation to download all require
 official EukMS pipelines and run any merge/index generation steps needed for use in EukMS
 """
 import os
-from typing import Generator
 
 from EukMetaSanity.data.data_types import Fasta, MMSeqsDB
 from EukMetaSanity.data.download_parsing_functions import odb_tax_parse
 from EukMetaSanity.data.mmseqs_index_types import CreateIndex, CreateLinIndex
-from EukMetaSanity.data.mmseqs_operations import ConcatDBs, CreateTaxDBs, CreateMappingFiles
+from EukMetaSanity.data.mmseqs_operations import ConcatDBs, CreateTaxDBs, CreateMappingFiles, DownloadMMSeqsDatabases
 
 
-def download_data(working_dir: str) -> Generator:
+def download_data(working_dir: str):
     """ Generate data download functors. Consumer should call each object in sequence.
 
     Current implementation:
@@ -21,7 +20,6 @@ def download_data(working_dir: str) -> Generator:
     Download/generate mmseqs db for MMETSP
 
     :param working_dir: Root directory for data downloads
-    :return: Iterator over all official EukMS pipeline downloader functors
     """
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
@@ -41,11 +39,12 @@ def download_data(working_dir: str) -> Generator:
             unzip_command_args=["tar", "-xvzf", "-C", working_dir],
         ),
     )
+
     for database in database_downloads:
-        yield database
+        database()
 
 
-def parsing_operations(working_dir: str) -> Generator:
+def parsing_operations(working_dir: str):
     """ Parse downloaded data, if needed, to create any mapping files that are used to build taxonomy databases
 
     :param working_dir: Directory containing downloaded data
@@ -59,12 +58,13 @@ def parsing_operations(working_dir: str) -> Generator:
             [os.path.join(working_dir, "ortho_db")]
         ),
     )
+
     for parsing_fxn in parsing_fxns:
-        yield parsing_fxn
+        parsing_fxn()
 
 
 def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex: bool,
-                           threads: int) -> Generator:
+                           threads: int):
     """ Generate data utilities functors. Consumer should call each object in sequence.
 
     Current implementation:
@@ -72,8 +72,6 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
     Generate ODB taxonomy database
 
     Merge ODB and MMETSP databases into single database
-
-    :return: Iterator over all official EukMS download utility functors
     """
     if not os.path.exists(working_dir):
         os.makedirs(working_dir)
@@ -81,10 +79,14 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
         CreateTaxDBs(working_dir, ["ortho_db"]),
         ConcatDBs(working_dir, "odb-mmetsp_db", ["ortho_db", "MMETSP"]),
         CreateTaxDBs(working_dir, ["odb-mmetsp_db"]),
+        DownloadMMSeqsDatabases(working_dir, threads, ["SILVA", "eggNOG", "dbCAN2"])
     ]
     if create_index:
         fxns.append(CreateIndex(threads, working_dir, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
+        fxns.append(CreateIndex(threads, working_dir, ["SILVA"], "--search-type", "3"))
     if create_linindex:
         fxns.append(CreateLinIndex(threads, working_dir, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
+        fxns.append(CreateLinIndex(threads, working_dir, ["SILVA"], "--search-type", "3"))
+
     for fxn in fxns:
-        yield fxn
+        fxn()
