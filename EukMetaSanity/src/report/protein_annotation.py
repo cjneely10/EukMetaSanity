@@ -3,7 +3,7 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class MMSeqs(Task):
+class ProteinAnnotation(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         final = []

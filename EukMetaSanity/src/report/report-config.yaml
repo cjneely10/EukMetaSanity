@@ -43,7 +43,33 @@ Quality:
       FLAGS:
         -f
 
-MMSeqs:
+RRNASearch:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 90
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+
+    MMSeqsSearch:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+      subname: search
+      FLAGS:
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+
+    MMSeqsConvertAlis:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+
+ProteinAnnotation:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
@@ -57,7 +83,6 @@ MMSeqs:
     MMSeqsSearch:
       data:
         /path/to/odb-mmetsp_db
-        /path/to/SILVA
         p:/path/to/dbCAN2
         p:/path/to/eggNOG
       program: mmseqs
@@ -70,7 +95,6 @@ MMSeqs:
     MMSeqsConvertAlis:
       data:
         /path/to/odb-mmetsp_db
-        /path/to/SILVA
         p:/path/to/dbCAN2
         p:/path/to/eggNOG
       program: mmseqs

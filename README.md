@@ -427,7 +427,7 @@ Transcriptomes:
   dependencies:
     GMAPBuild:
       threads: 1
-      program: gmapindex
+      program: gmap_build
 
     GMAP:
       program: gmap
@@ -557,6 +557,8 @@ INPUT:
   root: all
   run:
     prot: merged-prot  # or genemark-prot or aug-prot or evidence-prot
+#  refine:  # Uncomment these two lines, and comment out the two preceding lines,
+#    prot: prot  #  to annotate results from `refine` pipeline
 
 ## Global settings
 GLOBAL:
