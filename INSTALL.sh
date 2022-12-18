@@ -259,6 +259,7 @@ fi
 # # # Uninstall EukMetaSanity # # #
 if "$UNINSTALL"; then
   uninstall
+  echo "EukMetaSanity was successfully uninstalled"
   exit 0
 fi
 
