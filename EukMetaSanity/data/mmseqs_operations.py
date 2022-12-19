@@ -146,7 +146,7 @@ class DownloadMMSeqsDatabases(DataUtil):
             self.run(local["mmseqs"][
                          "databases",
                          database,
-                         os.path.join(self.wdir, database),
+                         os.path.join(self.wdir, database.replace("/", "_")),
                          os.path.join(self.wdir, "tmp"),
                         "--threads", str(self.threads)
                      ])
