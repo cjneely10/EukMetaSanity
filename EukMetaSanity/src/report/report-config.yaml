@@ -83,7 +83,6 @@ ProteinAnnotation:
     MMSeqsSearch:
       data:
         /path/to/odb-mmetsp_db
-        p:/path/to/dbCAN2
         p:/path/to/PDB70
         p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
@@ -96,7 +95,6 @@ ProteinAnnotation:
     MMSeqsConvertAlis:
       data:
         /path/to/odb-mmetsp_db
-        p:/path/to/dbCAN2
         p:/path/to/PDB70
         p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs

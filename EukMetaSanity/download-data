@@ -21,14 +21,6 @@ class DataDownloader(cli.Application):
     _bin_dir: str = cli.SwitchAttr("--eukms-run-bin", str, envname="EukMS_run", help="$EukMS_run environment variable")
     _config_only: bool = False
 
-    @cli.switch(["-d", "--download-directory"], str)
-    def set_download_directory(self, download_directory):
-        """Download path, recommended NOT to be the same as the installation directory"""
-        download_directory = str(Path(download_directory).resolve())
-        if download_directory == os.getcwd():
-            download_directory = DEFAULT_DIR
-        self._working_dir = download_directory
-
     @cli.switch(["-x", "--index"], help="Generate search index (optional, but takes a lot of space)")
     def set_index(self, _index):
         self._index = _index
