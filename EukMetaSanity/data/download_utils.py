@@ -79,7 +79,7 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
         CreateTaxDBs(working_dir, ["ortho_db"]),
         ConcatDBs(working_dir, "odb-mmetsp_db", ["ortho_db", "MMETSP"]),
         CreateTaxDBs(working_dir, ["odb-mmetsp_db"]),
-        DownloadMMSeqsDatabases(working_dir, threads, ["SILVA", "PDB70", "dbCAN2", "Pfam-A.full"])
+        DownloadMMSeqsDatabases(working_dir, threads, ["SILVA", "PDB70", "dbCAN2", "UniProtKB/Swiss-Prot"])
     ]
     if create_index:
         fxns.append(CreateIndex(threads, working_dir, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
