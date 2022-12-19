@@ -84,7 +84,8 @@ ProteinAnnotation:
       data:
         /path/to/odb-mmetsp_db
         p:/path/to/dbCAN2
-        p:/path/to/eggNOG
+        p:/path/to/PDB70
+        p:/path/to/Pfam-A.full
       program: mmseqs
       subname: linsearch
       FLAGS:
@@ -96,7 +97,8 @@ ProteinAnnotation:
       data:
         /path/to/odb-mmetsp_db
         p:/path/to/dbCAN2
-        p:/path/to/eggNOG
+        p:/path/to/PDB70
+        p:/path/to/Pfam-A.full
       program: mmseqs
 
 KOFamScan:
