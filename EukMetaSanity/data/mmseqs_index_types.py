@@ -42,7 +42,7 @@ class Index(DataUtil):
         for database in self.databases:
             self.run(local["mmseqs"][
                 self.command(),
-                os.path.join(self.wdir, database),
+                os.path.join(self.wdir, database.replace("/", "_")),
                 os.path.join(self.wdir, "tmp"),
                 "--threads", self._threads,
                 "--remove-tmp-files",

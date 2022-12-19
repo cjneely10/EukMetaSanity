@@ -82,10 +82,10 @@ def manage_downloaded_data(working_dir: str, create_index: bool, create_linindex
         DownloadMMSeqsDatabases(working_dir, threads, ["SILVA", "PDB70", "UniProtKB/Swiss-Prot"])
     ]
     if create_index:
-        fxns.append(CreateIndex(threads, working_dir, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
+        fxns.append(CreateIndex(threads, working_dir, ["odb-mmetsp_db", "UniProtKB/Swiss-Prot"]))
         fxns.append(CreateIndex(threads, working_dir, ["SILVA"], "--search-type", "3"))
     if create_linindex:
-        fxns.append(CreateLinIndex(threads, working_dir, ["ortho_db", "MMETSP", "odb-mmetsp_db"]))
+        fxns.append(CreateLinIndex(threads, working_dir, ["odb-mmetsp_db", "UniProtKB/Swiss-Prot"]))
         fxns.append(CreateLinIndex(threads, working_dir, ["SILVA"], "--search-type", "3"))
 
     for fxn in fxns:
