@@ -663,7 +663,7 @@ conda activate EukMS_report
 Run pipeline using the command:
 
 ```
-yapim run -c report-config.yaml -p $EukMS_report
+yapim run -i /path/to/EukMetaSanity/tests/data -c report-config.yaml -p $EukMS_report
 ```
 
 Note that we do not need to provide the input directory for this analysis, as the pipeline will only annotate genomes that have completed the `Run` or `Refine` pipeline.
