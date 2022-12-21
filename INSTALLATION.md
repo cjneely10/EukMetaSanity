@@ -22,9 +22,6 @@ A typical installation can be run using:
 
 Expect 4-8 hours to complete the installation and database downloads.
 
-Your `~/.bashrc` file will be modified to append updated environment variables. You may change this using the `-b` flag.
-More information is available with the `-h` flag.
-
 After running the `INSTALL.sh` script, you must restart your shell.
 
 ### Updating from existing installation
@@ -40,6 +37,9 @@ And then run the installation script:
 ```shell
 ./INSTALL.sh -t <num-threads> --upgrade
 ```
+
+Note that prior versions of EukMEtaSanity modified your `~/.bashrc` file.
+You may wish to remove these modifications
 
 ## Installing dependencies
 

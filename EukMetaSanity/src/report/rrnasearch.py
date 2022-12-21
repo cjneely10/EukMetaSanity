@@ -22,7 +22,7 @@ class RRNASearch(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsConvertAlis", {"root": ["fasta"]})]
+        return [DependencyInput("MMSeqsConvertAlis")]
 
     def run(self):
         pass

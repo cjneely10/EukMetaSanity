@@ -31,10 +31,10 @@ CollectInput:
   memory: 8
   time: "4:00:00"
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
+  # genome-file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
   transcriptomes: /path/To/transcriptome-mapping-file
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
+  # genome-file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
   rnaseq: /path/To/rnaseq-mapping-file
 
 GatherProteins:
@@ -113,6 +113,7 @@ RunBraker:
       program: braker.pl
       FLAGS:
         # Provide flags as desired
+        # Currently, `exonerate` is the only supported protein mapper
         "--prg=exonerate"
 
 ...  # document end

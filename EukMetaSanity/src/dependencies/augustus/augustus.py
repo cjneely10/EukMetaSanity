@@ -27,23 +27,13 @@ class Augustus(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("MMSeqsConvertAlis")
-        ]
+        return []
 
     def run(self):
         """
         Run augustus
         """
-        if self.parse_search_output(str(self.input["MMSeqsConvertAlis"]["results_files"][0])) == "":
-            touch(str(self.output["ab-gff3"]))
-            touch(str(self.output["prot"]))
-            return
-        # Initial training based on best species from taxonomy search
-        out_gff = self._augustus(
-            self.parse_search_output(str(self.input["MMSeqsConvertAlis"]["results_files"][0])), 1,
-            str(self.input["fasta"])
-        )
+        out_gff = self.input["gff3"]
         if len(open(out_gff, "r").readlines()) < 200 or int(self.config["rounds"]) == 0:
             # Move any augustus-generated config stuff
             self._finalize_output(out_gff)

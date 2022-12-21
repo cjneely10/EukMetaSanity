@@ -222,35 +222,10 @@ AbinitioAugustus:
   time: "24:00:00"
   skip: false
   dependencies:
-    MMSeqsCreateDB:
-      time: "10:00"
-      program: mmseqs
-      threads: 1
-
-    MMSeqsSearch:
-      memory: 20
-      data:
-        /path/to/odb-mmetsp_db
-      program: mmseqs
-      subname: linsearch  # Can use `search` if linear index is not present for database
-      FLAGS:
-        --cov-mode 0
-        -c 0.6
-        -e 0.01
-        --remove-tmp-files
-
-    MMSeqsConvertAlis:
-      time: "2:00:00"
-      data:
-        /path/to/odb-mmetsp_db
-      program: mmseqs
-      FLAGS:
-        --format-output query,target,pident,taxid,taxname,taxlineage
-
     Augustus:
       program: augustus
       cutoff: 25.0
-      rounds: 1
+      rounds: 2
 
 Tier:
   # Number of threads task will use
@@ -357,9 +332,9 @@ for RNA-seq and transcriptomes that is required by the config file:
 
 ```
 # Paths to RNA-seq should be contained in a file with the format (excluding spaces around tab):
-file-basename \t /path/to/r1.fq,/path/to/r2.fq;/path/to/r3.fq,/path/to/r4.fq
+genome-file-basename \t /path/to/r1.fq,/path/to/r2.fq;/path/to/r3.fq,/path/to/r4.fq
 # Transcriptomes should be contained in a file with the format (excluding spaces around tab):
-file-basename \t /path/to/tr1.fna,/path/to/tr2.fna
+genome-file-basename \t /path/to/tr1.fna,/path/to/tr2.fna
 ``` 
 
 The listed paired-end or single-end reads will be mapped to the file that begins with `file-basename`, as will the list 
@@ -383,7 +358,7 @@ GLOBAL:
 ###########################################
 
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
@@ -399,11 +374,11 @@ CollectInput:
   memory: 8
   time: "4:00:00"
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
-  transcriptomes: /path/to/transcriptome-mapping-file
+  # genome-file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
+  transcriptomes: /path/To/transcriptome-mapping-file
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
-  rnaseq: /path/to/rnaseq-mapping-file
+  # genome-file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
+  rnaseq: /path/To/rnaseq-mapping-file
 
 GatherProteins:
   # Number of threads task will use
@@ -480,7 +455,9 @@ RunBraker:
     Braker:
       program: braker.pl
       FLAGS:
-      # Provide flags as desired
+        # Provide flags as desired
+        # Currently, `exonerate` is the only supported protein mapper
+        "--prg=exonerate"
 
 ...  # document end
 ```
@@ -570,7 +547,7 @@ GLOBAL:
 ###########################################
 
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
@@ -594,7 +571,34 @@ Quality:
       FLAGS:
         -f
 
-MMSeqs:
+RRNASearch:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 90
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+
+    MMSeqsSearch:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+      subname: search
+      FLAGS:
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+        --search-type 3
+
+    MMSeqsConvertAlis:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+
+ProteinAnnotation:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
@@ -608,6 +612,7 @@ MMSeqs:
     MMSeqsSearch:
       data:
         /path/to/odb-mmetsp_db
+        p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
       subname: linsearch
       FLAGS:
@@ -618,6 +623,7 @@ MMSeqs:
     MMSeqsConvertAlis:
       data:
         /path/to/odb-mmetsp_db
+        p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
 
 KOFamScan:
@@ -629,9 +635,9 @@ KOFamScan:
   skip: true
   dependencies:
     KofamscanExecAnnotation:
-      program: /path/to/kofamscan/exec_annotation
-      kolist: /path/to/kofam/ko_list
-      profiles: /path/to/profiles/eukaryote.hal
+      program: /path/To/kofamscan/exec_annotation
+      kolist: /path/To/kofam/ko_list
+      profiles: /path/To/profiles/eukaryote.hal
 
 EggNog:
   # Number of threads task will use

@@ -63,6 +63,7 @@ RRNASearch:
         -c 0.3
         --cov-mode 1
         --remove-tmp-files
+        --search-type 3
 
     MMSeqsConvertAlis:
       data:

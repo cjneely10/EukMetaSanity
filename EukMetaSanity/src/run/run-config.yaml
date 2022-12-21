@@ -147,35 +147,10 @@ AbinitioAugustus:
   time: "24:00:00"
   skip: false
   dependencies:
-    MMSeqsCreateDB:
-      time: "10:00"
-      program: mmseqs
-      threads: 1
-
-    MMSeqsSearch:
-      memory: 20
-      data:
-        /path/to/odb-mmetsp_db
-      program: mmseqs
-      subname: linsearch  # Can use `search` if linear index is not present for database
-      FLAGS:
-        --cov-mode 0
-        -c 0.6
-        -e 0.01
-        --remove-tmp-files
-
-    MMSeqsConvertAlis:
-      time: "2:00:00"
-      data:
-        /path/to/odb-mmetsp_db
-      program: mmseqs
-      FLAGS:
-        --format-output query,target,pident,taxid,taxname,taxlineage
-
     Augustus:
       program: augustus
       cutoff: 25.0
-      rounds: 1
+      rounds: 2
 
 Tier:
   # Number of threads task will use

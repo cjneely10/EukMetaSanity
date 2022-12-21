@@ -112,6 +112,8 @@ function pip_install_env() {
   source "$SOURCE"
   conda activate "EukMS_$1"
   python -m pip install .
+  conda env config vars set "PATH=$(pwd)/$BIN/":'$PATH'
+  conda env config vars set "EukMS_$1=$(pwd)/$BIN/$1-pipeline"
   conda deactivate
 }
 
@@ -179,19 +181,6 @@ function install_metaeuk() {
 function install_eukms_run() {
   install_env run
   modify_rm_location "$MINICONDA/envs/EukMS_run/bin/"
-}
-
-# Add EukMS definitions to source script (default is ~/.bashrc)
-function update_source_script() {
-  if [ "$(grep -c "EukMS_run=$2" "$SOURCE_SCRIPT")" -lt 1 ]; then
-    echo "# Environment variables are part of EukMetaSanity installation." >> "$1"
-    echo "# Remove on program deletion" >> "$1"
-    echo export PATH="$(pwd)/$BIN/":'$PATH' >> "$1"
-    echo export EukMS_run="$2" >> "$1"
-    echo export EukMS_report="$(pwd)/$BIN/report-pipeline" >> "$1"
-    echo export EukMS_refine="$(pwd)/$BIN/refine-pipeline" >> "$1"
-    echo "# # # # # #" >> "$1"
-  fi
 }
 
 # # # # # Begin # # # # #
