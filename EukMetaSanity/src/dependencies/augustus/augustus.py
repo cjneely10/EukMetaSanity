@@ -220,21 +220,3 @@ class Augustus(Task):
         :return: New path
         """
         return os.path.basename(os.path.splitext(_file_name)[0]) + _ext
-
-    def parse_search_output(self, search_results_file: str) -> str:
-        """ Return optimal taxonomy from mmseqs search
-
-        :param search_results_file: MMseqs results file
-        :return: Augustus species with the most hits
-        """
-        augustus_ids_dict = augustus_taxon_ids()
-        found_taxa = Counter()
-        with open(search_results_file, "r") as _file:
-            for line in _file:
-                line = line.rstrip("\r\n").split()
-                # Count those that pass the user-defined cutoff value
-                if line[3] in augustus_ids_dict.keys() and float(line[2]) >= (float(self.config["cutoff"]) / 100.):
-                    found_taxa[line[3]] += 1
-        if len(found_taxa.most_common()) == 0:
-            return ""
-        return augustus_ids_dict[found_taxa.most_common()[0][0]]
