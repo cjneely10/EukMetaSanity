@@ -1,7 +1,6 @@
 import glob
 import os
 import shutil
-from collections import Counter
 from pathlib import Path
 from typing import List, Union, Type, Iterable
 
@@ -10,7 +9,6 @@ from Bio.SeqRecord import SeqRecord
 from yapim import Task, DependencyInput, touch
 
 from .merge_parallelized_output import merge
-from .taxon_ids import augustus_taxon_ids
 
 
 class Augustus(Task):
