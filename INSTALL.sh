@@ -112,7 +112,6 @@ function pip_install_env() {
   source "$SOURCE"
   conda activate "EukMS_$1"
   python -m pip install .
-  conda env config vars set "PATH=$(pwd)/$BIN/":'$PATH'
   conda env config vars set "EukMS_$1=$(pwd)/$BIN/$1-pipeline"
   conda deactivate
 }
@@ -161,20 +160,6 @@ function update_augustus() {
   cd "$MINICONDA/envs/EukMS_refine/bin"
   sed -i 's/transcript_id \"(\.\*)\"/transcript_id \"(\\S\+)"/' filterGenesIn_mRNAname.pl
   cd "$CWD"
-}
-
-# Download MetaEuk from MMSeqs2 server
-function install_metaeuk() {
-  # Create bin directory and install non-conda dependencies
-  cd "$BIN"
-  source "$SOURCE"
-  conda activate "EukMS_run"
-  wget https://mmseqs.com/metaeuk/metaeuk-linux-sse41.tar.gz
-  conda deactivate
-  tar "xzf" metaeuk-linux-sse41.tar.gz && rm metaeuk-linux-sse41.tar.gz
-  mv "metaeuk/$BIN/metaeuk" ./_metaeuk
-  rm -r metaeuk/ && mv _metaeuk metaeuk
-  cd -
 }
 
 # Create run environment and install repeat modeler updates
@@ -263,11 +248,6 @@ install_eukms_run
 install_env report
 # Create refine environment
 install_env refine
-
-# Install metaeuk and confirm proper completion
-if "$UPGRADE" || [ ! -e "$BIN/metaeuk" ]; then
-  install_metaeuk
-fi
 
 # Configure augustus version
 update_augustus

@@ -9,6 +9,7 @@ dependencies:
   - mmseqs2=12.113e3
   - repeatmodeler=2.0.1
   - repeatmasker=4.0.9_p2
+  - metaeuk=6.a5d39d9
   - perl-mce=1.837
   - perl-yaml=1.28
   - perl-hash-merge=0.300
