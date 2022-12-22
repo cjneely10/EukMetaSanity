@@ -254,7 +254,6 @@ update_augustus
 
 # Update .bashrc with proper locations
 EukMS_run="$CWD/$BIN/run-pipeline"
-update_source_script "$SOURCE_SCRIPT" "$EukMS_run"
 
 # Download updated databases
 if "$UPGRADE" || [ ! -d "$DATA" ]; then
