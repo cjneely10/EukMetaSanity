@@ -6,6 +6,7 @@ import os
 from abc import abstractmethod
 from pathlib import Path
 from typing import List, Optional, Set, Sequence
+import urllib.request
 
 from plumbum import local
 from plumbum.machines import LocalCommand
@@ -51,7 +52,11 @@ class Data(Command):
         self._data = os.path.join(self._wdir, expected)
         # Download data
         if not os.path.exists(self._data):
-            self.run(local["wget"][data_url, "-O", self._data])
+            if data_url[:3] == "ftp":
+                print(f"Retrieving `{data_url}`")
+                urllib.request.urlretrieve(data_url, self._data)
+            else:
+                self.run(local["wget"][data_url, "-O", self._data])
             # Unzip downloaded data
             self._unzip_data(unzip_command_args)
             touch(self._data)
