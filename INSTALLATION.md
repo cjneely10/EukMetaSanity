@@ -4,7 +4,7 @@
 
 Ensure that the drive in which your conda installation is contained has ~80GB of extra space.
 
-Clone this repository to a drive with >128GB of storage space:
+Clone this repository to a drive with >100GB of storage space:
 
 ```
 git clone https://github.com/cjneely10/EukMetaSanity.git
@@ -20,7 +20,7 @@ A typical installation can be run using:
 ./INSTALL.sh -t <num-threads>
 ```
 
-Expect 4-8 hours to complete the installation and database downloads.
+Expect ~4 hours to complete the installation and database downloads.
 
 After running the `INSTALL.sh` script, you must restart your shell.
 
@@ -38,7 +38,7 @@ And then run the installation script:
 ./INSTALL.sh -t <num-threads> --upgrade
 ```
 
-Note that prior versions of EukMEtaSanity modified your `~/.bashrc` file.
+Note that prior versions of EukMetaSanity modified your `~/.bashrc` file.
 You may wish to remove these modifications
 
 ## Installing dependencies

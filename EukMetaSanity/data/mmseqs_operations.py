@@ -3,6 +3,7 @@ Module holds functionality for manipulating downloaded databases from initial fo
 """
 import os
 from typing import Sequence, Callable, List
+import urllib.request
 
 from plumbum import local
 from yapim import prefix
@@ -92,10 +93,9 @@ class CreateTaxDBs(DataUtil):
         Generate taxonomy database
         """
         # Download tax info
-        self.run(local["wget"][
-                     "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz",
-                     "-O", os.path.join(self.wdir, "taxdump.tar.gz")
-                 ])
+        data_url = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
+        print(f"Retrieving `{data_url}`")
+        urllib.request.urlretrieve(data_url, os.path.join(self.wdir, "taxdump.tar.gz"))
         self.run(local["tar"][
                      "xzvf", os.path.join(self.wdir, "taxdump.tar.gz"), "-C", self.wdir
                  ])
