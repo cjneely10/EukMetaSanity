@@ -95,10 +95,10 @@ class CreateTaxDBs(DataUtil):
         # Download tax info
         data_url = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
         print(f"Retrieving `{data_url}`")
-        urllib.request.urlretrieve(data_url, os.path.join(self.wdir, "taxdump.tar.gz"))
-        self.run(local["tar"][
-                     "xzvf", os.path.join(self.wdir, "taxdump.tar.gz"), "-C", self.wdir
-                 ])
+        taxdump_file = os.path.join(self.wdir, "taxdump.tar.gz")
+        if not os.path.exists(taxdump_file):
+            urllib.request.urlretrieve(data_url, taxdump_file)
+            self.run(local["tar"]["xzvf", taxdump_file, "-C", self.wdir])
         # Generate tax db
         for database in self.databases:
             self.run(local["mmseqs"][
