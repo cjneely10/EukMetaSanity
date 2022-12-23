@@ -14,7 +14,7 @@ class AbinitioAugustus(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Repeats", "AbinitioGeneMark"]
+        return ["Repeats", "Taxonomy", "AbinitioGeneMark"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

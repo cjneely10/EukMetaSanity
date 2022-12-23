@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+from collections import Counter
 from pathlib import Path
 from typing import List, Union, Type, Iterable
 
@@ -9,6 +10,7 @@ from Bio.SeqRecord import SeqRecord
 from yapim import Task, DependencyInput, touch
 
 from .merge_parallelized_output import merge
+from .taxon_ids import augustus_taxon_ids
 
 
 class Augustus(Task):
@@ -31,11 +33,24 @@ class Augustus(Task):
         """
         Run augustus
         """
-        out_gff = self.input["gff3"]
-        if len(open(out_gff, "r").readlines()) < 200 or int(self.config["rounds"]) == 0:
+        if "gff3" not in self.input.keys() or os.stat(self.input["gff3"]).st_size == 0:
+            tax_search_results = self.parse_search_output(str(self.input["MMSeqsConvertAlis"]["results_files"][0]))
+            if tax_search_results == "":
+                touch(str(self.output["ab-gff3"]))
+                touch(str(self.output["prot"]))
+                return
+            # Initial training based on best species from taxonomy search
+            out_gff = self._augustus(tax_search_results, 1, str(self.input["fasta"]))
+        else:
+            # Initial training based on provided gff3 file
+            out_gff = self.input["gff3"]
+        if int(self.config["rounds"]) == 0:
             # Move any augustus-generated config stuff
             self._finalize_output(out_gff)
-            return
+        with open(out_gff, "r") as gff_ptr:
+            if sum(1 for _ in gff_ptr) < 200:
+                self._finalize_output(out_gff)
+                return
         self._train_augustus(1, str(self.input["fasta"]), out_gff)
         # Remaining rounds of re-training on generated predictions
         for i in range(int(self.config["rounds"])):
@@ -218,3 +233,20 @@ class Augustus(Task):
         :return: New path
         """
         return os.path.basename(os.path.splitext(_file_name)[0]) + _ext
+
+    def parse_search_output(self, search_results_file: str) -> str:
+        """ Return optimal taxonomy from mmseqs search
+        :param search_results_file: MMseqs results file
+        :return: Augustus species with the most hits
+        """
+        augustus_ids_dict = augustus_taxon_ids()
+        found_taxa = Counter()
+        with open(search_results_file, "r") as _file:
+            for line in _file:
+                line = line.rstrip("\r\n").split()
+                # Count those that pass the user-defined cutoff value
+                if line[3] in augustus_ids_dict.keys() and float(line[2]) >= (float(self.config["cutoff"]) / 100.):
+                    found_taxa[line[3]] += 1
+        if len(found_taxa.most_common()) == 0:
+            return ""
+        return augustus_ids_dict[found_taxa.most_common()[0][0]]
