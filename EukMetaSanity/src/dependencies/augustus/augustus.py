@@ -29,6 +29,10 @@ class Augustus(Task):
     def depends() -> List[DependencyInput]:
         return []
 
+    # TODO: Add to separate Task to perform tax mapping only if needed
+    def condition(self) -> bool:
+        pass
+
     def run(self):
         """
         Run augustus
@@ -47,6 +51,7 @@ class Augustus(Task):
         if int(self.config["rounds"]) == 0:
             # Move any augustus-generated config stuff
             self._finalize_output(out_gff)
+            return
         with open(out_gff, "r") as gff_ptr:
             if sum(1 for _ in gff_ptr) < 200:
                 self._finalize_output(out_gff)
@@ -116,7 +121,7 @@ class Augustus(Task):
         buckets.append(unable_to_fit)
         # Extend using records that were too large to fit
         buckets.extend(too_large)
-        # Remore empty buckets
+        # Remove empty buckets
         buckets = [bucket for bucket in buckets if len(bucket) > 0]
         # Sanity check
         assert total_size == sum([sum([len(record.seq) for record in bucket]) for bucket in buckets])
