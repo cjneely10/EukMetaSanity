@@ -2,16 +2,20 @@ import os
 from copy import deepcopy
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, touch
 
 
 class Braker(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "cds": self.wdir.joinpath(self.record_id + ".cds.fna"),
-            "prot": self.wdir.joinpath(self.record_id + ".faa"),
-            "gtf": self.wdir.joinpath(self.record_id + ".gtf"),
+            "possible_files": {
+                "cds": self.wdir.joinpath(self.record_id + ".cds.fna"),
+                "prot": self.wdir.joinpath(self.record_id + ".faa"),
+                "gtf": self.wdir.joinpath(self.record_id + ".gtf"),
+                "joined": self.wdir.joinpath("braker.gtf")
+            },
+            "_": self.wdir.joinpath(".done")
         }
 
     @staticmethod
@@ -42,10 +46,12 @@ class Braker(Task):
                 (*self._filter_provided_flags()),
             ]
         )
-        os.rename(self.wdir.joinpath("augustus.hints.aa"), self.output["prot"])
-        os.rename(self.wdir.joinpath("augustus.hints.codingseq"), self.output["cds"])
-        os.rename(self.wdir.joinpath("augustus.hints.gtf"), self.output["gtf"])
-
+        for key, file in [("prot", self.wdir.joinpath("augustus.hints.aa")),
+                          ("cds", self.wdir.joinpath("augustus.hints.codingseq")),
+                          ("gtf", self.wdir.joinpath("augustus.hints.gtf"))]:
+            if file.exists():
+                os.rename(file, self.output["possible_files"][key])
+        touch(str(self.output["_"]))
 
     def _filter_provided_flags(self) -> [str]:
         """ Remove flags that would affect program behaviour

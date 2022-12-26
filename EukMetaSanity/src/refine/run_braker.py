@@ -6,12 +6,13 @@ from yapim import Task, DependencyInput
 class RunBraker(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.output = {
-            "prot": self.input["Braker"]["prot"],
-            "gtf": self.input["Braker"]["gtf"],
-            "cds": self.input["Braker"]["cds"],
-            "final": ["prot", "gtf", "cds"]
-        }
+        output = {}
+        final = []
+        for key, file in self.input["Braker"]["possible_files"].items():
+            if file.exists():
+                output[key] = file
+                final.append(key)
+        self.output = {**output, "final": final}
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:

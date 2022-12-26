@@ -19,6 +19,7 @@ dependencies:
   - perl-logger-simple=2.0
   - perl-parallel-forkmanager=2.02
   - perl-threaded=5.26.0
+  - biopython=1.76
   - pip
   - pip:
     - git+https://github.com/cjneely10/YAPIM.git@v0.2.0
