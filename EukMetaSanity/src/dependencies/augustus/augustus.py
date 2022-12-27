@@ -29,16 +29,9 @@ class Augustus(Task):
     def depends() -> List[DependencyInput]:
         return []
 
-    # TODO: Add to separate Task to perform tax mapping only if needed
-    def condition(self) -> bool:
-        pass
-
     def run(self):
-        """
-        Run augustus
-        """
-        if "gff3" not in self.input.keys() or os.stat(self.input["gff3"]).st_size == 0:
-            tax_search_results = self.parse_search_output(str(self.input["MMSeqsConvertAlis"]["results_files"][0]))
+        if "search_results" in self.input.keys() and os.stat(self.input["search_results"]).st_size > 0:
+            tax_search_results = self.parse_search_output(self.input["search_results"])
             if tax_search_results == "":
                 touch(str(self.output["ab-gff3"]))
                 touch(str(self.output["prot"]))
@@ -162,9 +155,7 @@ class Augustus(Task):
             )
         )
 
-        out_gff = Path(os.path.join(
-            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gff" % _round)
-        ))
+        out_gff = Path(os.path.join(self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gff" % _round)))
         if out_gff.exists():
             self.local["rm"][out_gff]()
         merge(contig_files, out_gff, _round)
