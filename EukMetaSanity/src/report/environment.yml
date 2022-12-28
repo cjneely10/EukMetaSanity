@@ -9,4 +9,4 @@ dependencies:
   - busco=5.2.2
   - pip
   - pip:
-    - git+https://github.com/cjneely10/YAPIM.git@v0.2.0
+    - git+https://github.com/cjneely10/YAPIM.git@v0.3.0
