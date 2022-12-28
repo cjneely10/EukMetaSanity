@@ -30,7 +30,7 @@ class Augustus(Task):
         return []
 
     def run(self):
-        if "search_results" in self.input.keys() and os.stat(self.input["search_results"]).st_size > 0:
+        if os.path.exists(self.input["search_results"]) and os.stat(self.input["search_results"]).st_size > 0:
             tax_search_results = self.parse_search_output(self.input["search_results"])
             if tax_search_results == "":
                 touch(str(self.output["ab-gff3"]))
