@@ -56,12 +56,20 @@ class Augustus(Task):
             if i == int(self.config["rounds"]) - 1:
                 _last = True
             out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.input["fasta"]), _last)
-            if len(open(out_gff, "r").readlines()) < 200:
+            if Augustus._line_count(out_gff) < 200:
                 break
             if i != int(self.config["rounds"]) - 1:
                 self._train_augustus(i + 2, str(self.input["fasta"]), out_gff)
         # Move any augustus-generated config stuff
         self._finalize_output(out_gff)
+
+    @staticmethod
+    def _line_count(file: str) -> int:
+        i: int = 0
+        with open(file, "r") as file_ptr:
+            for _ in file_ptr:
+                i += 1
+        return i
 
     def _finalize_output(self, out_gff: str):
         self._handle_config_output()
