@@ -9,21 +9,21 @@ from yapim import Task, DependencyInput, Result
 
 @dataclass
 class _NodeInfo:
-    """Taxonomy node representing a line in mmseqs taxonomy-report output file"""
+    """Taxonomy node representing a line in mmseqs taxonomyreport output file"""
     percent_mapped_reads: float
     number_reads_covered_by_clade: int
     number_reads_assigned_to_taxon: int
     rank: Optional[str]
     ncbi_identifier: int
-    scientific_name: str
+    scientific_name_string: str
 
     @cached_property
-    def scientific_name_cleaned(self) -> str:
-        return self.scientific_name.lstrip(" ")
+    def scientific_name(self) -> str:
+        return self.scientific_name_string.lstrip(" ")
 
     @cached_property
     def calculate_level(self) -> int:
-        for i, s in enumerate(self.scientific_name):
+        for i, s in enumerate(self.scientific_name_string):
             if s != " ":
                 return i // 2  # Each new level is formed by adding 2 spaces to the preceding level
         return 0
@@ -92,22 +92,23 @@ class MMSeqsTaxonomyReportParser:
             line[5])
 
     @staticmethod
-    def create_tree(file: Path) -> _Node:
+    def _create_tree(file: Path) -> _Node:
         """
         Convert report file to taxonomy tree
 
-        :param file: Result file from mmseqs taxonomy-report
+        :param file: Result file from mmseqs taxonomyreport
         :raises ValueError: If parsing a field in the taxonomy file line fails (i.e., int(line[0]) fails, etc.)
+        :raises AssertionError: If file does not exist
         :return: Root node to taxonomy tree
         """
+        assert file.exists()
         stack = _NodeStack()
         root = _Node(None, [], None)
         stack.push(root)
         current_level: int = -1
         with open(file, "r") as file_ptr:
-            for _line in file_ptr:
-                line: List[str] = _line.rstrip("\r\n").split("\t")
-                node_info: _NodeInfo = MMSeqsTaxonomyReportParser._parse_line(line)
+            for line in file_ptr:
+                node_info: _NodeInfo = MMSeqsTaxonomyReportParser._parse_line(line.rstrip("\r\n").split("\t"))
                 node_level: int = node_info.calculate_level
                 # Node is a sibling of the current node
                 if current_level == node_level:
@@ -133,11 +134,32 @@ class MMSeqsTaxonomyReportParser:
         return root
 
     @staticmethod
+    def _find_taxonomy(root: _Node, *taxonomic_ranks: str) -> bool:
+        """
+
+        :param root:
+        :param taxonomic_ranks:
+        :return:
+        """
+        if len(taxonomic_ranks) == 0:
+            return False
+        for rank in taxonomic_ranks:
+            rank_is_present = False
+            for child in root.children:
+                if child.data.scientific_name == rank:
+                    root = child
+                    rank_is_present = True
+                    break
+            if not rank_is_present:
+                return False
+        return True
+
+    @staticmethod
     def find_best_taxonomy(file: Path, cutoff: float) -> Dict[str, Dict[str, Union[float, int, str, None]]]:
         """
-        Find the taxonomic label path to which the largest amount of reads mapped to the deepest depths
+        Find the taxonomic label path to which the largest amount of reads mapped to the deepest taxonomic rank depths
 
-        :param file: Result file from mmseqs taxonomy-report
+        :param file: Result file from mmseqs taxonomyreport
         :param cutoff: Minimum % (0-100) of mapped reads that should be considered in generated tree
         :return: Mapping consisting of {tax-level: {taxid: "", value: "", score: ""}}
         :raises AssertionError: If line in taxonomy file is of improper length, or if function parameters are invalid
@@ -146,7 +168,7 @@ class MMSeqsTaxonomyReportParser:
         assert 0 < cutoff < 100
         out = {level: {"taxid": None, "value": None, "score": None} for level in MMSeqsTaxonomyReportParser._tax_order}
         try:
-            root = MMSeqsTaxonomyReportParser.create_tree(file)
+            root = MMSeqsTaxonomyReportParser._create_tree(file)
         except ValueError:
             return out
 
