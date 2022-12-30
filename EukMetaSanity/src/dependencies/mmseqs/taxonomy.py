@@ -42,6 +42,13 @@ class _Node:
     def add_child(self, child: "_Node"):
         self.children.append(child)
 
+    @staticmethod
+    def connect_nodes(parent: Optional["_Node"], child_info: "_NodeInfo") -> "_Node":
+        child_node = _Node(child_info, [], parent)
+        if parent is not None:
+            parent.add_child(child_node)
+        return child_node
+
 
 class _NodeStack:
     def __init__(self):
@@ -51,18 +58,12 @@ class _NodeStack:
         self._stack.append(v)
 
     def pop(self) -> Optional[_Node]:
-        if self.is_empty():
+        if len(self._stack) == 0:
             return None
         return self._stack.pop()
 
-    def __len__(self) -> int:
-        return len(self._stack)
-
-    def is_empty(self) -> bool:
-        return len(self) == 0
-
     def last(self) -> Optional[_Node]:
-        if self.is_empty():
+        if len(self._stack) == 0:
             return None
         return self._stack[-1]
 
@@ -112,14 +113,10 @@ class MMSeqsTaxonomyReportParser:
                 node_level: int = node_info.calculate_level
                 # Node is a sibling of the current node
                 if current_level == node_level:
-                    parent = stack.last().parent
-                    new_node = _Node(node_info, [], parent)
-                    if parent is not None:
-                        parent.add_child(new_node)
+                    new_node = _Node.connect_nodes(stack.last().parent, node_info)
                 # Node is a child of the current node
                 elif node_level > current_level:
-                    new_node = _Node(node_info, [], stack.last())
-                    stack.last().add_child(new_node)
+                    new_node = _Node.connect_nodes(stack.last(), node_info)
                     current_level = node_level
                 # Node is attached to *an ancestor* of the current node
                 else:
@@ -127,10 +124,7 @@ class MMSeqsTaxonomyReportParser:
                     while current_level != node_level:
                         stack.pop()
                         current_level -= 1
-                    parent = stack.last().parent
-                    new_node = _Node(node_info, [], parent)
-                    if parent is not None:
-                        parent.add_child(new_node)
+                    new_node = _Node.connect_nodes(stack.last().parent, node_info)
                 stack.push(new_node)
         # Remove trailing references
         stack.clear()
