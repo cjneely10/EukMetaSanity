@@ -30,6 +30,7 @@ class Augustus(Task):
         return []
 
     def run(self):
+        rounds = int(self.config["rounds"])
         if os.path.exists(self.input["search_results"]) and os.stat(self.input["search_results"]).st_size > 0:
             tax_search_results = self.parse_search_output(self.input["search_results"])
             if tax_search_results == "":
@@ -38,38 +39,34 @@ class Augustus(Task):
                 return
             # Initial training based on best species from taxonomy search
             out_gff = self._augustus(tax_search_results, 1, str(self.input["fasta"]))
+            rounds -= 1
+            if rounds < 0:
+                rounds = 0
         else:
             # Initial training based on provided gff3 file
             out_gff = self.input["gff3"]
-        if int(self.config["rounds"]) == 0:
+        if rounds == 0 or self._line_count(out_gff) < 200:
             # Move any augustus-generated config stuff
             self._finalize_output(out_gff)
             return
-        with open(out_gff, "r") as gff_ptr:
-            if sum(1 for _ in gff_ptr) < 200:
-                self._finalize_output(out_gff)
-                return
         self._train_augustus(1, str(self.input["fasta"]), out_gff)
         # Remaining rounds of re-training on generated predictions
-        for i in range(int(self.config["rounds"])):
+        for i in range(rounds):
             _last = False
-            if i == int(self.config["rounds"]) - 1:
+            if i == rounds - 1:
                 _last = True
             out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.input["fasta"]), _last)
             if Augustus._line_count(out_gff) < 200:
                 break
-            if i != int(self.config["rounds"]) - 1:
+            if i != rounds - 1:
                 self._train_augustus(i + 2, str(self.input["fasta"]), out_gff)
         # Move any augustus-generated config stuff
         self._finalize_output(out_gff)
 
     @staticmethod
     def _line_count(file: str) -> int:
-        i: int = 0
         with open(file, "r") as file_ptr:
-            for _ in file_ptr:
-                i += 1
-        return i
+            return sum(1 for _ in file_ptr)
 
     def _finalize_output(self, out_gff: str):
         self._handle_config_output()

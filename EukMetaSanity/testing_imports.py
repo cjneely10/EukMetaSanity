@@ -1,0 +1,1 @@
+from EukMetaSanity.src.dependencies.mmseqs.taxonomy import MMSeqsTaxonomyReportParser

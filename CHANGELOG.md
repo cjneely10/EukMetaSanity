@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.0] - 2022-12-13
+## [1.1.0] - 2023-1-1
 ### Added
 - Support to upgrade and uninstall `EukMetaSanity` from `INSTALL.sh` script
 
@@ -14,13 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Installation script now fails on error (as expected)
 - The `bin/` directory is no longer version-controlled 
   - Will auto-generate as part of installation process
-- Update to YAPIM v0.1.3
+- Update to YAPIM v0.3.0
+- If available, augustus uses GeneMark-derived proteins for first-pass predictions
+  - Otherwise, performs legacy taxonomy search and uses closest augustus species for first-pass
 
 ### Fixed
 - The `report` pipeline failed to annotate results of `refine` pipeline
 - Parsing existing pipeline results failed on non-uniform recorded result directories
 - Transcriptome-related `Task`s defined implementations for incorrect versions of GMAP
 - BRAKER2 now populates expected output
+- Taxonomy parsing algorithm was incorrect
 
 ### Removed
 - Ability to set database directory as part of installation
