@@ -2,17 +2,17 @@ import os
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import List, Union, Type, Dict, Optional
+from typing import List, Union, Type, Dict, Optional, Tuple
 
 from yapim import Task, DependencyInput, Result
+
+TaxonomyResultsDict = Dict[str, Dict[str, Union[float, int, str, None]]]
 
 
 @dataclass
 class _NodeInfo:
     """Taxonomy node representing a line in mmseqs taxonomyreport output file"""
     percent_mapped_reads: float
-    number_reads_covered_by_clade: int
-    number_reads_assigned_to_taxon: int
     rank: Optional[str]
     ncbi_identifier: int
     scientific_name_string: str
@@ -36,9 +36,6 @@ class _Node:
     children: List["_Node"]
     parent: Optional["_Node"]
 
-    def is_leaf(self) -> bool:
-        return len(self.children) == 0
-
     def add_child(self, child: "_Node"):
         self.children.append(child)
 
@@ -58,14 +55,17 @@ class _NodeStack:
         self._stack.append(v)
 
     def pop(self) -> Optional[_Node]:
-        if len(self._stack) == 0:
+        if self.is_empty():
             return None
         return self._stack.pop()
 
     def last(self) -> Optional[_Node]:
-        if len(self._stack) == 0:
+        if self.is_empty():
             return None
         return self._stack[-1]
+
+    def is_empty(self) -> bool:
+        return len(self._stack) == 0
 
     def clear(self):
         self._stack.clear()
@@ -73,6 +73,10 @@ class _NodeStack:
 
 class MMSeqsTaxonomyReportParser:
     _tax_order = ["superkingdom", "kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
+
+    @staticmethod
+    def default_result() -> TaxonomyResultsDict:
+        return {level: {"taxid": None, "value": None, "score": None} for level in MMSeqsTaxonomyReportParser._tax_order}
 
     @staticmethod
     def _parse_line(line: List[str]) -> _NodeInfo:
@@ -84,51 +88,52 @@ class MMSeqsTaxonomyReportParser:
         :raises ValueError: If a portion of the line does not match mmseqs/kraken specifications
         """
         assert len(line) == 6, "file does not match mmseqs/kraken documentation specifications"
-        return _NodeInfo(
-            float(line[0]),
-            int(line[1]),
-            int(line[2]),
-            None if line[3] == "no rank" else line[3],
-            int(line[4]),
-            line[5])
+        return _NodeInfo(float(line[0]), None if line[3] == "no rank" else line[3], int(line[4]), line[5])
 
     @staticmethod
-    def _create_tree(file: Path) -> _Node:
+    def _create_tree(file: Path) -> Tuple[_Node, List[_Node]]:
         """
         Convert report file to taxonomy tree
 
         :param file: Result file from mmseqs taxonomyreport
         :raises ValueError: If parsing a field in the taxonomy file line fails (i.e., int(line[0]) fails, etc.)
         :raises AssertionError: If file does not exist
-        :return: Root node to taxonomy tree
+        :return: Root node to taxonomy tree and a list of the tree's leaf nodes
         """
         assert file.exists()
         stack = _NodeStack()
         root = _Node(None, [], None)
         stack.push(root)
         current_level: int = -1
+        leaf_nodes: List[_Node] = []
         with open(file, "r") as file_ptr:
             for line in file_ptr:
                 node_info: _NodeInfo = MMSeqsTaxonomyReportParser._parse_line(line.rstrip("\r\n").split("\t"))
                 node_level: int = node_info.calculate_level
                 # Node is a sibling of the current node
                 if current_level == node_level:
+                    leaf_nodes.append(stack.last())
                     new_node: _Node = _Node.connect_nodes(stack.last().parent, node_info)
                 # Node is a child of the current node
                 elif node_level > current_level:
-                    new_node = _Node.connect_nodes(stack.last(), node_info)
                     current_level = node_level
+                    new_node = _Node.connect_nodes(stack.last(), node_info)
                 # Node is attached to *an ancestor* of the current node
                 else:
+                    leaf_nodes.append(stack.last())
                     # Pop off from stack until `current_level` matches node_level
                     while current_level != node_level:
                         stack.pop()
                         current_level -= 1
                     new_node = _Node.connect_nodes(stack.last().parent, node_info)
                 stack.push(new_node)
+        # Add last node to leaf nodes
+        last_stack_elem = stack.last()
+        if last_stack_elem.data is not None:
+            leaf_nodes.append(last_stack_elem)
         # Remove trailing references
         stack.clear()
-        return root
+        return root, leaf_nodes
 
     @staticmethod
     def _find_taxonomy(root: _Node, *taxonomic_ranks: str) -> bool:
@@ -153,7 +158,7 @@ class MMSeqsTaxonomyReportParser:
         return True
 
     @staticmethod
-    def find_best_taxonomy(file: Path, cutoff: float) -> Dict[str, Dict[str, Union[float, int, str, None]]]:
+    def find_best_taxonomy(file: Path, cutoff: float) -> TaxonomyResultsDict:
         """
         Find the taxonomic label path to which the largest amount of reads mapped to the deepest taxonomic rank depths
 
@@ -164,9 +169,9 @@ class MMSeqsTaxonomyReportParser:
         """
         assert file.exists()
         assert 0 < cutoff < 100
-        out = {level: {"taxid": None, "value": None, "score": None} for level in MMSeqsTaxonomyReportParser._tax_order}
+        out = MMSeqsTaxonomyReportParser.default_result()
         try:
-            root = MMSeqsTaxonomyReportParser._create_tree(file)
+            root, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(file)
         except ValueError:
             return out
 
@@ -178,13 +183,14 @@ class MMSeqsTaxonomy(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "tax-report": os.path.join(self.wdir, f"{self.record_id}.txt"),
-            "taxonomy": {},
             "tax-db": Result(os.path.join(self.wdir, f"{self.record_id}-tax_db"))
         }
         tax_file = self.output["tax-report"]
         if os.path.exists(tax_file):
             self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(
                 Path(tax_file).resolve(), float(self.config["cutoff"]))
+        else:
+            self.output["taxonomy"] = MMSeqsTaxonomyReportParser.default_result()
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:

@@ -4,6 +4,8 @@ from tempfile import NamedTemporaryFile
 
 from EukMetaSanity.testing_imports import MMSeqsTaxonomyReportParser
 
+unclassified = "100.0\t1000\t1000\tno rank\t0\tunclassified\n"
+
 single_branch = """13.5938\t755\t755\tno rank\t0\tunclassified
 86.4062\t4799\t0\tno rank\t1\troot
 86.3702\t4797\t0\tno rank\t131567\t  cellular organisms
@@ -20,7 +22,8 @@ class TestTaxonomyReportParser(unittest.TestCase):
         temp_file = NamedTemporaryFile()
         with open(temp_file.name, "w") as temp_file_ptr:
             temp_file_ptr.write(single_branch)
-        tree = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        tree, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        assert len(leaf_nodes) == 2
         assert len(tree.children) == 2
         assert tree.children[0].data.scientific_name == "unclassified"
         assert tree.children[1].data.scientific_name == "root"
@@ -36,19 +39,32 @@ class TestTaxonomyReportParser(unittest.TestCase):
         temp_file = NamedTemporaryFile()
         with open(temp_file.name, "w") as temp_file_ptr:
             temp_file_ptr.write("")
-        tree = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        tree, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        assert len(leaf_nodes) == 0
         assert len(tree.children) == 0
         assert not MMSeqsTaxonomyReportParser._find_taxonomy(tree, "root")
+
+    def test_unclassified(self):
+        temp_file = NamedTemporaryFile()
+        with open(temp_file.name, "w") as temp_file_ptr:
+            temp_file_ptr.write(unclassified)
+        tree, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        assert len(leaf_nodes) == 1
+        assert len(tree.children) == 1
+        assert tree.children[0].data.scientific_name == "unclassified"
 
     def test_two_branches(self):
         temp_file = NamedTemporaryFile()
         with open(temp_file.name, "w") as temp_file_ptr:
             temp_file_ptr.write(double_branch)
-        tree = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        tree, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        assert len(leaf_nodes) == 3
         assert len(tree.children[1].children) == 2
         assert tree.children[1].children[1].data.scientific_name == "uncellular organisms"
         assert len(tree.children[1].children[1].children) == 1
         assert tree.children[1].children[1].children[0].data.scientific_name == "Uncellulota"
+
+        assert MMSeqsTaxonomyReportParser._find_taxonomy(tree, "root", "uncellular organisms", "Uncellulota")
 
     def test_find_best_taxonomy(self):
         pass
