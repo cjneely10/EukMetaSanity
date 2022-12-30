@@ -127,7 +127,10 @@ class MMSeqsTaxonomyReportParser:
                     while current_level != node_level:
                         stack.pop()
                         current_level -= 1
-                    new_node = _Node(node_info, [], stack.last().parent)
+                    parent = stack.last().parent
+                    new_node = _Node(node_info, [], parent)
+                    if parent is not None:
+                        parent.add_child(new_node)
                 stack.push(new_node)
         # Remove trailing references
         stack.clear()

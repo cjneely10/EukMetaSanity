@@ -4,19 +4,22 @@ from tempfile import NamedTemporaryFile
 
 from EukMetaSanity.testing_imports import MMSeqsTaxonomyReportParser
 
-
-class TestTaxonomyReportParser(unittest.TestCase):
-    file = Path(__file__).parent.joinpath("data").joinpath("test-taxonomy.txt")
-    single_branch = """13.5938	755	755	no rank	0	unclassified
-86.4062	4799	0	no rank	1	root
-86.3702	4797	0	no rank	131567	  cellular organisms
-86.1001	4782	25	superkingdom	2759	    Eukaryota
+single_branch = """13.5938\t755\t755\tno rank\t0\tunclassified
+86.4062\t4799\t0\tno rank\t1\troot
+86.3702\t4797\t0\tno rank\t131567\t  cellular organisms
+86.1001\t4782\t25\tsuperkingdom\t2759\t    Eukaryota
 """
 
+double_branch = single_branch + """5.5\t100\t4\tno rank\t131568\t  uncellular organisms
+1.1\t25\t1\tsuperkingdom\t2759\t    Uncellulota
+"""
+
+
+class TestTaxonomyReportParser(unittest.TestCase):
     def test_single_branch(self):
         temp_file = NamedTemporaryFile()
         with open(temp_file.name, "w") as temp_file_ptr:
-            temp_file_ptr.write(TestTaxonomyReportParser.single_branch)
+            temp_file_ptr.write(single_branch)
         tree = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
         assert len(tree.children) == 2
         assert tree.children[0].data.scientific_name == "unclassified"
@@ -38,10 +41,14 @@ class TestTaxonomyReportParser(unittest.TestCase):
         assert not MMSeqsTaxonomyReportParser._find_taxonomy(tree, "root")
 
     def test_two_branches(self):
-        pass
-
-    def test_find_in_file(self):
-        pass
+        temp_file = NamedTemporaryFile()
+        with open(temp_file.name, "w") as temp_file_ptr:
+            temp_file_ptr.write(double_branch)
+        tree = MMSeqsTaxonomyReportParser._create_tree(Path(temp_file.name))
+        assert len(tree.children[1].children) == 2
+        assert tree.children[1].children[1].data.scientific_name == "uncellular organisms"
+        assert len(tree.children[1].children[1].children) == 1
+        assert tree.children[1].children[1].children[0].data.scientific_name == "Uncellulota"
 
     def test_find_best_taxonomy(self):
         pass
