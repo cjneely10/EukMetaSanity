@@ -113,7 +113,7 @@ class MMSeqsTaxonomyReportParser:
                 node_level: int = node_info.calculate_level
                 # Node is a sibling of the current node
                 if current_level == node_level:
-                    new_node = _Node.connect_nodes(stack.last().parent, node_info)
+                    new_node: _Node = _Node.connect_nodes(stack.last().parent, node_info)
                 # Node is a child of the current node
                 elif node_level > current_level:
                     new_node = _Node.connect_nodes(stack.last(), node_info)
@@ -133,10 +133,11 @@ class MMSeqsTaxonomyReportParser:
     @staticmethod
     def _find_taxonomy(root: _Node, *taxonomic_ranks: str) -> bool:
         """
+        Check if given taxonomic rank list corresponds to an existing path in the generated taxonomy tree
 
-        :param root:
-        :param taxonomic_ranks:
-        :return:
+        :param root: Root of tree created by `_create_tree(...)`
+        :param taxonomic_ranks: List of ranks to search as a path in the tree
+        :return: Rank walk is present within the given tree
         """
         if len(taxonomic_ranks) == 0:
             return False
