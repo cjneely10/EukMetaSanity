@@ -1,6 +1,5 @@
 import unittest
 from pathlib import Path
-from pprint import pprint
 from tempfile import NamedTemporaryFile
 
 from EukMetaSanity.testing_imports import MMSeqsTaxonomyReportParser
