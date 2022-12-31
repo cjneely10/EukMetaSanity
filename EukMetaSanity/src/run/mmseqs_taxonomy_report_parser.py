@@ -27,8 +27,6 @@ def _create_taxonomic_ranks() -> List[str]:
 
 
 # Ranks supported by current taxonomic databases
-
-
 _supported_taxonomic_ranks = _create_taxonomic_ranks()
 
 
@@ -254,17 +252,17 @@ class MMSeqsTaxonomyReportParser:
         if matching_rank is not None:
             return matching_rank
         # If not present, find rank in supported taxonomic ranks and check for presence upwards
+        available_ranks: Dict[str, int] = {rank[0]: i for i, rank in enumerate(taxonomy_results)}
         try:
             rank_index = _supported_taxonomic_ranks.index(rank)
             for i in range(rank_index - 1, -1, -1):
-                close_rank = MMSeqsTaxonomyReportParser._get_rank_results(taxonomy_results,
-                                                                          _supported_taxonomic_ranks[i])
+                close_rank = available_ranks.get(_supported_taxonomic_ranks[i], None)
                 if close_rank is not None:
-                    return close_rank
+                    return taxonomy_results[close_rank]
         # Unsupported ranks will default to eukaryota assignment
         except ValueError:
-            eukaryota_rank = MMSeqsTaxonomyReportParser._get_rank_results(taxonomy_results, "superkingdom")
+            eukaryota_rank = available_ranks["superkingdom"]
             if eukaryota_rank is not None:
-                return eukaryota_rank
+                return taxonomy_results[eukaryota_rank]
         # If eukaryota was not assigned, will provide default assignment with `-1` mapping percent
         return "superkingdom", _create_taxonomy_result(2759, "Eukaryota", -1)
