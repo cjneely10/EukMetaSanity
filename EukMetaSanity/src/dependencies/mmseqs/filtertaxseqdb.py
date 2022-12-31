@@ -20,7 +20,8 @@ class MMSeqsFilterTaxSeqDB(Task):
             out_results.append(_outfile)
         self.output = {
             "dbs": out_results,
-            "fastas": [out_res + ".fasta" for out_res in out_results]
+            "fastas": [out_res + ".fasta" for out_res in out_results],
+            "_": self.wdir.joinpath(".done")
         }
 
     @staticmethod
@@ -62,3 +63,4 @@ class MMSeqsFilterTaxSeqDB(Task):
                     ],
                     "30:00"
                 )
+        touch(str(self.output["_"]))
