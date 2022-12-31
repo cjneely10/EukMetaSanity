@@ -4,7 +4,7 @@ from typing import List, Union, Type
 
 from yapim import Task, DependencyInput
 
-from .mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
 
 
 class Taxonomy(Task):

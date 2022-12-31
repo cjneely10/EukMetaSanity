@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from EukMetaSanity.testing_imports import MMSeqsTaxonomyReportParser
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
 
 unclassified = "100.0\t1000\t1000\tno rank\t0\tunclassified\n"
 

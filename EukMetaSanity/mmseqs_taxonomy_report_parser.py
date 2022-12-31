@@ -119,7 +119,7 @@ class MMSeqsTaxonomyReportParser:
         :raises ValueError: If a portion of the line does not match mmseqs/kraken specifications and fails to parse
         """
         assert len(line) == 6, "file does not match mmseqs/kraken documentation specifications"
-        return _TaxonomyInfo(float(line[0]), int(line[2]), line[3], int(line[4]), line[5])
+        return _TaxonomyInfo(float(line[0]), int(line[2]), line[3].lower(), int(line[4]), line[5])
 
     @staticmethod
     def _create_tree(file: Path) -> Tuple[_Node, List[_Node]]:
@@ -169,17 +169,20 @@ class MMSeqsTaxonomyReportParser:
         return root, leaf_nodes
 
     @staticmethod
-    def _find_taxonomy(root: _Node, *taxonomic_ranks: str) -> bool:
+    def _find_taxonomy(root: _Node, *taxonomy_terms: str) -> bool:
         """
         Check if given taxonomic rank list corresponds to an existing path in the generated taxonomy tree
 
+        Example:
+          MMSeqsTaxonomyReportParser._find_taxonomy(tree, "root", "cellular organisms", "Eukaryota")
+
         :param root: Root of tree created by `_create_tree(...)`
-        :param taxonomic_ranks: List of ranks to search as a path in the tree
+        :param taxonomy_terms: Scientific name of organism for which to search
         :return: Rank walk is present within the given tree
         """
-        if len(taxonomic_ranks) == 0:
+        if len(taxonomy_terms) == 0:
             return False
-        for rank in taxonomic_ranks:
+        for rank in taxonomy_terms:
             rank_is_present = False
             for child in root.children:
                 if child.data.scientific_name == rank:
@@ -247,6 +250,7 @@ class MMSeqsTaxonomyReportParser:
         :param rank: Taxonomic rank, e.g., "family"
         :return: Tuple consisting of rank (or nearest rank) and its result (tax-rank, {taxid: "", value: "", score: ""})
         """
+        rank = rank.lower()
         # First, check if exact rank is present
         matching_rank = MMSeqsTaxonomyReportParser._get_rank_results(taxonomy_results, rank)
         if matching_rank is not None:
