@@ -3,6 +3,8 @@ from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, prefix, touch
 
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
+
 
 class MMSeqsFilterTaxSeqDB(Task):
     def __init__(self, *args, **kwargs):
@@ -33,7 +35,9 @@ class MMSeqsFilterTaxSeqDB(Task):
         """
         Run mmseqs.filtertaxseqdb
         """
-        tax = self.input["taxonomy"][self.config["level"]]["taxid"]
+        assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"],
+                                                                                self.config["level"])
+        tax = assignment[1]["taxid"]
         for database, subset_db_outpath, out_fasta in zip(self.data, self.output["dbs"], self.output["fastas"]):
             if tax is None:
                 touch(out_fasta)

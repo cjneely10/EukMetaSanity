@@ -4,6 +4,8 @@ from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, touch
 
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
+
 
 class Braker(Task):
     def __init__(self, *args, **kwargs):
@@ -31,7 +33,8 @@ class Braker(Task):
         Run braker
         """
         tax = []
-        if "fungi" in self.input["taxonomy"]["kingdom"]["value"].lower():
+        assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"], "kingdom")
+        if "fungi" in assignment[1]["value"].lower():
             tax = ["--fungus"]
         self.parallel(
             self.program[

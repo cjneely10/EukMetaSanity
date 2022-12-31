@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import List, Union, Type
 
 from plumbum import ProcessExecutionError
-from yapim import Task, DependencyInput, prefix
+from yapim import Task, DependencyInput, prefix, touch
+
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
 
 
 class RMaskRepeatMasker(Task):
@@ -12,9 +14,9 @@ class RMaskRepeatMasker(Task):
         data_files = []
         data_files += [_f for _f in self.data if _f != ""]
         # Perform on optimal taxonomic identification
-        assignment = self.input["taxonomy"][self.config["level"].lower()]
-        if assignment["value"] is not None:
-            data_files += [assignment["value"]]
+        assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"],
+                                                                                self.config["level"])
+        data_files += [assignment[1]["value"]]
         _file = str(self.input["RModRepeatModeler"]["model"])
         if os.path.exists(_file) and os.path.getsize(_file) > 0:
             data_files.append(_file)
@@ -28,7 +30,8 @@ class RMaskRepeatMasker(Task):
                 _dir = os.path.join(self.wdir, "repeats_" + _search.replace(" ", "_"))
             out.append((search, _dir))
         self.output = {
-            "libraries": out
+            "libraries": out,
+            "_": self.wdir.joinpath(".done")
         }
 
     @staticmethod
@@ -65,3 +68,4 @@ class RMaskRepeatMasker(Task):
                 self.parallel(script)
             except ProcessExecutionError:
                 continue
+        touch(str(self.output["_"]))
