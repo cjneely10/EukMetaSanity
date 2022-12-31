@@ -6,16 +6,17 @@ from typing import List, Union, Type, Dict, Optional, Tuple
 
 from yapim import Task, DependencyInput, Result
 
-TaxonomyResultsDict = Dict[str, Dict[str, Union[float, int, str, None]]]
+TaxonomyResults = List[Tuple[str, Dict[str, Union[float, int, str]]]]
 
 
 @dataclass
-class _NodeInfo:
+class _TaxonomyInfo:
     """Taxonomy node representing a line in mmseqs taxonomyreport output file"""
-    percent_mapped_reads: float
-    rank: Optional[str]
-    ncbi_identifier: int
-    scientific_name_string: str
+    percent_mapped_reads: float  # 0
+    number_reads_assigned_to_taxon: int  # 2
+    rank: Optional[str]  # 3
+    ncbi_identifier: int  # 4
+    scientific_name_string: str  # 5
 
     @cached_property
     def scientific_name(self) -> str:
@@ -32,19 +33,34 @@ class _NodeInfo:
 @dataclass
 class _Node:
     """Parsed information from mmseqs/kraken-like output and connections to remainder of tree"""
-    data: Optional[_NodeInfo]
+    data: Optional[_TaxonomyInfo]
     children: List["_Node"]
     parent: Optional["_Node"]
+    cumulative_read_count: int
 
     def add_child(self, child: "_Node"):
+        if self.data is not None:
+            child.cumulative_read_count += self.data.number_reads_assigned_to_taxon
         self.children.append(child)
 
     @staticmethod
-    def connect_nodes(parent: Optional["_Node"], child_info: "_NodeInfo") -> "_Node":
-        child_node = _Node(child_info, [], parent)
+    def connect_nodes(parent: Optional["_Node"], child_info: "_TaxonomyInfo") -> "_Node":
+        child_node = _Node(child_info, [], parent, child_info.number_reads_assigned_to_taxon)
         if parent is not None:
             parent.add_child(child_node)
         return child_node
+
+    def collect_taxonomy(self) -> TaxonomyResults:
+        node = self
+        out = []
+        while node is not None and node.data is not None and node.data.scientific_name != "root":
+            result = {"taxid": node.data.ncbi_identifier,
+                      "value": node.data.scientific_name,
+                      "score": node.data.percent_mapped_reads}
+            out.append((node.data.rank, result))
+            node = node.parent
+        out.reverse()
+        return out
 
 
 class _NodeStack:
@@ -72,23 +88,17 @@ class _NodeStack:
 
 
 class MMSeqsTaxonomyReportParser:
-    _tax_order = ["superkingdom", "kingdom", "phylum", "class", "order", "superfamily", "family", "genus", "species"]
-
     @staticmethod
-    def default_result() -> TaxonomyResultsDict:
-        return {level: {"taxid": None, "value": None, "score": None} for level in MMSeqsTaxonomyReportParser._tax_order}
-
-    @staticmethod
-    def _parse_line(line: List[str]) -> _NodeInfo:
+    def _parse_line(line: List[str]) -> _TaxonomyInfo:
         """
         Create _NodeInfo from line that matches mmseqs/kraken specs
 
         :param line: File line split by tab
         :return: Parsed _NodeInfo
-        :raises ValueError: If a portion of the line does not match mmseqs/kraken specifications
+        :raises ValueError: If a portion of the line does not match mmseqs/kraken specifications and fails to parse
         """
         assert len(line) == 6, "file does not match mmseqs/kraken documentation specifications"
-        return _NodeInfo(float(line[0]), None if line[3] == "no rank" else line[3], int(line[4]), line[5])
+        return _TaxonomyInfo(float(line[0]), int(line[2]), line[3], int(line[4]), line[5])
 
     @staticmethod
     def _create_tree(file: Path) -> Tuple[_Node, List[_Node]]:
@@ -102,13 +112,13 @@ class MMSeqsTaxonomyReportParser:
         """
         assert file.exists()
         stack = _NodeStack()
-        root = _Node(None, [], None)
+        root = _Node(None, [], None, 0)
         stack.push(root)
         current_level: int = -1
         leaf_nodes: List[_Node] = []
         with open(file, "r") as file_ptr:
             for line in file_ptr:
-                node_info: _NodeInfo = MMSeqsTaxonomyReportParser._parse_line(line.rstrip("\r\n").split("\t"))
+                node_info: _TaxonomyInfo = MMSeqsTaxonomyReportParser._parse_line(line.rstrip("\r\n").split("\t"))
                 node_level: int = node_info.calculate_level
                 # Node is a sibling of the current node
                 if current_level == node_level:
@@ -125,6 +135,7 @@ class MMSeqsTaxonomyReportParser:
                     while current_level != node_level:
                         stack.pop()
                         current_level -= 1
+                    stack.pop()
                     new_node = _Node.connect_nodes(stack.last().parent, node_info)
                 stack.push(new_node)
         # Add last node to leaf nodes
@@ -158,24 +169,28 @@ class MMSeqsTaxonomyReportParser:
         return True
 
     @staticmethod
-    def find_best_taxonomy(file: Path, cutoff: float) -> TaxonomyResultsDict:
+    def find_best_taxonomy(file: Path) -> TaxonomyResults:
         """
         Find the taxonomic label path to which the largest amount of reads mapped to the deepest taxonomic rank depths
 
+        Calculates the path from root -> leaf to which the largest cumulative number of reads is mapped
+
         :param file: Result file from mmseqs taxonomyreport
-        :param cutoff: Minimum % (0-100) of mapped reads that should be considered in generated tree
         :return: Mapping consisting of {tax-level: {taxid: "", value: "", score: ""}}
         :raises AssertionError: If line in taxonomy file is of improper length, or if function parameters are invalid
+        :raises ValueError: If parsing a field in the taxonomy file line fails (i.e., int(line[0]) fails, etc.)
         """
         assert file.exists()
-        assert 0 < cutoff < 100
-        out = MMSeqsTaxonomyReportParser.default_result()
-        try:
-            root, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(file)
-        except ValueError:
-            return out
-
-        return out
+        root: _Node
+        leaf_nodes: List[_Node]
+        root, leaf_nodes = MMSeqsTaxonomyReportParser._create_tree(file)
+        # Find leaf node with the highest cumulative read count
+        leaf_nodes.sort(key=lambda node: node.cumulative_read_count, reverse=True)
+        for leaf_node in leaf_nodes:
+            if leaf_node.data is not None and leaf_node.data.scientific_name != "unclassified":
+                return leaf_node.collect_taxonomy()
+        # Failed to calculate taxonomy
+        return []
 
 
 class MMSeqsTaxonomy(Task):
@@ -187,10 +202,9 @@ class MMSeqsTaxonomy(Task):
         }
         tax_file = self.output["tax-report"]
         if os.path.exists(tax_file):
-            self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(
-                Path(tax_file).resolve(), float(self.config["cutoff"]))
+            self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(Path(tax_file).resolve())
         else:
-            self.output["taxonomy"] = MMSeqsTaxonomyReportParser.default_result()
+            self.output["taxonomy"] = []
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -224,5 +238,4 @@ class MMSeqsTaxonomy(Task):
             ],
             "1:00:00"
         )
-        self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(
-            Path(self.output["tax-report"]).resolve(), float(self.config["cutoff"]))
+        self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(Path(self.output["tax-report"]))

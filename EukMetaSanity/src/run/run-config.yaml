@@ -59,7 +59,6 @@ Taxonomy:
 
     MMSeqsTaxonomy:
       program: mmseqs
-      cutoff: 8.0  # Minimum % of mapped reads to tax level
       data:
         /path/to/odb-mmetsp_db
       # Pass any flags to mmseqs required
