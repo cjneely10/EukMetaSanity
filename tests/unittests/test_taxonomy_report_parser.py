@@ -74,7 +74,27 @@ class TestTaxonomyReportParser(unittest.TestCase):
         best_taxonomy = MMSeqsTaxonomyReportParser.find_best_taxonomy(Path(temp_file.name))
         assert best_taxonomy[-1][1]["value"] == "Archaea-clade2"
 
+        assigned_kingdom = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "kingdom")
+        assert assigned_kingdom[0] == "kingdom"
+        assert assigned_kingdom[1]["value"] == "Archaea-kingdom"
+
+        request_for_class = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "class")
+        assert request_for_class[0] == "kingdom"
+        assert request_for_class[1]["value"] == "Archaea-kingdom"
+
     def test_real_file(self):
         file = Path(__file__).parent.joinpath("data").joinpath("test-taxonomy.txt")
         best_taxonomy = MMSeqsTaxonomyReportParser.find_best_taxonomy(file)
         assert best_taxonomy[-1][1]["value"] == "Tigriopus californicus"
+
+        assigned_phylum = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "phylum")
+        assert assigned_phylum[0] == "phylum"
+        assert assigned_phylum[1]["value"] == "Arthropoda"
+
+        request_for_sf = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "superfamily")
+        assert request_for_sf[0] == "order"
+        assert request_for_sf[1]["value"] == "Harpacticoida"
+
+        invalid_search = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "meow")
+        assert invalid_search[0] == "superkingdom"
+        assert invalid_search[1]["value"] == "Eukaryota"

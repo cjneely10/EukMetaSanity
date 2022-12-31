@@ -3,7 +3,33 @@ from functools import cached_property
 from pathlib import Path
 from typing import List, Tuple, Dict, Union, Optional
 
-TaxonomyResults = List[Tuple[str, Dict[str, Union[float, int, str]]]]
+TaxonomyAssignment = Dict[str, Union[float, int, str]]
+RankResult = Tuple[str, TaxonomyAssignment]
+TaxonomyResults = List[RankResult]
+
+
+def _create_taxonomy_result(taxid: int, scientific_name: str, score: float) -> TaxonomyAssignment:
+    return {"taxid": taxid, "value": scientific_name, "score": score}
+
+
+def _create_taxonomic_ranks() -> List[str]:
+    _ranks = ["kingdom", "phylum", "class", "cohort", "order",
+              "family", "tribe", "genus", "section", "species", "strain"]
+    out = []
+    for rank in _ranks[:-2]:
+        out.append(f"super{rank}")
+        out.append(rank)
+        out.append(f"sub{rank}")
+        out.append(f"infra{rank}")
+    out.append(_ranks[-2])
+    out.append(_ranks[-1])
+    return out
+
+
+# Ranks supported by current taxonomic databases
+
+
+_supported_taxonomic_ranks = _create_taxonomic_ranks()
 
 
 @dataclass
@@ -51,9 +77,9 @@ class _Node:
         node = self
         out = []
         while node is not None and node.data is not None and node.data.scientific_name != "root":
-            result = {"taxid": node.data.ncbi_identifier,
-                      "value": node.data.scientific_name,
-                      "score": node.data.percent_mapped_reads}
+            result = _create_taxonomy_result(node.data.ncbi_identifier,
+                                             node.data.scientific_name,
+                                             node.data.percent_mapped_reads)
             out.append((node.data.rank, result))
             node = node.parent
         out.reverse()
@@ -167,6 +193,25 @@ class MMSeqsTaxonomyReportParser:
         return True
 
     @staticmethod
+    def _get_rank_results(results: TaxonomyResults, rank: str) -> Optional[RankResult]:
+        """
+        Find result for a given taxonomic rank
+
+        :param results: Results from `cls.find_best_taxonomy`
+        :param rank: Desired taxonomic rank
+        :return: Result for rank, or None if rank was not present in results
+        """
+        # For clade, check for most-specific clade assignments
+        if rank == "clade":
+            _iter = results[::-1]
+        else:
+            _iter = results
+        for rank_results in _iter:
+            if rank_results[0] == rank:
+                return rank_results
+        return None
+
+    @staticmethod
     def find_best_taxonomy(file: Path) -> TaxonomyResults:
         """
         Find the taxonomic label path to which the largest amount of reads mapped to the deepest taxonomic rank depths
@@ -174,7 +219,7 @@ class MMSeqsTaxonomyReportParser:
         Calculates the path from root -> leaf to which the largest cumulative number of reads is mapped
 
         :param file: Result file from mmseqs taxonomyreport
-        :return: Mapping consisting of {tax-level: {taxid: "", value: "", score: ""}}
+        :return: List of results in format [(tax-rank, {taxid: "", value: "", score: ""})]
         :raises AssertionError: If line in taxonomy file is of improper length, or if function parameters are invalid
         :raises ValueError: If parsing a field in the taxonomy file line fails (i.e., int(line[0]) fails, etc.)
         """
@@ -189,3 +234,37 @@ class MMSeqsTaxonomyReportParser:
                 return leaf_node.collect_taxonomy()
         # Failed to calculate taxonomy
         return []
+
+    @staticmethod
+    def find_assignment_nearest_request(taxonomy_results: TaxonomyResults, rank: str) -> RankResult:
+        """
+        Find assignment for a given taxonomic rank.
+
+        If rank is not present, will attempt to search for closest taxonomic assignment upwards:
+
+        For example, if rank="superfamily" and it is not present, this method may return the result for "infraorder",
+        or any taxonomic rank that precedes superfamily.
+
+        :param taxonomy_results: Results from `cls.find_best_taxonomy`
+        :param rank: Taxonomic rank, e.g., "family"
+        :return: Tuple consisting of rank (or nearest rank) and its result (tax-rank, {taxid: "", value: "", score: ""})
+        """
+        # First, check if exact rank is present
+        matching_rank = MMSeqsTaxonomyReportParser._get_rank_results(taxonomy_results, rank)
+        if matching_rank is not None:
+            return matching_rank
+        # If not present, find rank in supported taxonomic ranks and check for presence upwards
+        try:
+            rank_index = _supported_taxonomic_ranks.index(rank)
+            for i in range(rank_index - 1, -1, -1):
+                close_rank = MMSeqsTaxonomyReportParser._get_rank_results(taxonomy_results,
+                                                                          _supported_taxonomic_ranks[i])
+                if close_rank is not None:
+                    return close_rank
+        # Unsupported ranks will default to eukaryota assignment
+        except ValueError:
+            eukaryota_rank = MMSeqsTaxonomyReportParser._get_rank_results(taxonomy_results, "superkingdom")
+            if eukaryota_rank is not None:
+                return eukaryota_rank
+        # If eukaryota was not assigned, will provide default assignment with `-1` mapping percent
+        return "superkingdom", _create_taxonomy_result(2759, "Eukaryota", -1)
