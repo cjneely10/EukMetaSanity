@@ -121,6 +121,7 @@ class MMSeqsTaxonomyReportParser:
                 if current_level == node_level:
                     leaf_nodes.append(stack.last())
                     new_node: _Node = _Node.connect_nodes(stack.last().parent, node_info)
+                    stack.pop()
                 # Node is a child of the current node
                 elif node_level > current_level:
                     current_level = node_level
@@ -132,8 +133,8 @@ class MMSeqsTaxonomyReportParser:
                     while current_level != node_level:
                         stack.pop()
                         current_level -= 1
-                    stack.pop()
                     new_node = _Node.connect_nodes(stack.last().parent, node_info)
+                    stack.pop()
                 stack.push(new_node)
         # Add last node to leaf nodes
         last_stack_elem = stack.last()
