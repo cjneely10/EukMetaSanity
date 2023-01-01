@@ -16,10 +16,8 @@ class RMaskRepeatMasker(Task):
         # Perform on optimal taxonomic identification
         assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"],
                                                                                 self.config["level"])
-        data_files += [assignment[1]["value"]]
-        _file = str(self.input["RModRepeatModeler"]["model"])
-        if os.path.exists(_file) and os.path.getsize(_file) > 0:
-            data_files.append(_file)
+        data_files.append(assignment[1]["value"])
+        data_files.append(str(self.input["RModRepeatModeler"]["model"]))
         out = []
         for _search in data_files:
             if "classified" in _search:
@@ -53,6 +51,8 @@ class RMaskRepeatMasker(Task):
             if os.path.exists(_dir):
                 continue
             os.makedirs(_dir)
+            if search[0] == "-lib" and not os.path.exists(search[1]):
+                continue
             # Call RepeatMasker on modeled repeats in the new directory
             script = self.create_script(
                 self.program[
