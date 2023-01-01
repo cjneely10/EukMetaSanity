@@ -1,8 +1,7 @@
-import os
 from pathlib import Path
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, touch
 
 from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
 
@@ -12,9 +11,12 @@ class Taxonomy(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "tax-report": self.input["MMSeqsTaxonomy"]["tax-report"],
-            "final": ["tax-report", "taxonomy"]
+            "final": ["tax-report", "taxonomy"],
+            "_": self.wdir.joinpath(".done")
         }
-        self.set_tax_file()
+        tax_file = Path(self.output["tax-report"]).resolve()
+        if tax_file.exists():
+            self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(tax_file)
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -25,11 +27,6 @@ class Taxonomy(Task):
         return [DependencyInput("MMSeqsTaxonomy", {"MetaEukEV": {"evidence-prot": "fasta"}})]
 
     def run(self):
-        self.set_tax_file()
-
-    def set_tax_file(self):
-        tax_file = self.output["tax-report"]
-        if os.path.exists(tax_file):
-            self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(Path(tax_file).resolve())
-        else:
-            self.output["taxonomy"] = []
+        tax_file = Path(self.output["tax-report"]).resolve()
+        self.output["taxonomy"] = MMSeqsTaxonomyReportParser.find_best_taxonomy(tax_file)
+        touch(str(self.output["_"]))

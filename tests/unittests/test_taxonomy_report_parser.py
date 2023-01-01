@@ -98,3 +98,15 @@ class TestTaxonomyReportParser(unittest.TestCase):
         invalid_search = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "meow")
         assert invalid_search[0] == "superkingdom"
         assert invalid_search[1]["value"] == "Eukaryota"
+
+    def test_real_file2(self):
+        file = Path(__file__).parent.joinpath("data").joinpath("test-taxonomy2.txt")
+        best_taxonomy = MMSeqsTaxonomyReportParser.find_best_taxonomy(file)
+
+        assigned_species = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "species")
+        assert assigned_species[0] == "species"
+        assert assigned_species[1]["value"] == "Ostreococcus tauri"
+
+        assigned_family = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(best_taxonomy, "family")
+        assert assigned_family[0] == "family"
+        assert assigned_family[1]["value"] == "Bathycoccaceae"
