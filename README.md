@@ -26,9 +26,50 @@ Search KEGG, EggNOG, and any MMseqs2 database for functional annotation of putat
 Check the quality of your annotation using BUSCO.
 
 ## Installation
-
 See <a href="https://github.com/cjneely10/EukMetaSanity/blob/main/INSTALLATION.md" target="_blank">INSTALLATION.md</a> 
 for detailed installation instructions.
+
+## Using yapim configuration files
+EukMetaSanity is built using the [YAPIM](https://github.com/cjneely10/YAPIM) library, which operates through a configuration file that is provided with each pipeline.
+
+Running a YAPIM pipeline typically consists of copying a default configuration file to your working directory,
+making edits to fit your resource and analysis needs, and running the pipeline on a folder of input files.
+
+At the top of each configuration file will be a section that defines total available resources:
+
+```yaml
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 20
+  # Maximum memory to use (in GB)
+  MaxMemory: 120
+
+###########################################
+```
+
+Provide the maximum threads and memory to allot towards the analysis.
+
+Within each section of the configuration file, set the resources to allot **to each input genome** 
+
+```yaml
+Taxonomy:
+  # Number of threads task will use
+  threads: 5
+  # Amount of memory task will use (in GB)
+  memory: 10
+  time: "8:00:00"
+```
+
+For example, based on the provided maximum resource limits, the preceding section can run up to 4 genomes at a time.
+
+When launched using SLURM, the maximum resources can be set quite high, and the task-level resources can be set to match
+node resource limits that exist on your systems.
 
 ---
 
@@ -267,7 +308,7 @@ If run with default config parameters, the analysis should complete within about
 
 ### Run output
 
-This will create a directory structure resembling:
+This will create a directory structure with **non-empty files** resembling:
 ```
 out/
   |-- wdir/
@@ -294,6 +335,8 @@ out/
         |-- NAO-all-DCM-20-180-00_bin-2/
           ...
 ```
+
+If you have empty files present, there is likely an installation issue (for example, with GeneMark).
 
 #### Note on running:
 **EukMetaSanity** will not re-run already completed steps within a given pipeline. If you would like to re-do a particular
