@@ -91,9 +91,7 @@ function create_binary_directory() {
     pip install .
     # Generate binary directories using the YAPIM `create` function
     for f in "${PIPELINES[@]}"; do
-      if "$UPGRADE" || [ ! -d "$BIN/$f-pipeline" ]; then
-        echo n | yapim create -t "EukMetaSanity/src/$f" -d EukMetaSanity/src/dependencies -o "$BIN/$f-pipeline"
-      fi
+      echo n | yapim create -t "EukMetaSanity/src/$f" -d EukMetaSanity/src/dependencies -o "$BIN/$f-pipeline"
     done
     # Deactivate and delete installer environment
     conda deactivate
