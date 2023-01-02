@@ -88,6 +88,7 @@ function create_binary_directory() {
     fi
     source "$SOURCE"
     conda activate yapim_installer
+    pip install .
     # Generate binary directories using the YAPIM `create` function
     for f in "${PIPELINES[@]}"; do
       if "$UPGRADE" || [ ! -d "$BIN/$f-pipeline" ]; then
