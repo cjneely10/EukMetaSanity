@@ -11,8 +11,7 @@ from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportPars
 class RMaskRepeatMasker(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        data_files = []
-        data_files += [_f for _f in self.data if _f != ""]
+        data_files = [_f for _f in self.data if _f != ""]
         # Perform on optimal taxonomic identification
         assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"],
                                                                                 self.config["level"])

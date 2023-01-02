@@ -22,4 +22,4 @@ dependencies:
   - biopython=1.76
   - pip
   - pip:
-    - git+https://github.com/cjneely10/YAPIM.git@v0.3.0
+    - git+https://github.com/cjneely10/YAPIM.git@v0.3.1
