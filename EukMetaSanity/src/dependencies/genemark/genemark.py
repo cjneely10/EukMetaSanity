@@ -6,11 +6,11 @@ from yapim import Task, DependencyInput, touch
 from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser, TaxonomyResults
 
 
-def determine_fungal(taxonomy_results: TaxonomyResults) -> str:
+def determine_fungal(taxonomy_results: TaxonomyResults) -> List[str]:
     assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(taxonomy_results, "kingdom")
     if assignment[1]["value"].lower() == "fungi":
-        return "--fungus"
-    return ""
+        return ["--fungus"]
+    return []
 
 
 class GeneMarkPETAP(Task):
@@ -74,7 +74,7 @@ class GeneMarkPETAP(Task):
                 "--sequence", str(self.input["fasta"]),
                 (*ev_vals),
                 "--cores", self.threads, (*self.added_flags),
-                determine_fungal(self.input["taxonomy"])
+                (*determine_fungal(self.input["taxonomy"]))
             ],
             script_name
         )

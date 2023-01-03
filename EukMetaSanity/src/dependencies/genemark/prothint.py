@@ -28,7 +28,7 @@ class GeneMarkProtHint(Task):
                 str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0]),
                 "--workdir", self.wdir,
                 "--threads", self.threads,
-                determine_fungal(self.input["taxonomy"])
+                (*determine_fungal(self.input["taxonomy"]))
             ]
         )
         # Create files if prothint fails
