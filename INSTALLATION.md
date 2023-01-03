@@ -27,7 +27,7 @@ After running the `INSTALL.sh` script, you must restart your shell.
 ### Updating from existing installation
 
 Prior to updating to the most recent version of this software, users should edit their `~/.bashrc` file and remove old
-EukMetaSanity-related export and `PATH` update statements. Additionally, remove old database directories.
+EukMetaSanity-related export and `PATH` update statements. Additionally, remove old database and `bin` directories.
 Next, restart your shell.
 
 Then, either update this repository:
