@@ -19,27 +19,18 @@ class GeneMarkProtHint(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("MMSeqsFilterTaxSeqDB")
-        ]
+        return [DependencyInput("MMSeqsFilterTaxSeqDB")]
 
     def run(self):
-        """
-        Run gmes.prothint
-        """
-        try:
-            # Run prothint
-            self.parallel(
-                self.program[
-                    str(self.input["fasta"]),
-                    str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0]),
-                    "--workdir", self.wdir,
-                    "--threads", self.threads,
-                    determine_fungal(self.input["taxonomy"])
-                ]
-            )
-            touch(str(self.output["hints"]))
-            touch(str(self.output["evidence"]))
-        except:
-            touch(str(self.output["hints"]))
-            touch(str(self.output["evidence"]))
+        self.parallel(
+            self.program[
+                str(self.input["fasta"]),
+                str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0]),
+                "--workdir", self.wdir,
+                "--threads", self.threads,
+                determine_fungal(self.input["taxonomy"])
+            ]
+        )
+        # Create files if prothint fails
+        touch(str(self.output["hints"]))
+        touch(str(self.output["evidence"]))

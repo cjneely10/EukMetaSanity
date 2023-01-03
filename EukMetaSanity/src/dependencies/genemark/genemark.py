@@ -38,7 +38,7 @@ class GeneMarkPETAP(Task):
         """
         ev_vals = ["--ES"]
         # For now default to 100 intron predictions minimum to use file
-        if len(open(str(self.input["GeneMarkProtHint"]["hints"])).readlines()) > 100 and \
+        if len(open(str(self.input["GeneMarkProtHint"]["hints"])).readlines()) > 100 or \
                 len(open(str(self.input["GeneMarkProtHint"]["evidence"])).readlines()) > 100:
             ev_vals = ["--EP", str(self.input["GeneMarkProtHint"]["hints"]),
                        "--evidence", str(self.input["GeneMarkProtHint"]["evidence"])]

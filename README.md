@@ -336,7 +336,23 @@ out/
           ...
 ```
 
-If you have empty files present, there is likely an installation issue (for example, with GeneMark).
+### Installation check:
+To confirm proper GeneMark installation, users should run the following command:
+```shell
+ls out/wdir/*/AbinitioGeneMark.GeneMarkPETAP/*.sh
+```
+
+You should see the following three files:
+
+```shell
+out/wdir/NAO-all-DCM-20-180-00_bin-19/AbinitioGeneMark.GeneMarkPETAP/gmes.sh
+out/wdir/NAO-all-DCM-20-180-00_bin-1/AbinitioGeneMark.GeneMarkPETAP/gmes.sh
+out/wdir/NAO-all-DCM-20-180-00_bin-2/AbinitioGeneMark.GeneMarkPETAP/gmep.sh
+```
+
+If you do not see the file named `gmep.sh`, there may be an issue with your ProtHint installation.
+Check your `PATH` to confirm that GeneMark-related directories are present, and check the version of `diamond` that is 
+present in the `gmes_linux64/ProtHint/dependencies` and confirm that it runs as expected.
 
 #### Note on running:
 **EukMetaSanity** will not re-run already completed steps within a given pipeline. If you would like to re-do a particular
