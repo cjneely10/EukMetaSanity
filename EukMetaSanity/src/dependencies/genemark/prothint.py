@@ -2,6 +2,8 @@ from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, touch
 
+from .genemark import determine_fungal
+
 
 class GeneMarkProtHint(Task):
     def __init__(self, *args, **kwargs):
@@ -33,6 +35,7 @@ class GeneMarkProtHint(Task):
                     str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0]),
                     "--workdir", self.wdir,
                     "--threads", self.threads,
+                    determine_fungal(self.input["taxonomy"])
                 ]
             )
             touch(str(self.output["hints"]))

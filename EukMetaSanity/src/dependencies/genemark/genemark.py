@@ -1,10 +1,16 @@
 import os
-from functools import cached_property
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, touch
 
-from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser, TaxonomyResults
+
+
+def determine_fungal(taxonomy_results: TaxonomyResults) -> str:
+    assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(taxonomy_results, "kingdom")
+    if assignment[1]["value"].lower() == "fungi":
+        return "--fungus"
+    return ""
 
 
 class GeneMarkPETAP(Task):
@@ -68,16 +74,9 @@ class GeneMarkPETAP(Task):
                 "--sequence", str(self.input["fasta"]),
                 (*ev_vals),
                 "--cores", self.threads, (*self.added_flags),
-                self._determine_fungal
+                determine_fungal(self.input["taxonomy"])
             ],
             script_name
         )
         # Run script
         self.parallel(script)
-
-    @cached_property
-    def _determine_fungal(self) -> str:
-        assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"], "kingdom")
-        if assignment[1]["value"].lower() == "fungi":
-            return "--fungus"
-        return ""

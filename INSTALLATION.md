@@ -26,20 +26,21 @@ After running the `INSTALL.sh` script, you must restart your shell.
 
 ### Updating from existing installation
 
-Update this repository:
+Prior to updating to the most recent version of this software, users should edit their `~/.bashrc` file and remove old
+EukMetaSanity-related export and `PATH` update statements. Additionally, remove old database directories.
+Next, restart your shell.
+
+Then, either update this repository:
 
 ```shell
 git restore .
 git pull
 ```
 
-And then run the installation script:
+Or clone it (as described above), and then run the installation script:
 ```shell
 ./INSTALL.sh -t <num-threads> --upgrade
 ```
-
-Note that prior versions of EukMetaSanity modified your `~/.bashrc` file.
-You may wish to remove these modifications
 
 ## Installing dependencies
 
@@ -53,6 +54,7 @@ EggNOG users should download the software and its required databases using `pip`
 
 ### Configuring GeneMark &ge;4.65_lic
 
+EukMetaSanity is packaged with all dependencies that are needed to run GeneMark
 If you choose to include GeneMark in your analysis pipeline, follow the installation instructions [on their webpage](http://topaz.gatech.edu/GeneMark/license_download.cgi) to download their software and accept their license agreements.
 
 Ensure that your `.gm_key` file is present in your home directory. 
