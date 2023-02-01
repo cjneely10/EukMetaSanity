@@ -2,7 +2,9 @@ import glob
 import os
 import shutil
 from collections import Counter
+from copy import deepcopy
 from pathlib import Path
+from threading import Lock
 from typing import List, Union, Type, Iterable
 
 from Bio import SeqIO
@@ -13,6 +15,18 @@ from .merge_parallelized_output import merge
 from .taxon_ids import augustus_taxon_ids
 
 
+class _UniqueIdentifiersFactory:
+    _lock: Lock = Lock()
+    _next: int = 256  # Begin after integers that are statically stored in memory
+
+    @staticmethod
+    def get_next() -> int:
+        with _UniqueIdentifiersFactory._lock:
+            _UniqueIdentifiersFactory._next += 1
+            out = deepcopy(_UniqueIdentifiersFactory._next)
+        return out
+
+
 class Augustus(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,6 +34,7 @@ class Augustus(Task):
             "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3"),
             "prot": self.wdir.joinpath(self.record_id + ".faa")
         }
+        self._unique_id = _UniqueIdentifiersFactory.get_next()
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -55,7 +70,7 @@ class Augustus(Task):
             _last = False
             if i == rounds - 1:
                 _last = True
-            out_gff = self._augustus(self.record_id + str(i + 1), i + 2, str(self.input["fasta"]), _last)
+            out_gff = self._augustus(self._species_config_prefix(i + 1), i + 2, str(self.input["fasta"]), _last)
             if Augustus._line_count(out_gff) < 200:
                 break
             if i != rounds - 1:
@@ -71,10 +86,7 @@ class Augustus(Task):
     def _finalize_output(self, out_gff: str):
         self._handle_config_output()
         # Rename final file
-        self.single(
-            self.local["gffread"][out_gff, "-o", str(self.output["ab-gff3"]), "-G"],
-            "5:00"
-        )
+        self.single(self.local["gffread"][out_gff, "-o", str(self.output["ab-gff3"]), "-G"], "5:00")
         touch(str(self.output["prot"]))
         self.single(
             self.local["gffread"][
@@ -175,10 +187,16 @@ class Augustus(Task):
             "config", "species"
         )
         for file in glob.glob(os.path.join(config_dir, self.record_id + "*")):
-            shutil.move(
-                file,
-                os.path.join(self.wdir, os.path.basename(file))
-            )
+            shutil.move(file, os.path.join(self.wdir, os.path.basename(file)))
+
+    def _species_config_prefix(self, _round: int) -> str:
+        """
+        Generate species prefix from training round
+
+        :param _round: training round
+        :return: species identifier corresponding to provided `_round`
+        """
+        return f"EukMS-{self.record_id}-{self._unique_id}-{_round}"
 
     def _train_augustus(self, _round: int, _file: str, out_gff: str):
         """ Run training set on augustus results
@@ -188,10 +206,11 @@ class Augustus(Task):
         :param out_gff: Output gff3 path
         :return: Output gff3 path
         """
+        species_config_prefix = self._species_config_prefix(_round)
         # Remove old training directory, if needed
         config_dir = os.path.join(
             os.path.dirname(os.path.dirname(Path(str(self.program)).resolve())),
-            "config", "species", self.record_id + str(_round)
+            "config", "species", species_config_prefix
         )
         if os.path.exists(config_dir):
             shutil.rmtree(config_dir)
@@ -206,7 +225,6 @@ class Augustus(Task):
             ],
             "2:00"
         )
-        species_config_prefix = self.record_id + str(_round)
         # Write new species config file
         self.single(
             self.local["new_species.pl"][

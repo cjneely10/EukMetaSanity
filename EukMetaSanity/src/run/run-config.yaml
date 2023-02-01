@@ -8,7 +8,7 @@ INPUT:
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 20
+  MaxThreads: 40
   # Maximum memory to use (in GB)
   MaxMemory: 120
 
@@ -71,7 +71,7 @@ Taxonomy:
 
 Repeats:
   # Number of threads task will use
-  threads: 16
+  threads: 24
   # Amount of memory task will use (in GB)
   memory: 16
   time: "24:00:00"
