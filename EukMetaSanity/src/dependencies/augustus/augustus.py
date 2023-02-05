@@ -9,7 +9,7 @@ from typing import List, Union, Type, Iterable
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
-from yapim import Task, DependencyInput, touch
+from yapim import Task, DependencyInput, touch, clean
 
 from .merge_parallelized_output import merge
 from .taxon_ids import augustus_taxon_ids
@@ -44,6 +44,7 @@ class Augustus(Task):
     def depends() -> List[DependencyInput]:
         return []
 
+    @clean("*.gb", "*.gff")
     def run(self):
         rounds = int(self.config["rounds"])
         if os.path.exists(self.input["search_results"]) and os.stat(self.input["search_results"]).st_size > 0:
