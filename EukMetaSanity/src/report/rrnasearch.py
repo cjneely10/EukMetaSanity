@@ -18,7 +18,7 @@ class RRNASearch(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        return ["CreateMMSeqsDB"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

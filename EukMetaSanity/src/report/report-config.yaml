@@ -28,6 +28,17 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
+CreateMMSeqsDB:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 4
+  time: "8:00:00"
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+      threads: 1
+
 Quality:
   # Number of threads task will use
   threads: 16

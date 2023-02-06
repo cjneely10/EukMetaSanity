@@ -18,11 +18,12 @@ class ProteinAnnotation(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        return ["CreateMMSeqsDB"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsConvertAlis", {"root": {"prot": "fasta"}})]
+        return [DependencyInput("MMSeqsConvertAlis", {"root": {"prot": "fasta"},
+                                                      "CreateMMSeqsDB": ["db"]})]
 
     def run(self):
         pass
