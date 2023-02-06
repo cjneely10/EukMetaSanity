@@ -15,6 +15,7 @@ from .merge_parallelized_output import merge
 from .taxon_ids import augustus_taxon_ids
 
 
+# TODO: Decrease mem usage, cache splits/merges, etc
 class _UniqueIdentifiersFactory:
     _lock: Lock = Lock()
     _next: int = 256  # Begin after integers that are statically stored in memory

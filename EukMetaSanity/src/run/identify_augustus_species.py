@@ -17,7 +17,7 @@ class IdentifyAugustusSpecies(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsConvertAlis")]
+        return [DependencyInput("MMSeqsConvertAlis", {"CreateMMSeqsDB": ["db"]})]
 
     def condition(self) -> bool:
         genemark_output = str(self.input["AbinitioGeneMark"]["genemark-gff3"])

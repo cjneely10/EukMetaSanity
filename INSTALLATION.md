@@ -54,13 +54,13 @@ EggNOG users should download the software and its required databases using `pip`
 
 ### Configuring GeneMark &ge;4.65_lic
 
-EukMetaSanity is packaged with all dependencies that are needed to run GeneMark
+EukMetaSanity is packaged with all dependencies that are needed to run GeneMark.
 If you choose to include GeneMark in your analysis pipeline, follow the installation instructions [on their webpage](http://topaz.gatech.edu/GeneMark/license_download.cgi) to download their software and accept their license agreements.
 
 Ensure that your `.gm_key` file is present in your home directory. 
-You also may need to run their accessory script from within your `EukMS_run` environment:
+You also may need to run their accessory script from within your activated `EukMS_run` environment:
 
-```
+```shell
 perl change_path_in_perl_scripts.pl "/usr/bin/env perl"
 ```
 

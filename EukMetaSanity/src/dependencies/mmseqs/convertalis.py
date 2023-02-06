@@ -19,10 +19,7 @@ class MMSeqsConvertAlis(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("MMSeqsSearch"),
-            DependencyInput("MMSeqsCreateDB")
-        ]
+        return [DependencyInput("MMSeqsSearch")]
 
     def run(self):
         """
@@ -37,7 +34,7 @@ class MMSeqsConvertAlis(Task):
                 self.parallel(
                     self.program[
                         "convertalis",
-                        str(self.input["MMSeqsCreateDB"]["db"]),  # Input FASTA sequence db
+                        str(self.input["db"]),  # Input FASTA sequence db
                         data,  # Input database
                         database,  # Input tax db
                         outfile,  # Output results file

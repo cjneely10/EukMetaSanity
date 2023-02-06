@@ -2,7 +2,7 @@ import os
 from copy import deepcopy
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput, touch
+from yapim import Task, DependencyInput, touch, clean
 
 from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
 
@@ -28,6 +28,7 @@ class Braker(Task):
     def depends() -> List[DependencyInput]:
         return []
 
+    @clean("align_exonerate*")
     def run(self):
         """
         Run braker

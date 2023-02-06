@@ -17,16 +17,16 @@ class MMSeqsTaxonomy(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsCreateDB")]
+        pass
 
-    @clean("*-tax_db")
+    @clean("*-tax_db*")
     def run(self):
         # Search taxonomy db
         tax_db = os.path.join(self.wdir, f"{self.record_id}-tax_db")
         self.parallel(
             self.program[
                 "taxonomy",
-                self.input["MMSeqsCreateDB"]["db"],
+                self.input["db"],
                 self.data[0],
                 tax_db,
                 os.path.join(self.wdir, "tmp"),

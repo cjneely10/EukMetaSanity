@@ -24,6 +24,17 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
+CreateMMSeqsDB:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 4
+  time: "8:00:00"
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+      threads: 1
+
 MetaEukEV:
   # Number of threads task will use
   threads: 16
@@ -53,10 +64,6 @@ Taxonomy:
   memory: 100
   time: "8:00:00"
   dependencies:
-    MMSeqsCreateDB:
-      program: mmseqs
-      threads: 1
-
     MMSeqsTaxonomy:
       program: mmseqs
       data:
@@ -146,11 +153,6 @@ IdentifyAugustusSpecies:
   time: "24:00:00"
   skip: false
   dependencies:
-    MMSeqsCreateDB:
-      time: "10:00"
-      program: mmseqs
-      threads: 1
-
     MMSeqsSearch:
       memory: 20
       data:

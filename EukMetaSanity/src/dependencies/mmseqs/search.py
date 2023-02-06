@@ -23,9 +23,7 @@ class MMSeqsSearch(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("MMSeqsCreateDB")
-        ]
+        pass
 
     def run(self):
         """
@@ -42,7 +40,7 @@ class MMSeqsSearch(Task):
                 self.parallel(
                     self.program[
                         subname,
-                        str(self.input["MMSeqsCreateDB"]["db"]),  # Input FASTA sequence db
+                        str(self.input["db"]),  # Input FASTA sequence db
                         db_path,  # Search db
                         outfile,  # Output db
                         os.path.join(self.wdir, "tmp"),

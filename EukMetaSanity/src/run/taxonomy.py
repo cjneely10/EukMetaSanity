@@ -20,11 +20,12 @@ class Taxonomy(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["MetaEukEV"]
+        return ["MetaEukEV", "CreateMMSeqsDB"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsTaxonomy", {"MetaEukEV": {"evidence-prot": "fasta"}})]
+        return [DependencyInput("MMSeqsTaxonomy",
+                                {"MetaEukEV": {"evidence-prot": "fasta"}, "CreateMMSeqsDB": ["db"]})]
 
     def run(self):
         tax_file = Path(self.output["tax-report"]).resolve()
