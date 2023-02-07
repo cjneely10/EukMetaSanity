@@ -45,7 +45,7 @@ class Augustus(Task):
 
     @clean("*.gb", "*.gff")
     def run(self):
-        self._contig_splitter = ContigSplitter(self.input["fasta"], int(self.threads), self.wdir, self.record_id)
+        self._contig_splitter = ContigSplitter(Path(self.input["fasta"]), int(self.threads), self.wdir, self.record_id)
         rounds = int(self.config["rounds"])
         if os.path.exists(self.input["search_results"]) and os.stat(self.input["search_results"]).st_size > 0:
             tax_search_results = self.parse_search_output(self.input["search_results"])
