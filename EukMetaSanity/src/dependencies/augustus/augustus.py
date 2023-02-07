@@ -5,17 +5,14 @@ from collections import Counter
 from copy import deepcopy
 from pathlib import Path
 from threading import Lock
-from typing import List, Union, Type, Iterable
+from typing import List, Union, Type, Optional
 
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 from yapim import Task, DependencyInput, touch, clean
 
-from .merge_parallelized_output import merge
+from .contig_splitter import ContigSplitter
 from .taxon_ids import augustus_taxon_ids
 
 
-# TODO: Decrease mem usage, cache splits/merges, etc
 class _UniqueIdentifiersFactory:
     _lock: Lock = Lock()
     _next: int = 256  # Begin after integers that are statically stored in memory
@@ -35,7 +32,8 @@ class Augustus(Task):
             "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3"),
             "prot": self.wdir.joinpath(self.record_id + ".faa")
         }
-        self._unique_id = _UniqueIdentifiersFactory.get_next()
+        self._unique_id: int = _UniqueIdentifiersFactory.get_next()
+        self._contig_splitter: Optional[ContigSplitter] = None
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -47,6 +45,7 @@ class Augustus(Task):
 
     @clean("*.gb", "*.gff")
     def run(self):
+        self._contig_splitter = ContigSplitter(self.input["fasta"], int(self.threads), self.wdir, self.record_id)
         rounds = int(self.config["rounds"])
         if os.path.exists(self.input["search_results"]) and os.stat(self.input["search_results"]).st_size > 0:
             tax_search_results = self.parse_search_output(self.input["search_results"])
@@ -79,6 +78,8 @@ class Augustus(Task):
                 self._train_augustus(i + 2, str(self.input["fasta"]), out_gff)
         # Move any augustus-generated config stuff
         self._finalize_output(out_gff)
+        # Remove temporarily-created files
+        self._contig_splitter.finalize()
 
     @staticmethod
     def _line_count(file: str) -> int:
@@ -97,58 +98,6 @@ class Augustus(Task):
             "5:00"
         )
 
-    @staticmethod
-    def split_data(data: List[SeqRecord], n: int) -> List[List[SeqRecord]]:
-        """Accepts list of contig lengths, splits to n lists of indices"""
-        buckets: List[List[SeqRecord]] = [[] for _ in range(n + 1)]
-        sums = {i: 0 for i in range(len(buckets))}
-        total_size = sum([len(rec.seq) for rec in data])
-        bucket_size = total_size // n
-
-        # Track contigs that are too big to fit into a bucket,
-        too_large = []
-        # and contigs that couldn't fit because buckets are all mostly full
-        unable_to_fit = []
-        for record in data:
-            record_length = len(record.seq)
-            # Contig too large for bucket size - place into own bucket
-            if record_length > bucket_size:
-                too_large.append([record])
-                continue
-            # Try to find a bucket that can fit contig
-            pos = 0
-            while pos < len(buckets):
-                current_sum = sums[pos]
-                if current_sum + record_length > bucket_size:
-                    pos += 1
-                else:
-                    buckets[pos].append(record)
-                    sums[pos] += len(record)
-                    break
-            # Reached end and did not find appropriate bucket, collect into own bucket
-            if pos == len(buckets):
-                unable_to_fit.append(record)
-
-        # Add bucket of records that could not be placed
-        buckets.append(unable_to_fit)
-        # Extend using records that were too large to fit
-        buckets.extend(too_large)
-        # Remove empty buckets
-        buckets = [bucket for bucket in buckets if len(bucket) > 0]
-        # Sanity check
-        assert total_size == sum([sum([len(record.seq) for record in bucket]) for bucket in buckets])
-        return buckets
-
-    def _contig_splitter(self, created_files_list: List[str]) -> Iterable[str]:
-        records = list(SeqIO.parse(self.input["fasta"], "fasta"))
-        split_records: List[List[SeqRecord]] = Augustus.split_data(records, int(self.threads))
-        for pos, records_list in enumerate(split_records):
-            out_file = str(self.wdir.joinpath(f"{self.record_id}.{pos}.fasta"))
-            with open(out_file, "w") as out_ptr:
-                SeqIO.write(records_list, out_ptr, "fasta")
-            created_files_list.append(out_file)
-            yield out_file
-
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         """ Run augustus training round
 
@@ -158,8 +107,7 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        contig_files = []
-        contig_files_iter = self._contig_splitter(contig_files)
+        assert self._contig_splitter is not None
         self.parallel(
             self.create_script(
                 [self.program[
@@ -169,7 +117,7 @@ class Augustus(Task):
                      "--outfile=%s" % contig_file + f".{_round}.gff",
                      ("--gff3=on" if _last else "--gff3=off"),
                      contig_file,
-                 ] for contig_file in contig_files_iter], "augustus-runner.sh",
+                 ] for contig_file in self._contig_splitter], "augustus-runner.sh",
                 parallelize=True
             )
         )
@@ -177,7 +125,7 @@ class Augustus(Task):
         out_gff = Path(os.path.join(self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gff" % _round)))
         if out_gff.exists():
             self.local["rm"][out_gff]()
-        merge(contig_files, out_gff, _round)
+        self._contig_splitter.merge(out_gff, _round)
         return str(out_gff)
 
     def _handle_config_output(self):
@@ -218,31 +166,11 @@ class Augustus(Task):
             shutil.rmtree(config_dir)
         # Parse to genbank
         out_gb = os.path.join(self.wdir, Augustus.out_path(_file, ".%i.gb" % _round))
-        self.single(
-            self.local["gff2gbSmallDNA.pl"][
-                out_gff,
-                _file,
-                "1000",
-                out_gb
-            ],
-            "2:00"
-        )
+        self.single(self.local["gff2gbSmallDNA.pl"][out_gff, _file, "1000", out_gb], "2:00")
         # Write new species config file
-        self.single(
-            self.local["new_species.pl"][
-                "--species=%s" % species_config_prefix,
-                out_gb
-            ],
-            "2:00"
-        )
+        self.single(self.local["new_species.pl"]["--species=%s" % species_config_prefix, out_gb], "2:00")
         # Run training
-        self.single(
-            self.local["etraining"][
-                "--species=%s" % species_config_prefix,
-                out_gb
-            ],
-            "10:00"
-        )
+        self.single(self.local["etraining"]["--species=%s" % species_config_prefix, out_gb], "10:00")
         return out_gff
 
     @staticmethod
