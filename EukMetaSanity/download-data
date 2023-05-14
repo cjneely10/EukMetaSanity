@@ -21,14 +21,6 @@ class DataDownloader(cli.Application):
     _bin_dir: str = cli.SwitchAttr("--eukms-run-bin", str, envname="EukMS_run", help="$EukMS_run environment variable")
     _config_only: bool = False
 
-    @cli.switch(["-d", "--download-directory"], str)
-    def set_download_directory(self, download_directory):
-        """Download path, recommended NOT to be the same as the installation directory"""
-        download_directory = str(Path(download_directory).resolve())
-        if download_directory == os.getcwd():
-            download_directory = DEFAULT_DIR
-        self._working_dir = download_directory
-
     @cli.switch(["-x", "--index"], help="Generate search index (optional, but takes a lot of space)")
     def set_index(self, _index):
         self._index = _index
@@ -55,21 +47,15 @@ class DataDownloader(cli.Application):
 
             # Download data
             print("Downloading data")
-            for db_download in download_data(self._working_dir):
-                db_download()
+            download_data(self._working_dir)
 
             # Parse any required download data
             print("\nGenerating taxonomy lookup files")
-            for parsing_operation in parsing_operations(self._working_dir):
-                parsing_operation()
+            parsing_operations(self._working_dir)
 
             # Run database utility protocols
             print("\nRunning MMseqs utility functions on data")
-            for util_instruction in manage_downloaded_data(self._working_dir,
-                                                           self._index,
-                                                           True,
-                                                           self._threads):
-                util_instruction()
+            manage_downloaded_data(self._working_dir, self._index, True, self._threads)
         # Generate system-specific config files
         update_config_files(self._working_dir, self._bin_dir)
 

@@ -3,21 +3,20 @@ from pathlib import Path
 from typing import List, Union, Type
 
 from plumbum import ProcessExecutionError
-from yapim import Task, DependencyInput, prefix
+from yapim import Task, DependencyInput, prefix, touch
+
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
 
 
 class RMaskRepeatMasker(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        data_files = []
-        data_files += [_f for _f in self.data if _f != ""]
+        data_files = [_f for _f in self.data if _f != ""]
         # Perform on optimal taxonomic identification
-        assignment = self.input["taxonomy"][self.config["level"].lower()]
-        if assignment["value"] is not None:
-            data_files += [assignment["value"]]
-        _file = str(self.input["RModRepeatModeler"]["model"])
-        if os.path.exists(_file) and os.path.getsize(_file) > 0:
-            data_files.append(_file)
+        assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"],
+                                                                                self.config["level"])
+        data_files.append(assignment[1]["value"])
+        data_files.append(str(self.input["RModRepeatModeler"]["model"]))
         out = []
         for _search in data_files:
             if "classified" in _search:
@@ -28,7 +27,8 @@ class RMaskRepeatMasker(Task):
                 _dir = os.path.join(self.wdir, "repeats_" + _search.replace(" ", "_"))
             out.append((search, _dir))
         self.output = {
-            "libraries": out
+            "libraries": out,
+            "_": self.wdir.joinpath(".done")
         }
 
     @staticmethod
@@ -50,6 +50,8 @@ class RMaskRepeatMasker(Task):
             if os.path.exists(_dir):
                 continue
             os.makedirs(_dir)
+            if search[0] == "-lib" and not os.path.exists(search[1]):
+                continue
             # Call RepeatMasker on modeled repeats in the new directory
             script = self.create_script(
                 self.program[
@@ -65,3 +67,4 @@ class RMaskRepeatMasker(Task):
                 self.parallel(script)
             except ProcessExecutionError:
                 continue
+        touch(str(self.output["_"]))

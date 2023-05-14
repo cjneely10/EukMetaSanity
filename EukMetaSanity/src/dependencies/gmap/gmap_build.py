@@ -1,5 +1,5 @@
 import glob
-import os
+import os.path
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, Result
@@ -8,8 +8,11 @@ from yapim import Task, DependencyInput, Result
 class GMAPBuild(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        db_name = self.record_id + "_db"
         self.output = {
-            "db": Result(os.path.join(self.wdir, self.record_id + "_db"))
+            "db_name": Result(db_name),
+            "db_dir": Result(str(self.wdir)),
+            "_": os.path.join(self.wdir, db_name)
         }
 
     @staticmethod
@@ -22,14 +25,12 @@ class GMAPBuild(Task):
 
     def run(self):
         """
-        Run gmap.build
+        Run GMAPBuild
         """
-        _genome_dir = os.path.dirname(str(self.input["fasta"]))
-        _genome_basename = os.path.basename(str(self.input["fasta"]))
-        if len(glob.glob(str(self.output["db"]) + "*")) == 0:
-            self.single(
-                self.program[
-                    "-d", str(self.output["db"]),
-                    "-D", _genome_dir, _genome_basename
-                ]
-            )
+        self.single(
+            self.program[
+                "-d", str(self.output["db_name"]),
+                "-D", str(self.output["db_dir"]),
+                str(self.input["fasta"])
+            ]
+        )

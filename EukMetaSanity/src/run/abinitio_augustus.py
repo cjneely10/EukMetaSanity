@@ -14,12 +14,14 @@ class AbinitioAugustus(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Repeats", "Taxonomy"]
+        return ["Repeats", "IdentifyAugustusSpecies", "AbinitioGeneMark"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("Augustus", {"Repeats": ["mask-fna"], "Taxonomy": ["taxonomy"]})
+            DependencyInput("Augustus", {"Repeats": {"mask-fna": "fasta"},
+                                         "AbinitioGeneMark": {"genemark-gff3": "gff3"},
+                                         "IdentifyAugustusSpecies": ["search_results"]})
         ]
 
     def run(self):

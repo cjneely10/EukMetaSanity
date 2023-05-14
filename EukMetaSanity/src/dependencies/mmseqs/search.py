@@ -23,9 +23,7 @@ class MMSeqsSearch(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("MMSeqsCreateDB")
-        ]
+        pass
 
     def run(self):
         """
@@ -33,11 +31,17 @@ class MMSeqsSearch(Task):
         """
         for outfile, db_path in zip(self.output["dbs"], self.data):
             if not os.path.exists(outfile + ".index"):
+                # Profile databases should not use linsearch
+                if "p:" in db_path:
+                    db_path = db_path[2:]
+                    subname = "search"
+                else:
+                    subname = self.config["subname"]
                 self.parallel(
                     self.program[
-                        self.config["subname"],
-                        str(self.input["MMSeqsCreateDB"]["db"]),  # Input FASTA sequence db
-                        db_path,  # Input db
+                        subname,
+                        str(self.input["db"]),  # Input FASTA sequence db
+                        db_path,  # Search db
                         outfile,  # Output db
                         os.path.join(self.wdir, "tmp"),
                         "--split-memory-limit", str(int(float(self.memory) * 0.7)) + "G",

@@ -3,6 +3,7 @@ Module holds functionality for manipulating downloaded databases from initial fo
 """
 import os
 from typing import Sequence, Callable, List
+import urllib.request
 
 from plumbum import local
 from yapim import prefix
@@ -92,13 +93,12 @@ class CreateTaxDBs(DataUtil):
         Generate taxonomy database
         """
         # Download tax info
-        self.run(local["wget"][
-                     "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz",
-                     "-O", os.path.join(self.wdir, "taxdump.tar.gz")
-                 ])
-        self.run(local["tar"][
-                     "xzvf", os.path.join(self.wdir, "taxdump.tar.gz"), "-C", self.wdir
-                 ])
+        data_url = "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
+        print(f"Retrieving `{data_url}`")
+        taxdump_file = os.path.join(self.wdir, "taxdump.tar.gz")
+        if not os.path.exists(taxdump_file):
+            urllib.request.urlretrieve(data_url, taxdump_file)
+            self.run(local["tar"]["xzvf", taxdump_file, "-C", self.wdir])
         # Generate tax db
         for database in self.databases:
             self.run(local["mmseqs"][
@@ -120,3 +120,33 @@ class CreateTaxDBs(DataUtil):
         if os.path.exists(tax_file):
             tax_mapping = ["--tax-mapping-file", os.path.join(self.wdir, prefix(database) + ".input")]
         return tax_mapping
+
+
+class DownloadMMSeqsDatabases(DataUtil):
+    """
+    Download MMSeqs2 database using `mmseqs database` utility
+    """
+    def __init__(self, wdir: str, threads: int, databases: Sequence[str]):
+        """
+        Create database entry for each in `databases`
+
+        :param wdir: Working directory for download
+        :param threads: Number of threads for creation operation
+        :param databases: List of MMSeqs2 databases to download
+        """
+        super().__init__(databases)
+        self.wdir = wdir
+        self.threads = threads
+
+    def __call__(self):
+        """
+        Generate requested databases
+        """
+        for database in self.databases:
+            self.run(local["mmseqs"][
+                         "databases",
+                         database,
+                         os.path.join(self.wdir, database.replace("/", "_")),
+                         os.path.join(self.wdir, "tmp"),
+                        "--threads", str(self.threads)
+                     ])

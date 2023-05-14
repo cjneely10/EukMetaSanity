@@ -3,6 +3,15 @@ from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, touch
 
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser, TaxonomyResults
+
+
+def determine_fungal(taxonomy_results: TaxonomyResults) -> List[str]:
+    assignment = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(taxonomy_results, "kingdom")
+    if assignment[1]["value"].lower() == "fungi":
+        return ["--fungus"]
+    return []
+
 
 class GeneMarkPETAP(Task):
     def __init__(self, *args, **kwargs):
@@ -29,7 +38,7 @@ class GeneMarkPETAP(Task):
         """
         ev_vals = ["--ES"]
         # For now default to 100 intron predictions minimum to use file
-        if len(open(str(self.input["GeneMarkProtHint"]["hints"])).readlines()) > 100 and \
+        if len(open(str(self.input["GeneMarkProtHint"]["hints"])).readlines()) > 100 or \
                 len(open(str(self.input["GeneMarkProtHint"]["evidence"])).readlines()) > 100:
             ev_vals = ["--EP", str(self.input["GeneMarkProtHint"]["hints"]),
                        "--evidence", str(self.input["GeneMarkProtHint"]["evidence"])]
@@ -65,9 +74,7 @@ class GeneMarkPETAP(Task):
                 "--sequence", str(self.input["fasta"]),
                 (*ev_vals),
                 "--cores", self.threads, (*self.added_flags),
-                ("--fungus"
-                 if self.input["taxonomy"]["kingdom"] is not None and
-                    self.input["taxonomy"]["kingdom"]["value"].lower() == "fungi" else "")
+                (*determine_fungal(self.input["taxonomy"]))
             ],
             script_name
         )

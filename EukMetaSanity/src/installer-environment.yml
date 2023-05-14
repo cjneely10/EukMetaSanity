@@ -1,12 +1,9 @@
-name: EukMS_report
+name: yapim_installer
 channels:
   - bioconda
   - conda-forge
 dependencies:
   - python=3.8.6
-  - mmseqs2=12.113e3
-  - sqlite=3.33
-  - busco=5.2.2
   - pip
   - pip:
     - git+https://github.com/cjneely10/YAPIM.git@v0.3.3

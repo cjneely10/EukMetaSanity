@@ -1,5 +1,10 @@
-.idea/
-bin/metaeuk
+/.idea
+/bin/metaeuk
 __pycache__/
-install/repeats.txt
+/install/repeats.txt
 condaenv.*.requirements.txt
+venv
+EukMetaSanity.egg-info
+/bin
+/data
+/build

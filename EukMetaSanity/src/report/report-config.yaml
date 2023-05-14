@@ -5,7 +5,9 @@
 INPUT:
   root: all
   run:
-    prot: merged-prot  # or gmes-prot or genemark-prot or aug-prot or evidence-prot
+    prot: merged-prot  # or genemark-prot or aug-prot or evidence-prot
+#  refine:  # Uncomment these two lines, and comment out the two preceding lines,
+#    prot: prot  #  to annotate results from `refine` pipeline
 
 ## Global settings
 GLOBAL:
@@ -17,7 +19,7 @@ GLOBAL:
 ###########################################
 
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
@@ -25,6 +27,17 @@ SLURM:
   --qos: unlim
   --job-name: EukMS
   user-id: uid
+
+CreateMMSeqsDB:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 4
+  time: "8:00:00"
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+      threads: 1
 
 Quality:
   # Number of threads task will use
@@ -41,7 +54,7 @@ Quality:
       FLAGS:
         -f
 
-MMSeqs:
+RRNASearch:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
@@ -49,12 +62,34 @@ MMSeqs:
   time: "4:00:00"
   skip: false
   dependencies:
-    MMSeqsCreateDB:
+    MMSeqsSearch:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+      subname: search
+      FLAGS:
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+        --search-type 3
+
+    MMSeqsConvertAlis:
+      data:
+        /path/to/SILVA
       program: mmseqs
 
+ProteinAnnotation:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 90
+  time: "4:00:00"
+  skip: false
+  dependencies:
     MMSeqsSearch:
       data:
         /path/to/odb-mmetsp_db
+        p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
       subname: linsearch
       FLAGS:
@@ -65,6 +100,7 @@ MMSeqs:
     MMSeqsConvertAlis:
       data:
         /path/to/odb-mmetsp_db
+        p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
 
 KOFamScan:
@@ -76,9 +112,9 @@ KOFamScan:
   skip: true
   dependencies:
     KofamscanExecAnnotation:
-      program: /path/to/kofamscan/exec_annotation
-      kolist: /path/to/kofam/ko_list
-      profiles: /path/to/profiles/eukaryote.hal
+      program: /path/To/kofamscan/exec_annotation
+      kolist: /path/To/kofam/ko_list
+      profiles: /path/To/profiles/eukaryote.hal
 
 EggNog:
   # Number of threads task will use

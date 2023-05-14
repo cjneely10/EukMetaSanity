@@ -22,16 +22,18 @@ class Index(DataUtil):
         """
         pass
 
-    def __init__(self, threads: int, wdir: str, databases: Sequence[str]):
+    def __init__(self, threads: int, wdir: str, databases: Sequence[str], *args):
         """ Create mmseqs lin/index base class
 
         :param threads: Number of system threads
         :param wdir: Directory containing built databases
         :param databases: List of databases for which to generate indices
+        :param args: List of additional arguments to pass to index creation operation
         """
         super().__init__(databases)
         self.wdir = wdir
         self._threads = threads
+        self.args = args
 
     def __call__(self):
         """
@@ -40,10 +42,11 @@ class Index(DataUtil):
         for database in self.databases:
             self.run(local["mmseqs"][
                 self.command(),
-                os.path.join(self.wdir, database),
+                os.path.join(self.wdir, database.replace("/", "_")),
                 os.path.join(self.wdir, "tmp"),
                 "--threads", self._threads,
-                "--remove-tmp-files"
+                "--remove-tmp-files",
+                (*self.args)
             ])
 
 

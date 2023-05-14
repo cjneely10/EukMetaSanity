@@ -3,6 +3,8 @@ from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, touch
 
+from EukMetaSanity.mmseqs_taxonomy_report_parser import MMSeqsTaxonomyReportParser
+
 
 class RMaskProcessRepeats(Task):
     def __init__(self, *args, **kwargs):
@@ -48,13 +50,15 @@ class RMaskProcessRepeats(Task):
         if os.path.exists(final_out):
             os.remove(final_out)
         touch(final_out)
-        all([(self.local["cat"][_file] >> final_out)() for _file in cat_files])
+        for _file in cat_files:
+            (self.local["cat"][_file] >> final_out)()
         if os.path.getsize(final_out) > 0:
             # Run ProcessRepeats
+            family = MMSeqsTaxonomyReportParser.find_assignment_nearest_request(self.input["taxonomy"], "family")
             self.single(
                 self.program[
                     # Input taxonomy from OrthoDB search
-                    "-species", self.input["taxonomy"]["family"]["value"],
+                    "-species", family[1]["value"],
                     "-maskSource", str(self.input["fasta"]),
                     (*self.added_flags),
                     final_out,

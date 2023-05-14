@@ -35,27 +35,26 @@ class CollectInput(AggregateTask):
     def get_rna_read_pairs(rnaseq_mapping_file: Path) -> Dict[str, List[Tuple]]:
         if not rnaseq_mapping_file.exists():
             return {}
-        file_ptr = open(rnaseq_mapping_file, "r")
         out = {}
-        for line in file_ptr:
-            line = line.rstrip("\r\n").split()
-            pairs_string = line[1].split(";")
-            if line[0] not in out.keys():
-                out[line[0]] = []
-            for pair in pairs_string:
-                out[line[0]].append(tuple(pair.split(",")))
-        file_ptr.close()
+        with open(rnaseq_mapping_file, "r") as file_ptr:
+            for line in file_ptr:
+                line = line.rstrip("\r\n").split()
+                pairs_string = line[1].split(";")
+                if line[0] not in out.keys():
+                    out[line[0]] = []
+                for pair in pairs_string:
+                    out[line[0]].append(tuple([l.rstrip(" ").lstrip(" ") for l in pair.split(",")]))
         return out
 
     @staticmethod
     def get_transcripts(transcripts_mapping_file: Path) -> Dict[str, List[str]]:
         if not transcripts_mapping_file.exists():
             return {}
-        file_ptr = open(transcripts_mapping_file, "r")
         out = {}
-        for line in file_ptr:
-            line = line.rstrip("\r\n").split("\t")
-            if line[0] not in out.keys():
-                out[line[0]] = []
-            out[line[0]].extend(line[1].split(","))
+        with open(transcripts_mapping_file, "r") as file_ptr:
+            for line in file_ptr:
+                line = line.rstrip("\r\n").split("\t")
+                if line[0] not in out.keys():
+                    out[line[0]] = []
+                out[line[0]].extend([l.rstrip(" ").lstrip(" ") for l in line[1].split(",")])
         return out

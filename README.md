@@ -26,9 +26,50 @@ Search KEGG, EggNOG, and any MMseqs2 database for functional annotation of putat
 Check the quality of your annotation using BUSCO.
 
 ## Installation
-
 See <a href="https://github.com/cjneely10/EukMetaSanity/blob/main/INSTALLATION.md" target="_blank">INSTALLATION.md</a> 
 for detailed installation instructions.
+
+## Using yapim configuration files
+EukMetaSanity is built using the [YAPIM](https://github.com/cjneely10/YAPIM) library, which operates through a configuration file that is provided with each pipeline.
+
+Running a YAPIM pipeline typically consists of copying a default configuration file to your working directory,
+making edits to fit your resource and analysis needs, and running the pipeline on a folder of input files.
+
+At the top of each configuration file will be a section that defines total available resources:
+
+```yaml
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 20
+  # Maximum memory to use (in GB)
+  MaxMemory: 120
+
+###########################################
+```
+
+Provide the maximum threads and memory to allot towards the analysis.
+
+Within each section of the configuration file, set the resources to allot **to each input genome** 
+
+```yaml
+Taxonomy:
+  # Number of threads task will use
+  threads: 5
+  # Amount of memory task will use (in GB)
+  memory: 10
+  time: "8:00:00"
+```
+
+For example, based on the provided maximum resource limits, the preceding section can run up to 4 genomes at a time.
+
+When launched using SLURM, the maximum resources can be set quite high, and the task-level resources can be set to match
+node resource limits that exist on your systems.
 
 ---
 
@@ -222,35 +263,10 @@ AbinitioAugustus:
   time: "24:00:00"
   skip: false
   dependencies:
-    MMSeqsCreateDB:
-      time: "10:00"
-      program: mmseqs
-      threads: 1
-
-    MMSeqsSearch:
-      memory: 20
-      data:
-        /path/to/odb-mmetsp_db
-      program: mmseqs
-      subname: linsearch  # Can use `search` if linear index is not present for database
-      FLAGS:
-        --cov-mode 0
-        -c 0.6
-        -e 0.01
-        --remove-tmp-files
-
-    MMSeqsConvertAlis:
-      time: "2:00:00"
-      data:
-        /path/to/odb-mmetsp_db
-      program: mmseqs
-      FLAGS:
-        --format-output query,target,pident,taxid,taxname,taxlineage
-
     Augustus:
       program: augustus
       cutoff: 25.0
-      rounds: 1
+      rounds: 2
 
 Tier:
   # Number of threads task will use
@@ -292,7 +308,7 @@ If run with default config parameters, the analysis should complete within about
 
 ### Run output
 
-This will create a directory structure resembling:
+This will create a directory structure with **non-empty files** resembling:
 ```
 out/
   |-- wdir/
@@ -319,6 +335,25 @@ out/
         |-- NAO-all-DCM-20-180-00_bin-2/
           ...
 ```
+
+### Installation check:
+To confirm proper GeneMark installation, users should run the following command:
+```shell
+ls out/wdir/*/AbinitioGeneMark.GeneMarkPETAP/*.sh
+```
+
+You should see the following files:
+
+```shell
+out/wdir/NAO-all-DCM-20-180-00_bin-19/AbinitioGeneMark.GeneMarkPETAP/gmep.sh
+out/wdir/NAO-all-DCM-20-180-00_bin-19/AbinitioGeneMark.GeneMarkPETAP/gmes.sh
+out/wdir/NAO-all-DCM-20-180-00_bin-1/AbinitioGeneMark.GeneMarkPETAP/gmep.sh
+out/wdir/NAO-all-DCM-20-180-00_bin-2/AbinitioGeneMark.GeneMarkPETAP/gmep.sh
+```
+
+If you do not see files named `gmep.sh`, there may be an issue with your ProtHint installation.
+Check your `PATH` to confirm that GeneMark-related directories are present, and check the version of `diamond` that is 
+present in the `gmes_linux64/ProtHint/dependencies` and confirm that it runs as expected.
 
 #### Note on running:
 **EukMetaSanity** will not re-run already completed steps within a given pipeline. If you would like to re-do a particular
@@ -357,9 +392,9 @@ for RNA-seq and transcriptomes that is required by the config file:
 
 ```
 # Paths to RNA-seq should be contained in a file with the format (excluding spaces around tab):
-file-basename \t /path/to/r1.fq,/path/to/r2.fq;/path/to/r3.fq,/path/to/r4.fq
+genome-file-basename \t /path/to/r1.fq,/path/to/r2.fq;/path/to/r3.fq,/path/to/r4.fq
 # Transcriptomes should be contained in a file with the format (excluding spaces around tab):
-file-basename \t /path/to/tr1.fna,/path/to/tr2.fna
+genome-file-basename \t /path/to/tr1.fna,/path/to/tr2.fna
 ``` 
 
 The listed paired-end or single-end reads will be mapped to the file that begins with `file-basename`, as will the list 
@@ -383,7 +418,7 @@ GLOBAL:
 ###########################################
 
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
@@ -399,11 +434,11 @@ CollectInput:
   memory: 8
   time: "4:00:00"
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/tr1.fna[,/path/to/tr2.fna]
-  transcriptomes: /path/to/transcriptome-mapping-file
+  # genome-file-basename \t /path/To/tr1.fna[,/path/To/tr2.fna]
+  transcriptomes: /path/To/transcriptome-mapping-file
   # Should be in format (excluding spaces around tab):
-  # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
-  rnaseq: /path/to/rnaseq-mapping-file
+  # genome-file-basename \t /path/To/r1.fq[,/path/To/r2.fq][;/path/To/r3.fq[,/path/To/r4.fq]]
+  rnaseq: /path/To/rnaseq-mapping-file
 
 GatherProteins:
   # Number of threads task will use
@@ -427,7 +462,7 @@ Transcriptomes:
   dependencies:
     GMAPBuild:
       threads: 1
-      program: gmapindex
+      program: gmap_build
 
     GMAP:
       program: gmap
@@ -467,9 +502,6 @@ ProcessMapping:
   memory: 60
   time: "4:00:00"
   dependencies:
-    SambambaView:
-      program: sambamba
-
     SambambaSort:
       program: sambamba
 
@@ -483,7 +515,9 @@ RunBraker:
     Braker:
       program: braker.pl
       FLAGS:
-      # Provide flags as desired
+        # Provide flags as desired
+        # Currently, `exonerate` is the only supported protein mapper
+        "--prg=exonerate"
 
 ...  # document end
 ```
@@ -560,6 +594,8 @@ INPUT:
   root: all
   run:
     prot: merged-prot  # or genemark-prot or aug-prot or evidence-prot
+#  refine:  # Uncomment these two lines, and comment out the two preceding lines,
+#    prot: prot  #  to annotate results from `refine` pipeline
 
 ## Global settings
 GLOBAL:
@@ -571,7 +607,7 @@ GLOBAL:
 ###########################################
 
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
@@ -595,7 +631,34 @@ Quality:
       FLAGS:
         -f
 
-MMSeqs:
+RRNASearch:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 90
+  time: "4:00:00"
+  skip: false
+  dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+
+    MMSeqsSearch:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+      subname: search
+      FLAGS:
+        -c 0.3
+        --cov-mode 1
+        --remove-tmp-files
+        --search-type 3
+
+    MMSeqsConvertAlis:
+      data:
+        /path/to/SILVA
+      program: mmseqs
+
+ProteinAnnotation:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
@@ -609,6 +672,7 @@ MMSeqs:
     MMSeqsSearch:
       data:
         /path/to/odb-mmetsp_db
+        p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
       subname: linsearch
       FLAGS:
@@ -619,6 +683,7 @@ MMSeqs:
     MMSeqsConvertAlis:
       data:
         /path/to/odb-mmetsp_db
+        p:/path/to/UniProtKB_Swiss-Prot
       program: mmseqs
 
 KOFamScan:
@@ -630,9 +695,9 @@ KOFamScan:
   skip: true
   dependencies:
     KofamscanExecAnnotation:
-      program: /path/to/kofamscan/exec_annotation
-      kolist: /path/to/kofam/ko_list
-      profiles: /path/to/profiles/eukaryote.hal
+      program: /path/To/kofamscan/exec_annotation
+      kolist: /path/To/kofam/ko_list
+      profiles: /path/To/profiles/eukaryote.hal
 
 EggNog:
   # Number of threads task will use
@@ -664,7 +729,7 @@ conda activate EukMS_report
 Run pipeline using the command:
 
 ```
-yapim run -c report-config.yaml -p $EukMS_report
+yapim run -i /path/to/EukMetaSanity/tests/data -c report-config.yaml -p $EukMS_report
 ```
 
 Note that we do not need to provide the input directory for this analysis, as the pipeline will only annotate genomes that have completed the `Run` or `Refine` pipeline.
